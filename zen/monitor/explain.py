@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import re
+import time
 
 import requests
 
@@ -33,6 +34,12 @@ FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "GEMINI_MODELS",
     "gemini-3.6-flash,gemini-3.5-flash-lite,gemini-flash-latest"
 ).split(",") if m.strip()]
+
+# How hard to try before giving up. Free-tier capacity fluctuates minute to
+# minute, so a second pass after a short wait recovers most 503s.
+MAX_MODELS = 5
+PASSES = 3
+BACKOFF_SECONDS = 20
 
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 ENDPOINT = BASE + "/models/{model}:generateContent"
@@ -62,15 +69,20 @@ def discover_models(api_key: str) -> list[str]:
         return FALLBACK_MODELS
 
     def rank(name: str) -> tuple:
-        # flash first, then lite, then anything; newer version strings first
-        return (0 if "flash" in name else 1,
-                0 if "lite" not in name else 1,
-                [-int(p) for p in re.findall(r"\d+", name)] or [0])
+        low = name.lower()
+        return (
+            0 if "flash" in low else 1,
+            # Preview and experimental builds are the most contended on the
+            # free tier and returned 503 across the board; stable first.
+            1 if any(t in low for t in ("preview", "exp", "thinking")) else 0,
+            0 if "lite" not in low else 1,
+            [-int(p) for p in re.findall(r"\d+", low)] or [0],
+        )
 
     ordered = sorted(usable, key=rank)
-    log.info("gemini: %d models available, trying %s",
+    log.info("gemini: %d models available, preferring %s",
              len(usable), ", ".join(ordered[:3]))
-    return ordered[:4]
+    return ordered[:MAX_MODELS]
 
 PROMPT = """You are writing the morning market brief for one reader in India. \
 He follows markets closely but is not a specialist in every sector, and he \
@@ -145,16 +157,46 @@ def _call_model(model: str, prompt: str, api_key: str,
     return text, "ok"
 
 
+def _transient(why: str) -> bool:
+    """503 means 'high demand, try again later'; 429 means rate limited.
+
+    Both are worth waiting out. A 404 or a bad key is not -- retrying those
+    just burns workflow minutes.
+    """
+    return why.startswith("HTTP 503") or why.startswith("HTTP 429") \
+        or why.startswith("request failed")
+
+
 def _call(prompt: str, api_key: str) -> str | None:
+    """Rotate across models, then wait and rotate again.
+
+    Free-tier capacity is per model and fluctuates minute to minute, so
+    trying the next model immediately beats hammering one that is busy.
+    Coming back for a second pass after a pause beats giving up: the whole
+    fleet being briefly saturated is common and self-resolving.
+    """
     models = discover_models(api_key)
-    for model in models:
-        text, why = _call_model(model, prompt, api_key)
-        if text:
-            log.info("gemini: %s responded", model)
-            return text
-        log.warning("gemini: %s unusable -- %s", model, why)
-    log.error("gemini: all %d models failed; falling back to extracted facts",
-              len(models))
+
+    for attempt in range(1, PASSES + 1):
+        transient_seen = False
+        for model in models:
+            text, why = _call_model(model, prompt, api_key)
+            if text:
+                log.info("gemini: %s responded (pass %d)", model, attempt)
+                return text
+            log.warning("gemini: %s unusable -- %s", model, why)
+            transient_seen |= _transient(why)
+
+        if not transient_seen:
+            break                      # nothing retryable; stop wasting time
+        if attempt < PASSES:
+            wait = BACKOFF_SECONDS * attempt
+            log.info("gemini: all models busy, waiting %ds before pass %d",
+                     wait, attempt + 1)
+            time.sleep(wait)
+
+    log.error("gemini: exhausted %d models over %d passes; using extracted facts",
+              len(models), PASSES)
     return None
 
 
