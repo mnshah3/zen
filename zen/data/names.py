@@ -17,6 +17,7 @@ import csv
 import io
 import json
 import logging
+import re
 from pathlib import Path
 
 import requests
@@ -31,6 +32,23 @@ CACHE = Path("state/symbol_names.json")
 # Words that carry no identifying information when matching a headline.
 _STOP = {"limited", "ltd", "the", "india", "indian", "company", "corporation",
          "corp", "industries", "enterprises", "and", "of", "co"}
+
+# Sector and industry words that appear in hundreds of company names and in
+# unrelated headlines. Matching on one of these alone produced false hits --
+# "RIR Power Electronics" matching a story about "Jaiprakash Power Ventures" --
+# so a match on one of these must be corroborated by a second token.
+_GENERIC = {
+    "power", "energy", "steel", "cement", "motors", "auto", "bank", "finance",
+    "financial", "capital", "technologies", "technology", "tech", "systems",
+    "solutions", "services", "chemicals", "chemical", "pharma", "labs",
+    "laboratories", "textiles", "paper", "papers", "mills", "metals", "metal",
+    "engineering", "infra", "infrastructure", "projects", "construction",
+    "electronics", "electricals", "electric", "industrial", "products",
+    "international", "global", "holdings", "ventures", "resources", "mining",
+    "petroleum", "gas", "oil", "foods", "agro", "sugar", "textile", "trading",
+    "investments", "securities", "insurance", "healthcare", "hospitals",
+    "media", "communications", "telecom", "logistics", "transport", "group",
+}
 
 
 def refresh() -> dict[str, str]:
@@ -77,8 +95,15 @@ def find_in_text(text: str, names: dict[str, str],
                  symbols: list[str]) -> list[str]:
     """Which of `symbols` are plausibly mentioned in `text`.
 
-    Matching is on the leading distinctive word of the company name rather
-    than the ticker, since headlines say "Andhra Paper", never "ANDHRAPAP".
+    Matching is on company name, not ticker, since headlines say "Andhra
+    Paper" and never "ANDHRAPAP". Evidence required scales with how
+    distinctive the word is:
+
+      a specific word ("andhra", "hikal")   one match is enough
+      a sector word   ("power", "paper")    needs a second token to corroborate
+
+    Without that rule "RIR Power Electronics" matched any headline containing
+    the word power, which is most of them.
     """
     low = f" {text.lower()} "
     hits = []
@@ -87,6 +112,15 @@ def find_in_text(text: str, names: dict[str, str],
         if not name:
             continue
         toks = tokens(name)
-        if toks and toks[0] in low:
+        if not toks:
+            continue
+
+        present = [t for t in toks if re.search(rf"\b{re.escape(t)}\b", low)]
+        if not present:
+            continue
+
+        distinctive = [t for t in present if t not in _GENERIC]
+        # One distinctive word, or two words of any kind, counts as a match.
+        if distinctive or len(present) >= 2:
             hits.append(sym)
     return hits

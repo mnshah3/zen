@@ -60,8 +60,10 @@ INDIA_LINKS = [
 
 # Patterns for the numbers that actually carry information.
 _NUM_PATTERNS = [
-    (re.compile(r"(?:Rs\.?|₹|INR)\s?([\d,]+(?:\.\d+)?)\s?(crore|cr|lakh|billion|bn|trillion)?",
-                re.I), "amount"),
+    # \d[\d,]* rather than [\d,]+ : the latter is satisfied by a bare comma,
+    # which is how a chip reading only "Rs," reached the brief.
+    (re.compile(r"(?:Rs\.?|₹|INR)\s?(\d[\d,]*(?:\.\d+)?)\s?"
+                r"(crore|cr|lakh|billion|bn|trillion)?", re.I), "amount"),
     (re.compile(r"([+-]?\d+(?:\.\d+)?)\s?(?:per cent|percent|%)", re.I), "percent"),
     (re.compile(r"(\d+)\s?(?:basis points|bps)", re.I), "bps"),
     (re.compile(r"\b(Q[1-4]\s?FY\s?\d{2,4})\b", re.I), "quarter"),

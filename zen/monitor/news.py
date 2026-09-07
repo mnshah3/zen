@@ -20,7 +20,7 @@ import feedparser
 import requests
 
 from zen.monitor import extract
-from zen.monitor.feeds import FEEDS, NOISE, SECTIONS
+from zen.monitor.feeds import FEEDS, JUNK_PATTERNS, NOISE, SECTIONS
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +29,8 @@ MEMORY_DAYS = 7
 
 # Several publishers reject feedparser's default user-agent outright and return
 # an empty document with a 200, so feeds are fetched via requests first.
+_JUNK = re.compile("|".join(JUNK_PATTERNS), re.I)
+
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 
@@ -83,6 +85,8 @@ def collect(lookback_hours: int = 24) -> list[Article]:
                 continue
             title = re.sub(r"\s+", " ", e.get("title", "")).strip()
             if not title or any(n in title.lower() for n in NOISE):
+                continue
+            if _JUNK.search(title):
                 continue
             out.append(Article(
                 title=title,

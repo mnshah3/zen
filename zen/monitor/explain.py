@@ -25,7 +25,13 @@ import requests
 
 log = logging.getLogger(__name__)
 
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+# Free-tier model availability changes without notice, so several are tried in
+# order rather than pinning one and silently producing no explanations.
+MODELS = [m.strip() for m in os.environ.get(
+    "GEMINI_MODELS",
+    "gemini-2.5-flash,gemini-2.0-flash,gemini-flash-latest,gemini-2.5-flash-lite"
+).split(",") if m.strip()]
+
 ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
             "{model}:generateContent")
 
@@ -51,30 +57,53 @@ Stories:
 """
 
 
-def _call(prompt: str, api_key: str, timeout: int = 60) -> str | None:
+def _call_model(model: str, prompt: str, api_key: str,
+                timeout: int = 90) -> tuple[str | None, str]:
+    """Returns (text, diagnosis). The diagnosis is logged so a silent failure
+    in a scheduled run can be identified from the Actions log alone."""
     try:
         r = requests.post(
-            ENDPOINT.format(model=MODEL),
+            ENDPOINT.format(model=model),
             headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
             json={
                 "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048},
+                "generationConfig": {"temperature": 0.3, "maxOutputTokens": 4096},
             },
             timeout=timeout,
         )
     except requests.RequestException as e:
-        log.warning("gemini request failed: %s", e)
-        return None
+        return None, f"request failed ({type(e).__name__}: {e})"
 
     if r.status_code != 200:
-        log.warning("gemini returned %s: %s", r.status_code, r.text[:250])
-        return None
+        return None, f"HTTP {r.status_code}: {r.text[:200]}"
 
     try:
-        return r.json()["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError, ValueError) as e:
-        log.warning("unexpected gemini response shape: %s", e)
-        return None
+        payload = r.json()
+    except ValueError:
+        return None, "response was not JSON"
+
+    candidates = payload.get("candidates") or []
+    if not candidates:
+        # A prompt blocked by safety filters returns 200 with no candidates.
+        return None, f"no candidates (feedback: {payload.get('promptFeedback')})"
+
+    parts = (candidates[0].get("content") or {}).get("parts") or []
+    text = "".join(p.get("text", "") for p in parts).strip()
+    if not text:
+        return None, f"empty text (finishReason: {candidates[0].get('finishReason')})"
+    return text, "ok"
+
+
+def _call(prompt: str, api_key: str) -> str | None:
+    for model in MODELS:
+        text, why = _call_model(model, prompt, api_key)
+        if text:
+            log.info("gemini: %s responded", model)
+            return text
+        log.warning("gemini: %s unusable -- %s", model, why)
+    log.error("gemini: all %d models failed; falling back to extracted facts",
+              len(MODELS))
+    return None
 
 
 def _parse(raw: str, expected: int) -> dict[int, str]:

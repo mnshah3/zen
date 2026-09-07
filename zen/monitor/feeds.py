@@ -58,6 +58,19 @@ SECTIONS: dict[str, dict] = {
     },
 }
 
+# Titles that are not stories at all: Reuters quote pages, site landing pages,
+# and section indexes that RSS feeds emit alongside real articles.
+JUNK_PATTERNS = [
+    r"^[A-Z0-9]{1,6}\.[A-Z]{1,3}(\s|$)",   # SNDO.NS, OPAD.OQ, EFGN.S
+    r"stock price\s*&\s*latest news",
+    r"^compare stocks",
+    r"business news, economic news",
+    r"latest news.*moneycontrol\.com",
+    r"^\s*live updates?\s*$",
+    r"share price today.*live",
+    r"^markets? live",
+]
+
 # Headlines that are almost always noise.
 NOISE = [
     "horoscope", "astrology", "stocks to watch today", "muhurat", "top gainers",

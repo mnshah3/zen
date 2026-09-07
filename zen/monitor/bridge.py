@@ -12,10 +12,22 @@ wrong one is obvious rather than persuasive.
 from __future__ import annotations
 
 import logging
+import re
 
 from zen.data import names as names_mod
 
 log = logging.getLogger(__name__)
+
+# Publishers append their own name to headlines; it adds nothing when the
+# headline is being quoted inside a sentence.
+_SUFFIX = re.compile(
+    r"\s*[-|–—]\s*(Reuters|Bloomberg\.com|Bloomberg|Moneycontrol\.com|"
+    r"Moneycontrol|The Hindu BusinessLine|Business Standard|Mint|Livemint|"
+    r"Economic Times|ET Now|NDTV Profit|CNBC ?TV18)\s*$", re.I)
+
+
+def _clean(title: str) -> str:
+    return _SUFFIX.sub("", (title or "").strip()).strip()
 
 
 def _volume_explained_by_news(insights: dict, articles: list,
@@ -26,15 +38,22 @@ def _volume_explained_by_news(insights: dict, articles: list,
         return []
 
     symbols = list(uv["symbol"])
-    out = []
+    out: list[str] = []
+    claimed: set[str] = set()
+
     for a in articles:
         hits = names_mod.find_in_text(f"{a.title} {a.summary}", names, symbols)
         for sym in hits:
+            # One line per stock. Reporting the same spike against three
+            # different headlines says nothing three times.
+            if sym in claimed:
+                continue
+            claimed.add(sym)
             row = uv[uv["symbol"] == sym].iloc[0]
             out.append(
                 f"<b>{names.get(sym, sym)}</b> traded at {row.vol_x:,.0f} times its "
                 f"normal volume and moved {row.ret:+.1f}% &mdash; and there is a story "
-                f"today: &ldquo;{a.title}&rdquo;."
+                f"today: &ldquo;{_clean(a.title)}&rdquo;."
             )
             if len(out) >= 3:
                 return out
