@@ -25,35 +25,83 @@ import requests
 
 log = logging.getLogger(__name__)
 
-# Free-tier model availability changes without notice, so several are tried in
-# order rather than pinning one and silently producing no explanations.
-MODELS = [m.strip() for m in os.environ.get(
+# Google retires model names without warning -- a pinned list went stale and
+# every model in it returned 404 with "no longer available to new users". The
+# available models are therefore discovered at runtime and only used as a
+# fallback ordering if that discovery fails.
+FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "GEMINI_MODELS",
-    "gemini-2.5-flash,gemini-2.0-flash,gemini-flash-latest,gemini-2.5-flash-lite"
+    "gemini-3.6-flash,gemini-3.5-flash-lite,gemini-flash-latest"
 ).split(",") if m.strip()]
 
-ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
-            "{model}:generateContent")
+BASE = "https://generativelanguage.googleapis.com/v1beta"
+ENDPOINT = BASE + "/models/{model}:generateContent"
 
-PROMPT = """You are writing a morning market brief for one reader in India who \
-follows markets but is not a specialist in every sector. He wants to understand \
-each story in a few seconds without opening the link.
 
-For each numbered story write ONE sentence, maximum 26 words, in the simplest \
-English that is still accurate.
+def discover_models(api_key: str) -> list[str]:
+    """Ask Google which models this key can actually call.
+
+    Cheaper than guessing and immune to renames. Flash variants are preferred:
+    they are the ones covered by the free tier and are fast enough that one
+    request can carry the whole brief.
+    """
+    try:
+        r = requests.get(f"{BASE}/models", headers={"x-goog-api-key": api_key},
+                         timeout=30)
+        r.raise_for_status()
+        models = r.json().get("models", [])
+    except (requests.RequestException, ValueError) as e:
+        log.warning("gemini: model discovery failed (%s); using fallback list", e)
+        return FALLBACK_MODELS
+
+    usable = [
+        m["name"].removeprefix("models/") for m in models
+        if "generateContent" in (m.get("supportedGenerationMethods") or [])
+    ]
+    if not usable:
+        return FALLBACK_MODELS
+
+    def rank(name: str) -> tuple:
+        # flash first, then lite, then anything; newer version strings first
+        return (0 if "flash" in name else 1,
+                0 if "lite" not in name else 1,
+                [-int(p) for p in re.findall(r"\d+", name)] or [0])
+
+    ordered = sorted(usable, key=rank)
+    log.info("gemini: %d models available, trying %s",
+             len(usable), ", ".join(ordered[:3]))
+    return ordered[:4]
+
+PROMPT = """You are writing the morning market brief for one reader in India. \
+He follows markets closely but is not a specialist in every sector, and he \
+wants to finish your paragraph understanding the story well enough not to open \
+the link.
+
+For each numbered story write a SHORT PARAGRAPH of two or three sentences, \
+45 to 70 words, in the simplest English that is still precise.
+
+Structure each paragraph:
+1. What actually happened, leading with the concrete number or fact.
+2. Why it matters -- the mechanism, in plain words. What does this change, and \
+for whom?
+3. Only if genuinely useful: what would confirm or kill this in the coming days.
 
 Rules, strictly:
-- Write as if explaining to a smart friend over coffee. Short words. Active voice.
-- Lead with the concrete fact or number. No throat-clearing, no "the story says".
-- Never use jargon without immediately unpacking it. Instead of "re-rated", write \
+- Write as if explaining to a smart friend over coffee. Short words, active voice.
+- Never use jargon without unpacking it in the same breath. Not "re-rated" but \
 "investors decided it deserves a higher price for the same profits".
-- For a global story, say plainly how it reaches India. If it does not, say so.
-- Never predict prices. Never advise buying or selling.
-- If the story is trivial, say that in a few words rather than inflating it.
-- Do not repeat the headline back. Add what the headline leaves out.
+- For a global story, say concretely how it reaches India -- through oil prices, \
+foreign fund flows, the rupee, export demand. If it genuinely does not reach \
+India, say so in one line and stop.
+- Never predict prices. Never advise buying or selling. Never say "investors \
+should".
+- Do not restate the headline. The reader has already read it. Add what it left out.
+- If a story is trivial, say so plainly in one short sentence instead of \
+inflating it to fill the space.
+- If you do not know something, leave it out rather than guessing.
 
 Return ONLY a JSON array, one object per story, no markdown fence:
-[{"i": 1, "s": "your sentence"}, ...]
+[{"i": 1, "s": "your paragraph"}, ...]
 
 Stories:
 %s
@@ -70,7 +118,7 @@ def _call_model(model: str, prompt: str, api_key: str,
             headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
             json={
                 "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.3, "maxOutputTokens": 4096},
+                "generationConfig": {"temperature": 0.3, "maxOutputTokens": 8192},
             },
             timeout=timeout,
         )
@@ -98,14 +146,15 @@ def _call_model(model: str, prompt: str, api_key: str,
 
 
 def _call(prompt: str, api_key: str) -> str | None:
-    for model in MODELS:
+    models = discover_models(api_key)
+    for model in models:
         text, why = _call_model(model, prompt, api_key)
         if text:
             log.info("gemini: %s responded", model)
             return text
         log.warning("gemini: %s unusable -- %s", model, why)
     log.error("gemini: all %d models failed; falling back to extracted facts",
-              len(MODELS))
+              len(models))
     return None
 
 

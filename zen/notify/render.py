@@ -184,8 +184,10 @@ def _story(a, explanation: str | None, facts: list[str]) -> str:
            f'font-size:14px;font-weight:600;line-height:1.4;">{_esc(a.title)}</a>')
 
     if explanation:
-        out += (f'<div style="font-size:13px;color:#374151;margin-top:4px;'
-                f'line-height:1.5;">{_esc(explanation)}</div>')
+        # A paragraph needs more air than a caption; this is the part actually
+        # being read, so it gets close to body-copy treatment.
+        out += (f'<div style="font-size:13px;color:#3a3f47;margin-top:6px;'
+                f'line-height:1.62;">{_esc(explanation)}</div>')
 
     if facts:
         chips = "".join(
