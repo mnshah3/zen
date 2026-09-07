@@ -167,9 +167,32 @@ are the interesting part:
 | Source | Coverage | Cost |
 |--------|----------|------|
 | NSE bhavcopy | daily OHLCV, all listed including later-delisted | free |
-| NSE equity list | symbol to company name, for headline matching | free |
+| NSE corporate announcements | every filing, timestamped by the exchange | free |
+| NSE equity list | symbol to company name | free |
 | RSS (13 feeds) | Indian market, macro, and global news | free |
 | Google Gemini | plain-English explanations, optional | free tier |
+
+### Corporate filings
+
+A stock's real news is filed with the exchange, not written by a journalist.
+The filing appears within minutes of a board approving it; a newspaper covers
+it days later, if at all.
+
+Each filing is stamped with `an_dt`, the moment NSE published it, and
+attributed to `trade_date` -- the first session it could actually affect.
+A filing at 17:59 belongs to the next session, not the one that just closed.
+Getting that backwards is a one-day look-ahead, the same error shape that
+produced a fictitious 30% CAGR once already.
+
+Two thirds of the feed is statutory noise: "Copy of Newspaper Publication"
+alone was 409 of 1,943 filings over four sessions. Routine compliance is
+matched and discarded before anything else, so a newspaper advertisement
+announcing results can never be mistaken for the results themselves.
+
+One category earns its own treatment. When the exchange formally asks a
+company to explain an unusual move, that query arrives after the close --
+so it confirms the move rather than explaining it. The brief says exactly
+that, rather than presenting it as a cause.
 
 Every component runs on free infrastructure. NSE changed the bhavcopy format on
 8 July 2024; both layouts are parsed and normalised to one schema.
@@ -203,11 +226,12 @@ never the account password), `MAIL_TO`, and optionally `GEMINI_API_KEY`.
 
 ## Status
 
-Working: the archive, both briefs, the news–data bridge, and look-ahead
-detection.
+Working: the archive, corporate filings, both briefs, the news-data-filings
+bridge, and look-ahead detection.
 
-Next: walk-forward backtesting with a persistent trial counter, corporate-action
-adjustment, and point-in-time index membership.
+Next: quarterly financials from exchange XBRL, then walk-forward backtesting
+with a persistent trial counter, corporate-action adjustment, and
+point-in-time index membership.
 
 The momentum screen currently wired in is a **calibration baseline, not a
 strategy intended for capital**. Momentum is heavily documented and its rough

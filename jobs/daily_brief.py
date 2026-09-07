@@ -18,10 +18,10 @@ from __future__ import annotations
 
 import argparse
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
-from zen.data import store
+from zen.data import announcements, store
 from zen.monitor import bridge, explain, extract, insights, market, news
 from zen.notify import charts, mailer, render
 
@@ -48,11 +48,21 @@ def main() -> int:
     # The archive is computed before the sections are built, because which
     # stocks it flagged determines which stories get promoted.
     con = store.connect()
-    try:
-        asof = con.execute("SELECT max(date) FROM prices").fetchone()[0]
-        derived = insights.collect(con, asof) if asof else {}
-    finally:
-        con.close()
+    asof = con.execute("SELECT max(date) FROM prices").fetchone()[0]
+    derived = insights.collect(con, asof) if asof else {}
+
+    # Filings for the session being reported. Refreshed here rather than in the
+    # price job so a manually triggered brief is never reading stale filings.
+    if asof:
+        try:
+            fresh_ann = announcements.fetch(asof - timedelta(days=1), asof)
+            announcements.upsert(con, fresh_ann)
+            announcements.write_parquet(fresh_ann)
+        except Exception as e:
+            log.warning("announcement refresh failed (%s); using what is stored", e)
+        filings = announcements.for_session(con, asof, material_only=True)
+    else:
+        filings = None
 
     summary = market.summary()
 
@@ -92,7 +102,8 @@ def main() -> int:
                 # than an empty entry.
                 facts_map[i] = extract.facts(f"{a.title} {a.summary}")
     images = charts.build_all(derived)
-    bridge_text = bridge.build(derived, summary, pool)
+    bridge_text = bridge.build(derived, summary, pool, con=con)
+    con.close()
 
     # --- render -----------------------------------------------------------
     subject, html, text = render.daily_brief(
@@ -103,7 +114,7 @@ def main() -> int:
         explanations=explanations,
         facts_map=facts_map,
         bridge_text=bridge_text,
-        glossary_terms=sorted(glossary_seen.items())[:6],
+        filings=filings,
         when=datetime.now(),
     )
 

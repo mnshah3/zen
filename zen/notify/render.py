@@ -249,25 +249,68 @@ def _verdict(market: dict, insights: dict) -> str:
     return f"{adv:,} up, {dec:,} down — mixed session"
 
 
-def _glossary(terms: list[tuple[str, str]]) -> str:
-    if not terms:
+FILING_LABELS = {
+    "volume_query": "Exchange query on the move",
+    "results": "Results",
+    "guidance": "Guidance / investor update",
+    "expansion": "Capacity / expansion",
+    "orders": "Order win",
+    "mna": "M&A / restructuring",
+    "capital": "Fund raising",
+    "ratings": "Credit rating",
+    "litigation": "Legal / regulatory",
+}
+
+
+def _filings_section(filings) -> str:
+    """What companies themselves told the exchange today.
+
+    Kept separate from news because it is a different kind of evidence: the
+    company's own statement, timestamped by the exchange, rather than a
+    journalist's account of it.
+    """
+    if filings is None or len(filings) == 0:
         return ""
-    rows = "".join(
-        f'<div style="margin-bottom:7px;font-size:12px;">'
-        f'<b>{_esc(t)}</b> &mdash; <span style="color:{MUTED};">{_esc(d)}</span></div>'
-        for t, d in terms
-    )
-    return f'<div style="margin-top:22px;">{_heading("Jargon")}{rows}</div>'
+
+    rows = ""
+    for r in filings.head(8).itertuples():
+        label = FILING_LABELS.get(r.category, str(r.category).replace("_", " ").title())
+        subject = str(r.subject or "")
+        if ": " in subject:
+            subject = subject.split(": ", 1)[1]
+        company = (r.company or r.symbol or "")[:44]
+        link = str(r.url or "")
+        title = _esc(subject[:190])
+        if link:
+            title = (f'<a href="{_esc(link)}" style="color:{INK};'
+                     f'text-decoration:none;">{title}</a>')
+        rows += (
+            f'<div style="margin-bottom:12px;">'
+            f'<span style="font-size:9px;font-weight:700;letter-spacing:0.06em;'
+            f'text-transform:uppercase;color:{ACCENT};">{_esc(label)}</span>'
+            f'<span style="font-size:12px;font-weight:700;margin-left:7px;">'
+            f'{_esc(r.symbol)}</span>'
+            f'<span style="font-size:11px;color:{MUTED};margin-left:6px;">'
+            f'{_esc(company)}</span>'
+            f'<div style="font-size:12.5px;color:#3a3f47;margin-top:3px;'
+            f'line-height:1.5;">{title}</div></div>'
+        )
+
+    note = (f'<div style="font-size:11px;color:{FAINT};margin-top:-2px;'
+            f'margin-bottom:10px;">Filed with NSE for this session. Routine '
+            f'compliance filings are excluded.</div>')
+    return (f'<div style="margin-bottom:26px;">'
+            f'{_heading("What companies filed")}{note}{rows}</div>')
 
 
 def daily_brief(sections: dict, market: dict, insights: dict, charts: dict,
                 explanations: dict, facts_map: dict, bridge_text: str,
-                glossary_terms: list, when: datetime) -> tuple[str, str, str]:
+                filings, when: datetime) -> tuple[str, str, str]:
     """Returns (subject, html, plain text)."""
     body = _bridge(bridge_text)
     body += _data_section(market, insights, charts)
+    body += _filings_section(filings)
     body += _news_section(sections, explanations, facts_map)
-    body += _glossary(glossary_terms)
 
     n = sum(len(v) for v in sections.values())
     b = market.get("breadth", {})
