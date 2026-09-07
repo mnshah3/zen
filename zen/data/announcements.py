@@ -57,10 +57,17 @@ CATEGORIES: list[tuple[str, str]] = [
                     r"earnings release|statement of (profit|accounts)"),
     ("guidance",    r"guidance|outlook|investor (presentation|meet|day)|"
                     r"earnings call|analyst meet|conference call|business update"),
-    ("expansion",   r"expansion|capacity|new plant|commission|capex|greenfield|"
-                    r"brownfield|acquisition of land|new facility|debottleneck"),
-    ("orders",      r"\border\b|contract|letter of (award|intent)|\bloa\b|"
-                    r"work order|tender|purchase order|bags? (an )?order"),
+    # Stems, not whole words. "expansion" does not match "expands", which is
+    # how the single most consequential filing in the Sterlite Technologies
+    # case study -- "STL expands Data Centre portfolio ... for AI data centres",
+    # eight months before a sevenfold re-rating -- was binned as "other".
+    ("expansion",   r"expan(d|si)|capacity|new plant|commission|capex|greenfield|"
+                    r"brownfield|acquisition of land|new facility|debottleneck|"
+                    r"foray|enter(s|ing)? (into )?(the )?\w+ (market|segment|business)|"
+                    r"diversif|scal(e|ing) up|ramp[- ]up"),
+    ("orders",      r"\border(s|ed|ing)?\b|contract|letter of (award|intent)|\bloa\b|"
+                    r"work order|tender|purchase order|bagg?(s|ing|ed)?\b|"
+                    r"win(s|ning)? (a |an )?(order|contract|project|mandate)"),
     ("mna",         r"amalgamation|merger|demerger|scheme of arrangement|"
                     r"acquisition|divest|stake sale|slump sale|joint venture"),
     ("capital",     r"fund rais|\bqip\b|preferential|allotment|debenture|\bncd\b|"
