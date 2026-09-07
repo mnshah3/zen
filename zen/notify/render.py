@@ -330,13 +330,73 @@ padding:15px 17px;margin-bottom:16px;">
 </div>"""
 
 
+def _signal_table(group: list[dict], colour: str) -> str:
+    """Compact ranked list.
+
+    When a screen returns fifteen names the per-name detail is nearly
+    identical, and repeating it fifteen times buries the information rather
+    than presenting it. The table carries what differs between names; what
+    they share is stated once, above.
+    """
+    rows = ""
+    for s in group:
+        f = s.get("facts", {})
+        rows += (
+            f'<tr style="border-bottom:1px solid {RULE};">'
+            f'<td style="padding:7px 8px 7px 0;font-size:13px;vertical-align:top;">'
+            f'<b>{_esc(s["symbol"])}</b>'
+            f'<div style="font-size:11px;color:{MUTED};margin-top:1px;">'
+            f'{_esc((s.get("name") or "")[:34])}</div></td>'
+            f'<td style="padding:7px 8px;font-size:13px;text-align:right;'
+            f'vertical-align:top;color:{colour};font-weight:600;">'
+            f'{_esc(f.get("Formation return", ""))}</td>'
+            f'<td style="padding:7px 8px;font-size:12px;text-align:right;'
+            f'vertical-align:top;">{_esc(f.get("Last close", ""))}</td>'
+            f'<td style="padding:7px 0;font-size:12px;text-align:right;'
+            f'vertical-align:top;color:{MUTED};">'
+            f'{_esc(f.get("Median turnover", "").replace(" cr/day", "cr"))}</td>'
+            f'</tr>'
+        )
+    return (
+        f'<table style="width:100%;border-collapse:collapse;margin-bottom:6px;">'
+        f'<tr style="color:{FAINT};font-size:9px;text-transform:uppercase;'
+        f'letter-spacing:0.07em;">'
+        f'<td style="padding-bottom:4px;">Stock</td>'
+        f'<td style="padding-bottom:4px;text-align:right;">Formation</td>'
+        f'<td style="padding-bottom:4px;text-align:right;">Close</td>'
+        f'<td style="padding-bottom:4px;text-align:right;">Liquidity</td></tr>'
+        f'{rows}</table>'
+    )
+
+
+def _shared_notes(group: list[dict]) -> str:
+    """Whatever every signal in the group argues identically, argued once."""
+    if not group:
+        return ""
+    common = group[0].get("against") or []
+    if not common or not all((s.get("against") or []) == common for s in group):
+        return ""
+    items = "".join(f'<li style="margin-bottom:5px;font-size:12.5px;color:#78350f;">'
+                    f'{_esc(r)}</li>' for r in common)
+    return (f'<div style="background:#fffbeb;border:1px solid #fde68a;'
+            f'border-radius:4px;padding:12px 15px;margin:16px 0 8px;">'
+            f'<div style="font-size:9px;font-weight:700;letter-spacing:0.1em;'
+            f'color:#92400e;text-transform:uppercase;margin-bottom:7px;">'
+            f'Case against &mdash; applies to every name above</div>'
+            f'<ul style="margin:0;padding-left:17px;">{items}</ul></div>')
+
+
 def signal_alert(signals: list[dict], context: dict, when: datetime) -> tuple[str, str, str]:
-    """Detailed buy/sell note. Only called when signals is non-empty."""
+    """Buy/sell note. Only called when signals is non-empty.
+
+    Collapses to a table when a screen returns many names sharing one
+    argument; expands per name when the signals are genuinely individual.
+    """
     body = ""
     if context.get("note"):
-        body += (f'<div style="background:#f9fafb;border:1px solid {RULE};'
-                 f'padding:11px 14px;margin-bottom:20px;font-size:13px;">'
-                 f'{_esc(context["note"])}</div>')
+        body += (f'<div style="background:{TINT};border:1px solid {RULE};'
+                 f'border-radius:4px;padding:11px 14px;margin-bottom:18px;'
+                 f'font-size:13px;">{_esc(context["note"])}</div>')
 
     buys = [s for s in signals if s["action"].lower() == "buy"]
     sells = [s for s in signals if s["action"].lower() == "sell"]
@@ -344,8 +404,14 @@ def signal_alert(signals: list[dict], context: dict, when: datetime) -> tuple[st
     for label, group in (("To buy", buys), ("To sell", sells)):
         if not group:
             continue
+        colour = UP if label == "To buy" else DOWN
         body += _heading(f"{label} ({len(group)})")
-        body += "".join(_signal_block(s) for s in group)
+        shared = _shared_notes(group)
+        if shared and len(group) > 4:
+            body += _signal_table(group, colour)
+            body += shared
+        else:
+            body += "".join(_signal_block(s) for s in group)
 
     body += (f'<div style="margin-top:22px;padding:11px 14px;background:#fffbeb;'
              f'border:1px solid #fde68a;font-size:12px;">'
