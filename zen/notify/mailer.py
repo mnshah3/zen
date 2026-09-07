@@ -29,8 +29,15 @@ def _config() -> dict | None:
     return cfg
 
 
-def send(subject: str, html: str, text: str = "") -> bool:
-    """Send one HTML email. Returns False (and dumps to stdout) if unconfigured."""
+def send(subject: str, html: str, text: str = "",
+         images: dict[str, bytes] | None = None) -> bool:
+    """Send one HTML email, optionally with inline charts.
+
+    Images are attached to the message and referenced from the HTML as
+    cid:<name>. Gmail renders those immediately, whereas a remote <img src>
+    is blocked until the reader clicks "display images" -- which, for a brief
+    read on a phone at 7am, means the charts are never seen.
+    """
     cfg = _config()
     if cfg is None:
         log.warning("SMTP not configured; writing to stdout instead")
@@ -45,6 +52,12 @@ def send(subject: str, html: str, text: str = "") -> bool:
     msg["Date"] = formatdate(localtime=True)
     msg.set_content(text or "This brief is best viewed as HTML.")
     msg.add_alternative(html, subtype="html")
+
+    if images:
+        html_part = msg.get_payload()[-1]
+        for name, blob in images.items():
+            html_part.add_related(blob, maintype="image", subtype="png",
+                                  cid=f"<{name}>", filename=f"{name}.png")
 
     try:
         with smtplib.SMTP(cfg["host"], cfg["port"], timeout=30) as s:

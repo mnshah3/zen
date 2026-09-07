@@ -19,6 +19,7 @@ from pathlib import Path
 import feedparser
 import requests
 
+from zen.monitor import extract
 from zen.monitor.feeds import FEEDS, NOISE, SECTIONS
 
 log = logging.getLogger(__name__)
@@ -149,10 +150,20 @@ def _save_seen(seen: dict[str, str]) -> None:
     STATE.write_text(json.dumps(fresh, indent=0, sort_keys=True))
 
 
-def build(lookback_hours: int = 24, remember: bool = True) -> dict[str, list[Article]]:
-    """Ranked articles per section, excluding anything sent in the last week."""
+def build(lookback_hours: int = 24, remember: bool = True,
+          pool: list[Article] | None = None) -> dict[str, list[Article]]:
+    """Ranked articles per section, excluding anything sent in the last week.
+
+    `pool` lets the caller supply an already-collected, wider set of articles
+    so the brief can display a 24-hour window while matching stock moves
+    against a longer one, without fetching every feed twice.
+    """
     seen = _load_seen()
-    articles = deduplicate(collect(lookback_hours))
+    if pool is None:
+        pool = collect(lookback_hours)
+
+    cutoff = _now() - timedelta(hours=lookback_hours)
+    articles = deduplicate([a for a in pool if a.published >= cutoff])
 
     fresh = []
     for a in articles:
@@ -164,7 +175,12 @@ def build(lookback_hours: int = 24, remember: bool = True) -> dict[str, list[Art
 
     sections: dict[str, list[Article]] = {}
     for name, cfg in SECTIONS.items():
-        picked = sorted([a for a in fresh if a.section == name], key=lambda x: -x.score)
+        candidates = [a for a in fresh if a.section == name]
+        # A global story earns its place only if it plausibly reaches India.
+        if name == "Global":
+            candidates = [a for a in candidates
+                          if extract.india_relevant(f"{a.title} {a.summary}")]
+        picked = sorted(candidates, key=lambda x: -x.score)
         if picked:
             sections[name] = picked[: cfg["limit"]]
 
