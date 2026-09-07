@@ -1,0 +1,5 @@
+requests>=2.32
+pandas>=2.2
+pyarrow>=17
+duckdb>=1.1
+python-dotenv>=1.0

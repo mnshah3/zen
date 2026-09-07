@@ -1,0 +1,28 @@
+# secrets - NEVER commit these
+.env
+*.env
+!.env.example
+secrets.json
+*.pem
+*.key
+
+# duckdb is rebuildable from committed parquet - never commit the binary
+*.duckdb
+*.duckdb.wal
+
+# raw downloads (rebuildable, large)
+data/raw/*
+!data/raw/.gitkeep
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/

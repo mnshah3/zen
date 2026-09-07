@@ -1,0 +1,38 @@
+name: daily prices
+
+on:
+  schedule:
+    # 13:30 UTC = 19:00 IST, comfortably after the 15:30 IST close.
+    # GitHub cron can drift 5-15 min on the free tier; that is fine here.
+    - cron: "30 13 * * 1-5"
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: write           # needed to commit the new parquet back
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: fetch missing bhavcopy days
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m jobs.update_prices --days 7 --notify
+
+      - name: commit new data
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          git add data/daily
+          git diff --staged --quiet || git commit -m "data: bhavcopy $(date -u +%Y-%m-%d)"
+          git push
