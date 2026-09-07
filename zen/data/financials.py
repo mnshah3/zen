@@ -1,23 +1,51 @@
-"""Quarterly financials from NSE's XBRL filings.
+"""Quarterly financials from NSE's integrated filings.
 
-Every quarterly result is filed as structured XBRL, which means revenue,
-expenses and profit arrive as tagged numbers rather than a PDF to scrape.
-This is what makes valuation screens possible: P/E, EV/EBITDA and margin
-history all come from here.
+WHICH ENDPOINT, AND WHY IT MATTERS
 
-Two things this module refuses to get wrong.
+The obvious endpoint, /api/corporates-financial-results, is a dead end: it
+serves a single quarter (every row carries period end 31 Dec 2024) and
+date-filtered queries return only late stragglers. Several other candidates
+fail differently -- /api/corp-info is a route-level 404, /api/quote-equity is
+blocked by the WAF, and /api/annual-reports returns PDF links with no figures.
 
-Point-in-time. Each row carries `broadcast_dt` -- when NSE published it -- as
-well as the period it describes. A screen asking what was knowable on a date
-must filter on `broadcast_dt`, never on period end. Results for the quarter
-ending 31 December are typically published in late January or February; a
-backtest that assumes they were available on 31 December has invented six
-weeks of foresight.
+/api/integrated-filing-results works. It carries both income statement and
+balance sheet as tagged Ind-AS XBRL, covers roughly 1,700 companies, needs no
+login, and stamps every filing with the moment NSE broadcast it.
 
-Exceptional items. Indian companies book one-off land sales and write-offs
-above the profit line routinely enough that raw net profit is a poor guide to
-earning power. `profit_normalised` strips them; `profit_reported` keeps them.
-Both are stored, so a screen can choose and the choice is visible.
+WHAT IT CAN AND CANNOT SUPPORT -- verified, not assumed
+
+Income statement: every quarter from the March 2025 quarter onward.
+Balance sheet: HALF-YEARLY ONLY. March and September filings carry Assets,
+Equity and Borrowings; June and December quarters do not. Confirmed directly
+on Reliance, where debt-to-equity computes to 0.345, 0.331 and 0.344 for the
+three half-years available, and the June and December filings return income
+statement fields alone.
+
+The consequence is a boundary worth stating plainly rather than discovering
+later:
+
+  A LIVE SCREEN works. Debt-to-equity, P/E, EV/EBITDA and margins can be
+  computed today across the covered universe, which is what the strategy's
+  hard filters need.
+
+  A HISTORICAL BACKTEST of fundamental factors does NOT work. Three
+  balance-sheet observations cannot answer whether low leverage predicted
+  returns. Any claim of that kind would have to come from a source we do not
+  have, and inventing one is how a backtest starts lying.
+
+POINT-IN-TIME
+
+`broadcast_dt` is when NSE published the filing, not when the period ended.
+A December quarter is published in mid-January; a screen filtering on period
+end would grant itself six weeks of foresight. known_at() filters on
+broadcast_dt for exactly this reason.
+
+EXCEPTIONAL ITEMS
+
+Indian companies book one-off land sales and write-offs above the profit line
+often enough that raw net profit is a poor guide to earning power.
+`profit_normalised` strips them, `profit_reported` keeps them, and both are
+stored so a screen's choice is visible rather than implicit.
 """
 
 from __future__ import annotations
@@ -34,14 +62,18 @@ from zen.data.bhavcopy import _session
 
 log = logging.getLogger(__name__)
 
-LISTING = ("https://www.nseindia.com/api/corporates-financial-results"
-           "?index=equities&period={period}")
 WARMUP = "https://www.nseindia.com/companies-listing/corporate-filings-financial-results"
+BY_SYMBOL = ("https://www.nseindia.com/api/integrated-filing-results"
+             "?index=equities&symbol={symbol}")
+BY_RANGE = ("https://www.nseindia.com/api/integrated-filing-results"
+            "?index=equities&from_date={frm}&to_date={to}&size={size}&page={page}")
 
 PARQUET_DIR = Path("data/financials")
 
-# XBRL tag -> our column. Names are Ind-AS taxonomy tags, stable across filers.
+# Ind-AS taxonomy tags. Balance-sheet tags appear only in March and September
+# filings; their absence in a June or December filing is expected, not an error.
 TAGS = {
+    # income statement
     "RevenueFromOperations": "revenue",
     "OtherIncome": "other_income",
     "Income": "total_income",
@@ -59,184 +91,232 @@ TAGS = {
     "ProfitLossForPeriod": "profit_reported",
     "BasicEarningsLossPerShareFromContinuingOperations": "eps_basic",
     "DilutedEarningsLossPerShareFromContinuingOperations": "eps_diluted",
-    "PaidUpValueOfEquityShareCapital": "equity_capital",
-    "FaceValueOfEquityShareCapital": "face_value",
+    # balance sheet -- half-yearly only
+    "BorrowingsNoncurrent": "debt_long",
+    "BorrowingsCurrent": "debt_short",
+    "Equity": "equity",
+    "EquityShareCapital": "equity_capital",
+    "OtherEquity": "other_equity",
+    "Assets": "assets",
+    "Liabilities": "liabilities",
+    "CurrentAssets": "current_assets",
+    "CurrentLiabilities": "current_liabilities",
+    "NoncurrentAssets": "noncurrent_assets",
+    "NoncurrentLiabilities": "noncurrent_liabilities",
 }
 
-COLUMNS = [
-    "symbol", "isin", "company", "period_start", "period_end", "quarter",
-    "broadcast_dt", "consolidated", "audited", "is_bank",
-    *dict.fromkeys(TAGS.values()),
-    "ebitda", "profit_normalised", "shares_implied", "xbrl_url",
-]
+DERIVED = ["ebitda", "profit_normalised", "shares_implied",
+           "debt_total", "debt_to_equity", "has_balance_sheet"]
+
+COLUMNS = ["symbol", "company", "period_end", "broadcast_dt", "consolidated",
+           "audited", *dict.fromkeys(TAGS.values()), *DERIVED, "xbrl_url"]
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS financials (
-    symbol        VARCHAR NOT NULL,
-    isin          VARCHAR,
-    company       VARCHAR,
-    period_start  DATE,
-    period_end    DATE    NOT NULL,
-    quarter       VARCHAR,
-    broadcast_dt  TIMESTAMP NOT NULL,
-    consolidated  BOOLEAN,
-    audited       BOOLEAN,
-    is_bank       BOOLEAN,
-    revenue       DOUBLE, other_income DOUBLE, total_income DOUBLE,
-    materials     DOUBLE, employee_cost DOUBLE, finance_costs DOUBLE,
-    depreciation  DOUBLE, other_expenses DOUBLE, total_expenses DOUBLE,
+    symbol       VARCHAR NOT NULL,
+    company      VARCHAR,
+    period_end   DATE    NOT NULL,
+    broadcast_dt TIMESTAMP NOT NULL,
+    consolidated BOOLEAN NOT NULL,
+    audited      BOOLEAN,
+    revenue DOUBLE, other_income DOUBLE, total_income DOUBLE,
+    materials DOUBLE, employee_cost DOUBLE, finance_costs DOUBLE,
+    depreciation DOUBLE, other_expenses DOUBLE, total_expenses DOUBLE,
     pbt_before_exceptional DOUBLE, exceptional_items DOUBLE,
-    pbt           DOUBLE, tax DOUBLE,
+    pbt DOUBLE, tax DOUBLE,
     profit_continuing DOUBLE, profit_reported DOUBLE,
-    eps_basic     DOUBLE, eps_diluted DOUBLE,
-    equity_capital DOUBLE, face_value DOUBLE,
-    ebitda        DOUBLE, profit_normalised DOUBLE, shares_implied DOUBLE,
-    xbrl_url      VARCHAR,
+    eps_basic DOUBLE, eps_diluted DOUBLE,
+    debt_long DOUBLE, debt_short DOUBLE, equity DOUBLE,
+    equity_capital DOUBLE, other_equity DOUBLE,
+    assets DOUBLE, liabilities DOUBLE,
+    current_assets DOUBLE, current_liabilities DOUBLE,
+    noncurrent_assets DOUBLE, noncurrent_liabilities DOUBLE,
+    ebitda DOUBLE, profit_normalised DOUBLE, shares_implied DOUBLE,
+    debt_total DOUBLE, debt_to_equity DOUBLE, has_balance_sheet BOOLEAN,
+    xbrl_url VARCHAR,
     PRIMARY KEY (symbol, period_end, consolidated)
 );
 """
 
 
-def _dt(raw: str) -> datetime | None:
-    for fmt in ("%d-%b-%Y %H:%M:%S", "%d-%b-%Y %H:%M", "%d-%b-%Y"):
+def _dt(raw) -> datetime | None:
+    for fmt in ("%d-%b-%Y %H:%M:%S", "%d-%b-%Y %H:%M", "%d-%b-%Y",
+                "%d-%B-%Y %H:%M:%S"):
         try:
-            return datetime.strptime((raw or "").strip(), fmt)
+            return datetime.strptime(str(raw or "").strip(), fmt)
         except ValueError:
             continue
     return None
 
 
-def _d(raw: str) -> date | None:
+def _period(raw) -> date | None:
     v = _dt(raw)
     return v.date() if v else None
 
 
-def listing(period: str = "Quarterly", session=None) -> pd.DataFrame:
-    """Every result filing NSE currently exposes, with its XBRL link."""
+def _rows(payload) -> list:
+    return payload if isinstance(payload, list) else (payload or {}).get("data", [])
+
+
+def listing(symbol: str | None = None, start: date | None = None,
+            end: date | None = None, session=None, page_size: int = 100,
+            max_pages: int = 200) -> pd.DataFrame:
+    """Financial filings, by symbol or across a broadcast-date window.
+
+    The feed mixes "Integrated Filing- Financials" with governance filings;
+    only the former carry figures, so the rest are dropped here rather than
+    silently producing empty XBRL parses downstream.
+    """
     s = session or _session()
     s.get(WARMUP, timeout=25)
-    r = s.get(LISTING.format(period=period), timeout=60)
-    r.raise_for_status()
-    payload = r.json()
-    rows = payload if isinstance(payload, list) else payload.get("data", [])
+
+    raw = []
+    if symbol:
+        r = s.get(BY_SYMBOL.format(symbol=symbol), timeout=60)
+        r.raise_for_status()
+        raw = _rows(r.json())
+    else:
+        if not (start and end):
+            raise ValueError("a date range is required when no symbol is given")
+        for page in range(1, max_pages + 1):
+            url = BY_RANGE.format(frm=f"{start:%d-%m-%Y}", to=f"{end:%d-%m-%Y}",
+                                  size=page_size, page=page)
+            try:
+                r = s.get(url, timeout=90)
+                r.raise_for_status()
+                batch = _rows(r.json())
+            except Exception as e:
+                log.warning("page %d failed (%s)", page, e)
+                break
+            if not batch:
+                break
+            raw.extend(batch)
+            if len(batch) < page_size:
+                break
 
     out = []
-    for row in rows:
-        bdt = _dt(row.get("broadCastDate") or row.get("filingDate") or "")
+    for row in raw:
+        if "financial" not in str(row.get("type", "")).lower():
+            continue
+        bdt = _dt(row.get("broadcast_Date") or row.get("creation_Date"))
+        pe = _period(row.get("qe_Date"))
         sym = (row.get("symbol") or "").strip()
-        # NSE writes "-" where no XBRL was filed, which is truthy and produced
-        # a URL ending in /- that 404s. Mostly suspended or non-compliant names.
-        xbrl = (row.get("xbrl") or "").strip()
-        if not bdt or not sym or xbrl in ("", "-"):
+        url = str(row.get("xbrl") or row.get("ixbrl") or "").strip()
+        if not (bdt and pe and sym and url.startswith("http")):
             continue
         out.append({
             "symbol": sym,
-            "isin": (row.get("isin") or "").strip() or None,
-            "company": (row.get("companyName") or "").strip() or None,
-            "period_start": _d(row.get("fromDate") or ""),
-            "period_end": _d(row.get("toDate") or ""),
-            "quarter": (row.get("relatingTo") or "").strip() or None,
+            "company": (row.get("cmName") or row.get("smName") or "").strip() or None,
+            "period_end": pe,
             "broadcast_dt": bdt,
             "consolidated": str(row.get("consolidated", "")).lower().startswith("cons"),
             "audited": str(row.get("audited", "")).lower().startswith("audit"),
-            "is_bank": str(row.get("bank", "N")).upper() == "Y",
-            "xbrl_url": xbrl,
+            "xbrl_url": url,
         })
     return pd.DataFrame(out)
 
 
 def parse_xbrl(content: bytes) -> dict:
-    """Pull the P&L out of one Ind-AS XBRL document.
+    """Extract tagged figures for the period being reported.
 
-    A filing carries several contexts -- the quarter just ended, the year-ago
-    quarter, cumulative periods, standalone and consolidated. Each fact is
-    kept against its context, and the context covering the shortest, most
-    recent period wins, which is the quarter being reported.
+    A filing carries several contexts: the quarter just ended, the year-ago
+    quarter, cumulative periods, and instant contexts for balance-sheet items.
+    Duration facts are taken from the shortest span ending latest -- the
+    quarter itself rather than a nine-month cumulative -- and instant facts
+    from the latest instant, which is the balance-sheet date.
     """
     try:
         root = ET.fromstring(content)
     except ET.ParseError as e:
-        log.warning("unparseable XBRL: %s", e)
+        log.debug("unparseable XBRL: %s", e)
         return {}
 
-    # context id -> (start, end) for duration contexts
     spans: dict[str, tuple[date, date]] = {}
+    instants: dict[str, date] = {}
     for ctx in root.iter():
-        if not ctx.tag.endswith("}context") and ctx.tag != "context":
+        if not (ctx.tag.endswith("}context") or ctx.tag == "context"):
             continue
         cid = ctx.get("id")
-        start = end = None
+        if not cid:
+            continue
+        start = end = inst = None
         for node in ctx.iter():
             tag = node.tag.split("}")[-1]
-            if tag == "startDate" and node.text:
-                start = node.text.strip()
-            elif tag == "endDate" and node.text:
-                end = node.text.strip()
-        if cid and start and end:
-            try:
+            txt = (node.text or "").strip()
+            if tag == "startDate" and txt:
+                start = txt
+            elif tag == "endDate" and txt:
+                end = txt
+            elif tag == "instant" and txt:
+                inst = txt
+        try:
+            if start and end:
                 spans[cid] = (date.fromisoformat(start), date.fromisoformat(end))
-            except ValueError:
-                continue
-    if not spans:
-        return {}
+            elif inst:
+                instants[cid] = date.fromisoformat(inst)
+        except ValueError:
+            continue
 
-    # Shortest span, latest end: the quarter just reported rather than a
-    # cumulative nine-month or year-ago figure.
-    best = sorted(spans.items(), key=lambda kv: ((kv[1][1] - kv[1][0]).days, -kv[1][1].toordinal()))
-    wanted = {cid for cid, (s, e) in spans.items()
-              if (e - s).days == (best[0][1][1] - best[0][1][0]).days
-              and e == max(v[1] for v in spans.values())}
+    wanted = set()
+    if spans:
+        latest_end = max(v[1] for v in spans.values())
+        shortest = min((v[1] - v[0]).days for v in spans.values() if v[1] == latest_end)
+        wanted |= {c for c, (a, b) in spans.items()
+                   if b == latest_end and (b - a).days == shortest}
+    if instants:
+        latest = max(instants.values())
+        wanted |= {c for c, d in instants.items() if d == latest}
+    if not wanted:
+        return {}
 
     facts: dict[str, float] = {}
     for node in root.iter():
-        name = node.tag.split("}")[-1]
-        col = TAGS.get(name)
+        col = TAGS.get(node.tag.split("}")[-1])
         if not col or node.get("contextRef") not in wanted or not node.text:
             continue
         try:
-            value = float(re.sub(r"[,\s]", "", node.text))
+            facts.setdefault(col, float(re.sub(r"[,\s]", "", node.text)))
         except ValueError:
             continue
-        facts.setdefault(col, value)
     return facts
 
 
 def _derive(row: dict) -> dict:
-    """Figures a screen needs that the filing does not state directly."""
-    rev = row.get("revenue")
     pbt_pre = row.get("pbt_before_exceptional")
     fin = row.get("finance_costs") or 0.0
     dep = row.get("depreciation") or 0.0
     other_inc = row.get("other_income") or 0.0
-
-    # Operating EBITDA: profit before exceptional items, adding back interest
-    # and depreciation, less other income -- which is usually treasury yield
-    # rather than the business earning anything.
+    # Operating EBITDA: other income is stripped because it is usually
+    # treasury yield rather than the business earning anything.
     row["ebitda"] = (pbt_pre + fin + dep - other_inc) if pbt_pre is not None else None
 
     profit = row.get("profit_continuing")
     if profit is None:
         profit = row.get("profit_reported")
     exc = row.get("exceptional_items") or 0.0
-    # Exceptional items sit above tax; removing them gross overstates slightly,
-    # which is the conservative direction for a value screen.
     row["profit_normalised"] = (profit - exc) if profit is not None else None
     row["profit_reported"] = row.get("profit_reported") or profit
 
     eps = row.get("eps_basic")
-    row["shares_implied"] = (profit / eps) if (eps and profit is not None and eps != 0) else None
+    row["shares_implied"] = (profit / eps) if (eps and profit is not None and eps) else None
+
+    dl, ds, eq = row.get("debt_long"), row.get("debt_short"), row.get("equity")
+    if dl is not None or ds is not None:
+        row["debt_total"] = (dl or 0.0) + (ds or 0.0)
+    else:
+        row["debt_total"] = None
+    row["debt_to_equity"] = (row["debt_total"] / eq) if (row["debt_total"] is not None
+                                                        and eq) else None
+    row["has_balance_sheet"] = eq is not None and row.get("assets") is not None
     return row
 
 
-def fetch(limit: int | None = None, period: str = "Quarterly",
-          since: date | None = None) -> pd.DataFrame:
-    """Listing plus parsed XBRL for each filing."""
+def fetch(symbol: str | None = None, start: date | None = None,
+          end: date | None = None, limit: int | None = None) -> pd.DataFrame:
     s = _session()
-    index = listing(period=period, session=s)
+    index = listing(symbol=symbol, start=start, end=end, session=s)
     if index.empty:
         return pd.DataFrame(columns=COLUMNS)
-    if since is not None:
-        index = index[index["broadcast_dt"].dt.date >= since]
     index = index.sort_values("broadcast_dt", ascending=False)
     if limit:
         index = index.head(limit)
@@ -244,11 +324,10 @@ def fetch(limit: int | None = None, period: str = "Quarterly",
     rows, failed = [], 0
     for meta in index.to_dict("records"):
         try:
-            r = s.get(meta["xbrl_url"], timeout=40)
+            r = s.get(meta["xbrl_url"], timeout=60)
             r.raise_for_status()
             facts = parse_xbrl(r.content)
-        except Exception as e:
-            log.debug("%s: xbrl fetch failed (%s)", meta["symbol"], e)
+        except Exception:
             failed += 1
             continue
         if not facts:
@@ -256,10 +335,13 @@ def fetch(limit: int | None = None, period: str = "Quarterly",
             continue
         rows.append(_derive({**meta, **facts}))
 
-    log.info("financials: %d parsed, %d unusable of %d", len(rows), failed, len(index))
-    if not rows:
-        return pd.DataFrame(columns=COLUMNS)
-    return pd.DataFrame(rows).reindex(columns=COLUMNS)
+    if rows:
+        df = pd.DataFrame(rows).reindex(columns=COLUMNS)
+        log.info("financials: %d parsed (%d with balance sheet), %d unusable",
+                 len(df), int(df["has_balance_sheet"].fillna(False).sum()), failed)
+        return df
+    log.warning("financials: nothing parsed of %d filings", len(index))
+    return pd.DataFrame(columns=COLUMNS)
 
 
 def ensure_schema(con) -> None:
@@ -282,8 +364,8 @@ def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
     if df.empty:
         return []
     written = []
-    quarters = df["period_end"].map(lambda d: f"{d:%Y-%m}" if pd.notna(d) else "unknown")
-    for q, chunk in df.groupby(quarters):
+    for q, chunk in df.groupby(df["period_end"].map(
+            lambda d: f"{d:%Y-%m}" if pd.notna(d) else "unknown")):
         p = out_dir / f"{q}.parquet"
         p.parent.mkdir(parents=True, exist_ok=True)
         if p.exists():
@@ -300,32 +382,27 @@ def rebuild_from_parquet(con, out_dir: Path = PARQUET_DIR) -> int:
     if not out_dir.exists():
         return 0
     con.execute("DELETE FROM financials")
-    con.execute(
-        f"INSERT INTO financials SELECT * FROM "
-        f"read_parquet('{out_dir}/*.parquet', union_by_name=true)"
-    )
+    con.execute(f"INSERT INTO financials SELECT * FROM "
+                f"read_parquet('{out_dir}/*.parquet', union_by_name=true)")
     return con.execute("SELECT count(*) FROM financials").fetchone()[0]
 
 
-def known_at(con, asof: date, consolidated: bool | None = True) -> pd.DataFrame:
-    """The latest results per company that had actually been published by asof.
+def known_at(con, asof: date, consolidated: bool = True,
+             require_balance_sheet: bool = False) -> pd.DataFrame:
+    """Latest results per company that had actually been PUBLISHED by asof.
 
-    This is the point-in-time gate. Filtering on broadcast_dt rather than
-    period end is the difference between a screen that could have been run on
-    the day and one that quietly knows the future.
+    Filtering on broadcast_dt rather than period end is the whole point. Set
+    require_balance_sheet when a screen needs leverage, since only March and
+    September filings carry it.
     """
     ensure_schema(con)
-    sql = """
-        SELECT * FROM (
-            SELECT *, row_number() OVER (
-                PARTITION BY symbol ORDER BY period_end DESC, broadcast_dt DESC
-            ) AS rn
-            FROM financials
-            WHERE CAST(broadcast_dt AS DATE) <= ?
-    """
+    sql = ["SELECT * FROM (SELECT *, row_number() OVER ("
+           "PARTITION BY symbol ORDER BY period_end DESC, broadcast_dt DESC) AS rn",
+           "FROM financials WHERE CAST(broadcast_dt AS DATE) <= ?"]
     params: list = [asof]
-    if consolidated is not None:
-        sql += " AND consolidated = ?"
-        params.append(consolidated)
-    sql += ") WHERE rn = 1"
-    return con.execute(sql, params).df()
+    sql.append("AND consolidated = ?")
+    params.append(consolidated)
+    if require_balance_sheet:
+        sql.append("AND has_balance_sheet")
+    sql.append(") WHERE rn = 1")
+    return con.execute(" ".join(sql), params).df()
