@@ -34,27 +34,39 @@ FEEDS: dict[str, tuple[str, float]] = {
     "FII and DII flows": (GNEWS.format(q="when:2d+FII+DII+flows+india+equities"), 0.70),
 }
 
-# Sections in the order they appear in the email.
+# Sections in the order they appear in the email. Small limits on purpose:
+# the brief is meant to be a two-minute read, not an archive.
+#
+# "Breaking" and "Connected to your data" are not keyword sections -- the
+# first is assigned from corroboration and recency, the second is computed in
+# the job from stocks the archive flagged. Both are declared here only so the
+# email renders them in the right order.
 SECTIONS: dict[str, dict] = {
-    "Markets": {
-        "keywords": ["nifty", "sensex", "market", "rally", "selloff", "index", "midcap",
-                     "smallcap", "valuation", "equities", "rupee", "bse", "nse"],
-        "limit": 6,
-    },
-    "Macro and Policy": {
-        "keywords": ["rbi", "sebi", "inflation", "cpi", "gdp", "repo", "budget", "fiscal",
-                     "monetary", "tariff", "policy", "deficit", "gst"],
-        "limit": 5,
-    },
-    "Companies": {
-        "keywords": ["results", "earnings", "profit", "revenue", "order book", "acquisition",
-                     "merger", "ipo", "qip", "stake", "guidance", "margin"],
-        "limit": 5,
-    },
-    "Global": {
-        "keywords": ["fed", "fomc", "treasury", "crude", "oil", "china", "dollar",
-                     "geopolit", "sanction", "war", "tariff"],
+    "Breaking": {"keywords": [], "limit": 3},
+    "Connected to your data": {"keywords": [], "limit": 3},
+    "Capital markets": {
+        "keywords": ["nifty", "sensex", "index", "equities", "ipo", "listing",
+                     "fii", "dii", "flows", "rupee", "bond", "yield", "midcap",
+                     "smallcap", "valuation", "rally", "selloff", "bse", "nse"],
         "limit": 4,
+    },
+    "Macro and economy": {
+        "keywords": ["rbi", "inflation", "cpi", "gdp", "repo", "budget",
+                     "fiscal", "monetary", "deficit", "gst", "iip", "policy",
+                     "sebi", "tax", "growth", "unemployment", "manufacturing"],
+        "limit": 4,
+    },
+    "Companies and earnings": {
+        "keywords": ["results", "earnings", "profit", "revenue", "order book",
+                     "acquisition", "merger", "qip", "stake", "guidance",
+                     "margin", "demerger", "buyback", "capacity", "expansion"],
+        "limit": 4,
+    },
+    "Geopolitics": {
+        "keywords": ["tariff", "sanction", "war", "trade deal", "china",
+                     "russia", "opec", "crude", "geopolit", "border",
+                     "defence", "export ban", "supply chain"],
+        "limit": 3,
     },
 }
 

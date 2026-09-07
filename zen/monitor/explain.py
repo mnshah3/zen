@@ -35,19 +35,22 @@ MODELS = [m.strip() for m in os.environ.get(
 ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
             "{model}:generateContent")
 
-PROMPT = """You are writing a market brief for one reader: a finance graduate \
-in India who follows markets closely but is not a specialist in every sector. \
-He wants facts, not filler.
+PROMPT = """You are writing a morning market brief for one reader in India who \
+follows markets but is not a specialist in every sector. He wants to understand \
+each story in a few seconds without opening the link.
 
-For each numbered story below write ONE sentence, maximum 28 words, that says \
-what actually happened and why it matters to an Indian equity investor. \
-Follow these rules strictly:
+For each numbered story write ONE sentence, maximum 26 words, in the simplest \
+English that is still accurate.
 
-- Lead with the concrete fact or number. No throat-clearing.
-- Plain English. If you must use a technical term, define it in three words.
-- If the story is a global one, say specifically how it reaches India.
-- Never speculate about price direction. Never give advice.
-- If a story is trivial, say so in three words rather than inflating it.
+Rules, strictly:
+- Write as if explaining to a smart friend over coffee. Short words. Active voice.
+- Lead with the concrete fact or number. No throat-clearing, no "the story says".
+- Never use jargon without immediately unpacking it. Instead of "re-rated", write \
+"investors decided it deserves a higher price for the same profits".
+- For a global story, say plainly how it reaches India. If it does not, say so.
+- Never predict prices. Never advise buying or selling.
+- If the story is trivial, say that in a few words rather than inflating it.
+- Do not repeat the headline back. Add what the headline leaves out.
 
 Return ONLY a JSON array, one object per story, no markdown fence:
 [{"i": 1, "s": "your sentence"}, ...]

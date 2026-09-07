@@ -120,10 +120,30 @@ def deduplicate(articles: list[Article], threshold: float = 0.72) -> list[Articl
     return groups
 
 
+BREAKING_OUTLETS = 3      # independent outlets carrying the same story
+BREAKING_HOURS = 8
+
+
+def is_breaking(a: Article) -> bool:
+    """Breaking is a property of coverage, not of vocabulary.
+
+    Several independent outlets running the same story within hours is the
+    signal. Keyword lists cannot detect that -- and every publisher labels its
+    own copy urgent, so their wording is worthless as evidence.
+    """
+    age_h = (_now() - a.published).total_seconds() / 3600
+    if a.corroboration >= BREAKING_OUTLETS:
+        return True
+    return a.corroboration >= 2 and age_h <= BREAKING_HOURS
+
+
 def classify(a: Article) -> str:
+    """Assign a keyword section. Breaking and Connected are set elsewhere."""
     text = f"{a.title} {a.summary}".lower()
-    best, best_hits = "Markets", 0
+    best, best_hits = "Capital markets", 0
     for name, cfg in SECTIONS.items():
+        if not cfg["keywords"]:
+            continue
         hits = sum(1 for k in cfg["keywords"] if k in text)
         if hits > best_hits:
             best, best_hits = name, hits
@@ -155,12 +175,16 @@ def _save_seen(seen: dict[str, str]) -> None:
 
 
 def build(lookback_hours: int = 24, remember: bool = True,
-          pool: list[Article] | None = None) -> dict[str, list[Article]]:
+          pool: list[Article] | None = None,
+          connected: list[Article] | None = None) -> dict[str, list[Article]]:
     """Ranked articles per section, excluding anything sent in the last week.
 
     `pool` lets the caller supply an already-collected, wider set of articles
     so the brief can display a 24-hour window while matching stock moves
     against a longer one, without fetching every feed twice.
+
+    `connected` are articles the caller has matched to stocks the archive
+    flagged; they are promoted into their own section regardless of keywords.
     """
     seen = _load_seen()
     if pool is None:
@@ -173,15 +197,22 @@ def build(lookback_hours: int = 24, remember: bool = True,
     for a in articles:
         if a.key in seen:
             continue
-        a.section = classify(a)
+        a.section = "Breaking" if is_breaking(a) else classify(a)
         a.score = score(a)
         fresh.append(a)
+
+    # Stories the caller has already matched to the archive outrank every
+    # other placement -- that connection is the reason the brief exists.
+    connected_keys = {a.key for a in (connected or [])}
+    for a in fresh:
+        if a.key in connected_keys:
+            a.section = "Connected to your data"
 
     sections: dict[str, list[Article]] = {}
     for name, cfg in SECTIONS.items():
         candidates = [a for a in fresh if a.section == name]
-        # A global story earns its place only if it plausibly reaches India.
-        if name == "Global":
+        # Geopolitics earns its place only where it plausibly reaches India.
+        if name == "Geopolitics":
             candidates = [a for a in candidates
                           if extract.india_relevant(f"{a.title} {a.summary}")]
         picked = sorted(candidates, key=lambda x: -x.score)

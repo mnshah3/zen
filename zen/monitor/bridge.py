@@ -30,6 +30,29 @@ def _clean(title: str) -> str:
     return _SUFFIX.sub("", (title or "").strip()).strip()
 
 
+def matched_articles(insights: dict, articles: list, names: dict | None = None) -> list:
+    """Articles that mention a stock the archive flagged today.
+
+    Used to promote those stories into their own section: a headline about a
+    company whose volume just went to 200 times normal is worth more than a
+    headline about anything else in the feed.
+    """
+    names = names if names is not None else names_mod.load()
+    uv = insights.get("unusual_volume")
+    if uv is None or len(uv) == 0 or not articles:
+        return []
+
+    symbols = list(uv["symbol"])
+    out, claimed = [], set()
+    for a in articles:
+        hits = names_mod.find_in_text(f"{a.title} {a.summary}", names, symbols)
+        fresh = [h for h in hits if h not in claimed]
+        if fresh:
+            claimed.update(fresh)
+            out.append(a)
+    return out
+
+
 def _volume_explained_by_news(insights: dict, articles: list,
                               names: dict) -> list[str]:
     """A stock trading at many times normal volume, and a story that says why."""

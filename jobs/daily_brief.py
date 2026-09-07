@@ -44,17 +44,31 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = parse_args()
 
+    # --- archive first ----------------------------------------------------
+    # The archive is computed before the sections are built, because which
+    # stocks it flagged determines which stories get promoted.
+    con = store.connect()
+    try:
+        asof = con.execute("SELECT max(date) FROM prices").fetchone()[0]
+        derived = insights.collect(con, asof) if asof else {}
+    finally:
+        con.close()
+
+    summary = market.summary()
+
     # --- news -------------------------------------------------------------
     # Collected once over the wider window. The brief shows the last `hours`;
     # stock-move matching uses the full pool, because a filing on the previous
     # evening routinely drives the next session's volume and would otherwise
     # look unexplained.
     pool = news.collect(args.match_hours)
+    connected = bridge.matched_articles(derived, pool)
     sections = news.build(lookback_hours=args.hours,
-                          remember=not args.dry_run, pool=pool)
+                          remember=not args.dry_run,
+                          pool=pool, connected=connected)
     ordered = [a for arts in sections.values() for a in arts]
-    log.info("%d stories shown (from a pool of %d over %dh)",
-             len(ordered), len(pool), args.match_hours)
+    log.info("%d stories shown (pool %d over %dh, %d matched to the archive)",
+             len(ordered), len(pool), args.match_hours, len(connected))
 
     # Numbers and jargon come out of the text itself -- free and deterministic.
     facts_map, glossary_seen = {}, {}
@@ -66,15 +80,12 @@ def main() -> int:
 
     explanations = {} if args.no_ai else explain.explain(ordered)
 
-    # --- archive ----------------------------------------------------------
-    con = store.connect()
-    try:
-        asof = con.execute("SELECT max(date) FROM prices").fetchone()[0]
-        derived = insights.collect(con, asof) if asof else {}
-    finally:
-        con.close()
-
-    summary = market.summary()
+    # Anything the model did not cover falls back to the article's own opening
+    # sentence, so every story carries some context even with no key at all.
+    for i, a in enumerate(ordered, start=1):
+        if not explanations.get(i):
+            if (s := extract.first_sentence(a.summary, a.title)):
+                explanations[i] = s
     images = charts.build_all(derived)
     bridge_text = bridge.build(derived, summary, pool)
 

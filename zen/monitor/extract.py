@@ -13,8 +13,10 @@ click through only when they want the full story.
 
 from __future__ import annotations
 
+import html
 import logging
 import re
+from difflib import SequenceMatcher
 
 log = logging.getLogger(__name__)
 
@@ -110,3 +112,34 @@ def india_relevant(text: str) -> bool:
 
 def is_trusted(source: str) -> bool:
     return source in TRUSTED
+
+
+def first_sentence(summary: str, title: str = "", limit: int = 180) -> str:
+    """A usable one-line description when no model is available.
+
+    Most publisher feeds open with the lede, so the first sentence carries what
+    the headline left out. Aggregator feeds do not: Google News echoes the
+    headline followed by the outlet name, which adds nothing and looks broken
+    once the HTML entities are decoded. Those are rejected rather than shown.
+    """
+    text = html.unescape(summary or "")
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return ""
+
+    m = re.search(r"(.+?[.!?])(\s|$)", text)
+    out = (m.group(1) if m else text).strip()
+
+    if title:
+        t = re.sub(r"[^a-z0-9 ]", "", title.lower()).strip()
+        o = re.sub(r"[^a-z0-9 ]", "", out.lower()).strip()
+        # Restating the headline is not an explanation.
+        if o.startswith(t[:40]) or t.startswith(o[:40]):
+            return ""
+        if SequenceMatcher(None, t, o).ratio() > 0.6:
+            return ""
+
+    if len(out) > limit:
+        out = out[:limit].rsplit(" ", 1)[0] + "..."
+    return out if len(out) > 45 else ""
