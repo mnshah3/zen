@@ -84,6 +84,8 @@ def collect(lookback_hours: int = 24) -> list[Article]:
             if pub < cutoff:
                 continue
             title = re.sub(r"\s+", " ", e.get("title", "")).strip()
+            # Feeds emit quoting artefacts: ">From dance floor to war".
+            title = title.lstrip(">|-– ").strip()
             if not title or any(n in title.lower() for n in NOISE):
                 continue
             if _JUNK.search(title):

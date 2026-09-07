@@ -28,8 +28,8 @@ DOWN = "#b42318"
 RULE = "#e5e7eb"
 
 plt.rcParams.update({
-    "figure.dpi": 150,
-    "savefig.dpi": 150,
+    "figure.dpi": 220,
+    "savefig.dpi": 220,
     "font.size": 8,
     "axes.edgecolor": RULE,
     "axes.labelcolor": MUTED,

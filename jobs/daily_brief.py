@@ -70,11 +70,12 @@ def main() -> int:
     log.info("%d stories shown (pool %d over %dh, %d matched to the archive)",
              len(ordered), len(pool), args.match_hours, len(connected))
 
-    # Numbers and jargon come out of the text itself -- free and deterministic.
+    # Jargon is always useful. Numbers are only worth pulling out when nothing
+    # explains the story -- once a paragraph states them in context, a row of
+    # bare chips reading "4%27 per cent" is noise, not detail.
     facts_map, glossary_seen = {}, {}
     for i, a in enumerate(ordered, start=1):
         text = f"{a.title} {a.summary}"
-        facts_map[i] = extract.facts(text)
         for term, meaning in extract.jargon(text):
             glossary_seen.setdefault(term, meaning)
 
@@ -86,6 +87,10 @@ def main() -> int:
         if not explanations.get(i):
             if (s := extract.first_sentence(a.summary, a.title)):
                 explanations[i] = s
+            else:
+                # Nothing to explain it with; the raw numbers are better
+                # than an empty entry.
+                facts_map[i] = extract.facts(f"{a.title} {a.summary}")
     images = charts.build_all(derived)
     bridge_text = bridge.build(derived, summary, pool)
 
