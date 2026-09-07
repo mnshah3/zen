@@ -1,33 +1,30 @@
-name: daily prices
+name: 1. daily prices
 
 on:
   schedule:
     # 13:30 UTC = 19:00 IST, comfortably after the 15:30 IST close.
-    # GitHub cron can drift 5-15 min on the free tier; that is fine here.
+    # GitHub cron drifts 5-15 min on the free tier, which is fine here.
     - cron: "30 13 * * 1-5"
-  workflow_dispatch:        # lets you run it by hand from the Actions tab
+  workflow_dispatch:
 
 permissions:
-  contents: write           # needed to commit the new parquet back
+  contents: write
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-
       - run: pip install -r requirements.txt
 
-      - name: fetch missing bhavcopy days
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python -m jobs.update_prices --days 7 --notify
+      # The DuckDB file is derived and never committed, so rebuild it first.
+      - run: python -m jobs.rebuild_db
+
+      - run: python -m jobs.update_prices --days 7
 
       - name: commit new data
         run: |

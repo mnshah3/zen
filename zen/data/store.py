@@ -70,11 +70,22 @@ PARQUET_DIR = Path("data/daily")
 
 
 def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
-    """One small parquet per trading day -- git-friendly and incremental."""
+    """One parquet per calendar month.
+
+    Monthly rather than daily: ~130 files for a decade instead of ~2,500, and
+    columnar compression works far better over a month of rows than over a
+    single session. A day appended to an existing month rewrites that one file,
+    which is cheap.
+    """
     written = []
-    for d, chunk in df.groupby("date"):
-        p = out_dir / f"{d:%Y}" / f"{d:%Y-%m-%d}.parquet"
+    months = df["date"].map(lambda d: f"{d:%Y-%m}")
+    for month, chunk in df.groupby(months):
+        p = out_dir / month[:4] / f"{month}.parquet"
         p.parent.mkdir(parents=True, exist_ok=True)
+        if p.exists():
+            chunk = pd.concat([pd.read_parquet(p), chunk], ignore_index=True)
+        chunk = (chunk.drop_duplicates(subset=["date", "symbol"], keep="last")
+                      .sort_values(["date", "symbol"]))
         chunk.to_parquet(p, index=False, compression="zstd")
         written.append(p)
     return written

@@ -1,0 +1,44 @@
+name: 3. signal check (email only if triggered)
+
+# Chained off the price update rather than its own cron, so signals are never
+# evaluated against a stale archive.
+on:
+  workflow_run:
+    workflows: ["1. daily prices"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  signals:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # pick up the data the previous workflow pushed
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m jobs.rebuild_db
+
+      - name: evaluate strategies
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python -m jobs.signal_check
+
+      - name: commit dispatched set
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          git add state/last_signals.json
+          git diff --staged --quiet || git commit -m "state: signals $(date -u +%Y-%m-%d)"
+          git push

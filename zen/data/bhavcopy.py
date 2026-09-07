@@ -59,14 +59,38 @@ def _url(d: date) -> str:
             f"cm{d:%d}{mon}{d:%Y}bhav.csv.zip")
 
 
+def _file_date_matches(df: pd.DataFrame, d: date) -> bool:
+    """Cheap guard against NSE serving a file for the wrong session.
+
+    The stamp inside the file is not parsed for its value -- NSE has used at
+    least '13-Jul-20' and '14-JUL-2020' on consecutive days -- only compared
+    loosely against the date we asked for.
+    """
+    col = "TradDt" if "TradDt" in df.columns else "TIMESTAMP"
+    if col not in df.columns or df.empty:
+        return True
+    raw = str(df[col].dropna().iloc[0]).upper()
+    day, mon = f"{d.day:02d}", d.strftime("%b").upper()
+    return (day in raw and mon in raw) or d.isoformat() in raw
+
+
 def _normalise(df: pd.DataFrame, d: date) -> pd.DataFrame:
-    """Map either NSE layout onto COLUMNS, equity series only."""
+    """Map either NSE layout onto COLUMNS, equity series only.
+
+    The date column is taken from the requested date rather than parsed out of
+    the file. NSE's own stamp formatting is not stable across days, and the
+    date we asked for is authoritative anyway.
+    """
     df.columns = [c.strip() for c in df.columns]
+
+    if not _file_date_matches(df, d):
+        log.warning("%s: file's internal date looks wrong; skipping", d)
+        return pd.DataFrame(columns=COLUMNS)
 
     if "TckrSymb" in df.columns:  # UDiFF
         df = df[df["FinInstrmTp"].isin(["STK", "EQ"])] if "FinInstrmTp" in df else df
         out = pd.DataFrame({
-            "date": pd.to_datetime(df["TradDt"]).dt.date,
+            "date": d,
             "symbol": df["TckrSymb"].str.strip(),
             "series": df["SctySrs"].str.strip(),
             "isin_code": df.get("ISIN", pd.Series(index=df.index, dtype=object)),
@@ -77,7 +101,7 @@ def _normalise(df: pd.DataFrame, d: date) -> pd.DataFrame:
         })
     else:  # legacy
         out = pd.DataFrame({
-            "date": pd.to_datetime(df["TIMESTAMP"], format="%d-%b-%Y").dt.date,
+            "date": d,
             "symbol": df["SYMBOL"].str.strip(),
             "series": df["SERIES"].str.strip(),
             "isin_code": df.get("ISIN"),

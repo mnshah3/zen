@@ -26,3 +26,7 @@ venv/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# local previews and run logs
+preview_*.html
+backfill*.log
