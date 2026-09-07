@@ -29,4 +29,4 @@ Thumbs.db
 
 # local previews and run logs
 preview_*.html
-backfill*.log
+*.log
