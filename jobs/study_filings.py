@@ -47,6 +47,23 @@ def open_readonly() -> duckdb.DuckDBPyConnection:
     return con
 
 
+def sample_evenly(ev, max_events: int):
+    """Take an evenly spaced subset across the whole period.
+
+    The previous form, ev.iloc[::step].head(n) with step = found // n, silently
+    truncated to the EARLIEST events whenever found sat between one and two
+    times the cap: step evaluates to 1, the slice returns everything, and head
+    then cuts the tail off. That concentrates a study in whichever months came
+    first rather than sampling the period, while the log still reports it as
+    evenly sampled.
+    """
+    import numpy as np
+    if len(ev) <= max_events:
+        return ev
+    idx = np.linspace(0, len(ev) - 1, max_events).round().astype(int)
+    return ev.iloc[np.unique(idx)]
+
+
 def find_events(con, category: str, min_turnover_cr: float = 1.0,
                 start: date | None = None) -> pd.DataFrame:
     """Filings of one category, joined to a liquid, tradeable stock.
@@ -57,13 +74,21 @@ def find_events(con, category: str, min_turnover_cr: float = 1.0,
     """
     where_start = f"AND a.trade_date >= DATE '{start}'" if start else ""
     return con.execute(f"""
+        WITH normal AS (
+            SELECT date, symbol,
+                   median(turnover) OVER (
+                       PARTITION BY symbol ORDER BY date
+                       ROWS BETWEEN 60 PRECEDING AND 1 PRECEDING
+                   ) AS normal_turnover
+            FROM prices
+            WHERE isin_code LIKE 'INE%' AND series IN ('EQ','BE') AND turnover > 0
+        )
         SELECT DISTINCT a.trade_date AS signal_date, a.symbol
         FROM announcements a
-        JOIN prices p
-          ON p.symbol = a.symbol AND p.date = a.trade_date
+        JOIN normal n
+          ON n.symbol = a.symbol AND n.date = a.trade_date
         WHERE a.category = '{category}'
-          AND p.isin_code LIKE 'INE%'
-          AND p.turnover >= {min_turnover_cr * 1e7}
+          AND n.normal_turnover >= {min_turnover_cr * 1e7}
           {where_start}
         ORDER BY a.trade_date
     """).df()
@@ -92,8 +117,7 @@ def main() -> int:
             log.warning("%s: only %d events, skipping", cat, found)
             continue
 
-        if found > args.max_events:
-            ev = ev.iloc[:: max(1, found // args.max_events)].head(args.max_events)
+        ev = sample_evenly(ev, args.max_events)
         log.info("%s: %d events (measuring %d)", cat, found, len(ev))
 
         outcomes = es.measure(con, ev)
@@ -101,25 +125,39 @@ def main() -> int:
         if summary.empty:
             continue
 
+        # Each signal gets its OWN control, matched on date and on the stock's
+        # normal liquidity. A single shared baseline compared microcaps against
+        # midcaps and produced a conclusion that did not survive audit.
+        liq = es.liquidity_profile(con, ev)
+        ctrl = es.summarise(es.matched_baseline(con, ev))
+
         trials.record("filing_category", {"category": cat},
                       {"events_found": found, "events_measured": len(ev),
-                       "by_horizon": summary.to_dict("records")})
+                       "normal_turnover_cr": liq,
+                       "by_horizon": summary.to_dict("records"),
+                       "matched_control": ctrl.to_dict("records") if not ctrl.empty else None})
+        summary.insert(0, "liq_cr", liq)
         summary.insert(0, "signal", cat)
         results.append(summary)
+        if not ctrl.empty:
+            # Same liquidity by construction -- that is the point of matching.
+            ctrl.insert(0, "liq_cr", liq)
+            ctrl.insert(0, "signal", "  ^ matched control")
+            results.append(ctrl)
 
-    # Random selection on comparable dates -- the only thing that makes the
-    # hit rates above mean anything.
-    log.info("measuring random baseline")
+    # The old unmatched control, kept only as a reference row and clearly
+    # labelled. It is 6x more liquid than a typical event stock, so it is not
+    # a fair comparison -- it is here to show how misleading it was.
+    log.info("measuring unmatched reference")
     dates = con.execute(
         f"SELECT DISTINCT date FROM prices WHERE date >= DATE '{args.start}' ORDER BY date"
     ).df()["date"].tolist()
     step = max(1, len(dates) // args.baseline_dates)
     base = es.summarise(es.baseline(con, dates[::step][:args.baseline_dates], n_per_date=60))
     if not base.empty:
-        base.insert(0, "signal", "RANDOM BASELINE")
+        base.insert(0, "liq_cr", None)
+        base.insert(0, "signal", "UNMATCHED ref (biased)")
         results.append(base)
-        trials.record("filing_category", {"category": "random_baseline"},
-                      {"by_horizon": base.to_dict("records")})
 
     con.close()
     if not results:
@@ -130,7 +168,9 @@ def main() -> int:
     pd.set_option("display.width", 250)
     print("\n" + out.to_string(index=False))
     print(f"\ntrials recorded for this study: {trials.count('filing_category')}")
-    print("Every row is read against RANDOM BASELINE, not against zero.")
+    print("Read each signal against the matched control DIRECTLY BELOW it.")
+    print("liq_cr = median trailing turnover, Rs crore. Signal and control "
+          "must be comparable or the result is a size effect.")
     return 0
 
 

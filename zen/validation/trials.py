@@ -79,17 +79,50 @@ def deflated_sharpe(observed_sharpe: float, n_trials: int, n_obs: int,
     if n_trials < 1 or n_obs < 2:
         return float("nan")
 
-    # Expected maximum Sharpe across n independent trials of zero true skill.
+    # With a single hypothesis there is no selection to deflate for, and the
+    # expected-maximum term below is undefined at n=1 -- ln(1/e) is negative,
+    # so the sqrt raises. Fall back to the plain probabilistic Sharpe.
+    if n_trials == 1:
+        denom = sqrt(1 - skew * observed_sharpe +
+                     ((kurtosis - 1) / 4) * observed_sharpe ** 2)
+        if denom <= 0:
+            return float("nan")
+        return _norm_cdf(observed_sharpe * sqrt(n_obs - 1) / denom)
+
+    # Expected maximum Sharpe across n independent trials of zero true skill
+    # (Bailey and Lopez de Prado). The second term needs n/e > 1, i.e. n >= 3;
+    # below that the first term alone is the right approximation.
     euler = 0.5772156649
-    e_max = sqrt(2 * ln(max(n_trials, 2))) * (1 - euler) + \
-        euler * sqrt(2 * ln(max(n_trials, 2) / 2.71828))
-    # Variance of the Sharpe estimator, adjusted for non-normal returns.
+    e = 2.718281828459045
+    a = sqrt(2 * ln(n_trials))
+    if n_trials / e > 1:
+        e_max = a * (1 - euler) + euler * sqrt(2 * ln(n_trials / e))
+    else:
+        e_max = a * (1 - euler)
+
     denom = sqrt(1 - skew * observed_sharpe +
                  ((kurtosis - 1) / 4) * observed_sharpe ** 2)
     if denom <= 0:
         return float("nan")
     z = (observed_sharpe - e_max) * sqrt(n_obs - 1) / denom
     return _norm_cdf(z)
+
+
+def effective_n(n_events: int, n_clusters: int) -> int:
+    """Sample size after accounting for clustering.
+
+    Filing events are not independent observations. Two thousand filings from
+    six hundred companies, many overlapping in time and sector, carry nowhere
+    near two thousand observations' worth of information -- market-wide moves
+    hit whole clusters at once. Significance computed on the raw count is
+    therefore overstated, sometimes by a lot.
+
+    The conservative correction used here is the number of distinct clusters,
+    which understates the information available but never overstates it. That
+    is the right direction to err when the failure mode being guarded against
+    is believing a result too readily.
+    """
+    return max(1, min(n_events, n_clusters))
 
 
 def summary(path: Path = LOG_PATH) -> dict:

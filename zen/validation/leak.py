@@ -34,20 +34,48 @@ class LeakDetected(AssertionError):
     pass
 
 
+# Every table a strategy could read, with the column that dates each row.
+# Truncating only prices would leave a strategy free to read tomorrow's
+# announcements or an unpublished results filing and still pass the test --
+# which is exactly the leak this detector exists to catch, so the table list
+# must stay in step with what the archive actually holds.
+TRUNCATABLE = [
+    ("prices", "date"),
+    ("announcements", "an_dt"),
+    ("financials", "broadcast_dt"),
+    ("indices", "date"),
+    ("corpactions", "ex_date"),
+]
+
+
 def _truncated_copy(con, asof: date, path: Path):
     """A physical archive containing nothing after asof.
 
     Truncation is real rather than a filter in the query, so a strategy that
     ignores its asof argument has no future rows available to find.
+
+    Every table present is truncated on its own date column. A table the
+    archive does not yet have is skipped, but a table that exists and is NOT
+    truncated would be a hole in the test, so each one is logged.
     """
     out = duckdb.connect(str(path))
-    out.execute(store.SCHEMA)
-    rows = con.execute(
-        "SELECT * FROM prices WHERE date <= ?", [asof]
-    ).df()
-    out.register("truncated", rows)
-    out.execute("INSERT INTO prices SELECT * FROM truncated")
-    out.unregister("truncated")
+    copied = []
+
+    for table, date_col in TRUNCATABLE:
+        try:
+            rows = con.execute(
+                f"SELECT * FROM {table} WHERE CAST({date_col} AS DATE) <= ?",
+                [asof]).df()
+        except Exception:
+            continue          # table absent from this archive
+        out.register("chunk", rows)
+        out.execute(f"CREATE TABLE {table} AS SELECT * FROM chunk")
+        out.unregister("chunk")
+        copied.append(f"{table}({len(rows):,})")
+
+    if "prices" not in " ".join(copied):
+        raise RuntimeError("prices table missing; cannot run a leak test")
+    log.debug("truncated archive at %s: %s", asof, ", ".join(copied))
     return out
 
 

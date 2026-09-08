@@ -52,6 +52,23 @@ def open_readonly() -> duckdb.DuckDBPyConnection:
     return con
 
 
+def sample_evenly(ev, max_events: int):
+    """Take an evenly spaced subset across the whole period.
+
+    The previous form, ev.iloc[::step].head(n) with step = found // n, silently
+    truncated to the EARLIEST events whenever found sat between one and two
+    times the cap: step evaluates to 1, the slice returns everything, and head
+    then cuts the tail off. That concentrates a study in whichever months came
+    first rather than sampling the period, while the log still reports it as
+    evenly sampled.
+    """
+    import numpy as np
+    if len(ev) <= max_events:
+        return ev
+    idx = np.linspace(0, len(ev) - 1, max_events).round().astype(int)
+    return ev.iloc[np.unique(idx)]
+
+
 def find_events(con, vol_x: float, min_turnover_cr: float,
                 require_up: bool, lookback: int = 60,
                 start: date | None = None) -> pd.DataFrame:
@@ -115,22 +132,29 @@ def main() -> int:
 
         # Sample evenly across time rather than taking the first N, which
         # would concentrate the study in whichever years were noisiest.
-        if found > args.max_events:
-            ev = ev.iloc[:: max(1, found // args.max_events)].head(args.max_events)
-            log.info("%s: %d events, sampled to %d", variant, found, len(ev))
-        else:
-            log.info("%s: %d events", variant, found)
+        ev = sample_evenly(ev, args.max_events)
+        log.info("%s: %d events (measuring %d)", variant, found, len(ev))
 
         outcomes = es.measure(con, ev[["symbol", "signal_date"]])
         summary = es.summarise(outcomes)
         if summary.empty:
             continue
 
+        liq = es.liquidity_profile(con, ev)
+        ctrl = es.summarise(es.matched_baseline(con, ev[["symbol", "signal_date"]]))
+
         n = trials.record("volume_anomaly", variant,
                           {"events_found": found, "events_measured": len(ev),
-                           "by_horizon": summary.to_dict("records")})
+                           "normal_turnover_cr": liq,
+                           "by_horizon": summary.to_dict("records"),
+                           "matched_control": ctrl.to_dict("records") if not ctrl.empty else None})
+        summary.insert(0, "liq_cr", liq)
         summary.insert(0, "variant", str(variant))
         results.append(summary)
+        if not ctrl.empty:
+            ctrl.insert(0, "liq_cr", liq)
+            ctrl.insert(0, "variant", "  ^ matched control")
+            results.append(ctrl)
         log.info("trial %d recorded", n)
 
     # The comparison that makes the numbers mean anything.
@@ -142,7 +166,8 @@ def main() -> int:
     base_out = es.baseline(con, all_dates[::step][:args.baseline_dates], n_per_date=60)
     base_sum = es.summarise(base_out)
     if not base_sum.empty:
-        base_sum.insert(0, "variant", "RANDOM BASELINE")
+        base_sum.insert(0, "liq_cr", None)
+        base_sum.insert(0, "variant", "UNMATCHED ref (biased)")
         results.append(base_sum)
         trials.record("volume_anomaly", {"variant": "random_baseline"},
                       {"by_horizon": base_sum.to_dict("records")})
@@ -157,7 +182,7 @@ def main() -> int:
     pd.set_option("display.width", 250)
     print("\n" + out.to_string(index=False))
     print(f"\ntrials recorded for this study: {trials.count('volume_anomaly')}")
-    print("Read every hit rate against the RANDOM BASELINE row, not against zero.")
+    print("Read each variant against the matched control DIRECTLY BELOW it.")
     return 0
 
 

@@ -76,10 +76,18 @@ def adjustment_factors(con) -> pd.DataFrame:
     if acts.empty:
         return acts
     acts["ex_date"] = pd.to_datetime(acts["ex_date"])
-    # Reverse cumulative product within each symbol.
+
+    # A split and a bonus routinely share an ex-date in India, and the lookup
+    # downstream returns ONE row per date -- so the two must be collapsed into
+    # a single combined factor first or one of them is silently discarded,
+    # leaving a real gap in the adjusted series exactly where the largest
+    # price step happens.
+    acts = (acts.groupby(["symbol", "ex_date"], as_index=False)["factor"]
+                .prod())
+
     acts["cum_factor"] = (acts.sort_values("ex_date", ascending=False)
                               .groupby("symbol")["factor"].cumprod())
-    return acts.sort_values(["symbol", "ex_date"])
+    return acts.sort_values(["symbol", "ex_date"]).reset_index(drop=True)
 
 
 def adjusted_prices(con, symbols: list[str] | None = None,
@@ -276,11 +284,23 @@ def summarise(outcomes: pd.DataFrame, excess_target: float = 0.15,
 def baseline(con, dates: list[date], n_per_date: int = 50,
              horizons=HORIZONS, benchmark: str = DEFAULT_BENCHMARK,
              seed: int = 7, min_turnover_cr: float = 1.0) -> pd.DataFrame:
-    """Outcomes for randomly chosen liquid stocks on the same dates.
+    """Unmatched control: random liquid stocks on the given dates.
 
-    Without this there is nothing to compare a signal against. A screen with a
-    55% hit rate sounds good until random selection over the same period also
-    returns 55%, at which point the screen has done nothing.
+    KEEP THIS ONLY AS A SECOND ROW, LABELLED. It is NOT a fair comparison for
+    most signals, and using it as the primary control produced a published
+    conclusion that was wrong.
+
+    The problem is composition. An event is typically a day a stock did
+    something unusual, and screening the control on same-day turnover selects
+    a fundamentally different population: measured on this archive, event
+    stocks had a median trailing turnover of Rs 1.06 cr against Rs 6.81 cr for
+    this universe -- 6.4 times more liquid. Comparing them measures size, not
+    signal. Worse, the bias has a direction: it flatters large-cap screens by
+    roughly 3 points of hit rate and penalises microcap screens by the same,
+    which is precisely backwards for a strategy whose stated edge is owning
+    under-researched small caps.
+
+    Use matched_baseline() instead.
     """
     rng = np.random.default_rng(seed)
     picks = []
@@ -297,3 +317,105 @@ def baseline(con, dates: list[date], n_per_date: int = 50,
     if not picks:
         return pd.DataFrame()
     return measure(con, pd.DataFrame(picks), horizons=horizons, benchmark=benchmark)
+
+
+def _trailing_turnover(con, lookback: int = 60) -> pd.DataFrame:
+    """Each stock's own normal turnover, measured BEFORE the current session.
+
+    The window ends on the prior session deliberately. Matching on same-day
+    turnover would match on the event itself, which is the error this function
+    exists to correct.
+    """
+    return con.execute(f"""
+        SELECT date, symbol,
+               median(turnover) OVER (
+                   PARTITION BY symbol ORDER BY date
+                   ROWS BETWEEN {lookback} PRECEDING AND 1 PRECEDING
+               ) / 1e7 AS normal_turnover_cr
+        FROM prices
+        WHERE isin_code LIKE 'INE%' AND series IN ('EQ','BE') AND turnover > 0
+    """).df()
+
+
+def matched_baseline(con, events: pd.DataFrame, band: float = 0.6,
+                     n_per_event: int = 1, horizons=HORIZONS,
+                     benchmark: str = DEFAULT_BENCHMARK, seed: int = 7,
+                     symbol_col: str = "symbol",
+                     date_col: str = "signal_date") -> pd.DataFrame:
+    """Control stocks matched to each event on DATE and on NORMAL LIQUIDITY.
+
+    For every event, a stock is drawn that traded on the same session and whose
+    own trailing-60-day median turnover sits within `band` of the event stock's.
+    That holds both calendar and size constant, so the remaining difference is
+    the signal rather than the population.
+
+    This is the comparison that matters. Against the unmatched control, the
+    volume study appeared to show spikes underperforming random selection; once
+    matched, the gap at 12 and 24 months collapses to inside noise.
+    """
+    if events.empty:
+        return pd.DataFrame()
+
+    rng = np.random.default_rng(seed)
+    tt = _trailing_turnover(con)
+    tt = tt[tt["normal_turnover_cr"].notna() & (tt["normal_turnover_cr"] > 0)]
+    tt["date"] = pd.to_datetime(tt["date"])
+
+    ev = events.copy()
+    ev[date_col] = pd.to_datetime(ev[date_col])
+    ev = ev.merge(tt.rename(columns={"symbol": symbol_col, "date": date_col}),
+                  on=[symbol_col, date_col], how="left")
+    ev = ev[ev["normal_turnover_cr"].notna()]
+    if ev.empty:
+        log.warning("no events had a trailing-turnover value to match on")
+        return pd.DataFrame()
+
+    by_date = {d: g for d, g in tt.groupby("date")}
+    picks, unmatched = [], 0
+
+    for row in ev.itertuples():
+        d = getattr(row, date_col)
+        target = row.normal_turnover_cr
+        pool = by_date.get(d)
+        if pool is None:
+            unmatched += 1
+            continue
+        lo, hi = target * (1 - band), target * (1 + band)
+        cand = pool[(pool["normal_turnover_cr"].between(lo, hi)) &
+                    (pool["symbol"] != getattr(row, symbol_col))]
+        if cand.empty:
+            unmatched += 1
+            continue
+        take = min(n_per_event, len(cand))
+        chosen = rng.choice(cand["symbol"].values, size=take, replace=False)
+        picks.extend({"symbol": s, "signal_date": d} for s in chosen)
+
+    if unmatched:
+        log.info("matched control: %d of %d events had no comparable stock",
+                 unmatched, len(ev))
+    if not picks:
+        return pd.DataFrame()
+
+    out = measure(con, pd.DataFrame(picks), horizons=horizons, benchmark=benchmark,
+                  symbol_col="symbol", date_col="signal_date")
+    return out
+
+
+def liquidity_profile(con, events: pd.DataFrame, symbol_col: str = "symbol",
+                      date_col: str = "signal_date") -> float | None:
+    """Median trailing turnover of an event set, in Rs crore.
+
+    Printed alongside every study so a control that has drifted to a different
+    population is visible on the face of the result rather than discovered in
+    an audit.
+    """
+    if events.empty:
+        return None
+    tt = _trailing_turnover(con)
+    tt["date"] = pd.to_datetime(tt["date"])
+    ev = events.copy()
+    ev[date_col] = pd.to_datetime(ev[date_col])
+    m = ev.merge(tt.rename(columns={"symbol": symbol_col, "date": date_col}),
+                 on=[symbol_col, date_col], how="left")
+    v = m["normal_turnover_cr"].dropna()
+    return round(float(v.median()), 2) if len(v) else None

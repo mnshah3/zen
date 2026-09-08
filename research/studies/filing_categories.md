@@ -1,74 +1,75 @@
 # Do corporate filings predict returns?
 
-**Yes, and the effect is concentrated almost entirely in ORDER WINS.**
+> **CORRECTION, 8 September 2026.** An earlier version of this file claimed
+> order wins beat the benchmark 63.2% of the time against a 43.3% baseline,
+> z = +13.4. **That was wrong.** The control group was not comparable: it was
+> drawn on same-day turnover and was roughly six times more liquid than a
+> typical event stock, so the comparison measured company size, not the signal.
+> Against a control matched on both date and normal liquidity, the effect is
+> **+6.2 points, z = +3.2** -- real, but a third of the claimed size. Five of
+> the seven other categories reported as significant are, correctly measured,
+> noise. The error was found by an adversarial audit of this project's own
+> measurement code.
 
-Tested on 2022-2023 filings with complete outcomes through 2025, split-adjusted,
-delisted names retained, measured against Nifty 500 over identical windows.
-Random selection of liquid stocks on comparable dates is the comparison.
+**Order wins are the only category that survives a fair comparison.**
 
-## At 12 months
+Each signal is now compared against its own control: stocks trading on the
+same session whose trailing-60-day median turnover is within 60% of the event
+stock's. That holds calendar and size constant, so what remains is the signal.
 
-| Signal | Beat benchmark | Median return | Multibagger | Hit +15pp |
-|--------|---------------:|--------------:|------------:|----------:|
-| **Random baseline** | **43.3%** | **+6.1%** | **7.9%** | **30.9%** |
-| **Order wins** | **63.2%** | **+36.6%** | **21.1%** | **51.3%** |
-| Capacity expansion | 53.4% | +24.9% | 14.9% | 41.0% |
-| Results | 52.0% | +26.2% | 13.2% | 40.0% |
-| Credit rating action | 51.4% | +23.6% | 12.4% | 37.8% |
-| Guidance / investor update | 50.9% | +23.7% | 11.5% | 38.0% |
-| M&A | 48.3% | +18.4% | 11.1% | 33.7% |
-| Fund raising | 46.2% | +21.1% | 9.1% | 33.0% |
-| Exchange volume query | 47.0% | +18.3% | 13.5% | 36.4% |
+## At 12 and 24 months, signal versus its matched control
 
-Order wins beat the benchmark twenty points more often than random selection,
-with a median return six times higher and a multibagger rate 2.7x. The effect
-holds across every horizon and strengthens with time: 59.6% beat rate at 24
-months with a median of +67.3% and a 39.7% multibagger rate.
+| Signal | 12m gap | z | 24m gap | z | Verdict |
+|--------|--------:|--:|--------:|--:|---------|
+| **Order wins** | **+6.2pp** | +3.20 | **+8.1pp** | +3.11 | **real** |
+| Capacity expansion | +3.0pp | +1.59 | +5.9pp | +2.51 | marginal at 24m only |
+| Guidance / investor update | +0.0pp | 0.00 | +5.0pp | +2.29 | noise |
+| Credit rating action | -0.1pp | -0.05 | +4.3pp | +1.84 | noise |
+| Results | +0.3pp | +0.17 | -0.5pp | -0.23 | noise |
+| M&A | +0.2pp | +0.11 | -3.5pp | -1.54 | noise |
+| Fund raising | +2.4pp | +1.31 | +3.2pp | +1.43 | noise |
+| Exchange volume query | -1.2pp | -0.65 | +0.0pp | 0.00 | noise (and -4.6pp at 3m, real) |
 
-Statistically the gap is not ambiguous -- z = +13.4 against the baseline on
-n = 2,379. Capital raising and exchange volume queries do not clear noise.
+## How much confidence this deserves
 
-## Why this is plausible rather than a fluke
+Less than the numbers alone suggest. Thirty-two comparisons were made -- eight
+categories at four horizons. Correcting for that many looks, the threshold for
+significance at the 5% level rises to roughly z = 3.16. Order wins at 12 months
+reaches z = 3.20. It clears the bar by a hair.
+
+So the honest statement is: order wins are the single filing category with
+evidence behind them, the effect is around six to eight points of hit rate, and
+it only just survives the multiple-testing correction that seventeen logged
+trials demand.
+
+## Why order wins and nothing else
 
 An order win is a contracted future cash flow from a named counterparty. It is
-the least ambiguous good news a company can file, it is verifiable, and it
-changes forward revenue rather than describing the past. Compare that with a
-fund raising, which is dilution wearing good-news clothes and which the data
-scores at essentially nothing.
+verifiable, it is forward-looking, and it changes expected revenue rather than
+describing the past. Results and guidance describe what already happened or
+what management hopes will happen; the market has usually priced both. Fund
+raising is dilution. M&A is a coin flip on integration.
 
-Capacity expansion sits second, which fits the same logic one step earlier:
-the company is committing capital because it expects demand.
+Capacity expansion sits second and is directionally consistent -- capital
+committed because demand is expected -- but it only reaches significance at 24
+months, which is what you would expect if the payoff arrives with the capacity.
 
-## What this does NOT establish
+## Standing caveats
 
-**The period is one regime.** 2022-2023 was an exceptional run for Indian small
-and mid caps -- the RANDOM baseline itself returned +22.1% median over 24
-months. Every category looks positive in absolute terms because the market was.
-The comparison is relative and the relative gap is real, but whether order wins
-work in a flat or falling market is untested and cannot be tested until the
-archive extends further back. This is the single largest caveat.
+**One regime.** 2022-2023 was an exceptional run for Indian small and mid caps.
+The relative comparison controls for the market, but whether order wins work in
+a falling market is untested and cannot be tested until the archive extends
+back further.
 
-**Order-filing companies delist less.** 90 delisted in the orders sample against
-134 in the random baseline. Some of the edge is simply that companies winning
-contracts are healthier. That is a real effect and part of why the signal works,
-but it means the signal partly measures survival rather than upside.
+**Clustering.** Events are not independent. Two thousand filings come from
+several hundred companies, and market-wide moves hit whole clusters at once.
+The z-statistics above treat events as independent and are therefore
+optimistic. This is unfixed and is the largest remaining methodological gap.
 
-**No fundamental filter has been applied yet.** These are raw filing events with
-only a liquidity floor. The screen still has to add valuation and leverage.
-
-**Nothing here is a strategy.** It is one component measured in isolation, which
-is what was asked for. Combining components multiplies the search, and the
-trial count is already at nine for this study.
-
-## Contrast with the volume study
-
-Volume spikes beat the benchmark LESS often than random. Order filings beat it
-twenty points more often. Both were part of the Sterlite case study, and the
-data says only one of them carried information. The visually compelling half
-was the worthless half.
+**No fundamental filter yet.** These are raw filing events with a liquidity
+floor. Valuation and leverage have not been applied.
 
 ## Trials
 
-Nine hypotheses for this study; six previously for volume. Logged to
-`state/trials.jsonl`. Fifteen and counting -- the count matters, because the
-best of many looks better than it is.
+Seventeen for this study, six for volume. The count is the reason the
+multiple-testing correction above matters.
