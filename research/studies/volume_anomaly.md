@@ -1,60 +1,68 @@
 # Volume anomaly: does unusual volume predict anything?
 
-**No. If anything it is slightly negative.**
+**Yes -- negatively. Stocks spiking on volume underperform comparable stocks,
+and the effect grows with the size of the spike.**
 
-Tested over 2016-2026, split-adjusted, delisted names retained, measured
-against Nifty 500 over identical windows. Random selection of liquid stocks on
-the same dates is the comparison; every number below should be read against
-that row, not against zero.
+> **Revised 8 September 2026.** The first version of this study used a control
+> group drawn on same-day turnover, which was roughly six times more liquid
+> than a typical event stock. That flaw was real and it mattered enormously
+> elsewhere (see `filing_categories.md`, where a claimed effect shrank
+> threefold). Re-run against a properly matched control, the volume conclusion
+> is unchanged in direction and similar in magnitude -- but it now rests on a
+> comparison that holds size constant.
 
-## The result, at 12 months
+## Signal versus its own matched control
 
-| Signal | Beat benchmark | Median stock return | Multibagger rate |
-|--------|---------------:|--------------------:|-----------------:|
-| **Random baseline** | **42.6%** | **+4.9%** | **9.1%** |
-| Volume 3x normal | 40.4% | +3.2% | 8.8% |
-| Volume 5x normal | 40.8% | +0.9% | 10.0% |
-| Volume 10x normal | 39.0% | +0.5% | 11.5% |
-| Volume 5x + price up | 42.5% | +5.3% | 10.5% |
+Each event is compared against a stock trading the same session whose
+trailing-60-day median turnover is within 60% of the event stock's.
 
-Stocks spiking on volume beat the benchmark LESS often than stocks picked at
-random, and their median return is materially worse. The best variant, volume
-plus a same-day price rise, is indistinguishable from random.
+| Volume threshold | 3m | 6m | 12m | 24m |
+|------------------|---:|---:|----:|----:|
+| 3x normal | -2.7pp | +0.8pp | -0.3pp | -1.0pp |
+| **5x normal** | **-5.2pp** | **-6.1pp** | **-5.2pp** | -2.6pp |
+| **10x normal** | **-7.6pp** | **-5.8pp** | **-4.6pp** | **-4.5pp** |
+| 5x, liquid only (>5cr) | +0.5pp | -2.2pp | -3.7pp | -1.9pp |
+| 5x, price also up | -4.2pp | -2.6pp | -2.0pp | -0.5pp |
 
-The one thing volume raises slightly is the multibagger rate: 11.5% at 10x
-against 9.1% random. Read alongside the collapsing median, that describes a
-lottery, not an edge -- more extreme winners bought with a much worse typical
-outcome. Buying a volume spike is buying excitement.
+Bold entries clear z = 2.5. The 10x variant is negative and significant at
+every horizon out to two years.
 
-## What this kills
+The pattern is dose-responsive: 3x is noise, 5x is clearly negative, 10x is
+worse still. A signal that strengthens monotonically with its own intensity is
+harder to dismiss as chance than a single threshold that happens to work.
 
-The Sterlite Technologies case looked like accumulation: 113x normal volume in
-June 2025, then a sevenfold move. This study says the volume was not the
-signal. Thousands of stocks spiked on volume over eleven years and most went
-nowhere. Whatever made Sterlite work, it was not that.
+Restricting to genuinely liquid names (>5cr turnover) removes most of the
+effect, which locates it in smaller, thinner stocks -- exactly where a retail
+investor is most likely to notice a volume spike and be tempted by it.
 
-That matters because the volume spike was the most visually compelling part of
-the case study, and the easiest thing to build a screen around.
+## What this means practically
 
-## Two things worth noticing in the baseline itself
+Buying a stock because it suddenly traded ten times its normal volume is worse
+than buying a comparable stock at random, by four to eight points of hit rate.
+This is one of the most visible things on any screener, and it is an active
+negative.
 
-Only 42.6% of randomly chosen liquid stocks beat Nifty 500 over twelve months.
-The median stock LAGS the index, because the index is dominated by the winners
-it holds. Beating it is harder than a coin flip, before any skill is applied.
+## A disagreement worth recording
 
-Between 294 and 392 names in each sample delisted during the measurement
-window, with worst outcomes of -95% to -99%. Those are precisely the
-observations a survivorship-biased study drops, and dropping them would have
-lifted every number in this table.
+An adversarial audit of this project re-measured the same signal and concluded
+the gap collapsed to nothing once matched (-0.2pp at 12 months). This re-run
+finds -4.6pp. The most likely explanation is that the audit ran before the
+event sampler was fixed: the old sampler silently truncated to the EARLIEST
+events whenever the count sat between one and two times the cap, concentrating
+its sample in 2016-2018, while this run samples evenly across 2016-2026.
+
+Both cannot be right, and the disagreement is recorded rather than resolved by
+preferring the more convenient number. The sampler fix is verifiable and the
+audit predates it, which is why this version is the one carried forward -- but
+anyone rebuilding this should re-derive it rather than trust either.
+
+## What the audit got right, and it was the important part
+
+The flaw it identified -- a control group not comparable to the events -- was
+real, and in the filing study it had inflated a headline result threefold.
+Finding a genuine methodological defect matters more than whether one
+downstream number moved.
 
 ## Trials
 
-Six hypotheses consumed, logged to `state/trials.jsonl`. The count matters:
-test enough variants and one looks excellent by chance. Reporting the best
-without the count is the most common way a backtest lies.
-
-## Next
-
-Volume is out as a standalone signal. The remaining components -- filing
-category, prior decline, and the combination -- are still untested, and the
-announcements archive is being backfilled to 2022 for exactly that purpose.
+Eleven for this study across both runs. Logged to `state/trials.jsonl`.

@@ -30,3 +30,6 @@ Thumbs.db
 # local previews and run logs
 preview_*.html
 *.log
+
+# scratch
+.scratch_fs/
