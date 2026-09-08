@@ -1,0 +1,12 @@
+import duckdb, pandas as pd
+pd.set_option("display.width",200)
+con = duckdb.connect()
+con.execute("CREATE VIEW announcements AS SELECT * FROM read_parquet('data/announcements/**/*.parquet', union_by_name=true)")
+con.execute("CREATE VIEW indices AS SELECT * FROM read_parquet('data/indices/*.parquet', union_by_name=true)")
+con.execute("CREATE VIEW corpactions AS SELECT * FROM read_parquet('data/corpactions/*.parquet', union_by_name=true)")
+print("== ANN schema =="); print(con.execute("describe announcements").df()[["column_name","column_type"]].to_string())
+print("\n== ann recency =="); print(con.execute("select max(trade_date), max(an_dt), count(*) from announcements").df().to_string())
+print("\n== ann categories ==")
+print(con.execute("select category, count(*) n from announcements group by 1 order by 2 desc limit 40").df().to_string())
+print("\n== INDICES =="); print(con.execute("describe indices").df()[["column_name","column_type"]].to_string())
+print(con.execute("select index_name, min(date), max(date), count(*) from indices group by 1").df().to_string())
