@@ -36,18 +36,38 @@ def main() -> int:
         done += len(d)
         frames.append(d)
 
-    # Rate comes from the log's own timestamps, which is the only honest
-    # measure -- wall clock since launch would include the indexing phase.
+    # Rate is measured between consecutive "N/M fetched" checkpoints in the
+    # CURRENT log. Dividing all-time documents by the log's span looked simpler
+    # and was wrong by a factor of twenty-five: the log is truncated on every
+    # relaunch, so it charged eleven quarters of prior work against a two
+    # minute window and reported ninety-four documents a second.
     rate = None
     if LOG.exists():
-        stamps = re.findall(r"^(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)",
-                            LOG.read_text(errors="ignore"), re.M)
-        if len(stamps) >= 2:
-            t0 = datetime.strptime(stamps[0], "%Y-%m-%d %H:%M:%S")
-            t1 = datetime.strptime(stamps[-1], "%Y-%m-%d %H:%M:%S")
-            secs = (t1 - t0).total_seconds()
-            if secs > 0 and done:
-                rate = done / secs
+        marks = re.findall(
+            r"^(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d),\d+ INFO\s+(\d+)/\d+ fetched",
+            LOG.read_text(errors="ignore"), re.M)
+        if len(marks) >= 2:
+            # Only spans inside one quarter are comparable; the counter resets
+            # between them, so a decreasing count marks a boundary to skip.
+            spans = []
+            for (ta, na), (tb, nb) in zip(marks, marks[1:]):
+                if int(nb) <= int(na):
+                    continue
+                secs = (datetime.strptime(tb, "%Y-%m-%d %H:%M:%S")
+                        - datetime.strptime(ta, "%Y-%m-%d %H:%M:%S")).total_seconds()
+                if secs > 0:
+                    spans.append((int(nb) - int(na)) / secs)
+            if spans:
+                rate = sum(spans[-5:]) / len(spans[-5:])
+        elif len(marks) == 1:
+            # One checkpoint: measure it against the "fetching" line above it.
+            m = re.search(r"^(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d),\d+ INFO fetching \d+",
+                          LOG.read_text(errors="ignore"), re.M)
+            if m:
+                secs = (datetime.strptime(marks[0][0], "%Y-%m-%d %H:%M:%S")
+                        - datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S")).total_seconds()
+                if secs > 0:
+                    rate = int(marks[0][1]) / secs
 
     pct = 100 * done / expected if expected else 0
     print(f"  documents   {done:,} of {expected:,}   ({pct:.1f}%)")
