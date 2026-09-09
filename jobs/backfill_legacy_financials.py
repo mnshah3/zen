@@ -58,28 +58,59 @@ def main() -> int:
     if args.index_only:
         return 0
 
+    def rewarm(sess):
+        """NSE cookies go stale; a fresh warm-up restores full speed."""
+        try:
+            sess.get(fl.WARMUP, timeout=30)
+        except Exception as e:                                   # noqa: BLE001
+            log.warning("re-warm failed: %s", e)
+
     # Quarter at a time so progress survives an interruption. Grouping on the
     # PERIOD rather than the broadcast date keeps each file self-describing.
     idx = idx[idx["has_xbrl"] & idx["period_end"].notna()].copy()
     idx["q"] = pd.to_datetime(idx["period_end"]).dt.to_period("Q")
+    absent = fl.known_missing()
+    if absent:
+        log.info("%d documents already confirmed absent by NSE; not retrying", len(absent))
 
     total = 0
     for q, chunk in idx.groupby("q", sort=True):
         path = args.out / f"legacy_{q}.parquet"
-        if path.exists():
-            log.info("%s already present, skipping %d filings", path.name, len(chunk))
-            continue
-        log.info("=== %s: %d filings", q, len(chunk))
-        df = fl.fetch_documents(s, chunk, sleep=args.sleep)
-        if df.empty:
-            log.warning("%s produced no parsable rows", q)
-            continue
-        df["period_end"] = pd.to_datetime(df["period_end"])
-        df.to_parquet(path, index=False)
-        total += len(df)
-        log.info("wrote %s (%d rows, running total %d)", path.name, len(df), total)
 
-    log.info("done: %d rows written", total)
+        # A quarter is resumed rather than skipped. The earlier version treated
+        # the file's existence as proof the quarter was complete, so any
+        # document that failed mid-run became a permanent hole that no restart
+        # could ever fill -- two quarters had lost over a hundred companies
+        # between them before this was noticed.
+        existing = pd.read_parquet(path) if path.exists() else None
+        have = set(existing["xbrl_url"]) if existing is not None else set()
+        todo = chunk[~chunk["xbrl_url"].isin(have | absent)]
+        if todo.empty:
+            log.info("%s complete (%d rows)", path.name, len(have))
+            continue
+
+        log.info("=== %s: %d to fetch (%d already held)", q, len(todo), len(have))
+        df, unresolved = fl.fetch_documents(s, todo, sleep=args.sleep, rewarm=rewarm)
+        if not unresolved.empty:
+            fl.record_missing(unresolved)
+            n_gone = int((unresolved["outcome"] == "missing").sum())
+            log.info("  %d unresolved (%d confirmed absent, %d retryable)",
+                     len(unresolved), n_gone, len(unresolved) - n_gone)
+        if df.empty:
+            log.warning("%s produced no parsable rows this pass", q)
+            continue
+
+        df["period_end"] = pd.to_datetime(df["period_end"])
+        if existing is not None:
+            existing["period_end"] = pd.to_datetime(existing["period_end"])
+            df = pd.concat([existing, df], ignore_index=True)
+            df = df.drop_duplicates(subset=["xbrl_url"])
+        df.to_parquet(path, index=False)
+        total += len(df) - len(have)
+        log.info("wrote %s (%d rows total, +%d this pass, running total %d)",
+                 path.name, len(df), len(df) - len(have), total)
+
+    log.info("done: %d new rows written", total)
     return 0
 
 

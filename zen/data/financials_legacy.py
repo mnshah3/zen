@@ -140,31 +140,94 @@ def listing(session, start: date, end: date, window_days: int = 45) -> pd.DataFr
     return df.reset_index(drop=True)
 
 
-def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15) -> pd.DataFrame:
-    """Download and parse each filing's XBRL into one row of figures."""
+MISSING_LEDGER = PARQUET_DIR / "legacy_missing.parquet"
+
+# NSE's cookies go stale after a few hours and the endpoint then degrades
+# rather than failing outright: requests keep returning 200 but take twenty
+# times longer and the failure rate climbs. Re-warming on a schedule keeps the
+# session fresh; re-warming on a failure streak catches it early.
+REWARM_EVERY = 400
+REWARM_AFTER_FAILURES = 5
+
+
+def _fetch_one(session, url: str, tries: int = 3):
+    """One document, with backoff. Returns (facts, outcome).
+
+    Outcomes are deliberately distinguished because they need opposite
+    handling. A 404 is permanent -- NSE lists filings whose XBRL was never
+    published, and retrying those forever would stall every future run. A
+    timeout or a 5xx is transient and deserves another attempt. Treating the
+    two the same is how a run either loses data silently or never finishes.
+    """
+    for attempt in range(tries):
+        try:
+            r = session.get(url, timeout=45)
+            if r.status_code == 404:
+                return {}, "missing"
+            if r.status_code == 200:
+                facts = parse_xbrl(r.content)
+                return (facts, "ok") if facts else ({}, "empty")
+        except Exception:                                        # noqa: BLE001
+            pass
+        time.sleep(1.5 * (attempt + 1))
+    return {}, "failed"
+
+
+def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
+                    rewarm=None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Download and parse each filing's XBRL.
+
+    Returns (rows, unresolved). `unresolved` carries the filings that could not
+    be parsed and why, so the caller can tell a permanent gap from one worth
+    retrying rather than writing a quarter that quietly lacks a hundred
+    companies.
+    """
     todo = index[index["has_xbrl"] & index["period_end"].notna()]
     log.info("fetching %d XBRL documents", len(todo))
-    out, failed = [], 0
+    out, unresolved, streak = [], [], 0
+
     for n, (_, meta) in enumerate(todo.iterrows(), 1):
-        try:
-            r = session.get(meta["xbrl_url"], timeout=45)
-            facts = parse_xbrl(r.content) if r.status_code == 200 else {}
-        except Exception:                                        # noqa: BLE001
-            facts = {}
-        if not facts:
-            failed += 1
-        else:
+        facts, outcome = _fetch_one(session, meta["xbrl_url"])
+        if outcome == "ok":
             row = {"symbol": meta["symbol"], "company": meta.get("company"),
                    "period_end": meta["period_end"], "broadcast_dt": meta["broadcast_dt"],
                    "consolidated": bool(meta["consolidated"]),
                    "audited": bool(meta.get("audited", False)),
                    "xbrl_url": meta["xbrl_url"], **facts}
             out.append(_derive(row))
+            streak = 0
+        else:
+            unresolved.append({"symbol": meta["symbol"], "xbrl_url": meta["xbrl_url"],
+                               "period_end": meta["period_end"], "outcome": outcome})
+            streak = streak + 1 if outcome == "failed" else 0
+
+        if rewarm and (n % REWARM_EVERY == 0 or streak >= REWARM_AFTER_FAILURES):
+            log.info("  re-warming session at %d (failure streak %d)", n, streak)
+            rewarm(session)
+            streak = 0
         if n % 250 == 0:
-            log.info("  %d/%d fetched, %d without figures", n, len(todo), failed)
+            log.info("  %d/%d fetched, %d unresolved", n, len(todo), len(unresolved))
         time.sleep(sleep)
-    log.info("parsed %d filings; %d returned no figures", len(out), failed)
-    return pd.DataFrame(out)
+
+    log.info("parsed %d filings; %d unresolved", len(out), len(unresolved))
+    return pd.DataFrame(out), pd.DataFrame(unresolved)
+
+
+def known_missing(path: Path = MISSING_LEDGER) -> set[str]:
+    """URLs NSE has confirmed it does not hold, so runs stop chasing them."""
+    if not path.exists():
+        return set()
+    return set(pd.read_parquet(path)["xbrl_url"])
+
+
+def record_missing(rows: pd.DataFrame, path: Path = MISSING_LEDGER) -> None:
+    """Append confirmed-absent documents. Only 404s: a timeout is not evidence."""
+    gone = rows[rows["outcome"] == "missing"] if not rows.empty else rows
+    if gone.empty:
+        return
+    if path.exists():
+        gone = pd.concat([pd.read_parquet(path), gone], ignore_index=True)
+    gone.drop_duplicates(subset=["xbrl_url"]).to_parquet(path, index=False)
 
 
 def backfill(start: date = XBRL_FROM, end: date | None = None,
@@ -183,7 +246,9 @@ def backfill(start: date = XBRL_FROM, end: date | None = None,
              len(idx), int(idx["has_xbrl"].sum()),
              idx["period_end"].min(), idx["period_end"].max())
 
-    df = fetch_documents(s, idx)
+    df, unresolved = fetch_documents(s, idx, rewarm=lambda x: x.get(WARMUP, timeout=30))
+    if not unresolved.empty:
+        record_missing(unresolved)
     if df.empty:
         return df
 
