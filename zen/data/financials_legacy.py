@@ -156,6 +156,33 @@ REWARM_SECONDS = 240
 REWARM_AFTER_FAILURES = 3
 
 
+def document_session():
+    """A throwaway session for nsearchives.
+
+    The archive host wants nothing from the NSE cookie dance -- a bare request
+    with a user agent returns the document -- so document fetching does not
+    share the cookied session the listing API needs. That matters because the
+    failure being guarded against here is a POISONED CONNECTION POOL: when NSE
+    drops keep-alive connections badly, every later request on that session
+    blocks until timeout, and so does any attempt to revive it. Re-warming
+    cookies cannot fix a wedged pool, which is why the previous fix failed
+    silently for two and a half hours.
+
+    The cure is a new session object, not a new cookie.
+    """
+    import requests
+    s = requests.Session()
+    s.headers.update({
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                       "AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/124.0 Safari/537.36"),
+        "Accept": "application/xml,text/xml,*/*",
+        # Keep-alive is what goes bad; short-lived connections cannot rot.
+        "Connection": "close",
+    })
+    return s
+
+
 def _fetch_one(session, url: str, tries: int = 3):
     """One document, with backoff. Returns (facts, outcome).
 
@@ -167,7 +194,7 @@ def _fetch_one(session, url: str, tries: int = 3):
     """
     for attempt in range(tries):
         try:
-            r = session.get(url, timeout=45)
+            r = session.get(url, timeout=20)
             if r.status_code == 404:
                 return {}, "missing"
             if r.status_code == 200:
@@ -192,11 +219,10 @@ def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
     log.info("fetching %d XBRL documents", len(todo))
     out, unresolved, streak = [], [], 0
 
-    # Warm before the first request rather than relying on whatever state the
-    # session was left in. A resumed run reaches this with a session that may
-    # be hours old, and the first quarter would otherwise crawl.
-    if rewarm:
-        rewarm(session)
+    # The caller's cookied session is ignored for documents; see
+    # document_session(). A fresh object is built here and rebuilt on a timer
+    # and on any failure streak, because a wedged pool cannot be revived.
+    session = document_session()
     last_warm = time.monotonic()
 
     for n, (_, meta) in enumerate(todo.iterrows(), 1):
@@ -215,14 +241,18 @@ def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
             streak = streak + 1 if outcome == "failed" else 0
 
         stale = time.monotonic() - last_warm > REWARM_SECONDS
-        if rewarm and (stale or streak >= REWARM_AFTER_FAILURES):
-            rewarm(session)
+        if stale or streak >= REWARM_AFTER_FAILURES:
+            if streak:
+                log.warning("  %d consecutive failures; rebuilding session", streak)
+            session.close()
+            session = document_session()
             last_warm = time.monotonic()
             streak = 0
-        if n % 250 == 0:
+        if n % 100 == 0:
             log.info("  %d/%d fetched, %d unresolved", n, len(todo), len(unresolved))
         time.sleep(sleep)
 
+    session.close()
     log.info("parsed %d filings; %d unresolved", len(out), len(unresolved))
     return pd.DataFrame(out), pd.DataFrame(unresolved)
 
