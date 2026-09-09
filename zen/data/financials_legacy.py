@@ -142,12 +142,18 @@ def listing(session, start: date, end: date, window_days: int = 45) -> pd.DataFr
 
 MISSING_LEDGER = PARQUET_DIR / "legacy_missing.parquet"
 
-# NSE's cookies go stale after a few hours and the endpoint then degrades
-# rather than failing outright: requests keep returning 200 but take twenty
-# times longer and the failure rate climbs. Re-warming on a schedule keeps the
-# session fresh; re-warming on a failure streak catches it early.
-REWARM_EVERY = 400
-REWARM_AFTER_FAILURES = 5
+# NSE's cookies go stale within minutes and the endpoint then degrades rather
+# than failing outright: requests keep returning correct answers but take
+# twenty times longer. Measured 0.2s per document on a fresh session against
+# 8.6s on a session an hour old.
+#
+# Re-warming is timed rather than counted. A counter reset every quarter and
+# never reached its threshold on the small batches a resumed run produces, so
+# the re-warm this constant was supposed to trigger never fired once. Elapsed
+# time is what actually correlates with staleness, so elapsed time is what
+# drives it.
+REWARM_SECONDS = 240
+REWARM_AFTER_FAILURES = 3
 
 
 def _fetch_one(session, url: str, tries: int = 3):
@@ -186,6 +192,13 @@ def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
     log.info("fetching %d XBRL documents", len(todo))
     out, unresolved, streak = [], [], 0
 
+    # Warm before the first request rather than relying on whatever state the
+    # session was left in. A resumed run reaches this with a session that may
+    # be hours old, and the first quarter would otherwise crawl.
+    if rewarm:
+        rewarm(session)
+    last_warm = time.monotonic()
+
     for n, (_, meta) in enumerate(todo.iterrows(), 1):
         facts, outcome = _fetch_one(session, meta["xbrl_url"])
         if outcome == "ok":
@@ -201,9 +214,10 @@ def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
                                "period_end": meta["period_end"], "outcome": outcome})
             streak = streak + 1 if outcome == "failed" else 0
 
-        if rewarm and (n % REWARM_EVERY == 0 or streak >= REWARM_AFTER_FAILURES):
-            log.info("  re-warming session at %d (failure streak %d)", n, streak)
+        stale = time.monotonic() - last_warm > REWARM_SECONDS
+        if rewarm and (stale or streak >= REWARM_AFTER_FAILURES):
             rewarm(session)
+            last_warm = time.monotonic()
             streak = 0
         if n % 250 == 0:
             log.info("  %d/%d fetched, %d unresolved", n, len(todo), len(unresolved))
