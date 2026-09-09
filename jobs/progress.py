@@ -69,8 +69,21 @@ def main() -> int:
                 if secs > 0:
                     rate = int(marks[0][1]) / secs
 
-    pct = 100 * done / expected if expected else 0
-    print(f"  documents   {done:,} of {expected:,}   ({pct:.1f}%)")
+    # A quarter's parquet is written only when the whole quarter finishes, so
+    # counting files alone shows a frozen number for the hour it takes to work
+    # through 2,500 documents -- indistinguishable from the job being wedged,
+    # which is the one thing this script exists to rule out. The in-flight
+    # count comes from the current quarter's last checkpoint.
+    inflight = 0
+    if LOG.exists():
+        tail_marks = re.findall(r"INFO\s+(\d+)/(\d+) fetched", LOG.read_text(errors="ignore"))
+        if tail_marks:
+            inflight = int(tail_marks[-1][0])
+
+    pct = 100 * (done + inflight) / expected if expected else 0
+    print(f"  documents   {done + inflight:,} of {expected:,}   ({pct:.1f}%)")
+    if inflight:
+        print(f"              {done:,} written + {inflight:,} in the quarter being fetched")
     print(f"  files       {len(files)} quarters written")
     if rate:
         left = (expected - done) / rate
