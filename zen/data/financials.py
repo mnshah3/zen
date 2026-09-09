@@ -240,6 +240,7 @@ def parse_xbrl(content: bytes) -> dict:
         if not cid:
             continue
         start = end = inst = None
+        dimensioned = False
         for node in ctx.iter():
             tag = node.tag.split("}")[-1]
             txt = (node.text or "").strip()
@@ -249,6 +250,17 @@ def parse_xbrl(content: bytes) -> dict:
                 end = txt
             elif tag == "instant" and txt:
                 inst = txt
+            elif tag in ("explicitMember", "typedMember"):
+                # A dimensioned context reports one SEGMENT, not the company:
+                # ReportableSegmentsAxis, DetailsOfOtherExpensesAxis and the
+                # rest all carry the same period as the company total, so a
+                # rule that selects on dates alone ties with them and picks
+                # whichever appears first in the document. That silently
+                # returned one business division's revenue as if it were the
+                # whole company. Company totals are always undimensioned.
+                dimensioned = True
+        if dimensioned:
+            continue
         try:
             if start and end:
                 spans[cid] = (date.fromisoformat(start), date.fromisoformat(end))
@@ -266,6 +278,21 @@ def parse_xbrl(content: bytes) -> dict:
     if instants:
         latest = max(instants.values())
         wanted |= {c for c, d in instants.items() if d == latest}
+    # The 2018-2024 filings declare ONLY dimensioned segment contexts and then
+    # reference the company-level figures through a context they never declare
+    # -- "OneD" for the period and "OneI" for the balance-sheet instant. It is
+    # invalid XBRL, but it is what NSE served for seven years, and a parser
+    # that ignores it reads a filing as segment data with no company totals.
+    # An undeclared reference carries no segment by construction, and "One" is
+    # the taxonomy's name for the period being reported, so those two are safe
+    # to accept. Any other undeclared reference is left alone: missing a figure
+    # is recoverable, attributing a division's revenue to the company is not.
+    declared = set(spans) | set(instants)
+    for node in root.iter():
+        ref = node.get("contextRef")
+        if ref and ref not in declared and ref in ("OneD", "OneI"):
+            wanted.add(ref)
+
     if not wanted:
         return {}
 
