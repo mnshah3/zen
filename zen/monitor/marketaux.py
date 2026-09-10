@@ -59,6 +59,84 @@ THEME_QUERIES = {
 }
 
 
+# Exchange is not in the `exchange` field -- Marketaux leaves that null for
+# Indian equities and encodes the venue in the symbol suffix instead.
+SUFFIX_EXCHANGE = {"NS": "NSE", "NSI": "NSE", "BO": "BSE", "BSE": "BSE"}
+
+
+def _exchange_of(symbol: str) -> str:
+    tail = symbol.rsplit(".", 1)[-1].upper() if "." in symbol else ""
+    return SUFFIX_EXCHANGE.get(tail, "")
+
+
+def _norm_name(name: str) -> str:
+    """Company name reduced to comparable tokens."""
+    import re as _re
+    n = _re.sub(r"[^a-z0-9 ]", " ", (name or "").lower())
+    drop = {"limited", "ltd", "inc", "incorporated", "plc", "corp", "corporation",
+            "company", "co", "the", "and", "india", "indian", "private", "pvt"}
+    return " ".join(t for t in n.split() if t and t not in drop)
+
+
+_NAMES: dict | None = None
+
+
+def _archive_names() -> dict:
+    """symbol -> company name, from our own archive.
+
+    Needed because Marketaux's entity matcher is unreliable on Indian tickers.
+    It tagged a Macy's earnings story with M&M.NS and M&MFIN.NS -- both named
+    "Macy's, Inc." in the payload, both scoring 64.7 -- because the US ticker
+    is "M". Accepting that would have put Macy's results in the brief as
+    Mahindra & Mahindra news.
+
+    We already know what these symbols are, from filings the companies made
+    themselves, so the claim is checkable rather than trusted.
+    """
+    global _NAMES
+    if _NAMES is not None:
+        return _NAMES
+    _NAMES = {}
+    try:
+        import duckdb
+        con = duckdb.connect()
+        rows = con.execute("""
+            SELECT symbol, any_value(company) AS company FROM (
+                SELECT symbol, company FROM
+                  read_parquet('data/financials/legacy_2*.parquet', union_by_name=true)
+                  WHERE company IS NOT NULL
+                UNION ALL
+                SELECT symbol, company FROM
+                  read_parquet('data/announcements/**/*.parquet', union_by_name=true)
+                  WHERE company IS NOT NULL)
+            GROUP BY symbol""").fetchall()
+        con.close()
+        _NAMES = {sym: _norm_name(co) for sym, co in rows}
+    except Exception as e:                                       # noqa: BLE001
+        log.warning("could not load archive names (%s); entity names unverified", e)
+    return _NAMES
+
+
+def _name_agrees(symbol: str, claimed: str) -> bool:
+    """Does the provider's company name match what our archive calls it?
+
+    Unknown symbols pass: the archive does not cover every listed name, and
+    rejecting on absence would silently discard real coverage. Known symbols
+    with a clearly different name are rejected.
+    """
+    from difflib import SequenceMatcher
+    base = symbol.split(".")[0].upper()
+    ours = _archive_names().get(base)
+    if not ours:
+        return True
+    theirs = _norm_name(claimed)
+    if not theirs:
+        return True
+    if set(ours.split()) & set(theirs.split()):
+        return True
+    return SequenceMatcher(None, ours, theirs).ratio() >= 0.6
+
+
 @dataclass
 class Entity:
     symbol: str
@@ -80,16 +158,28 @@ class Story:
     theme: str = ""
 
     @property
+    def _indian(self) -> list:
+        return [e for e in self.entities if e.exchange in ("NSE", "BSE")]
+
+    @property
     def indian_symbols(self) -> list[str]:
-        """Tickers on an Indian exchange, which is the only kind we can price."""
-        return [e.symbol.split(".")[0] for e in self.entities
-                if e.exchange.upper() in ("NSE", "BSE", "NSI", "BO")]
+        """Tickers on an Indian exchange, deduplicated, NSE preferred.
+
+        A company is routinely returned twice, once per venue -- M&M.NS and
+        M&M.BO -- and the brief should name it once.
+        """
+        seen, out = set(), []
+        for e in sorted(self._indian, key=lambda x: x.exchange != "NSE"):
+            base = e.symbol.split(".")[0]
+            if base not in seen:
+                seen.add(base)
+                out.append(base)
+        return out
 
     @property
     def sentiment(self) -> float | None:
         """Mean sentiment across the Indian entities, if any carry one."""
-        vals = [e.sentiment for e in self.entities
-                if e.sentiment is not None and e.exchange.upper() in ("NSE", "BSE", "NSI", "BO")]
+        vals = [e.sentiment for e in self._indian if e.sentiment is not None]
         return round(sum(vals) / len(vals), 3) if vals else None
 
 
@@ -111,10 +201,16 @@ def _parse(item: dict, theme: str = "") -> Story | None:
         sym = (e.get("symbol") or "").strip()
         if not sym:
             continue
+        name = (e.get("name") or "").strip()
+        exch = (e.get("exchange") or "").strip() or _exchange_of(sym)
+        # Drop an Indian tag whose company name disagrees with our archive.
+        if exch in ("NSE", "BSE") and not _name_agrees(sym, name):
+            log.debug("rejected %s tagged as %r", sym, name)
+            continue
         ents.append(Entity(
             symbol=sym,
-            name=(e.get("name") or "").strip(),
-            exchange=(e.get("exchange") or "").strip(),
+            name=name,
+            exchange=exch,
             industry=(e.get("industry") or "").strip(),
             match_score=float(e.get("match_score") or 0),
             sentiment=(None if e.get("sentiment_score") is None
