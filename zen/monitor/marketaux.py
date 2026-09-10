@@ -236,9 +236,12 @@ class Budget:
 
     def __init__(self, limit: int = MAX_REQUESTS):
         self.limit, self.used = limit, 0
+        # Set once the API reports the daily allowance gone, so the rest of the
+        # run stops asking. Nothing recovers before midnight.
+        self.spent = False
 
     def take(self) -> bool:
-        if self.used >= self.limit:
+        if self.spent or self.used >= self.limit:
             return False
         self.used += 1
         return True
@@ -254,7 +257,12 @@ def _get(params: dict, budget: Budget) -> list[dict]:
         log.warning("marketaux unreachable: %s", e)
         return []
     if r.status_code == 402:
-        log.warning("marketaux daily quota spent (402); falling back to RSS")
+        # Spent is spent. The first version logged this and carried on, so a
+        # quota-exhausted run made eleven further requests and printed eleven
+        # identical warnings before concluding what the first one already knew.
+        if not budget.spent:
+            log.warning("marketaux daily quota spent (402); falling back to RSS")
+        budget.spent = True
         return []
     if r.status_code != 200:
         log.warning("marketaux returned %s", r.status_code)
