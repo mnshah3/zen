@@ -28,6 +28,63 @@ fundamentals     87,449 quarterly filings · 2,403 companies · 2018 – 2026
 
 ---
 
+## The morning brief
+
+**[Open a real one →](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-brief.html)**  ·  built and sent by GitHub Actions every weekday at 07:00 IST
+
+Not a news digest. It reads the archive first, decides what the session
+actually did, and only then goes looking for stories that explain it.
+
+**It starts from the data, not the headlines.** Breadth, the gap between
+heavyweights and the median stock, 52-week extremes, size rotation, and every
+stock that traded far above its own 60-day volume. Which stocks the archive
+flags is what determines which stories get promoted — a filing that explains an
+unusual move outranks a better-corroborated story about something that did not
+happen.
+
+**It is ranked for one reader.** Trust, corroboration and recency make a decent
+front page and an indifferent personal brief: two readers with opposite
+portfolios would get the identical email. Stories are also scored against the
+reader's own stated theses — AI and data centres, nuclear, solar, water,
+infrastructure, defence, import substitution — and carry a badge saying which
+one matched and why. Theme affinity is *added* to the score, never multiplied,
+because a brief that only shows what you already believe is worse than a
+generic one.
+
+**Keyword matching is the weak link, so it is bounded.** Each theme separates
+terms that count alone from terms that need corroboration: one "data centre" is
+enough, one "power" is not. Where a news API supplies entity tags, the guessing
+stops entirely and the story carries real NSE tickers with sentiment.
+
+**The charts are HTML, not images.** Gmail, Outlook and Apple Mail all block
+images by default for an unknown sender, so a brief whose visual layer is
+attached PNGs is, for a large share of opens, a wall of text. The advance/
+decline bar, thirty sessions of net breadth, the divergence gauges and the
+rotation heat table are built from table cells and background colours. They
+render everywhere, at every width, with images off. Every bar is labelled with
+its number too, since colour alone is unreadable to about one man in twelve.
+
+**Everything degrades rather than fails.** No model key means extracted facts
+instead of prose. A dead feed means fewer stories. A broken chart means no
+chart. The email goes out.
+
+### The second email
+
+**[A calibration run →](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-calibration.html)**
+
+Silent by default — it only sends when something fires, because an alert that
+arrives daily stops being an alert.
+
+Strategies carry a `validated` flag, default false, set true only after a
+walk-forward backtest that survives the look-ahead detector and reports its
+trial count. While anything unvalidated is contributing, the subject line says
+CALIBRATION, the sections read "ranked highest by the test screen" rather than
+"to buy", and a banner sits above everything saying not to trade on it. That
+exists because an earlier version headed a calibration run "To buy (15)" and
+was read exactly as it was written.
+
+---
+
 ## The problem this exists to solve
 
 Most retail backtests in India are run against whatever tickers are listed
