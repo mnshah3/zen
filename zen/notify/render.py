@@ -239,7 +239,13 @@ def _story(a, explanation: str | None, facts: list[str]) -> str:
             for s in syms[:4])
         out += f'<div style="margin-top:6px;">{chips}{mark}</div>'
 
-    themed = getattr(a, "themes", None)
+    # Only badge a theme an unambiguous term earned. A match built from two
+    # generic words scores 0.45, and at that level the badges were actively
+    # misleading: an oil-and-rupee story tagged "Import substitution" because
+    # it said "imports", a Fed rate story tagged "AI & data centres". A badge
+    # claims the story is about that theme, so it has to be right more often
+    # than a keyword count can manage.
+    themed = [t for t in (getattr(a, "themes", None) or []) if t[1] >= 0.6]
     if themed:
         name, strength, terms = themed[0]
         tip = ", ".join(terms[:3])

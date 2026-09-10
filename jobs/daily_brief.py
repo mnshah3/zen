@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -26,6 +27,19 @@ from zen.monitor import bridge, explain, extract, insights, market, news
 from zen.notify import charts, mailer, render
 
 log = logging.getLogger(__name__)
+
+# Phrases the explainer uses when it has concluded a story does not matter to
+# an Indian investor. Written as an explicit alternation rather than assembled
+# in a shell heredoc, because the last attempt at that turned every  into a
+# literal backspace byte: the pattern compiled cleanly and matched nothing.
+IRRELEVANT = re.compile(
+    "no (?:direct[, ]*(?:and )?immediate |direct |immediate "
+    "|broader |material |significant )?"
+    "(?:impact|bearing|relevance|effect|implication)"
+    "|is (?:trivial|not relevant|irrelevant)"
+    "|does not (?:affect|matter|impact)"
+    "|little (?:direct )?(?:impact|bearing|relevance)",
+    re.I)
 
 
 def parse_args() -> argparse.Namespace:
@@ -101,6 +115,42 @@ def main() -> int:
                 # Nothing to explain it with; the raw numbers are better
                 # than an empty entry.
                 facts_map[i] = extract.facts(f"{a.title} {a.summary}")
+    # Drop what the explainer itself judged irrelevant.
+    #
+    # Asked why a story matters to an Indian investor, the model sometimes
+    # answers that it does not: "This Australian expansion has no direct impact
+    # on Indian markets." That is a correct answer and a wasted slot -- five of
+    # twenty-five in the first live brief, a fifth of the email spent telling
+    # the reader about things it had just called irrelevant. The judgement is
+    # already made; this acts on it.
+    #
+    # The length guard matters. A real explanation may note that one leg of a
+    # story has no direct impact before explaining the leg that does; a
+    # dismissal is short because there is nothing else to say.
+    keyed = {a.key: i for i, a in enumerate(ordered, start=1)}
+    dismissed = {a.key for a in ordered
+                 if (t := explanations.get(keyed[a.key])) and len(t) < 320
+                 and IRRELEVANT.search(t)}
+
+    if dismissed:
+        sections = {name: kept for name, arts in sections.items()
+                    if (kept := [a for a in arts if a.key not in dismissed])}
+        # The renderer keys explanations by POSITION, so both maps are rebuilt
+        # against the new ordering. Left pointing at the old one, every
+        # surviving story would inherit a neighbour's explanation.
+        by_key = {a.key: (explanations.get(keyed[a.key]), facts_map.get(keyed[a.key]))
+                  for a in ordered}
+        ordered = [a for arts in sections.values() for a in arts]
+        explanations, facts_map = {}, {}
+        for i, a in enumerate(ordered, start=1):
+            exp, fac = by_key.get(a.key, (None, None))
+            if exp:
+                explanations[i] = exp
+            if fac:
+                facts_map[i] = fac
+        log.info("dropped %d stories the explainer called irrelevant; %d shown",
+                 len(dismissed), len(ordered))
+
     images = charts.build_all(derived)
     bridge_text = bridge.build(derived, summary, pool, con=con)
     con.close()
