@@ -485,7 +485,24 @@ def signal_alert(signals: list[dict], context: dict, when: datetime) -> tuple[st
     Collapses to a table when a screen returns many names sharing one
     argument; expands per name when the signals are genuinely individual.
     """
+    # An unvalidated strategy must not produce an email that reads like advice.
+    # The previous version headed a momentum calibration run "To buy (15)" with
+    # the caveat in small type at the bottom, and it was read exactly as its
+    # headline said it should be.
+    validated = bool(context.get("validated"))
     body = ""
+    if not validated:
+        body += (
+            f'<div style="background:#7f1d1d;color:#ffffff;border-radius:4px;'
+            f'padding:13px 16px;margin-bottom:18px;">'
+            f'<div style="font-size:11px;font-weight:700;letter-spacing:0.1em;'
+            f'text-transform:uppercase;">Calibration output — not a recommendation</div>'
+            f'<div style="font-size:13px;margin-top:6px;line-height:1.55;">'
+            f'This screen has never been walk-forward tested. It exists to check '
+            f'that the measurement harness reports honestly, and its output is '
+            f'evidence about the plumbing, not about these companies. '
+            f'<b>Do not buy anything on this list.</b></div></div>')
+
     if context.get("note"):
         body += (f'<div style="background:{TINT};border:1px solid {RULE};'
                  f'border-radius:4px;padding:11px 14px;margin-bottom:18px;'
@@ -494,10 +511,13 @@ def signal_alert(signals: list[dict], context: dict, when: datetime) -> tuple[st
     buys = [s for s in signals if s["action"].lower() == "buy"]
     sells = [s for s in signals if s["action"].lower() == "sell"]
 
-    for label, group in (("To buy", buys), ("To sell", sells)):
+    labels = (("To buy", "Ranked highest by the test screen"),
+              ("To sell", "Ranked lowest by the test screen"))
+    for (real, test), group in zip(labels, (buys, sells)):
         if not group:
             continue
-        colour = UP if label == "To buy" else DOWN
+        label = real if validated else test
+        colour = UP if group is buys else DOWN
         body += _heading(f"{label} ({len(group)})")
         shared = _shared_notes(group)
         if shared and len(group) > 4:
@@ -512,7 +532,12 @@ def signal_alert(signals: list[dict], context: dict, when: datetime) -> tuple[st
              f'Check sizing against your sleeve limits and confirm nothing material '
              f'has been announced since the last close.</div>')
 
-    subject = f"Zen SIGNAL {when:%d %b} | {len(buys)} buy, {len(sells)} sell"
+    if validated:
+        subject = f"Zen SIGNAL {when:%d %b} | {len(buys)} buy, {len(sells)} sell"
+    else:
+        subject = (f"Zen CALIBRATION {when:%d %b} | {len(buys) + len(sells)} names, "
+                   f"not recommendations")
     subtitle = f"{when:%A %d %B %Y} | {_esc(context.get('strategy', 'strategy'))}"
     text = "\n".join(f"{s['action'].upper()} {s['symbol']}" for s in signals)
-    return subject, _shell("Zen Signal Alert", subtitle, body), text
+    title = "Zen Signal Alert" if validated else "Zen Calibration Run"
+    return subject, _shell(title, subtitle, body), text

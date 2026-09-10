@@ -34,6 +34,10 @@ log = logging.getLogger(__name__)
 
 class Momentum:
     name = "momentum_12_1"
+    # A calibration baseline, not a strategy for capital. Momentum is heavily
+    # documented and its rough magnitude is known, so it tests whether the
+    # harness reports honestly. It has never been walk-forward tested here.
+    validated = False
     min_history_days = 260
 
     def __init__(self, lookback: int = 252, skip: int = 21, top_n: int = 15,

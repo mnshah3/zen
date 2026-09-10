@@ -54,5 +54,13 @@ class Strategy(Protocol):
     name: str
     min_history_days: int
 
+    # False until a walk-forward backtest has been run, survived the look-ahead
+    # detector, and been reported with its trial count. Default False and
+    # opt-in, because the failure that matters is a strategy quietly reaching
+    # the inbox looking like advice -- which is exactly what happened with the
+    # momentum baseline: an email headed "To buy (15)" from a screen whose
+    # own README calls it a calibration test.
+    validated: bool
+
     def generate(self, con, asof: date) -> list[Signal]:
         ...

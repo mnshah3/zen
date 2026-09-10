@@ -79,7 +79,11 @@ def main() -> int:
         log.info("signal set unchanged since last alert; staying quiet")
         return 0
 
+    # Validated only if EVERY contributing strategy is. One unvalidated screen
+    # in the mix makes the whole email a calibration run, because the reader
+    # cannot be expected to sort the trustworthy rows from the rest.
     context = {
+        "validated": all(getattr(st, "validated", False) for st in STRATEGIES),
         "strategy": ", ".join(sorted({s.strategy for s in signals})),
         "note": (f"Ranking as of the {asof} close. Entry is assumed at the next "
                  "session open, which is what the backtest measures."),
