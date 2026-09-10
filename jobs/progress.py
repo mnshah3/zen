@@ -92,6 +92,9 @@ def main() -> int:
         if live:
             inflight = live[-1]
 
+    finished = LOG.exists() and "INFO done:" in LOG.read_text(errors="ignore")
+    running = _is_running()
+
     pct = 100 * (done + inflight) / expected if expected else 0
     print(f"  documents   {done + inflight:,} of {expected:,}   ({pct:.1f}%)")
     if inflight:
@@ -117,7 +120,34 @@ def main() -> int:
     if LOG.exists():
         tail = [l for l in LOG.read_text(errors="ignore").splitlines() if l.strip()][-2:]
         print("\n  " + "\n  ".join(tail))
+
+    # A finished run and a stuck one look identical otherwise: the counter
+    # stops moving either way, and it stops BELOW 100% because some documents
+    # are confirmed absent. That has to be stated, not left to be inferred from
+    # a log line reading "done:".
+    print()
+    if finished and not running:
+        print(f"  STATUS      COMPLETE. {done:,} parsed; {expected - done:,} confirmed "
+              f"absent by NSE,")
+        print("              so this never reaches 100%. Nothing left to fetch.")
+    elif running:
+        print("  STATUS      RUNNING")
+    else:
+        print("  STATUS      NOT RUNNING and not finished. Relaunch to resume "
+              "-- completed")
+        print("              quarters are skipped, so nothing is refetched.")
     return 0
+
+
+def _is_running() -> bool:
+    """Is a backfill process actually alive right now?"""
+    import subprocess
+    try:
+        out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq python.exe"],
+                             capture_output=True, text=True, timeout=15).stdout
+    except Exception:                                            # noqa: BLE001
+        return False
+    return out.lower().count("python.exe") > 0
 
 
 if __name__ == "__main__":
