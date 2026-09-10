@@ -22,6 +22,9 @@ UP = "#0f7b3f"
 DOWN = "#b42318"
 
 
+from zen.notify import viz
+
+
 def _esc(s) -> str:
     return html.escape(str(s), quote=False)
 
@@ -147,28 +150,41 @@ def _data_section(market: dict, insights: dict, charts: dict) -> str:
     body = _heading(f"What the data says — {market.get('session', '')}")
     body += _stat_row(b)
 
-    if "breadth" in charts:
-        body += _chart("breadth", "advancers minus decliners, last 30 sessions")
+    # The proportional bar carries the day's shape even with images blocked,
+    # which is the default in Gmail and Outlook for an unknown sender.
+    if b.get("advancers") is not None and b.get("decliners") is not None:
+        body += viz.split_bar(int(b["advancers"]), int(b["decliners"]),
+                              int(b.get("unchanged") or 0))
+
+    hist = insights.get("breadth_history")
+    if hist is not None and len(hist):
+        net = (hist["advancers"] - hist["decliners"]).tolist()
+        days = [str(d)[:10] for d in hist["date"].tolist()]
+        body += viz.spark_bars(net, labels=days)
+        body += (f'<div style="font-size:10px;color:{FAINT};margin:-4px 0 12px;">'
+                 f'net breadth, last {len(net)} sessions</div>')
 
     div = insights.get("divergence")
     if div and div.get("diverging"):
-        body += (
-            f'<div style="font-size:13px;margin:8px 0 4px;">'
-            f'Heavyweights moved {_pct(div["large_cap_proxy"])} while the median stock '
-            f'moved {_pct(div["median_stock"])} &mdash; {_esc(div["direction"])}.</div>'
-        )
+        body += viz.gauge(
+            "Heavyweights", _pct(div["large_cap_proxy"]),
+            "Median stock", _pct(div["median_stock"]),
+            caption=f'{div["direction"]}. A gap this wide means the index is '
+                    f'not describing what most stocks did.')
 
     ext = insights.get("extremes") or {}
     if ext:
-        body += (
-            f'<div style="font-size:13px;margin:6px 0;">'
-            f'<b style="color:{UP};">{ext["at_52w_high"]}</b> stocks at 52-week highs '
-            f'against <b style="color:{DOWN};">{ext["at_52w_low"]}</b> at lows, '
-            f'of {ext["eligible"]:,} liquid names.</div>'
-        )
+        body += viz.gauge(
+            "At 52-week highs", f'<span style="color:{UP};">{ext["at_52w_high"]}</span>',
+            "At 52-week lows", f'<span style="color:{DOWN};">{ext["at_52w_low"]}</span>',
+            caption=f'of {ext["eligible"]:,} liquid names.')
 
-    if "rotation" in charts:
-        body += _chart("rotation", "median return by size tier over five sessions")
+    rot = insights.get("rotation")
+    if rot is not None and len(rot):
+        body += viz.heat_table(rot, label_key="tier", value_key="median_ret",
+                               extra_key="stocks", extra_label="stocks")
+        body += (f'<div style="font-size:10px;color:{FAINT};margin:-8px 0 12px;">'
+                 f'median return by size tier, five sessions</div>')
 
     body += _volume_table(insights.get("unusual_volume"))
     return f'<div style="margin-bottom:26px;">{body}</div>'
@@ -196,6 +212,20 @@ def _story(a, explanation: str | None, facts: list[str]) -> str:
             f'{_esc(f)}</span>' for f in facts
         )
         out += f'<div style="margin-top:5px;">{chips}</div>'
+
+    # Theme badge. Placed on the source line rather than above the headline so
+    # it reads as provenance -- why this story is in front of him -- instead of
+    # competing with the headline for the first glance.
+    themed = getattr(a, "themes", None)
+    if themed:
+        name, strength, terms = themed[0]
+        tip = ", ".join(terms[:3])
+        badge = (f'<span style="display:inline-block;background:#eef2fb;'
+                 f'border:1px solid #d6e0f5;border-radius:3px;padding:1px 6px;'
+                 f'margin-right:6px;font-size:10px;font-weight:600;color:{ACCENT};'
+                 f'letter-spacing:0.02em;" title="matched: {_esc(tip)}">'
+                 f'{_esc(name)}</span>')
+        src = badge + src
 
     out += (f'<div style="font-size:11px;color:{FAINT};margin-top:4px;">{src}</div>'
             f'</div>')

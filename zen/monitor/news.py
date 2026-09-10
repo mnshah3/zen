@@ -21,6 +21,7 @@ import requests
 
 from zen.monitor import extract
 from zen.monitor.feeds import FEEDS, JUNK_PATTERNS, NOISE, SECTIONS
+from zen.monitor import themes
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +55,10 @@ class Article:
     section: str = "Markets"
     score: float = 0.0
     also: list[str] = field(default_factory=list)
+    # (theme name, strength, matched terms) from zen.monitor.themes. Carried on
+    # every article, not only those in the themes section, so a thematic story
+    # ranked into Companies or Geopolitics still shows why it mattered.
+    themes: list = field(default_factory=list)
 
     @property
     def key(self) -> str:
@@ -153,10 +158,23 @@ def classify(a: Article) -> str:
 
 
 def score(a: Article) -> float:
+    """Trust, corroboration, recency -- and whether he actually cares.
+
+    The first three make a good front page. Without the fourth, two readers
+    with opposite portfolios get the identical email, which is what this brief
+    was doing: of 703 articles collected, thirteen touched a theme he had named.
+
+    Theme affinity is added rather than multiplied. Multiplying would bury every
+    story outside his theses, and a brief that only shows what he already
+    believes is worse than a generic one -- he still needs to know the market
+    fell. Adding lifts thematic stories above equally-corroborated noise while
+    leaving the rest ranked as before.
+    """
     age_h = (_now() - a.published).total_seconds() / 3600
     recency = max(0.0, 1.0 - age_h / 36)
     corrob = min(a.corroboration, 4) / 4
-    return round(0.40 * a.trust + 0.35 * corrob + 0.25 * recency, 4)
+    base = 0.40 * a.trust + 0.35 * corrob + 0.25 * recency
+    return round(base + 0.45 * themes.affinity(f"{a.title} {a.summary}"), 4)
 
 
 def _load_seen() -> dict[str, str]:
@@ -207,6 +225,11 @@ def build(lookback_hours: int = 24, remember: bool = True,
     # other placement -- that connection is the reason the brief exists.
     connected_keys = {a.key for a in (connected or [])}
     for a in fresh:
+        # Theme membership is recorded on every article regardless of section,
+        # so the renderer can badge a story wherever it ends up.
+        a.themes = themes.match(f"{a.title} {a.summary}")
+        if a.themes and a.themes[0][1] >= 0.6 and a.key not in connected_keys:
+            a.section = "Your themes"
         if a.key in connected_keys:
             a.section = "Connected to your data"
 

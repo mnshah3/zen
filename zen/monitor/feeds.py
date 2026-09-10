@@ -32,6 +32,26 @@ FEEDS: dict[str, tuple[str, float]] = {
     # Policy and flows
     "RBI and SEBI": (GNEWS.format(q="when:2d+RBI+OR+SEBI+monetary+policy"), 0.80),
     "FII and DII flows": (GNEWS.format(q="when:2d+FII+DII+flows+india+equities"), 0.70),
+
+    # The investor's own themes. Without these the brief is a general market
+    # digest that happens to arrive in his inbox: of 703 articles collected
+    # from the feeds above, thirteen touched a theme he actually cares about.
+    # Trust is set at 0.65 rather than 0.8 because a search feed aggregates
+    # unknown outlets, and corroboration should have to do more of the work.
+    "Data centres and AI capex": (
+        GNEWS.format(q="when:2d+india+data+centre+OR+datacenter+capacity+investment"), 0.65),
+    "Nuclear and SMR": (
+        GNEWS.format(q="when:3d+india+nuclear+power+OR+small+modular+reactor"), 0.65),
+    "Solar and green energy": (
+        GNEWS.format(q="when:2d+india+solar+cell+OR+module+manufacturing+OR+electrolyser"), 0.65),
+    "Water infrastructure": (
+        GNEWS.format(q="when:3d+india+water+treatment+OR+desalination+project"), 0.60),
+    "Order wins and capex": (
+        GNEWS.format(q="when:1d+india+order+book+OR+letter+of+award+OR+capacity+expansion"), 0.65),
+    "Defence indigenisation": (
+        GNEWS.format(q="when:2d+india+defence+order+OR+indigenisation+OR+defence+export"), 0.65),
+    "Import substitution": (
+        GNEWS.format(q="when:3d+india+PLI+scheme+OR+import+substitution+OR+china+plus+one"), 0.65),
 }
 
 # Sections in the order they appear in the email. Small limits on purpose:
@@ -44,6 +64,11 @@ FEEDS: dict[str, tuple[str, float]] = {
 SECTIONS: dict[str, dict] = {
     "Breaking": {"keywords": [], "limit": 3},
     "Connected to your data": {"keywords": [], "limit": 3},
+    # Assigned by zen.monitor.themes, not by these keywords, and placed above
+    # the general sections because a story about the investor's own theses is
+    # worth more to him than a better-corroborated story about something he
+    # will never own.
+    "Your themes": {"keywords": [], "limit": 5},
     "Capital markets": {
         "keywords": ["nifty", "sensex", "index", "equities", "ipo", "listing",
                      "fii", "dii", "flows", "rupee", "bond", "yield", "midcap",
