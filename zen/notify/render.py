@@ -48,7 +48,12 @@ def _shell(title: str, subtitle: str, body: str, verdict: str = "") -> str:
         verdict_html = (f'<div style="font-size:13px;color:{ACCENT};font-weight:600;'
                         f'margin-top:6px;">{_esc(verdict)}</div>')
 
-    return f"""<div style="background:{PAGE};padding:20px 12px;">
+    # The document is written and sent as UTF-8, but without this declaration a
+    # client that sniffs rather than trusts the MIME header falls back to
+    # Latin-1 and every em-dash and middle dot becomes mojibake: the header read
+    # "THURSDAY 10 SEPTEMBER 2026 A. 24 STORIES" in the browser preview.
+    return f"""<meta charset="utf-8">
+<div style="background:{PAGE};padding:20px 12px;">
 <div style="font-family:{FONT};max-width:640px;margin:0 auto;background:#ffffff;
 border:1px solid {RULE};border-radius:6px;overflow:hidden;color:{INK};line-height:1.55;">
 

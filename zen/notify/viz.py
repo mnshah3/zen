@@ -123,11 +123,17 @@ def _shade(pct: float, cap: float = 2.0) -> tuple[str, str]:
 
 
 def heat_table(rows, label_key="tier", value_key="median_ret",
-               extra_key=None, extra_label="") -> str:
+               extra_key=None, extra_label="", scale: float = 1.0) -> str:
     """A labelled heat grid -- one row per bucket, shaded by its number.
 
     `rows` is a list of dicts or a DataFrame's records. The number is printed
     in every cell, so the shading is an accelerator rather than the message.
+
+    `scale` multiplies each value before display, and defaults to 1.0 meaning
+    the values are ALREADY percentages. An earlier version inferred this from
+    magnitude -- anything below 1.0 was assumed to be a fraction and multiplied
+    by a hundred -- which turned a median five-session return of +0.68% into
+    +68.00% in the email. A caller knows its own units; a heuristic does not.
     """
     if rows is None or len(rows) == 0:
         return ""
@@ -136,9 +142,9 @@ def heat_table(rows, label_key="tier", value_key="median_ret",
     out = []
     for r in recs:
         v = r.get(value_key)
-        v = None if v is None else float(v)
-        bg, fg = _shade(v if v is None else v * (100 if abs(v) < 1 else 1))
-        shown = "—" if v is None else f"{v * (100 if abs(v) < 1 else 1):+.2f}%"
+        v = None if v is None else float(v) * scale
+        bg, fg = _shade(v)
+        shown = "&mdash;" if v is None else f"{v:+.2f}%"
         extra = ""
         if extra_key and r.get(extra_key) is not None:
             extra = (f'<td style="padding:7px 10px;font-size:11px;color:{FAINT};'
