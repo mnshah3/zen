@@ -140,14 +140,26 @@ def main() -> int:
 
 
 def _is_running() -> bool:
-    """Is a backfill process actually alive right now?"""
+    """Is a BACKFILL process alive right now?
+
+    Matched on the command line, not on the image name. Counting python.exe
+    processes reported RUNNING every time, because this script is itself one of
+    them -- a status check that can never report anything but "busy".
+    """
+    import os
     import subprocess
     try:
-        out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq python.exe"],
-                             capture_output=True, text=True, timeout=15).stdout
+        out = subprocess.run(
+            ["wmic", "process", "where", "name='python.exe'",
+             "get", "ProcessId,CommandLine", "/format:csv"],
+            capture_output=True, text=True, timeout=20).stdout
     except Exception:                                            # noqa: BLE001
         return False
-    return out.lower().count("python.exe") > 0
+    me = str(os.getpid())
+    for line in out.splitlines():
+        if "backfill_legacy_financials" in line and f",{me}" not in line:
+            return True
+    return False
 
 
 if __name__ == "__main__":
