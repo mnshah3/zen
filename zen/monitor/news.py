@@ -21,7 +21,7 @@ import requests
 
 from zen.monitor import extract
 from zen.monitor.feeds import FEEDS, JUNK_PATTERNS, NOISE, SECTIONS
-from zen.monitor import themes
+from zen.monitor import marketaux, themes
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +59,11 @@ class Article:
     # every article, not only those in the themes section, so a thematic story
     # ranked into Companies or Geopolitics still shows why it mattered.
     themes: list = field(default_factory=list)
+    # NSE tickers the story is actually about, and the sentiment that came with
+    # them. Populated only for Marketaux stories -- an RSS headline has neither,
+    # and guessing a ticker from a headline is the error this replaces.
+    symbols: list = field(default_factory=list)
+    sentiment: float | None = None
 
     @property
     def key(self) -> str:
@@ -105,6 +110,26 @@ def collect(lookback_hours: int = 24) -> list[Article]:
             ))
             kept += 1
         log.info("%-22s %3d entries, %2d fresh", source, len(parsed.entries), kept)
+
+    # Entity-tagged news, if a key is configured. Trust is high not because the
+    # outlets are better -- they are often the same ones -- but because the
+    # ticker attribution is stated by the provider rather than inferred here.
+    for st in marketaux.collect(hours=max(lookback_hours, 36)):
+        if st.published < cutoff:
+            continue
+        title = re.sub(r"\s+", " ", st.title).strip().lstrip(">|-– ").strip()
+        if not title or any(n in title.lower() for n in NOISE) or _JUNK.search(title):
+            continue
+        out.append(Article(
+            title=title,
+            link=st.url,
+            source=st.source,
+            trust=0.82,
+            published=st.published,
+            summary=st.summary[:400],
+            symbols=st.indian_symbols,
+            sentiment=st.sentiment,
+        ))
     return out
 
 

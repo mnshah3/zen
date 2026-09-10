@@ -216,6 +216,24 @@ def _story(a, explanation: str | None, facts: list[str]) -> str:
     # Theme badge. Placed on the source line rather than above the headline so
     # it reads as provenance -- why this story is in front of him -- instead of
     # competing with the headline for the first glance.
+    # Tickers the provider says the story is about, with its sentiment. These
+    # are stated rather than inferred, so they are shown as fact where a theme
+    # badge is shown as a guess.
+    syms = getattr(a, "symbols", None)
+    if syms:
+        sent = getattr(a, "sentiment", None)
+        mark = ""
+        if sent is not None and abs(sent) >= 0.15:
+            colour, arrow = (UP, "▲") if sent > 0 else (DOWN, "▼")
+            mark = (f'<span style="color:{colour};font-weight:700;'
+                    f'margin-left:5px;">{arrow} {sent:+.2f}</span>')
+        chips = "".join(
+            f'<span style="display:inline-block;background:{INK};color:#ffffff;'
+            f'border-radius:3px;padding:1px 6px;margin:0 4px 0 0;font-size:10px;'
+            f'font-weight:700;letter-spacing:0.03em;">{_esc(s)}</span>'
+            for s in syms[:4])
+        out += f'<div style="margin-top:6px;">{chips}{mark}</div>'
+
     themed = getattr(a, "themes", None)
     if themed:
         name, strength, terms = themed[0]
