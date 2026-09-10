@@ -74,11 +74,23 @@ def main() -> int:
     # through 2,500 documents -- indistinguishable from the job being wedged,
     # which is the one thing this script exists to rule out. The in-flight
     # count comes from the current quarter's last checkpoint.
+    #
+    # The checkpoint only counts as in-flight if it comes AFTER the last
+    # "wrote legacy_*" line. A finished quarter leaves its final checkpoint as
+    # the newest one in the log until the next quarter emits its first, and
+    # counting it during that gap adds documents that are already inside the
+    # written total -- which made the number jump to 34,293 and then fall back
+    # to 31,593 on the next check.
     inflight = 0
     if LOG.exists():
-        tail_marks = re.findall(r"INFO\s+(\d+)/(\d+) fetched", LOG.read_text(errors="ignore"))
-        if tail_marks:
-            inflight = int(tail_marks[-1][0])
+        text = LOG.read_text(errors="ignore")
+        last_write = max((m.end() for m in re.finditer(r"wrote legacy_\S+", text)),
+                         default=-1)
+        marks = [(m.start(), int(m.group(1)))
+                 for m in re.finditer(r"INFO\s+(\d+)/\d+ fetched", text)]
+        live = [n for pos, n in marks if pos > last_write]
+        if live:
+            inflight = live[-1]
 
     pct = 100 * (done + inflight) / expected if expected else 0
     print(f"  documents   {done + inflight:,} of {expected:,}   ({pct:.1f}%)")
