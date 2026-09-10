@@ -115,6 +115,11 @@ def _normalise(df: pd.DataFrame, d: date) -> pd.DataFrame:
     out = out[out["series"].isin(["EQ", "BE"])].copy()
     for c in ["open", "high", "low", "close", "prev_close", "volume", "turnover", "trades"]:
         out[c] = pd.to_numeric(out[c], errors="coerce")
+    # Stored parquet holds datetime64; a plain date object here leaves the
+    # column as `object` and a later concat mixes date with Timestamp. That
+    # mixture is unsortable under pandas 3, so the daily job dies at the point
+    # where new rows meet old ones. Match the stored type at the source.
+    out["date"] = pd.to_datetime(out["date"])
     return out[COLUMNS].reset_index(drop=True)
 
 

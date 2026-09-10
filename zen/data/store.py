@@ -84,6 +84,12 @@ def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
         p.parent.mkdir(parents=True, exist_ok=True)
         if p.exists():
             chunk = pd.concat([pd.read_parquet(p), chunk], ignore_index=True)
+        # Belt and braces: this is where freshly fetched rows meet stored ones,
+        # so it is the one place a dtype mismatch between them can surface. A
+        # mixed date/Timestamp column sorts fine on pandas 2 and raises on
+        # pandas 3, which is a failure worth making impossible rather than
+        # merely fixing upstream.
+        chunk["date"] = pd.to_datetime(chunk["date"])
         chunk = (chunk.drop_duplicates(subset=["date", "symbol"], keep="last")
                       .sort_values(["date", "symbol"]))
         chunk.to_parquet(p, index=False, compression="zstd")
