@@ -200,19 +200,58 @@ def _call(prompt: str, api_key: str) -> str | None:
     return None
 
 
+def _objects(text: str):
+    """Every JSON object in the text, decoded one at a time.
+
+    This is the salvage path, and it is the difference between a brief with
+    explanations and a brief without one. The model answers with an array of
+    twenty-odd objects, roughly eight kilobytes, and when it stops short the
+    array has no closing bracket -- so a parser that needs a complete array
+    throws away every complete object that did arrive. That is exactly what
+    happened on a live send: the model responded, the parse failed, and 0 of 23
+    stories were explained.
+
+    Decoding object by object recovers everything up to the truncation. Using
+    the JSON decoder rather than a regex matters, because an explanation
+    routinely contains braces and escaped quotes that no pattern will bound
+    correctly.
+    """
+    dec = json.JSONDecoder()
+    i = 0
+    while (i := text.find("{", i)) != -1:
+        try:
+            obj, end = dec.raw_decode(text, i)
+        except json.JSONDecodeError:
+            i += 1
+            continue
+        if isinstance(obj, dict):
+            yield obj
+        i = end
+
+
 def _parse(raw: str, expected: int) -> dict[int, str]:
-    """Pull the JSON array out, tolerating a stray markdown fence."""
+    """Pull the explanations out, tolerating fences, prose and truncation."""
     text = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.M).strip()
+
+    items = None
     try:
         items = json.loads(text)
     except json.JSONDecodeError:
         m = re.search(r"\[.*\]", text, re.S)
-        if not m:
-            log.warning("no JSON array in gemini output")
-            return {}
-        try:
-            items = json.loads(m.group(0))
-        except json.JSONDecodeError:
+        if m:
+            try:
+                items = json.loads(m.group(0))
+            except json.JSONDecodeError:
+                items = None
+
+    if items is None:
+        items = list(_objects(text))
+        if items:
+            log.info("gemini: array unparseable, salvaged %d objects from %d chars",
+                     len(items), len(text))
+        else:
+            log.warning("gemini: nothing parseable in %d chars; first 200: %r",
+                        len(text), text[:200])
             return {}
 
     out = {}
