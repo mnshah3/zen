@@ -139,8 +139,13 @@ def _trade_date(an_dt: datetime) -> date:
     was published. Getting this wrong is a one-day look-ahead -- the same shape
     of error that produced a fictitious 30% CAGR once already.
     """
+    # `minute >= 30`, not `> 30`. The strict form left the minute from
+    # 15:30:00 to 15:30:59 attributed to the session that had just ended --
+    # 1,285 filings in this archive, every one of them a one-day look-ahead,
+    # and invisible because the boundary is only wrong for sixty seconds a day.
+    # A filing stamped exactly at the close could not have traded on it.
     d = an_dt.date()
-    if an_dt.hour >= 16 or (an_dt.hour == 15 and an_dt.minute > 30):
+    if an_dt.hour >= 16 or (an_dt.hour == 15 and an_dt.minute >= 30):
         d += timedelta(days=1)
     while d.weekday() >= 5:            # roll Saturday/Sunday to Monday
         d += timedelta(days=1)

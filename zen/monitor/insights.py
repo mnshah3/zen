@@ -28,6 +28,29 @@ def _sessions(con, n: int, upto: date) -> list[date]:
     return sorted(r[0] for r in rows)
 
 
+# Previous close, corrected for corporate actions.
+#
+# `prev_close` in the bhavcopy is the raw previous session's close, NOT adjusted
+# for a split, bonus or consolidation that went ex that morning. Across the
+# archive there are 781 such sessions, and the median return they imply is
+# -52.8%: a five-for-one split reads as an eighty per cent crash. Left alone,
+# the stock is counted as a decliner in breadth, appears in any "biggest
+# losers" list, and prints a fake -80% in the brief.
+#
+# Factors are collapsed by (symbol, ex_date) with a product first, because a
+# split and a bonus routinely share an ex-date in India and applying only one
+# of them is its own error.
+ADJ_JOIN = """
+    LEFT JOIN (
+        SELECT symbol, CAST(ex_date AS DATE) AS xd, exp(sum(ln(factor))) AS f
+        FROM corpactions
+        WHERE factor IS NOT NULL AND factor > 0
+        GROUP BY 1, 2
+    ) ca ON ca.symbol = p.symbol AND ca.xd = CAST(p.date AS DATE)
+"""
+PREV_ADJ = "p.prev_close * coalesce(ca.f, 1)"
+
+
 def breadth_divergence(con, asof: date) -> dict | None:
     """Did the market's biggest names move with or against everything else?
 
@@ -36,9 +59,9 @@ def breadth_divergence(con, asof: date) -> dict | None:
     """
     df = con.execute(
         f"""
-        SELECT symbol, close, prev_close, turnover
-        FROM prices
-        WHERE date = ? AND {EQUITY} AND prev_close > 0 AND turnover > 0
+        SELECT p.symbol, p.close, {PREV_ADJ} AS prev_close, p.turnover
+        FROM prices p {ADJ_JOIN}
+        WHERE p.date = ? AND {EQUITY} AND p.prev_close > 0 AND p.turnover > 0
         """,
         [asof],
     ).df()
@@ -89,11 +112,19 @@ def unusual_volume(con, asof: date, n: int = 6, lookback: int = 60) -> pd.DataFr
         )
         SELECT w.symbol,
                w.close,
-               w.prev_close,
+               -- Same correction as breadth: an unadjusted prev_close puts a
+               -- stock that merely split at the top of any losers list.
+               w.prev_close * coalesce(ca.f, 1) AS prev_close,
                w.volume,
                w.turnover,
                n.med_vol
-        FROM win w JOIN norm n USING (symbol)
+        FROM win w
+        JOIN norm n USING (symbol)
+        LEFT JOIN (
+            SELECT symbol, CAST(ex_date AS DATE) AS xd, exp(sum(ln(factor))) AS f
+            FROM corpactions WHERE factor IS NOT NULL AND factor > 0
+            GROUP BY 1, 2
+        ) ca ON ca.symbol = w.symbol AND ca.xd = CAST(w.date AS DATE)
         WHERE w.date = ?
           AND n.sessions >= ?
           AND n.med_vol > 0
@@ -193,13 +224,13 @@ def breadth_history(con, asof: date, days: int = 30) -> pd.DataFrame:
 
     return con.execute(
         f"""
-        SELECT date,
-               sum(CASE WHEN close > prev_close THEN 1 ELSE 0 END) AS advancers,
-               sum(CASE WHEN close < prev_close THEN 1 ELSE 0 END) AS decliners,
-               median((close / prev_close - 1) * 100)              AS median_ret
-        FROM prices
-        WHERE date BETWEEN ? AND ? AND {EQUITY} AND prev_close > 0
-        GROUP BY date ORDER BY date
+        SELECT p.date AS date,
+               sum(CASE WHEN p.close > {PREV_ADJ} THEN 1 ELSE 0 END) AS advancers,
+               sum(CASE WHEN p.close < {PREV_ADJ} THEN 1 ELSE 0 END) AS decliners,
+               median((p.close / ({PREV_ADJ}) - 1) * 100)           AS median_ret
+        FROM prices p {ADJ_JOIN}
+        WHERE p.date BETWEEN ? AND ? AND {EQUITY} AND p.prev_close > 0
+        GROUP BY p.date ORDER BY p.date
         """,
         [sessions[0], asof],
     ).df()

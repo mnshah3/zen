@@ -25,7 +25,22 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-LOG_PATH = Path("state/trials.jsonl")
+# Anchored to the repository root, not the working directory. A relative path
+# here meant count() returned 0 from any cwd but the repo root -- and it
+# returned it silently, so a study run from anywhere else would report "trials
+# recorded: 1" and every multiple-testing correction downstream would be
+# computed against a search of size one. The ledger is the one thing in this
+# repo that must not be able to fail quietly.
+LOG_PATH = Path(__file__).resolve().parents[2] / "state" / "trials.jsonl"
+
+# Studies that were renamed mid-flight. The trials already burned under the old
+# key are part of the same search and must keep counting against the new one,
+# otherwise a rename launders away the cost of every hypothesis tested before
+# it. order_combination -> order_combination_v2 orphaned ten.
+ALIASES: dict[str, set[str]] = {
+    "order_combination_v2": {"order_combination", "order_combination_v2"},
+    "order_combination": {"order_combination", "order_combination_v2"},
+}
 
 
 def record(study: str, variant: dict, result: dict,
@@ -47,6 +62,7 @@ def record(study: str, variant: dict, result: dict,
 def count(study: str | None = None, path: Path = LOG_PATH) -> int:
     if not path.exists():
         return 0
+    keys = ALIASES.get(study, {study}) if study is not None else None
     n = 0
     with path.open(encoding="utf-8") as f:
         for line in f:
@@ -54,9 +70,20 @@ def count(study: str | None = None, path: Path = LOG_PATH) -> int:
                 e = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if study is None or e.get("study") == study:
+            if keys is None or e.get("study") in keys:
                 n += 1
     return n
+
+
+def lifetime(path: Path = LOG_PATH) -> int:
+    """Every hypothesis this repository has ever tested, across all studies.
+
+    The number that belongs in a published sentence. A per-study count
+    understates the search: the same archive, the same four years of prices and
+    the same 2,500 companies have been interrogated by every study in the log,
+    and the winner of the whole search is what gets written up.
+    """
+    return count(None, path)
 
 
 def _norm_cdf(x: float) -> float:
