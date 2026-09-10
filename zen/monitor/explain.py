@@ -6,8 +6,12 @@ Design rules:
   just with extracted facts instead of prose. Delivery never depends on a
   third party being up.
 
-  One request for the whole brief, not one per story. The free tier is rated
-  per minute, and twenty separate calls would trip it.
+  Batched, not one request per story and not one for the whole brief. A single
+  call covering twenty-three stories came back explaining four and stopping --
+  1,444 characters, nowhere near a token limit, the model simply not doing all
+  of it. One call per story would trip the per-minute rate limit. Six at a time
+  gets complete answers, costs four calls for a normal brief, and confines a
+  failure to six stories instead of the whole email.
 
   The model explains; it does not choose. Ranking and selection stay in
   rules where they can be inspected. What comes back is treated as text to
@@ -25,6 +29,11 @@ import time
 import requests
 
 log = logging.getLogger(__name__)
+
+# Stories per request. Six is small enough that the model reliably answers for
+# every one, and small enough that a failed batch costs six explanations rather
+# than the whole brief.
+BATCH = 6
 
 # Google retires model names without warning -- a pinned list went stale and
 # every model in it returned 404 with "no longer available to new users". The
@@ -278,15 +287,30 @@ def explain(articles: list, api_key: str | None = None) -> dict[int, str]:
     if not articles:
         return {}
 
-    lines = []
-    for i, a in enumerate(articles, start=1):
-        summary = (a.summary or "")[:280]
-        lines.append(f"{i}. [{a.source}] {a.title}\n   {summary}")
+    # Asked for twenty-three explanations at once, the model answered for four
+    # and stopped -- a 1,444 character reply, nowhere near any token limit. It
+    # was not truncated, it was simply not doing all of it. Smaller batches get
+    # complete answers, and a batch that fails costs six explanations rather
+    # than the whole brief.
+    result: dict[int, str] = {}
+    for start in range(0, len(articles), BATCH):
+        batch = articles[start:start + BATCH]
+        lines = []
+        for n, a in enumerate(batch, start=1):
+            summary = (a.summary or "")[:280]
+            lines.append(f"{n}. [{a.source}] {a.title}\n   {summary}")
 
-    raw = _call(PROMPT % "\n".join(lines), api_key)
-    if raw is None:
-        return {}
+        raw = _call(PROMPT % "\n".join(lines), api_key)
+        if raw is None:
+            log.warning("gemini: batch %d-%d unanswered",
+                        start + 1, start + len(batch))
+            continue
+        # Indices come back numbered within the batch; shift them back to the
+        # caller's numbering, which is what the renderer keys on.
+        for n, text in _parse(raw, len(batch)).items():
+            result[start + n] = text
 
-    result = _parse(raw, len(articles))
-    log.info("gemini explained %d of %d stories", len(result), len(articles))
+    log.info("gemini explained %d of %d stories in %d batches",
+             len(result), len(articles),
+             (len(articles) + BATCH - 1) // BATCH)
     return result

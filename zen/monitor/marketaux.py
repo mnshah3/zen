@@ -43,7 +43,7 @@ KEY_ENV = "MARKETAUX_KEY"
 
 # Free tier: 100/day. A brief and a signal check both run daily, so this leaves
 # most of the allowance unspent rather than racing the ceiling.
-MAX_REQUESTS = 24
+MAX_REQUESTS = 14
 PER_REQUEST = 3          # free-tier hard cap; asking for more is silently capped
 
 # Theme -> the search string that finds it. Marketaux's search takes boolean
@@ -299,10 +299,13 @@ def collect(hours: int = 36, themes: bool = True,
         absorb(_get({**common, "countries": "in", "page": page}, budget))
 
     if themes:
+        # One page per theme. Two pages cost fourteen of the day's hundred
+        # requests and returned almost nothing the first page had not, which is
+        # how a single day of testing exhausted the tier and the brief went out
+        # with no entity tags at all.
         for name, query in THEME_QUERIES.items():
-            for page in range(1, 3):
-                absorb(_get({**common, "countries": "in", "search": query,
-                             "page": page}, budget), theme=name)
+            absorb(_get({**common, "countries": "in", "search": query}, budget),
+                   theme=name)
 
     out = sorted(stories.values(), key=lambda s: s.published, reverse=True)
     tagged = sum(1 for s in out if s.indian_symbols)
