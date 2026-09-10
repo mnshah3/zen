@@ -1,44 +1,36 @@
-"""Quarterly financials from NSE's integrated filings.
+"""Quarterly financials: the 2025-onward scheme, and the shared XBRL parser.
 
-WHICH ENDPOINT, AND WHY IT MATTERS
+TWO ENDPOINTS, TWO ERAS
 
-The obvious endpoint, /api/corporates-financial-results, is a dead end: it
-serves a single quarter (every row carries period end 31 Dec 2024) and
-date-filtered queries return only late stragglers. Several other candidates
-fail differently -- /api/corp-info is a route-level 404, /api/quote-equity is
-blocked by the WAF, and /api/annual-reports returns PDF links with no figures.
+/api/integrated-filing-results is the scheme NSE introduced in 2025. It carries
+income statement and balance sheet as tagged Ind-AS XBRL and stamps every
+filing with the moment NSE broadcast it.
 
-/api/integrated-filing-results works. It carries both income statement and
-balance sheet as tagged Ind-AS XBRL, covers roughly 1,700 companies, needs no
-login, and stamps every filing with the moment NSE broadcast it.
+Everything before 2025 comes from the older endpoint, handled in
+financials_legacy.py. That one was written off here as a dead end -- the note
+this docstring used to carry said it "serves a single quarter" -- which was
+wrong. It returns nothing unless `period=Quarterly` is passed, and with it
+returns 87,449 filings back to 2016. Reading a docstring for a conclusion
+someone else reached is how a wrong one survives; this one survived for weeks.
 
-WHAT IT CAN AND CANNOT SUPPORT -- verified, not assumed
+WHAT THE COMBINED ARCHIVE SUPPORTS -- measured, not assumed
 
-Income statement: every quarter from the March 2025 quarter onward.
-Balance sheet: HALF-YEARLY ONLY. March and September filings carry Assets,
-Equity and Borrowings; June and December quarters do not. Confirmed directly
-on Reliance, where debt-to-equity computes to 0.345, 0.331 and 0.344 for the
-three half-years available, and the June and December filings return income
-statement fields alone.
+  Income statement   2018 onward, quarterly, standalone and consolidated
+  Balance sheet      Sep 2022 onward, half-yearly, as SEBI requires
+  Broadcast stamps   throughout, so point-in-time filtering holds
 
-The consequence is a boundary worth stating plainly rather than discovering
-later:
-
-  A LIVE SCREEN works. Debt-to-equity, P/E, EV/EBITDA and margins can be
-  computed today across the covered universe, which is what the strategy's
-  hard filters need.
-
-  A HISTORICAL BACKTEST of fundamental factors does NOT work. Three
-  balance-sheet observations cannot answer whether low leverage predicted
-  returns. Any claim of that kind would have to come from a source we do not
-  have, and inventing one is how a backtest starts lying.
+So a live screen works on everything. A backtest of income-statement factors
+has about 29 quarters; one of leverage or return-on-capital has about 14, which
+is one market regime and worth saying out loud whenever a number comes out of
+it.
 
 POINT-IN-TIME
 
-`broadcast_dt` is when NSE published the filing, not when the period ended.
-A December quarter is published in mid-January; a screen filtering on period
-end would grant itself six weeks of foresight. known_at() filters on
-broadcast_dt for exactly this reason.
+`broadcast_dt` is when NSE published the filing, not when the period ended. A
+December quarter is published in mid-January; a screen filtering on period end
+would grant itself six weeks of foresight. known_at() filters on broadcast_dt,
+and the table keeps every revision so that a query about November cannot see a
+correction published in January.
 
 EXCEPTIONAL ITEMS
 
@@ -134,7 +126,13 @@ CREATE TABLE IF NOT EXISTS financials (
     ebitda DOUBLE, profit_normalised DOUBLE, shares_implied DOUBLE,
     debt_total DOUBLE, debt_to_equity DOUBLE, has_balance_sheet BOOLEAN,
     xbrl_url VARCHAR,
-    PRIMARY KEY (symbol, period_end, consolidated)
+    -- Keyed on the DOCUMENT, not on (symbol, period, basis). A company files a
+    -- quarter and then files it again: 572 keys in this archive, 132 of them
+    -- with revised figures. Keying on the period would keep only the last
+    -- version, and a backtest asking what was known in November would then see
+    -- a correction published in January. Every version is kept and known_at()
+    -- picks the latest one that had actually been broadcast by the as-of date.
+    PRIMARY KEY (xbrl_url)
 );
 """
 
@@ -404,13 +402,35 @@ def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
     return written
 
 
+# Bookkeeping that lives alongside the statements and is not a statement:
+# the filing index, and the ledger of documents NSE confirmed it does not hold.
+# A bare *.parquet glob swept both into the table and the insert failed with
+# "41 columns but 45 values supplied" -- an error about column counts that was
+# really about two files having no business being read at all.
+NON_STATEMENT = ("legacy_index", "legacy_missing")
+
+
+def statement_files(out_dir: Path = PARQUET_DIR) -> list[Path]:
+    """Parquet files that actually hold financial statement rows."""
+    return sorted(p for p in out_dir.glob("*.parquet")
+                  if p.stem not in NON_STATEMENT)
+
+
 def rebuild_from_parquet(con, out_dir: Path = PARQUET_DIR) -> int:
     ensure_schema(con)
-    if not out_dir.exists():
+    files = statement_files(out_dir) if out_dir.exists() else []
+    if not files:
         return 0
     con.execute("DELETE FROM financials")
-    con.execute(f"INSERT INTO financials SELECT * FROM "
-                f"read_parquet('{out_dir}/*.parquet', union_by_name=true)")
+    listed = ", ".join(f"'{p.as_posix()}'" for p in files)
+    # One row per document. The same XBRL can appear in two quarter files when
+    # a filing is re-broadcast across a boundary, so the insert is deduplicated
+    # on the document itself rather than trusting the files not to overlap.
+    con.execute(f"""INSERT INTO financials SELECT * EXCLUDE (rn) FROM (
+        SELECT *, row_number() OVER (PARTITION BY xbrl_url
+                                     ORDER BY broadcast_dt DESC) AS rn
+        FROM read_parquet([{listed}], union_by_name=true)
+        WHERE xbrl_url IS NOT NULL) WHERE rn = 1""")
     return con.execute("SELECT count(*) FROM financials").fetchone()[0]
 
 
