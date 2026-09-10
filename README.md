@@ -2,16 +2,29 @@
 
 Automated research infrastructure for Indian equities.
 
-A survivorship-bias-free price archive going back to 2015, a daily brief that
-connects market news to what the market actually did, and a validation harness
-built to break its own backtests before they can mislead anyone.
+A survivorship-bias-free price archive going back to 2015, quarterly company
+fundamentals from exchange XBRL, a daily brief that connects market news to
+what the market actually did, and a validation harness built to break its own
+backtests before they can mislead anyone.
 
 Runs unattended on GitHub Actions. Places no orders — it produces evidence, and
 the allocation decision stays human.
 
 ```
-5,328,811 rows   ·   2,884 sessions   ·   4,044 securities   ·   Jan 2015 – Sep 2026
+prices        5,334,585 rows · 2,886 sessions · 4,046 securities · Jan 2015 – Sep 2026
+filings         782,485 announcements · 2,537 companies · 2022 – 2026
+fundamentals     87,449 quarterly filings · 2,403 companies · 2018 – 2026
 ```
+
+### Where to start reading
+
+| If you want | Go to |
+|---|---|
+| What it measures and how honestly | [`research/studies/`](research/studies/) |
+| Every hypothesis ever tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
+| The look-ahead detector | [`zen/validation/leak.py`](zen/validation/leak.py) |
+| Why the fundamentals archive exists at all | [`zen/data/financials_legacy.py`](zen/data/financials_legacy.py) |
+| What broke and what it cost | [What this has got wrong](#what-this-has-got-wrong) below |
 
 ---
 
@@ -224,14 +237,47 @@ never the account password), `MAIL_TO`, and optionally `GEMINI_API_KEY`.
 
 ---
 
+## What this has got wrong
+
+The corrections matter more than the findings, so they are kept in public
+rather than quietly patched. Each of these produced a confident, wrong result
+before it was caught.
+
+| Bug | What it did | How it was caught |
+|---|---|---|
+| Control group not liquidity-matched | Baseline was 6.4× more liquid than the event stocks, turning a size effect into a signal. An apparent +20pp edge fell to +6.2pp and five categories became noise | Audit of the control construction |
+| Same-day split **and** bonus | Only one factor applied, a 5× price error on DELPHIFX | Implausible single-session return |
+| Look-ahead detector truncated only prices | A strategy could read tomorrow's filings and still pass | Reading the detector against the table list |
+| Filing categoriser matched substrings | `order` missed "orders"; "expansion" missed "expands". The most important filing in the motivating case study was binned as `other` | Hand-checking a known case |
+| Regex `orders` bucket | Only ~24% were genuine order wins; ~27% were regulatory penalties, the opposite sign. Composition shifted between periods, so the headline "+6.2pp that did not replicate" compared two different things | Checking NSE's own filing subtypes |
+| XBRL parsed a segment context | One division's revenue read as the whole company's, because segment contexts share the parent's period | Fields returning null where figures existed |
+| Backfill skipped quarters on restart | 171 filings became permanent holes no rerun could fill | Diffing written rows against the index |
+| Session re-warm keyed on a counter | Never fired once. Throughput fell from 1.8 docs/sec to 0.09 with no error in the log | Watching a live run stall |
+
+The trial log in [`state/trials.jsonl`](state/trials.jsonl) records every
+hypothesis tested, including abandoned ones, because the count of attempts is
+what determines whether the best result means anything.
+
+---
+
 ## Status
 
-Working: the archive, corporate filings, both briefs, the news-data-filings
-bridge, and look-ahead detection.
+Working: the price archive, corporate filings, quarterly fundamentals, both
+briefs, the news-data-filings bridge, corporate-action adjustment, matched
+controls, the trial log, and look-ahead detection.
 
-Next: quarterly financials from exchange XBRL, then walk-forward backtesting
-with a persistent trial counter, corporate-action adjustment, and
-point-in-time index membership.
+In progress: the point-in-time investable universe, then walk-forward
+backtesting of a fundamental screen.
+
+Known boundaries, stated rather than discovered later:
+
+- Income statements reach back to **2018**; balance sheets only to **Sep 2022**,
+  because that is when SEBI's half-yearly requirement produced tagged data.
+  So leverage and return-on-capital can be screened live but not yet backtested.
+- Announcements begin **2022**, so any news-based factor is limited to a
+  shorter window than the fundamental ones.
+- Promoter pledge percentages are not machine-readable in this archive — only
+  34 filings carry a figure — so that limit is a manual check, not a filter.
 
 The momentum screen currently wired in is a **calibration baseline, not a
 strategy intended for capital**. Momentum is heavily documented and its rough

@@ -33,3 +33,6 @@ preview_*.html
 
 # scratch
 .scratch_fs/
+
+# fundamentals: large, regenerable from NSE, and rewritten on every backfill pass
+data/financials/legacy_missing.parquet
