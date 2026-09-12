@@ -1,6 +1,4 @@
-# Zen
-
-Automated research infrastructure for Indian equities.
+# Zen - Automated research infrastructure for Indian equities.
 
 A survivorship-bias-free price archive going back to 2015, quarterly company
 fundamentals from exchange XBRL, a daily brief that connects market news to
