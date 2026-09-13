@@ -160,11 +160,19 @@ def main() -> int:
     cache = STAGE / "reparsed.parquet"
     if cache.exists():
         fresh = pd.read_parquet(cache)
-        log.info("resuming from %s (%d rows already fetched)", cache.name, len(fresh))
-        todo = stored[~stored["xbrl_url"].isin(fresh["xbrl_url"])]
+        log.info("resuming from %s (%d rows cached)", cache.name, len(fresh))
+        # A transient network failure is cached as "failed", and the first
+        # version of this check skipped anything already present -- so those
+        # rows could never be retried and 877 documents would have stayed
+        # unverified forever. Only "ok", "missing" and "unparsed" are settled
+        # answers. "failed" means try again.
+        settled = fresh[fresh["_outcome"] != "failed"]
+        todo = stored[~stored["xbrl_url"].isin(settled["xbrl_url"])]
         if len(todo):
-            log.info("fetching the remaining %d", len(todo))
-            fresh = pd.concat([fresh, fetch_all(todo, args.workers, args.rate)],
+            retries = len(fresh) - len(settled)
+            log.info("fetching %d (%d of them retries of earlier failures)",
+                     len(todo), retries)
+            fresh = pd.concat([settled, fetch_all(todo, args.workers, args.rate)],
                               ignore_index=True)
             fresh.to_parquet(cache, index=False)
     else:
