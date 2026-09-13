@@ -27,10 +27,18 @@ from zen.data.financials_legacy import document_session
 
 log = logging.getLogger(__name__)
 
-# Fields a screen would actually use. A drift in a field nothing reads is worth
-# knowing about but is not what decides whether to re-fetch.
-CHECKED = ["revenue", "total_income", "ebitda", "pbt", "profit_reported",
-           "profit_normalised", "eps_basic", "equity", "assets", "debt_total"]
+# Every field a difference could hide in, not a chosen ten. The first version
+# of this list omitted other_income and liabilities, and 55 of the 56 real
+# differences turned out to sit in exactly those two. A comparison that picks
+# its own fields can only find what its author already suspected.
+CHECKED = ["revenue", "other_income", "total_income", "materials",
+           "employee_cost", "finance_costs", "depreciation", "other_expenses",
+           "total_expenses", "pbt_before_exceptional", "exceptional_items",
+           "pbt", "tax", "profit_continuing", "profit_reported", "eps_basic",
+           "eps_diluted", "debt_long", "debt_short", "equity", "equity_capital",
+           "other_equity", "assets", "liabilities", "current_assets",
+           "current_liabilities", "noncurrent_assets", "noncurrent_liabilities",
+           "ebitda", "profit_normalised", "debt_total"]
 
 
 def material(old, new, tol: float = 0.01) -> bool:
@@ -73,16 +81,29 @@ def main() -> int:
     log.info("checking %d documents", len(sample))
 
     s = document_session()
-    rows, fetch_fail = [], 0
+    rows, fetch_fail, unparsed = [], 0, 0
 
     for n, (_, old) in enumerate(sample.iterrows(), 1):
+        content = b""
         try:
             r = s.get(old["xbrl_url"], timeout=25)
-            facts = parse_xbrl(r.content) if r.status_code == 200 else {}
+            content = r.content if r.status_code == 200 else b""
         except Exception:                                        # noqa: BLE001
-            facts = {}
-        if not facts:
+            pass
+        if not content:
             fetch_fail += 1
+            continue
+        facts = parse_xbrl(content)
+        if not facts:
+            # The document arrived and the CURRENT parser got nothing from it,
+            # while the old parser produced a stored row. That is the worst
+            # outcome available and the first version of this script booked it
+            # as a network failure and dropped it from the denominator.
+            unparsed += 1
+            rows.append({"symbol": old["symbol"], "period": str(old["period_end"])[:10],
+                         "consolidated": bool(old["consolidated"]),
+                         "n_diff": len(CHECKED), "fields": "ALL (parser returned nothing)",
+                         "old_revenue": old.get("revenue"), "new_revenue": None})
             continue
 
         new = _derive(dict(facts))

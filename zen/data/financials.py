@@ -231,6 +231,9 @@ def parse_xbrl(content: bytes) -> dict:
 
     spans: dict[str, tuple[date, date]] = {}
     instants: dict[str, date] = {}
+    # Contexts whose ONLY dimension is the audit-qualification axis. Used to
+    # fill a tag that has no undimensioned fact at all, never to override one.
+    audited: dict[str, tuple] = {}
     for ctx in root.iter():
         if not (ctx.tag.endswith("}context") or ctx.tag == "context"):
             continue
@@ -239,6 +242,7 @@ def parse_xbrl(content: bytes) -> dict:
             continue
         start = end = inst = None
         dimensioned = False
+        axes = []
         for node in ctx.iter():
             tag = node.tag.split("}")[-1]
             txt = (node.text or "").strip()
@@ -249,6 +253,8 @@ def parse_xbrl(content: bytes) -> dict:
             elif tag == "instant" and txt:
                 inst = txt
             elif tag in ("explicitMember", "typedMember"):
+                axes.append(((node.get("dimension") or "").split(":")[-1],
+                             txt.split(":")[-1]))
                 # A dimensioned context reports one SEGMENT, not the company:
                 # ReportableSegmentsAxis, DetailsOfOtherExpensesAxis and the
                 # rest all carry the same period as the company total, so a
@@ -257,15 +263,40 @@ def parse_xbrl(content: bytes) -> dict:
                 # returned one business division's revenue as if it were the
                 # whole company. Company totals are always undimensioned.
                 dimensioned = True
-        if dimensioned:
-            continue
         try:
             if start and end:
-                spans[cid] = (date.fromisoformat(start), date.fromisoformat(end))
+                period = ("span", date.fromisoformat(start), date.fromisoformat(end))
             elif inst:
-                instants[cid] = date.fromisoformat(inst)
+                period = ("instant", date.fromisoformat(inst))
+            else:
+                continue
         except ValueError:
             continue
+
+        if dimensioned:
+            # One exception, and only one. AuditedOrAdjustedAxis is SEBI's
+            # statement-of-impact-of-audit-qualifications disclosure, not a
+            # business segment: AuditedMember is the company as reported and
+            # AdjustedMember is the same company after the auditor's
+            # qualifications. Some small caps tag Assets and Liabilities under
+            # it and nowhere else, so treating it like a segment discards a
+            # company total that is not in dispute -- PLATIND's two Assets
+            # facts are byte-identical across both members.
+            #
+            # Held as a FALLBACK rather than a preference. Of 114 documents
+            # carrying the axis, 44 have both an undimensioned Assets and an
+            # AuditedMember Assets, and 19 of those disagree -- one reports
+            # undimensioned liabilities of 29.1bn against an audited figure of
+            # 558m that equals its own assets and is plainly a filer error.
+            # Undimensioned wins wherever it exists.
+            if axes == [("AuditedOrAdjustedAxis", "AuditedMember")]:
+                audited[cid] = period
+            continue
+
+        if period[0] == "span":
+            spans[cid] = (period[1], period[2])
+        else:
+            instants[cid] = period[1]
 
     wanted = set()
     if spans:
@@ -291,18 +322,41 @@ def parse_xbrl(content: bytes) -> dict:
         if ref and ref not in declared and ref in ("OneD", "OneI"):
             wanted.add(ref)
 
-    if not wanted:
+    # Audit-axis contexts for the same period, kept separate so they can only
+    # ever fill a gap.
+    fallback = set()
+    a_spans = {c: p for c, p in audited.items() if p[0] == "span"}
+    a_inst = {c: p for c, p in audited.items() if p[0] == "instant"}
+    if a_spans:
+        latest_end = max(p[2] for p in a_spans.values())
+        shortest = min((p[2] - p[1]).days for p in a_spans.values()
+                       if p[2] == latest_end)
+        fallback |= {c for c, p in a_spans.items()
+                     if p[2] == latest_end and (p[2] - p[1]).days == shortest}
+    if a_inst:
+        latest = max(p[1] for p in a_inst.values())
+        fallback |= {c for c, p in a_inst.items() if p[1] == latest}
+
+    if not wanted and not fallback:
         return {}
 
+    def collect(into: dict, refs: set) -> None:
+        for node in root.iter():
+            col = TAGS.get(node.tag.split("}")[-1])
+            if not col or node.get("contextRef") not in refs or not node.text:
+                continue
+            try:
+                into.setdefault(col, float(re.sub(r"[,\s]", "", node.text)))
+            except ValueError:
+                continue
+
     facts: dict[str, float] = {}
-    for node in root.iter():
-        col = TAGS.get(node.tag.split("}")[-1])
-        if not col or node.get("contextRef") not in wanted or not node.text:
-            continue
-        try:
-            facts.setdefault(col, float(re.sub(r"[,\s]", "", node.text)))
-        except ValueError:
-            continue
+    collect(facts, wanted)
+    if fallback:
+        # Second pass only. setdefault means anything already found from an
+        # undimensioned context stands, so this can add a missing figure and
+        # can never replace one.
+        collect(facts, fallback)
     return facts
 
 

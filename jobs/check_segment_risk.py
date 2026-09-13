@@ -29,8 +29,18 @@ from zen.data.financials_legacy import document_session
 
 log = logging.getLogger(__name__)
 
-CHECKED = ["revenue", "total_income", "ebitda", "pbt", "profit_reported",
-           "profit_normalised", "eps_basic", "equity", "assets", "debt_total"]
+# Every field a difference could hide in, not a chosen ten. The first version
+# of this list omitted other_income and liabilities, and 55 of the 56 real
+# differences turned out to sit in exactly those two. A comparison that picks
+# its own fields can only find what its author already suspected.
+CHECKED = ["revenue", "other_income", "total_income", "materials",
+           "employee_cost", "finance_costs", "depreciation", "other_expenses",
+           "total_expenses", "pbt_before_exceptional", "exceptional_items",
+           "pbt", "tax", "profit_continuing", "profit_reported", "eps_basic",
+           "eps_diluted", "debt_long", "debt_short", "equity", "equity_capital",
+           "other_equity", "assets", "liabilities", "current_assets",
+           "current_liabilities", "noncurrent_assets", "noncurrent_liabilities",
+           "ebitda", "profit_normalised", "debt_total"]
 
 
 def context_profile(content: bytes) -> dict:
@@ -125,9 +135,15 @@ def main() -> int:
             if facts:
                 new = _derive(dict(facts))
                 diffs = [c for c in CHECKED if material(old.get(c), new.get(c))]
-                drift.append({"symbol": old["symbol"], "period": prof["period"],
-                              "dimensioned": prof["dimensioned"],
-                              "n_diff": len(diffs), "fields": ",".join(diffs)})
+            else:
+                # Fetched fine, parsed to nothing. That is drift of the worst
+                # kind, not a fetch failure.
+                diffs = list(CHECKED)
+            drift.append({"symbol": old["symbol"], "period": prof["period"],
+                          "dimensioned": prof["dimensioned"],
+                          "n_diff": len(diffs),
+                          "fields": ",".join(diffs) if facts
+                                    else "ALL (parser returned nothing)"})
         if n % 30 == 0:
             log.info("  %d/%d", n, len(sample))
     s.close()
