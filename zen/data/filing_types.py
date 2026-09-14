@@ -1,0 +1,402 @@
+"""Filing categories from NSE's own subtype, not from guessing at the text.
+
+WHY THE REGEX HAD TO GO
+
+Every filing's `subject` begins with NSE's own classification, followed by a
+colon. That prefix is present on 783,505 of 783,510 rows -- 99.999% -- and it is
+what the exchange itself calls the filing. The previous categoriser ignored it
+and pattern-matched the free text instead, which produced an `orders` bucket
+that was roughly a quarter genuine order wins and a quarter regulatory
+penalties. Those have opposite signs. Averaging them and calling the result an
+edge is how a study reaches a confident conclusion about nothing.
+
+TWO VOCABULARIES, AND WHY BOTH ARE MAPPED
+
+NSE changed these labels between 2023 and 2024. "Bagging orders/contract"
+appears only in 2022; "Bagging/Receiving of orders/contracts" only from 2024.
+They are the same event. Mapping only the current names would make 2022 look
+empty of order wins, and a study comparing periods would be comparing its own
+taxonomy rather than the market.
+
+  2022 only                                    2024 onward
+  Bagging orders/contract                      Bagging/Receiving of orders/contracts
+  Awarding orders/contract                     Awarding of order(s)/contract(s)
+  Capacity addition/product launch             Capacity addition, Product launch
+  Sale or disposal of unit/division            Sale or disposal
+  Litigations/Disputes/Regulatory actions      Action(s) taken or orders passed
+
+THE HOLE IN 2023, WHICH NO MAPPING CAN FIX
+
+Order subtypes appear 355 times in 2022 under the old names, ZERO times in 2023,
+and 2,865 times from 2024 under the new ones. The 2023 filings exist, but the
+exchange did not classify them and the free text does not identify them
+reliably. So a clean order-win series runs 2024 onward, and 2024 itself ramps
+from 182 to 1,129 as adoption spread. Anyone measuring order wins before 2024
+is measuring a labelling convention. `USABLE_FROM` records this per category so
+a study cannot quietly reach past it.
+
+SIGN
+
+Each category carries an expected direction. It is not used to score anything --
+it exists so that two categories which move prices in opposite directions can
+never end up in the same bucket again.
+"""
+
+from __future__ import annotations
+
+import re
+from datetime import date
+
+# --------------------------------------------------------------------------
+# Categories, their expected direction, and the first year the data supports.
+# --------------------------------------------------------------------------
+
+SIGN = {
+    "orders": +1,          # winning work
+    "expansion": +1,       # adding capacity, starting production
+    "contraction": -1,     # closing, halting, disrupting
+    "regulatory": -1,      # penalties, litigation, insolvency, default
+    "mna": 0,              # direction depends entirely on terms
+    "capital": 0,          # raising money dilutes and funds growth at once
+    "ratings": 0,          # the subtype does not say which way
+    "results": 0,
+    "guidance": 0,
+    "exchange_query": 0,   # arrives AFTER the move, so it confirms not causes
+    "governance": 0,
+    "corp_action": 0,
+    "routine": 0,
+    "other": 0,
+}
+
+# First year each category can be trusted, measured from when the subtypes that
+# feed it actually appear. Before this, absence means "not labelled", not
+# "did not happen".
+USABLE_FROM = {
+    "orders": 2024,
+    "expansion": 2024,
+    "contraction": 2024,
+    "regulatory": 2024,
+    "mna": 2022,
+    "capital": 2022,
+    "ratings": 2022,
+    "results": 2022,
+    "guidance": 2022,
+    "exchange_query": 2022,
+    "governance": 2022,
+    "corp_action": 2022,
+    "routine": 2022,
+    "other": 2022,
+}
+
+
+def _norm(s: str) -> str:
+    """Collapse the spelling variants NSE uses for the same label.
+
+    "General Updates" and "General updates" are 33,194 and 17,834 rows of the
+    same thing. So are "Loss of Share Certificates" and "Loss of share
+    certificate". Case, trailing plurals and punctuation spacing all vary.
+    """
+    s = (s or "").strip().lower()
+    s = re.sub(r"[‘’']", "", s)
+    s = re.sub(r"[/,\-&()\.]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    # Singularise the last word only; "orders contracts" and "order contract"
+    # are the same label and nothing here depends on plurality.
+    return re.sub(r"s\b", "", s)
+
+
+# Subtype -> category. Written out in full rather than pattern-matched, so the
+# mapping can be read and argued with. Anything absent falls to "other" AND is
+# reported by unmapped(), because a new NSE subtype must surface rather than
+# quietly join the noise.
+_RAW: dict[str, tuple[str, ...]] = {
+    "orders": (
+        "Bagging/Receiving of orders/contracts",
+        "Awarding of order(s)/contract(s)",
+        "Bagging orders/contract",
+        "Awarding orders/contract",
+    ),
+    "expansion": (
+        "Capacity addition",
+        "Capacity addition/product launch",
+        "Commencement of commercial production/operations",
+        "Product launch",
+        "Adoption of new line(s) of business",
+        "Arrangements for strategic, technical, manufacturing, or marketing tie up",
+        "Grant of licenses/regulatory approvals",
+    ),
+    "contraction": (
+        "Postponement of commercial production/operations",
+        "Closure of operations",
+        "Closure of operations of any unit/division",
+        "Disruption of Operations",
+        "Disruption of operations",
+        "Strikes/Lockouts/Disturbances",
+        "Commencement/Postponement of Operations",
+        "Rescission/termination(s)",
+        "Amendment/Termination of awards/contracts",
+    ),
+    "regulatory": (
+        "Action(s) taken or orders passed",
+        "Action(s) initiated or orders passed",
+        "Litigations/Disputes/Regulatory actions",
+        "Pendency of Litigation(s)/dispute(s) or the outcome impacting the Company",
+        "Delay/default in the payment of fines/penalties/dues etc. to authority",
+        "Fraud/Default/Arrest",
+        "Frauds/Default by employees",
+        "Defaults on Payment of Interest/Principal",
+        "One Time Settlement",
+        "One time settlement",
+        "Corporate Insolvency Resolution Process",
+        "CIRP - others",
+        "CIRP - Commencement",
+        "CIRP - Committee meeting updates",
+        "CIRP - Filing of application",
+        "CIRP - Approval of Resolution Plan",
+        "Liquidation",
+        "Suspension of Trading",
+        "Granting/withdrawal/surrender/cancellation/suspension of key licenses/ regulatory approvals",
+        "Effect(s) on listed entity due to changed regulatory framework applicable",
+        "Voluntary Delisting",
+        "Delisting",
+        "CIRP - Filing of Resolution Plan",
+        "CIRP - Change in Resolutional Professional",
+        "CIRP - Revocation/rejection",
+        "Initiation of Forensic Audit",
+        "Final forensic audit report",
+        "Corporate Debt Restructuring",
+        "Public Announcement - Delisting",
+        "Revocation of Suspension of Securities",
+        "Withdrawal/Surrender/Cancellation or suspension of licenses/ regulatory approvals",
+        "Effects - Change in regulatory framework",
+        "One Time Settlement-XBRL",
+    ),
+    "mna": (
+        "Acquisition",
+        "Amalgamation/Merger",
+        "Scheme of Arrangement",
+        "Demerger",
+        "Open Offer",
+        "Public Announcement-Open Offer",
+        "Post Offer Public Announcement",
+        "Sale or disposal",
+        "Sale or disposal of unit/ division/subsidiary",
+        "Diversification/Disinvestment",
+        "Restructuring",
+        "Other Restructuring",
+        "Corp Restructuring - others",
+        "Update-Acquisition/Scheme/Sale/Disposal/Reg30-XBRL",
+        "Slump Sale",
+        "Joint Venture",
+        "Sale or disposal-XBRL",
+    ),
+    "capital": (
+        "Allotment of Securities",
+        "Issue of Securities",
+        "Rights Issue",
+        "Preferential issue",
+        "Preferential Issue",
+        "Qualified Institutional Placement",
+        "Offer for sale",
+        "Conversion",
+        "Increase in Authorised Capital",
+        "Debentures",
+        "Share Warrants",
+        "Issuance/changes in Capital-Others",
+        "Utilisation of Funds",
+        "Monitoring Agency Report",
+        "Redemption",
+        "Options to purchase securities",
+        "Preference Shares",
+        "Capital Reduction",
+        "Institutional Placement Programme",
+        "FCCBs",
+        "FCCB/ FCEB",
+        "Follow-on public issue",
+        "Global Depository Receipts",
+        "Withdrawal of Rights Issue",
+        "Alteration Of Capital and Fund Raising-XBRL",
+        "Payouts- others",
+    ),
+    "ratings": (
+        "Credit Rating",
+        "Credit Rating- Revision",
+        "Credit Rating- New",
+        "Credit Rating- Others",
+    ),
+    "results": (
+        "Financial Result Updates",
+        "Financial Results Updates",
+        "Integrated Filing- Financial",
+        "Clarification - Financial Results",
+        "Clarification- Financial Results",
+        "Reply to Clarification- Financial results",
+        "Reply to Clarification Sought- Financial Results",
+        "Limited Review Report",
+        "Publish Audited Results",
+        "Auditor's report",
+        "Statement on Impact of Audit Qualifications",
+        "Reasons for Delayed/Non-submission of Financial Results",
+        "Declaration for audit reports with unmodified opinion(s)",
+        "Disclosure of Annual financial information (if submitted as part of Annual Report)",
+        "Statement of deviation(s) or variation(s) under Reg. 32",
+        "Consolidated Result Updates - IFRS",
+        "Audit Qualifications/Comments",
+        "Voluntary Revision of Financial statements or Report",
+        "Disclosure of Half yearly financial information (if submitted as part of Half-Yearly Report)",
+        "Disclosure of Valuation report",
+    ),
+    "guidance": (
+        "Investor Presentation",
+        "Transcript of Analysts/Institutional Investor Meet/Con. Call",
+        "Monthly Business Updates",
+        "Analysts/Institutional Investor Meet/Con. Call Updates",
+        "Recording of Analysts/Institutional Investor Meet/Con. Call",
+        "Disclosure of material issue",
+        "Disclosure of other UPSI/material event",
+    ),
+    "exchange_query": (
+        "Spurt in Volume",
+        "Price movement",
+        "News Verification",
+        "Rumour Verification - Regulation 30(11)",
+        "Clarification",
+        "Reply to Clarification Sought",
+        "Clarification sought",
+    ),
+    "governance": (
+        "Appointment", "Resignation", "Cessation", "Retirement", "Demise",
+        "Change in Management", "Change in Director(s)", "Re-appointment",
+        "Change in designation", "Change in Auditors",
+        "Resignation of Independent director", "Resignation of Statutory Auditor",
+        "Resignation of Director/KMP/SMP",
+        "Change in Company Secretary/Compliance Officer",
+        "Change in Directors/ Key Managerial Personnel/ Auditor/ Compliance Officer/ Share Transfer Agent",
+        "Related Party Transaction", "Related Party Transactions",
+        "Integrated Filing- Governance",
+        "Giving guarantees/indemnity/ becoming a surety for third party",
+        "Giving of guarantee/indemnity or becoming surety",
+        "Appointment of Company Secretary and Compliance Officer",
+        "Disc. under Reg.30 of SEBI (SAST) Reg.2011",
+    ),
+    "corp_action": (
+        "Dividend", "Dividend Updates", "Date of payment of dividend",
+        "Bonus", "Stock split", "Split of shares",
+        "Record Date", "Revised Record date", "Cancellation of Record date",
+        "Book Closure", "Revised Book Closure", "Cancellation of Book closure",
+        "Buyback", "Buyback - others", "Buyback - Tender offer",
+        "Buyback - Open Market", "Closure of Buy Back",
+        "Daily Buy Back of securities", "Post Buyback Public Announcement",
+        "Public Announcement - Buyback of Shares",
+        "Disclosure of record date for purpose of distribution",
+        "Forfeiture", "ESOP/ESOS/ESPS", "ESOP/ESPS/SBEB Scheme",
+        "Date of payment of Interest/Principal",
+        "Confirmation of payment of Interest/Principal",
+        "Interest Rates Updates",
+        "Closure of Buyback",
+        "Allotment of ESOP/ESPS",
+        "Cancellation of Dividend",
+    ),
+    "routine": (
+        "Copy of Newspaper Publication", "Newspaper Advertisements",
+        "Loss of Share Certificates", "Loss of share certificate",
+        "Issue of Duplicate Share Certificate",
+        "Trading Window", "Closure of trading window",
+        "Certificate under SEBI (Depositories and Participants) Regulations, 2018",
+        "Shareholders meeting", "Annual General Meeting", "Extra Ordinary Meeting",
+        "Postal Ballot", "Notice Of Shareholders Meetings-XBRL",
+        "NCLT/ Court Convened Meeting", "Extension of Annual General Meeting",
+        "Outcome of Board Meeting", "Board Meeting Intimation",
+        "Board Meeting Adjourned", "Board meeting Cancelled",
+        "Committee Meeting Updates", "Outcome of committee meeting",
+        "Schedule of Analysts/Institutional Investor Meet/Con. Call",
+        "Disclosure under SEBI Takeover Regulations",
+        "Annual Secretarial Compliance Report",
+        "Quarterly Compliance Report on Corporate governance - within 21 days from the end of the quarter",
+        "Code of Conduct under SEBI(PIT) Reg., 2015",
+        "Code of conduct under SEBI (PIT) Regulations",
+        "Disclosure under SEBI (PIT) Reg 2015",
+        "Trading Plan under PIT", "Insider Trading - Others",
+        "Structural Digital Database",
+        "Business Responsibility & Sustainability Report (BRSR)",
+        "Address Change", "Name Change", "Name & Symbol Change",
+        "Name and Symbol Change", "Symbol Change of company",
+        "Amendment to AOA/MOA", "Amendment(s)", "Alteration/revision(s)",
+        "Registrar & Share Transfer Agent Update",
+        "E-mail ID for Investor's Grievance Redressal",
+        "Communication to shareholders as per Reg 30",
+        "Corrigendum", "Addendum", "Withdrawal", "Cancellation",
+        "Annual Disclosure", "Incorporation",
+        "Trading Plan under SEBI (PIT) Regulations",
+        "Trading Plan under SEBI (PIT) Reg., 2015",
+        "Notice of Unitholder meetings",
+        "Outcome of Unitholder meetings",
+        "Adjournment/Reschedule/Postpone",
+        "Intimation of Board Meeting",
+        "Outcome of Board Meeting-XBRL",
+        "Change in Financial Year",
+        "Extension of Financial Year",
+        "Incorporation-XBRL",
+        "Disclosure of all complaints including SCORES complaints received by the InvIT on a quarterly basis",
+    ),
+}
+
+# subtype (normalised) -> category
+TYPE_TO_CATEGORY: dict[str, str] = {
+    _norm(name): cat for cat, names in _RAW.items() for name in names
+}
+
+# Labels that are too vague to carry a signal. Kept separate from "unmapped"
+# so that a genuinely new NSE subtype is distinguishable from one deliberately
+# parked. "Updates" alone is 72,703 rows and says nothing at all.
+VAGUE = {_norm(x) for x in (
+    "Updates", "General Updates", "General updates", "Others",
+    "Press Release", "Press Release (Revised)", "Agreements",
+    "Memorandum of Understanding/Agreements",
+    "Agreements/Contracts/Arrangements/ MOU's PARA A",
+    "Agreements/Contracts/Arrangements/ MOU's PARA B",
+    "Agreements,Contracts,Arrangements,MOU-XBRL",
+)}
+
+
+def subtype(subject: str | None) -> str:
+    """NSE's own label, the part before the first colon."""
+    if not subject:
+        return ""
+    head, sep, _ = subject.partition(": ")
+    return head.strip() if sep else ""
+
+
+def categorise(subject: str | None) -> str:
+    st = _norm(subtype(subject))
+    if not st:
+        return "other"
+    if st in VAGUE:
+        return "other"
+    return TYPE_TO_CATEGORY.get(st, "other")
+
+
+def usable(category: str, when: date) -> bool:
+    """Is this category meaningful on this date, or merely unlabelled?
+
+    Absence of an order filing in 2023 does not mean no company won an order.
+    It means NSE was not labelling them. A study that treats the two the same
+    concludes the signal decayed when the taxonomy changed.
+    """
+    return when.year >= USABLE_FROM.get(category, 2022)
+
+
+def unmapped(subjects) -> dict[str, int]:
+    """Subtypes seen in the data that this module does not know about.
+
+    Run it after every refresh. A silently growing "other" bucket is how a new
+    NSE label disappears from a study without anyone noticing.
+    """
+    from collections import Counter
+    out: Counter = Counter()
+    for s in subjects:
+        st = subtype(s)
+        n = _norm(st)
+        if n and n not in TYPE_TO_CATEGORY and n not in VAGUE:
+            out[st] += 1
+    return dict(out.most_common())
