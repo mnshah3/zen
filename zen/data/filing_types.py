@@ -62,10 +62,23 @@ from datetime import date
 # --------------------------------------------------------------------------
 
 SIGN = {
+    # Each sign below is measured, not assumed. day-0 move against a
+    # liquidity-matched control, 3 sessions, corporate-action adjusted:
+    #   orders +0.854pp (n=1,943)   expansion +0.434pp (n=978)
+    #   contraction -0.175pp (n=201)
+    # Orders then GIVE BACK 0.467pp over the following three sessions, and
+    # only 41.4% are up against 46.5% of controls. The pop is real and so is
+    # the fade; anything acting on an order win has to choose which it is
+    # trading.
     "orders": +1,          # winning work
     "expansion": +1,       # adding capacity, starting production
     "contraction": -1,     # closing, halting, disrupting
-    "regulatory": -1,      # penalties, litigation, insolvency, default
+    # MEASURED, not asserted. Over 3,356 events from 2025, the day-0 move
+    # against a liquidity-matched control is -0.036pp, which is flat. Penalties,
+    # litigation and insolvency filings do not move prices measurably, so the
+    # -1 this carried was an assumption the data does not support. See
+    # jobs/study_category_signs.py.
+    "regulatory": 0,
     "licenses": 0,         # one label covers grants and withdrawals, 17 to 1
     "mna": 0,              # direction depends entirely on terms
     "capital": 0,          # raising money dilutes and funds growth at once
