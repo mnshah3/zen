@@ -25,15 +25,25 @@ taxonomy rather than the market.
   Sale or disposal of unit/division            Sale or disposal
   Litigations/Disputes/Regulatory actions      Action(s) taken or orders passed
 
-THE HOLE IN 2023, WHICH NO MAPPING CAN FIX
+THE HOLE IN 2023, AND WHY IT IS NOT WORTH FILLING
 
 Order subtypes appear 355 times in 2022 under the old names, ZERO times in 2023,
-and 2,865 times from 2024 under the new ones. The 2023 filings exist, but the
-exchange did not classify them and the free text does not identify them
-reliably. So a clean order-win series runs 2024 onward, and 2024 itself ramps
-from 182 to 1,129 as adoption spread. Anyone measuring order wins before 2024
-is measuring a labelling convention. `USABLE_FROM` records this per category so
-a study cannot quietly reach past it.
+and 2,865 times from 2024-09-23 under the new ones. The 2023 filings exist; the
+exchange simply did not classify them.
+
+They are partly recoverable from free text, and that was tested rather than
+assumed. A pattern tuned against the labelled era reaches about 64% recall at
+roughly 90% precision, which sounds usable until you ask WHICH filings it
+recovers: the ones whose subject line carries descriptive prose. That is a
+property of the filer's house style, not of the event. The rescued 2023 bucket
+covers 165 symbols against the 283 that file order wins in a labelled year, with
+ten symbols contributing 27% of the rows. A backtest on it would be measuring
+which companies write informative subject lines.
+
+So the rescue exists for the alert email, where a wrong row costs the reader
+thirty seconds, and is kept out of anything quantitative. The factor's order
+bucket is the labelled one. `USABLE_FROM` records the first trustworthy year
+per category so a study cannot quietly reach past it.
 
 SIGN
 
@@ -56,6 +66,7 @@ SIGN = {
     "expansion": +1,       # adding capacity, starting production
     "contraction": -1,     # closing, halting, disrupting
     "regulatory": -1,      # penalties, litigation, insolvency, default
+    "licenses": 0,         # one label covers grants and withdrawals, 17 to 1
     "mna": 0,              # direction depends entirely on terms
     "capital": 0,          # raising money dilutes and funds growth at once
     "ratings": 0,          # the subtype does not say which way
@@ -68,19 +79,35 @@ SIGN = {
     "other": 0,
 }
 
-# First year each category can be trusted, measured from when the subtypes that
-# feed it actually appear. Before this, absence means "not labelled", not
-# "did not happen".
+# First year each category can be trusted. Before this, absence means "not
+# labelled", not "did not happen".
+#
+# THE CUTOVER IS A SINGLE DAY, NOT A RAMP. Every new-vocabulary subtype begins
+# on 2024-09-23 -- orders, capacity addition, regulatory actions, all of them.
+# Filings under ANY new label between 2024-01-01 and 2024-09-22: zero. An
+# earlier version of this table said 2024, which let a study read eight months
+# of structural zeros as "no orders happened". These are 2025 because 2024 is
+# three months of data attached to nine months of nothing.
+#
+# There is also a cross-sectional problem a year cannot express. In 2024, 107
+# symbols filed order wins under the new labels and 223 filed them under vague
+# ones, overlapping on only 55. Sixty-one per cent of that year's order-filing
+# universe is invisible to any subtype mapping, so 2024 is not merely thin, it
+# is selected.
+#
+# guidance is 2023 because its main subtype is absent from March to November
+# 2022, when the same events were filed under other labels.
 USABLE_FROM = {
-    "orders": 2024,
-    "expansion": 2024,
-    "contraction": 2024,
-    "regulatory": 2024,
+    "orders": 2025,
+    "expansion": 2025,
+    "contraction": 2025,
+    "regulatory": 2025,
+    "licenses": 2025,
     "mna": 2022,
     "capital": 2022,
     "ratings": 2022,
     "results": 2022,
-    "guidance": 2022,
+    "guidance": 2023,
     "exchange_query": 2022,
     "governance": 2022,
     "corp_action": 2022,
@@ -123,7 +150,7 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Product launch",
         "Adoption of new line(s) of business",
         "Arrangements for strategic, technical, manufacturing, or marketing tie up",
-        "Grant of licenses/regulatory approvals",
+        "Commencement/Postponement of Operations",
     ),
     "contraction": (
         "Postponement of commercial production/operations",
@@ -132,7 +159,6 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Disruption of Operations",
         "Disruption of operations",
         "Strikes/Lockouts/Disturbances",
-        "Commencement/Postponement of Operations",
         "Rescission/termination(s)",
         "Amendment/Termination of awards/contracts",
     ),
@@ -154,11 +180,7 @@ _RAW: dict[str, tuple[str, ...]] = {
         "CIRP - Filing of application",
         "CIRP - Approval of Resolution Plan",
         "Liquidation",
-        "Suspension of Trading",
-        "Granting/withdrawal/surrender/cancellation/suspension of key licenses/ regulatory approvals",
         "Effect(s) on listed entity due to changed regulatory framework applicable",
-        "Voluntary Delisting",
-        "Delisting",
         "CIRP - Filing of Resolution Plan",
         "CIRP - Change in Resolutional Professional",
         "CIRP - Revocation/rejection",
@@ -166,10 +188,13 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Final forensic audit report",
         "Corporate Debt Restructuring",
         "Public Announcement - Delisting",
-        "Revocation of Suspension of Securities",
-        "Withdrawal/Surrender/Cancellation or suspension of licenses/ regulatory approvals",
         "Effects - Change in regulatory framework",
         "One Time Settlement-XBRL",
+    ),
+    "licenses": (
+        "Granting/withdrawal/surrender/cancellation/suspension of key licenses/ regulatory approvals",
+        "Withdrawal/Surrender/Cancellation or suspension of licenses/ regulatory approvals",
+        "Grant of licenses/regulatory approvals",
     ),
     "mna": (
         "Acquisition",
@@ -189,6 +214,7 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Slump Sale",
         "Joint Venture",
         "Sale or disposal-XBRL",
+        "Voluntary Delisting",
     ),
     "capital": (
         "Allotment of Securities",
@@ -203,8 +229,6 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Debentures",
         "Share Warrants",
         "Issuance/changes in Capital-Others",
-        "Utilisation of Funds",
-        "Monitoring Agency Report",
         "Redemption",
         "Options to purchase securities",
         "Preference Shares",
@@ -239,7 +263,6 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Reasons for Delayed/Non-submission of Financial Results",
         "Declaration for audit reports with unmodified opinion(s)",
         "Disclosure of Annual financial information (if submitted as part of Annual Report)",
-        "Statement of deviation(s) or variation(s) under Reg. 32",
         "Consolidated Result Updates - IFRS",
         "Audit Qualifications/Comments",
         "Voluntary Revision of Financial statements or Report",
@@ -252,8 +275,6 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Monthly Business Updates",
         "Analysts/Institutional Investor Meet/Con. Call Updates",
         "Recording of Analysts/Institutional Investor Meet/Con. Call",
-        "Disclosure of material issue",
-        "Disclosure of other UPSI/material event",
     ),
     "exchange_query": (
         "Spurt in Volume",
@@ -296,6 +317,9 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Closure of Buyback",
         "Allotment of ESOP/ESPS",
         "Cancellation of Dividend",
+        "Suspension of Trading",
+        "Revocation of Suspension of Securities",
+        "Delisting",
     ),
     "routine": (
         "Copy of Newspaper Publication", "Newspaper Advertisements",
@@ -338,6 +362,9 @@ _RAW: dict[str, tuple[str, ...]] = {
         "Extension of Financial Year",
         "Incorporation-XBRL",
         "Disclosure of all complaints including SCORES complaints received by the InvIT on a quarterly basis",
+        "Utilisation of Funds",
+        "Monitoring Agency Report",
+        "Statement of deviation(s) or variation(s) under Reg. 32",
     ),
 }
 
@@ -350,6 +377,8 @@ TYPE_TO_CATEGORY: dict[str, str] = {
 # so that a genuinely new NSE subtype is distinguishable from one deliberately
 # parked. "Updates" alone is 72,703 rows and says nothing at all.
 VAGUE = {_norm(x) for x in (
+    "Disclosure of other UPSI/material event",
+    "Disclosure of material issue",
     "Updates", "General Updates", "General updates", "Others",
     "Press Release", "Press Release (Revised)", "Agreements",
     "Memorandum of Understanding/Agreements",
@@ -357,6 +386,38 @@ VAGUE = {_norm(x) for x in (
     "Agreements/Contracts/Arrangements/ MOU's PARA B",
     "Agreements,Contracts,Arrangements,MOU-XBRL",
 )}
+
+
+# --------------------------------------------------------------------------
+# The one place a body test is justified.
+# --------------------------------------------------------------------------
+#
+# "Financial Result Updates" runs 2022-01 to 2025-03 and then stops dead: 3,849
+# / 7,782 / 8,225 / 2,158 / ZERO across 2022-2026. From April 2025 NSE folds
+# quarterly results into "Outcome of Board Meeting", which is otherwise routine
+# meeting housekeeping. Left alone, the results category simply ends in April
+# 2025 and nothing raises.
+#
+# Matching a body here is safe in a way the order regex never was, and the
+# difference is whose prose it is. The order regex matched text COMPANIES wrote,
+# which varies by house style. This matches NSE's own generated template.
+# Measured on 2023-24, where both labels coexist: 100.0% recall on 16,007
+# "Financial Result Updates" rows, and it fires on 4 of 16,177 "Outcome of Board
+# Meeting" rows in two years, a 0.02% false rate.
+#
+# The second alternative catches 2022 H2 phrasing, where "Financial Result
+# Updates" is literally zero from August to November 2022 and coverage falls to
+# 5% of the quarter. Without it, results cannot be used before 2023 either.
+RESULTS_BODY = re.compile(
+    r"submitted to the exchange,?\s+the\s+.{0,40}?financial result"
+    r"|(?:considered|approved|consider)[^.]{0,60}?"
+    r"(?:financial result|financial statement)",
+    re.I)
+
+# Subtypes that are results ONLY when the body says so. Everything else filed
+# under them is genuine meeting housekeeping.
+RESULTS_BY_BODY = {_norm(x) for x in
+                   ("Outcome of Board Meeting", "Outcome of Board Meeting-XBRL")}
 
 
 def subtype(subject: str | None) -> str:
@@ -367,10 +428,18 @@ def subtype(subject: str | None) -> str:
     return head.strip() if sep else ""
 
 
+def body(subject: str | None) -> str:
+    """Everything after NSE's label."""
+    _, sep, rest = (subject or "").partition(": ")
+    return rest if sep else ""
+
+
 def categorise(subject: str | None) -> str:
     st = _norm(subtype(subject))
     if not st:
         return "other"
+    if st in RESULTS_BY_BODY and RESULTS_BODY.search(body(subject) or ""):
+        return "results"
     if st in VAGUE:
         return "other"
     return TYPE_TO_CATEGORY.get(st, "other")
