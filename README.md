@@ -10,9 +10,9 @@ It runs unattended on GitHub Actions and emails me two briefs. It places no
 orders. It produces evidence, and I make the decisions.
 
 ```
-prices        5,337,468 rows · 2,887 sessions · 4,047 securities · Jan 2015 to Sep 2026
+prices        5,351,915 rows · 2,892 sessions · 4,060 securities · Jan 2015 to Sep 2026
 filings         783,510 announcements · 2,539 companies · 2022 to 2026
-fundamentals     80,189 quarterly filings · 2,377 companies · 2018 to 2026
+fundamentals    102,711 quarterly filings · 2,377 companies · 2018 to 2026
 ```
 
 ### Where to look first
@@ -20,7 +20,8 @@ fundamentals     80,189 quarterly filings · 2,377 companies · 2018 to 2026
 | If you want | Go to |
 |---|---|
 | What the emails look like | [sample brief](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-brief.html) |
-| Whether the measurements are honest | [`research/studies/`](research/studies/) |
+| The one real result | [What I've found so far](#what-ive-found-so-far) below |
+| Studies, including two I had to retract | [`research/studies/`](research/studies/) |
 | Every hypothesis I've tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
 | The look-ahead detector | [`zen/validation/leak.py`](zen/validation/leak.py) |
 | What I got wrong | [Mistakes](#mistakes) below |
@@ -90,17 +91,17 @@ Companies that delisted, collapsed or got absorbed are just missing from the
 sample. So the strategy only ever gets measured against the survivors, and every
 result comes out better than it was.
 
-It isn't a small effect. This archive holds **4,047 securities** and roughly
-2,900 trade today. That's about **1,150 companies** that existed, were
-tradeable, and appear on no present-day ticker list.
+It isn't a small effect. Counting ordinary equity only, this archive holds
+**3,548 securities** and **2,563** trade today. That's **985 companies** that
+existed, were tradeable, and appear on no present-day ticker list.
 
 The count grows over time, which is what an unbiased sample looks like:
 
-| Date | Securities in the universe |
+| Month | Equity securities trading |
 |------|---------------------------|
-| Mar 2015 | 1,475 |
-| Jun 2023 | 2,015 |
-| Sep 2026 | 2,887 |
+| Mar 2015 | 1,476 |
+| Jun 2023 | 1,880 |
+| Sep 2026 | 2,563 |
 
 It's built from NSE daily bhavcopy files, which record every security that
 traded that day. The universe on any past date is what actually existed then,
@@ -151,6 +152,46 @@ everything downstream of it is worthless.
 This exists because an earlier version of this work reported a 30% CAGR that
 turned out to be a one-day look-ahead bug. I built the harness before the
 strategy this time.
+
+---
+
+## What I've found so far
+
+One result, and it is small. I am listing it here rather than at the end
+because a reader should be able to see what this machinery has actually
+produced without hunting for it.
+
+**Order wins pop, then hand most of it back.**
+
+When an Indian company tells the exchange it has won a contract, the stock
+beats a matched control by **0.85pp on the day**. Over the next three sessions
+it then **underperforms by 0.47pp**, and only **41.4%** of them rise against
+**46.5%** of comparable stocks with no news at all.
+
+So more than half the reaction reverses within three days, and an order-win
+stock is *less* likely to go up over that window than an ordinary one. That is
+profit-taking, and it is the thing worth knowing if you were planning to buy
+into the announcement.
+
+Measured on 1,943 events from 2025, against control stocks matched on the same
+session and similar normal turnover, adjusted for splits and bonuses. One
+window, fixed before I looked.
+
+Two smaller results from the same run. Capacity expansion moves +0.43pp on the
+day and then stops. **Regulatory filings do nothing at all** -- penalties,
+litigation and insolvency notices move the price -0.04pp, which is flat, across
+3,356 events. I had assumed those were bad news and written it into the code.
+They are not, and the code now says so.
+
+There is also an unexplained one. Results filings are followed by a -0.53pp
+move across 24,271 events, the largest effect in the table, and I do not know
+why. It is recorded and left alone rather than turned into a story.
+
+**What I have not found:** anything that constitutes an edge. Volume spikes
+predict nothing. Filing categories are mostly noise. The one earlier result
+that looked promising -- order wins beating the market over months -- turned
+out to be measured on a bucket that was a quarter regulatory penalties, which
+carry the opposite sign. That is in [Mistakes](#mistakes) below.
 
 ---
 
@@ -263,6 +304,10 @@ produced a confident, wrong answer before I caught it.
 | Backfill skipped quarters on restart | 171 filings became permanent holes that no rerun could fill | Diffed written rows against the index |
 | Session re-warm keyed on a counter | Never fired once. Throughput fell from 1.8 docs/sec to 0.09 with no error in the log | Watched a live run stall |
 | Connection reuse turned off | My own fix for the last bug added a TLS handshake to every request. 0.42s per document against 0.12s reusing a connection | Timed both against the same URL |
+| Categorising filings by regex on free text | The `orders` bucket was 14,955 filings, a quarter of them regulatory penalties carrying the opposite sign. NSE labels every filing itself and I ignored it. The correct bucket is 3,220 | Read what was actually in the bucket |
+| Joining filings to prices on equality | `trade_date` is a calendar weekday, which need not be a session the stock traded. 70,506 filings were dropped, skewed towards those filed before long weekends | Counted the join both ways |
+| Adding a column to the data but not the schema | `session_date` went into 783,510 rows and not into the CREATE TABLE. Both daily jobs failed for four days. The same shape had shipped a week earlier in another table | CI, which builds from nothing. A working laptop cannot see it |
+| Trusting my own calibration | I measured a text pattern at 87% recall. Three quarters of the filings I tested it on simply restate their own label, so the pattern was matching the label, not the text. Real recall was 49% | An independent reader checked what the test was actually measuring |
 
 The trial log in [`state/trials.jsonl`](state/trials.jsonl) records every
 hypothesis I've tested, including the ones I abandoned, because how many I tried
@@ -274,23 +319,28 @@ decides whether the best result means anything.
 
 **Working:** the price archive, corporate filings, quarterly fundamentals, both
 emails, the news to data bridge, corporate-action adjustment, matched controls,
-the trial log and look-ahead detection.
+the trial log, look-ahead detection, and schema-parity tests that stop the data
+and the database definitions drifting apart.
 
-**Next:** the point-in-time investable universe, then walk-forward backtesting of
-a fundamental screen.
+**Next:** the point-in-time investable universe -- which stocks were genuinely
+buyable on each past date, including the ones that later died -- then
+walk-forward backtesting of a fundamental screen.
 
-**Limits I'd rather state now than discover later:**
+**Limits I'd rather state than have found:**
 
-- Income statements go back to **2018**. Balance sheets only to **Sep 2022**,
-  because that's when SEBI's half-yearly requirement started producing tagged
-  data. So I can screen on leverage and return on capital today, but I can't
+- Income statements go back to **2018**, balance sheets only to **Sep 2022**,
+  because that is when SEBI's half-yearly requirement started producing tagged
+  data. I can screen on leverage and return on capital today but cannot
   backtest them properly yet.
-- Announcements start in **2022**, so any news-based factor gets a shorter
-  window than the fundamental ones.
-- Promoter pledge percentages aren't machine-readable here. Only 34 filings
+- NSE only began labelling filing types on **2024-09-23**, and the change was a
+  single day rather than a phase-in. Before it, the exchange's own
+  classification does not exist, so a filing study reaching back further is
+  measuring a labelling convention. Each category records its first trustworthy
+  year in code so a study cannot quietly reach past it.
+- Promoter pledge percentages are not machine-readable here. Only 34 filings
   carry a figure, so that limit is a manual check rather than a filter.
 
-The momentum screen wired in at the moment is a **calibration baseline, not a
+The momentum screen currently wired in is a **calibration baseline, not a
 strategy for real money**. Momentum is well documented and I know roughly what
 it should return, so it tests whether the harness reports honestly. If
 validation comes back with an implausible number, the harness is broken. The

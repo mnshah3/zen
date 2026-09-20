@@ -1,5 +1,36 @@
 # Do corporate filings predict returns?
 
+> **SECOND CORRECTION, 14 September 2026. The +6.2 point result below is void,
+> and this time the data was wrong rather than the control.**
+>
+> Every number in this file was measured on filings bucketed by a regex over
+> free text. That bucket held 14,955 filings. Checked against NSE's own
+> classification, roughly a quarter were genuine order wins and **roughly a
+> quarter were regulatory penalties** -- companies being fined or sued, which
+> move a price the other way. Averaging those together produces a number that
+> describes nothing.
+>
+> The exchange labels every filing itself, in the subject line, with complete
+> coverage. I never looked. Using its labels, the real order-win bucket is
+> **3,220 filings, not 14,955** -- the regex was four and a half times
+> over-inclusive.
+>
+> It is worse than a contaminated sample. NSE only began applying these labels
+> on **2024-09-23**, and it was a single-day change rather than a phase-in, so
+> the 2022-23 window this study covers has no reliable order-win data at all.
+> The "+6.2 points that did not replicate later" was comparing two periods that
+> had almost nothing in common.
+>
+> Measured properly on the labelled era, order wins do move prices, but not
+> like this. They gain **0.85pp on the day** against a matched control and then
+> **give back 0.47pp over the next three sessions**, with only 41.4% rising
+> against 46.5% of comparable stocks. A short pop followed by profit-taking,
+> not a multi-month edge. See `jobs/study_category_signs.py`.
+>
+> Kept rather than deleted, because how a plausible number survived two rounds
+> of correction is more useful than the number ever was.
+
+
 > **CORRECTION, 8 September 2026.** An earlier version of this file claimed
 > order wins beat the benchmark 63.2% of the time against a 43.3% baseline,
 > z = +13.4. **That was wrong.** The control group was not comparable: it was
