@@ -157,41 +157,35 @@ strategy this time.
 
 ## What I've found so far
 
-One result, and it is small. I am listing it here rather than at the end
-because a reader should be able to see what this machinery has actually
-produced without hunting for it.
+**Nothing that constitutes an edge yet, and the study that would find one has
+not been run.**
 
-**Order wins pop, then hand most of it back.**
+This project is aimed at long-term investment, so the question that matters is
+whether a company's fundamentals and filings predict multi-year outperformance.
+The long-horizon work I have done so far was run on filing categories that
+turned out to be a quarter regulatory penalties, carrying the opposite sign to
+what I thought I was measuring. Those results are void. See
+[Mistakes](#mistakes).
 
-When an Indian company tells the exchange it has won a contract, the stock
-beats a matched control by **0.85pp on the day**. Over the next three sessions
-it then **underperforms by 0.47pp**, and only **41.4%** of them rise against
-**46.5%** of comparable stocks with no news at all.
+What I do have is calibration, not edge:
 
-So more than half the reaction reverses within three days, and an order-win
-stock is *less* likely to go up over that window than an ordinary one. That is
-profit-taking, and it is the thing worth knowing if you were planning to buy
-into the announcement.
+- **Volume spikes predict negative returns**, and the effect grows with the
+  size of the spike. Measured against liquidity-matched controls.
+- **Only 42.6% of randomly chosen liquid stocks beat the Nifty 500** over
+  twelve months. Any strategy has to clear that bar, not zero.
+- **Regulatory filings move prices by -0.04pp**, which is flat. I had written
+  into the code that they were bad news. They are not.
+- Order wins gain 0.85pp on the day a filing lands and give back 0.47pp over
+  the next three sessions. That is a short-horizon fact about the reaction, and
+  it is here because it corrected a wrong sign in the code. **It says nothing
+  about whether order wins precede multi-year compounding**, which is the
+  actual question and needs a different measurement entirely.
 
-Measured on 1,943 events from 2025, against control stocks matched on the same
-session and similar normal turnover, adjusted for splits and bonuses. One
-window, fixed before I looked.
-
-Two smaller results from the same run. Capacity expansion moves +0.43pp on the
-day and then stops. **Regulatory filings do nothing at all** -- penalties,
-litigation and insolvency notices move the price -0.04pp, which is flat, across
-3,356 events. I had assumed those were bad news and written it into the code.
-They are not, and the code now says so.
-
-There is also an unexplained one. Results filings are followed by a -0.53pp
-move across 24,271 events, the largest effect in the table, and I do not know
-why. It is recorded and left alone rather than turned into a story.
-
-**What I have not found:** anything that constitutes an edge. Volume spikes
-predict nothing. Filing categories are mostly noise. The one earlier result
-that looked promising -- order wins beating the market over months -- turned
-out to be measured on a bucket that was a quarter regulatory penalties, which
-carry the opposite sign. That is in [Mistakes](#mistakes) below.
+**The study that comes next** takes every stock that tripled since 2018, looks
+at what preceded the move, and then inverts it: of all companies showing that
+pattern, what share tripled, against a matched control. Measured on hit rates
+in the tail rather than median returns, because a median is blind to exactly
+the outcome a long-term investor is buying.
 
 ---
 
