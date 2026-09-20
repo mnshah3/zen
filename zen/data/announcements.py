@@ -100,6 +100,13 @@ CREATE TABLE IF NOT EXISTS announcements (
     subject     VARCHAR,
     url         VARCHAR,
     has_xbrl    BOOLEAN,
+    -- The first session this symbol ACTUALLY traded on or after trade_date.
+    -- trade_date comes from the clock alone and rolls an after-hours filing to
+    -- the next calendar weekday, but a weekday need not be a trading day and a
+    -- trading day for the exchange need not be one for the stock. Joining
+    -- prices on trade_date silently drops 70,506 filings, skewed towards those
+    -- filed before long weekends. Null where the symbol never traded again.
+    session_date DATE,
     PRIMARY KEY (an_dt, symbol, subject)
 );
 """
