@@ -36,3 +36,10 @@ preview_*.html
 
 # fundamentals: large, regenerable from NSE, and rewritten on every backfill pass
 data/financials/legacy_missing.parquet
+
+# duckdb spill files and backfill error logs
+.tmp/
+*.err
+
+# study panels: large, rebuilt by the scripts in jobs/
+data/study/*.parquet

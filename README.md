@@ -1,4 +1,4 @@
-# Zen - Automated research infrastructure for Indian equities.
+# Zen: automated research infrastructure for Indian equities
 
 I built this to answer one question properly: if I screen Indian stocks on
 fundamentals, does it actually work? Most retail backtests can't answer that
@@ -10,9 +10,9 @@ It runs unattended on GitHub Actions and emails me two briefs. It places no
 orders. It produces evidence, and I make the decisions.
 
 ```
-prices        5,351,915 rows · 2,892 sessions · 4,060 securities · Jan 2015 to Sep 2026
+prices        5,351,915 rows · 2,892 sessions · 4,060 ticker symbols · Jan 2015 to Sep 2026
 filings         783,510 announcements · 2,539 companies · 2022 to 2026
-fundamentals    102,711 quarterly filings · 2,377 companies · 2018 to 2026
+fundamentals    102,711 quarterly filings · 2,629 companies · 2016 to 2026
 ```
 
 ### Where to look first
@@ -20,9 +20,9 @@ fundamentals    102,711 quarterly filings · 2,377 companies · 2018 to 2026
 | If you want | Go to |
 |---|---|
 | What the emails look like | [sample brief](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-brief.html) |
-| The one real result | [What I've found so far](#what-ive-found-so-far) below |
+| What the research has shown so far | [What I've found so far](#what-ive-found-so-far) below |
 | Studies, including two I had to retract | [`research/studies/`](research/studies/) |
-| Every hypothesis I've tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
+| Every hypothesis I've formally tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
 | The look-ahead detector | [`zen/validation/leak.py`](zen/validation/leak.py) |
 | What I got wrong | [Mistakes](#mistakes) below |
 
@@ -92,10 +92,12 @@ sample. So the strategy only ever gets measured against the survivors, and every
 result comes out better than it was.
 
 It isn't a small effect. Counting ordinary equity only, this archive holds
-**3,548 securities** and **2,563** trade today. That's **985 companies** that
-existed, were tradeable, and appear on no present-day ticker list.
+**3,548 ticker symbols**, and **2,563** of them traded in September 2026. That
+leaves **985 symbols** that were tradeable and are no longer quoted. About 200
+of those are renames of companies that still trade, which leaves roughly
+**780 that genuinely left the market**.
 
-The count grows over time, which is what an unbiased sample looks like:
+The universe on each date is whatever actually traded that day:
 
 | Month | Equity securities trading |
 |------|---------------------------|
@@ -114,7 +116,7 @@ not what made it to now.
 **The database is derived, not stored.** Git tracks one Parquet file a month and
 DuckDB gets rebuilt from them in seconds. Committing a growing binary every day
 would have bloated the repo inside a month. Monthly partitions instead of daily
-cut the file count from about 2,500 to about 140 per decade, and they compress
+cut the file count from about 2,500 to 120 per decade, and they compress
 much better.
 
 **Signals have to argue against themselves.** The `Signal` class won't construct
@@ -157,22 +159,27 @@ strategy this time.
 
 ## What I've found so far
 
-**Nothing that constitutes an edge yet, and the study that would find one has
-not been run.**
+**Nothing that constitutes an edge yet.** The long-horizon studies I have run
+so far either failed proper testing or are unresolved, and I've kept them in
+instead of hiding them.
 
 This project is aimed at long-term investment, so the question that matters is
 whether a company's fundamentals and filings predict multi-year outperformance.
-The long-horizon work I have done so far was run on filing categories that
-turned out to be a quarter regulatory penalties, carrying the opposite sign to
-what I thought I was measuring. Those results are void. See
+My first long-horizon filing study used a category that turned out to be
+about a quarter regulatory penalties, which carry the opposite sign to the
+order wins I thought I was measuring. Those results are void. See
 [Mistakes](#mistakes).
 
-What I do have is calibration, not edge:
+What I do have is baseline measurements, not edge:
 
-- **Volume spikes predict negative returns**, and the effect grows with the
-  size of the spike. Measured against liquidity-matched controls.
-- **Only 42.6% of randomly chosen liquid stocks beat the Nifty 500** over
-  twelve months. Any strategy has to clear that bar, not zero.
+- **Volume spikes may predict negative returns**, growing with the size of the
+  spike, against liquidity-matched controls (stocks with similar trading
+  volume). An audit re-measurement found almost no effect, that disagreement is
+  unresolved, and the spike ratio is still computed on unadjusted volume. See
+  [research/studies/volume_anomaly.md](research/studies/volume_anomaly.md).
+- **Only about 42.6% of randomly chosen liquid stocks beat the Nifty 500** over
+  twelve months. It comes from about 40 entry dates, so the honest range is
+  roughly 38.5% to 46.7%. Any strategy has to clear that bar, not zero.
 - **Regulatory filings move prices by -0.04pp**, which is flat. I had written
   into the code that they were bad news. They are not.
 - Order wins gain 0.85pp on the day a filing lands and give back 0.47pp over
@@ -181,11 +188,19 @@ What I do have is calibration, not edge:
   about whether order wins precede multi-year compounding**, which is the
   actual question and needs a different measurement entirely.
 
-**The study that comes next** takes every stock that tripled since 2018, looks
-at what preceded the move, and then inverts it: of all companies showing that
-pattern, what share tripled, against a matched control. Measured on hit rates
-in the tail rather than median returns, because a median is blind to exactly
-the outcome a long-term investor is buying.
+**The multibagger study found nothing.** I asked whether anything visible at a
+month-end (margins, growth, momentum, size, order and expansion filings)
+predicted a stock tripling over the next two years. The first pass said
+low-margin small caps tripled twice as often. Proper testing took it apart.
+The base rate was wrong, overlapping windows inflated the t-statistics about
+threefold, and the effect turned out to be dispersion: those stocks halve more
+often too, and their average return is no better. Full write-up in
+[research/studies/multibagger.md](research/studies/multibagger.md).
+
+**Next** is testing a few factors that already have published evidence
+behind them, chosen in advance, instead of searching for new patterns. The
+design is written down before any result exists, in
+[research/strategy/v1-spec.md](research/strategy/v1-spec.md).
 
 ---
 
@@ -229,15 +244,16 @@ cron, so strategies never run against a stale archive.
 **Getting the fundamentals took longer than it should have.** I wrote off the
 older NSE endpoint as empty, twice, and it wasn't. It returns nothing unless you
 pass `period=Quarterly`. With that one parameter it returns 87,449 filings going
-back to 2016. That mistake cost about two weeks.
+back to late 2016, and the ones usable for screening start in 2018. That mistake cost about two weeks.
 
 **A stock's real news is filed with the exchange, not written by a journalist.**
 The filing shows up within minutes of a board approving it. A newspaper covers
 it days later, if at all.
 
-Every filing carries `an_dt`, the moment NSE published it, and gets attributed
-to `trade_date`, the first session it could actually affect. A filing at 17:59
-belongs to the next session, not the one that just closed. Getting that
+Every filing carries `an_dt`, the moment NSE published it. Anything published
+after the 15:30 close belongs to the next session, not the one that just ended.
+`session_date` is the first session the stock actually traded after that,
+which is the one the filing could affect. Getting that
 backwards is a one-day look-ahead, the same shape of error that produced the
 fake 30% CAGR.
 
@@ -293,19 +309,20 @@ produced a confident, wrong answer before I caught it.
 | Same-day split and bonus | Only one factor got applied, a 5x price error on DELPHIFX | A single-session return that couldn't be real |
 | Leak detector only truncated prices | A strategy could read tomorrow's filings and still pass | Read the detector against the actual table list |
 | Filing categoriser matched substrings | `order` missed "orders" and "expansion" missed "expands". The most important filing in the case study that started this got binned as `other` | Hand-checked a case I already knew the answer to |
-| The `orders` bucket itself | Only about 24% were real order wins and about 27% were regulatory penalties, the opposite sign. The mix changed between periods, so my headline finding compared two different things | Checked NSE's own filing subtypes |
 | XBRL parser read a segment context | One division's revenue came through as the whole company's, because segment contexts share the parent's period | Fields came back null where I could see figures in the document |
 | Backfill skipped quarters on restart | 171 filings became permanent holes that no rerun could fill | Diffed written rows against the index |
 | Session re-warm keyed on a counter | Never fired once. Throughput fell from 1.8 docs/sec to 0.09 with no error in the log | Watched a live run stall |
 | Connection reuse turned off | My own fix for the last bug added a TLS handshake to every request. 0.42s per document against 0.12s reusing a connection | Timed both against the same URL |
-| Categorising filings by regex on free text | The `orders` bucket was 14,955 filings, a quarter of them regulatory penalties carrying the opposite sign. NSE labels every filing itself and I ignored it. The correct bucket is 3,220 | Read what was actually in the bucket |
+| Categorising filings by regex on free text | The `orders` bucket held 14,955 filings. Only about 24% were real order wins and about 27% were regulatory penalties, the opposite sign. The mix also shifted between periods, so my headline finding compared two different things. NSE labels every filing itself, and on that basis the correct bucket is 3,220 | Checked NSE's own filing subtypes |
 | Joining filings to prices on equality | `trade_date` is a calendar weekday, which need not be a session the stock traded. 70,506 filings were dropped, skewed towards those filed before long weekends | Counted the join both ways |
 | Adding a column to the data but not the schema | `session_date` went into 783,510 rows and not into the CREATE TABLE. Both daily jobs failed for four days. The same shape had shipped a week earlier in another table | CI, which builds from nothing. A working laptop cannot see it |
 | Trusting my own calibration | I measured a text pattern at 87% recall. Three quarters of the filings I tested it on simply restate their own label, so the pattern was matching the label, not the text. Real recall was 49% | An independent reader checked what the test was actually measuring |
 
-The trial log in [`state/trials.jsonl`](state/trials.jsonl) records every
-hypothesis I've tested, including the ones I abandoned, because how many I tried
-decides whether the best result means anything.
+The trial log in [`state/trials.jsonl`](state/trials.jsonl) records the
+hypotheses I've formally tested, including the ones I abandoned, because how
+many I tried decides whether the best result means anything. It doesn't yet
+include about 50 exploratory statistics from piloting the news-reaction study,
+so the true count is higher than the line count.
 
 ---
 
@@ -316,9 +333,10 @@ emails, the news to data bridge, corporate-action adjustment, matched controls,
 the trial log, look-ahead detection, and schema-parity tests that stop the data
 and the database definitions drifting apart.
 
-**Next:** the point-in-time investable universe -- which stocks were genuinely
-buyable on each past date, including the ones that later died -- then
-walk-forward backtesting of a fundamental screen.
+**Next:** a pre-registered backtest of published factors (profitability,
+value, growth, momentum and low volatility) on a point-in-time universe that
+includes the stocks that later died, with 2023 onward held back and tested
+once. The spec is in [research/strategy/v1-spec.md](research/strategy/v1-spec.md).
 
 **Limits I'd rather state than have found:**
 
@@ -330,7 +348,8 @@ walk-forward backtesting of a fundamental screen.
   single day rather than a phase-in. Before it, the exchange's own
   classification does not exist, so a filing study reaching back further is
   measuring a labelling convention. Each category records its first trustworthy
-  year in code so a study cannot quietly reach past it.
+  year in code (`USABLE_FROM` in `zen/data/filing_types.py`). Studies have to
+  apply it themselves, and not all of them do yet.
 - Promoter pledge percentages are not machine-readable here. Only 34 filings
   carry a figure, so that limit is a manual check rather than a filter.
 

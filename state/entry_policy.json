@@ -1,0 +1,191 @@
+{
+  "rule": "open_t0",
+  "reason": "no conditioning variable cleared the 150 bp gate; OOS company spread +54 bp, best characteristic +79 bp, G1 z=+0.55",
+  "measured_on": "2026-09-09",
+  "events": 28624,
+  "companies": 1646,
+  "lifetime_trials": 157,
+  "per_company_timing": {
+    "oos_quintile_spread_bp": 53.9,
+    "monotonicity_rho": 0.4,
+    "G1_z": 0.55,
+    "verdict": "KILL"
+  },
+  "unconditional_entry": {
+    "sample": "S_good",
+    "rule": "R3b open of d0+6",
+    "advantage_vs_B0_bp": 136.7,
+    "reproduced_on_non_event_days_bp": -50.5,
+    "news_only_bp": 187.2,
+    "fill_pct": 100.0,
+    "ci_bp": [
+      72.2,
+      174.0
+    ],
+    "note": "a claim about EVERY good-news event, not about this company; amplitude and timing are separate and must stay separate"
+  },
+  "fill_probability_table": [
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 1,
+      "liq_tercile": 1,
+      "n": 110,
+      "fill_pct": 80.0,
+      "saved_when_filled_pct": 2.69,
+      "missed_fwd_6m_pct": 2.5
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 1,
+      "liq_tercile": 2,
+      "n": 137,
+      "fill_pct": 83.2,
+      "saved_when_filled_pct": 2.33,
+      "missed_fwd_6m_pct": 7.3
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 1,
+      "liq_tercile": 3,
+      "n": 234,
+      "fill_pct": 67.9,
+      "saved_when_filled_pct": 2.15,
+      "missed_fwd_6m_pct": 4.9
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 2,
+      "liq_tercile": 1,
+      "n": 166,
+      "fill_pct": 80.7,
+      "saved_when_filled_pct": 2.94,
+      "missed_fwd_6m_pct": 19.6
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 2,
+      "liq_tercile": 2,
+      "n": 171,
+      "fill_pct": 84.8,
+      "saved_when_filled_pct": 2.49,
+      "missed_fwd_6m_pct": NaN
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 2,
+      "liq_tercile": 3,
+      "n": 141,
+      "fill_pct": 80.1,
+      "saved_when_filled_pct": 2.3,
+      "missed_fwd_6m_pct": 18.0
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 3,
+      "liq_tercile": 1,
+      "n": 196,
+      "fill_pct": 88.8,
+      "saved_when_filled_pct": 2.93,
+      "missed_fwd_6m_pct": NaN
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 3,
+      "liq_tercile": 2,
+      "n": 172,
+      "fill_pct": 88.4,
+      "saved_when_filled_pct": 2.94,
+      "missed_fwd_6m_pct": NaN
+    },
+    {
+      "bid_under_open": "2%",
+      "sigma_tercile": 3,
+      "liq_tercile": 3,
+      "n": 104,
+      "fill_pct": 86.5,
+      "saved_when_filled_pct": 2.61,
+      "missed_fwd_6m_pct": NaN
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 1,
+      "liq_tercile": 1,
+      "n": 110,
+      "fill_pct": 41.8,
+      "saved_when_filled_pct": 5.81,
+      "missed_fwd_6m_pct": 2.5
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 1,
+      "liq_tercile": 2,
+      "n": 137,
+      "fill_pct": 35.8,
+      "saved_when_filled_pct": 5.56,
+      "missed_fwd_6m_pct": 3.9
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 1,
+      "liq_tercile": 3,
+      "n": 234,
+      "fill_pct": 24.4,
+      "saved_when_filled_pct": 5.35,
+      "missed_fwd_6m_pct": 3.4
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 2,
+      "liq_tercile": 1,
+      "n": 166,
+      "fill_pct": 47.0,
+      "saved_when_filled_pct": 6.01,
+      "missed_fwd_6m_pct": 13.7
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 2,
+      "liq_tercile": 2,
+      "n": 171,
+      "fill_pct": 47.4,
+      "saved_when_filled_pct": 5.72,
+      "missed_fwd_6m_pct": 4.7
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 2,
+      "liq_tercile": 3,
+      "n": 141,
+      "fill_pct": 50.4,
+      "saved_when_filled_pct": 5.7,
+      "missed_fwd_6m_pct": 7.7
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 3,
+      "liq_tercile": 1,
+      "n": 196,
+      "fill_pct": 58.2,
+      "saved_when_filled_pct": 5.91,
+      "missed_fwd_6m_pct": -0.1
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 3,
+      "liq_tercile": 2,
+      "n": 172,
+      "fill_pct": 59.9,
+      "saved_when_filled_pct": 6.22,
+      "missed_fwd_6m_pct": -4.0
+    },
+    {
+      "bid_under_open": "5%",
+      "sigma_tercile": 3,
+      "liq_tercile": 3,
+      "n": 104,
+      "fill_pct": 54.8,
+      "saved_when_filled_pct": 5.84,
+      "missed_fwd_6m_pct": -1.8
+    }
+  ]
+}
