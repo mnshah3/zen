@@ -194,6 +194,24 @@ does not prove skill, and this result cannot. It is evidence, not proof, and it
 is the honest kind: one measurement, on data the design never saw, with the
 rules public beforehand.
 
+Four further tests, in
+[research/strategy/v1-verification.md](research/strategy/v1-verification.md),
+put a size on that evidence:
+
+- **Against 2,000 random ten-stock portfolios** drawn from the same universe
+  and run through the same machinery, the strategy lands at the **95th
+  percentile**. 100 of the 2,000 beat it.
+- **Against IIM Ahmedabad's published Indian factors**, the ranking's alpha is
+  9.5% a year at **t = 1.96**, just under the conventional bar, with real value
+  and momentum loadings. Part of the return is factors anyone can buy.
+- **The filters, not the ranking, carry the strongest evidence.** Holding
+  everything that passes them, equally weighted, earns 6.8% a year of alpha at
+  t = 5.54.
+- **Deflated for 193 logged trials**, the probability of genuine skill is
+  **0.78**, against a usual bar of 0.95.
+- **Capacity** is about Rs 50 lakh to Rs 1 crore before the fills stop being
+  realistic.
+
 Two more things the result does not let me hide. The strategy is **down 10.2%
 in 2026** while the same universe is up 7.5%, so this is what a bad patch looks
 like while living through it. And two of the five ranking groups, quality and
