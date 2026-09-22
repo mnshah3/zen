@@ -1,5 +1,19 @@
 # Is the v1 result skill or luck?
 
+> **Correction, 23 September 2026. Parts of this page are wrong.** An
+> independent audit found that the factor regression in section 2 subtracted the
+> risk-free rate twice. Corrected, the strategy's alpha is **4.7% a year at
+> t = 0.99** and the filtered universe's is **1.6% at t = 1.30**, so neither is
+> significant and the conclusion that "the filters matter more than the ranking"
+> is withdrawn. The regression also stops at December 2025, where the IIMA data
+> ends. The deflated Sharpe probability in section 3 depends heavily on a
+> modelling choice and ranges from 0.42 to 0.99. The calendar-year table in
+> section 4 started each year one session late, and the corrected figures differ
+> by up to 1.8 points. This page will be rewritten once the test has been re-run
+> on the complete archive, since the March 2025 quarter is missing for about 600
+> companies.
+
+
 Run on 2026-09-22, after the held-back test, with
 [`jobs/verify_v1.py`](../../jobs/verify_v1.py). Full period, Feb 2019 to
 Sep 2026: strategy 28.3% a year, the same universe equally weighted 21.8%.

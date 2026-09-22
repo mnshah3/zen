@@ -7,8 +7,8 @@ So the first job was building an archive that doesn't cheat, and a test harness
 that tries to break its own results.
 
 The answer, measured once on 3.6 years the design had never seen:
-**29.4% a year against 13.5% for the Nifty 500 including dividends**, and
-20.4% for the same universe equally weighted, with a smaller drawdown than
+**29.3% a year against 13.5% for the Nifty 500 including dividends**, and
+20.5% for the same universe equally weighted, with a smaller drawdown than
 either. The rules were public before the test. [What that does and does not
 prove](#the-result) is below.
 
@@ -171,46 +171,72 @@ market on data it had never seen.**
 The rules were written into
 [research/strategy/v1-spec.md](research/strategy/v1-spec.md) and committed on
 21 September 2026. Everything from 15 February 2023 onward was locked in code
-and run **once**, on 22 September, after the rules were fixed and the code had
-been audited. This is the held-back period, 3.6 years:
+and the selected configuration was run on it on 22 September, after the rules
+were fixed and the code had been audited. Later runs over the same period were
+verification of that one fixed configuration, not new attempts. This is the
+held-back period, 3.6 years, measured from the open of 15 February 2023 to the
+open of 18 September 2026:
 
 | | Return a year | Worst fall |
 |---|---|---|
-| **The strategy** | **29.4%** | **-23.8%** |
-| The same universe, equally weighted | 20.4% | -31.2% |
+| **The strategy** | **29.3%** | **-23.8%** |
+| The same universe, equally weighted | 20.5% | -31.2% |
 | Nifty 500, dividends included | 13.5% | -18.6% |
-| Nifty Midcap 150 | 21.6% | |
-| Nifty Smallcap 250 | 22.1% | |
+| Nifty Midcap 150 | 21.4% | |
+| Nifty Smallcap 250 | 21.9% | |
 
 All three conditions set in advance were met: it beat the equal-weight universe
-by 9.0 points a year, beat the Nifty 500 by 15.9, and the ranking separated the
-best fifth of the universe (32.2% a year) from the worst (8.0%). It did so with
-a smaller drawdown than the same stocks equally weighted.
+by 8.8 points a year, beat the Nifty 500 by 15.8, and over the full period from
+2019 the ranking separated the best fifth of the universe (32.2% a year) from
+the worst (8.0%). It did so with a smaller drawdown than the same stocks
+equally weighted.
 
 **What this is not.** The 90% confidence interval for the margin over the
-equal-weight universe runs from -5.2 to +21.6 points a year, and there is an
-18% chance the true edge is zero or negative. Beating an index over 3.6 years
+equal-weight universe runs from -6.0 to +24.2 points a year, and there is about
+a 16% chance the true edge is zero or negative. Beating an index over 3.6 years
 does not prove skill, and this result cannot. It is evidence, not proof, and it
 is the honest kind: one measurement, on data the design never saw, with the
 rules public beforehand.
 
-Four further tests, in
-[research/strategy/v1-verification.md](research/strategy/v1-verification.md),
-put a size on that evidence:
+**Correction, 23 September 2026.** An independent audit of this result found
+errors in the statistics I published alongside it on 22 September. They were my
+own work, done after the audited build had finished and never checked by anyone
+else. The corrected figures are below, and the full audit is summarised in
+[research/strategy/v1-verification.md](research/strategy/v1-verification.md).
 
-- **Against 2,000 random ten-stock portfolios** drawn from the same universe
-  and run through the same machinery, the strategy lands at the **95th
-  percentile**. 100 of the 2,000 beat it.
-- **Against IIM Ahmedabad's published Indian factors**, the ranking's alpha is
-  9.5% a year at **t = 1.96**, just under the conventional bar, with real value
-  and momentum loadings. Part of the return is factors anyone can buy.
-- **The filters, not the ranking, carry the strongest evidence.** Holding
-  everything that passes them, equally weighted, earns 6.8% a year of alpha at
-  t = 5.54.
-- **Deflated for 193 logged trials**, the probability of genuine skill is
-  **0.78**, against a usual bar of 0.95.
-- **Capacity** is about Rs 50 lakh to Rs 1 crore before the fills stop being
-  realistic.
+What the audit confirmed:
+
+- **The result reproduces.** An independent re-implementation, extended to 2026
+  without sight of the production code, picked the same stocks on all 31
+  rebalance dates and matched the daily portfolio value to fifteen decimal
+  places. A separate rebuild from raw exchange prices matched all 226 trades in
+  the held-back period, 29.45% against 29.43%.
+- **Against 500 random ten-stock portfolios** from the same universe, run through
+  the same machinery, the strategy lands at the **95th percentile**.
+
+What was wrong, and the corrected figure:
+
+- **Factor alpha was overstated.** The regression on IIM Ahmedabad's published
+  Indian factors subtracted the risk-free rate twice. Correctly computed, the
+  strategy's alpha is **4.7% a year at t = 0.99**, and the filtered universe's
+  is 1.6% at t = 1.30. Neither is statistically significant, and the claim I
+  made that "the filters carry the strongest evidence" is withdrawn. Most of
+  the return is exposure to the market and to value and momentum, which are
+  factors anyone can buy.
+- **The deflated Sharpe probability of 0.78 is not a settled number.** It moves
+  between 0.42 and 0.99 depending on a defensible choice of how to estimate the
+  spread of Sharpe ratios across trials. I presented one choice as the answer.
+- **The final-test comparison was on mismatched clocks.** On the specification's
+  own clock, open of 15 February 2023 to open of 18 September 2026, it is
+  **29.3% against 20.5%**, a margin of 8.8 points rather than 9.0. The 90%
+  interval for that margin is **-6.0 to +24.2 points**, with about a 16% chance
+  the true edge is zero or negative.
+- **The archive is missing the March 2025 quarter for about 600 companies.** At
+  three rebalances in 2025 and 2026 that removed roughly a third of the
+  universe. A rough fill suggests the result would have been somewhat better,
+  not worse, but that is an estimate. The missing filings are being fetched and
+  the test re-run on complete data, and that re-run will be published next to
+  the original one-shot result rather than replacing it.
 
 Two more things the result does not let me hide. The strategy is **down 10.2%
 in 2026** while the same universe is up 7.5%, so this is what a bad patch looks
@@ -394,6 +420,7 @@ produced a confident, wrong answer before I caught it.
 | Joining filings to prices on equality | `trade_date` is a calendar weekday, which need not be a session the stock traded. 70,506 filings were dropped, skewed towards those filed before long weekends | Counted the join both ways |
 | Adding a column to the data but not the schema | `session_date` went into 783,510 rows and not into the CREATE TABLE. Both daily jobs failed for four days. The same shape had shipped a week earlier in another table | CI, which builds from nothing. A working laptop cannot see it |
 | Trusting my own calibration | I measured a text pattern at 87% recall. Three quarters of the filings I tested it on simply restate their own label, so the pattern was matching the label, not the text. Real recall was 49% | An independent reader checked what the test was actually measuring |
+| Publishing statistics nobody had checked | After the audited build finished I ran the verification alone and published it the same day. The factor regression subtracted the risk-free rate twice and turned an insignificant alpha (4.7%, t = 0.99) into a nearly significant one (9.5%, t = 1.96), and I built a conclusion on it | A second independent audit, run specifically on the work that had skipped review |
 
 The trial log in [`state/trials.jsonl`](state/trials.jsonl) records the
 hypotheses I've formally tested, including the ones I abandoned, because how
