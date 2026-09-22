@@ -1,0 +1,202 @@
+{
+  "cagr": 0.27498468335823034,
+  "volatility": 0.23499369959783953,
+  "sharpe_rf0": 1.1726382190598699,
+  "max_drawdown": -0.3355977760809462,
+  "calendar_years": {
+    "2019": 0.10778681824878689,
+    "2020": 0.2829836590275796,
+    "2021": 0.9536045057711158,
+    "2022": -0.02521045396227206,
+    "2023": -0.023673582038851726
+  },
+  "start": "2019-02-15",
+  "end": "2023-02-15",
+  "n_returns": 989,
+  "final_multiple": 2.6425296574227457,
+  "turnover_annual": 1.8449428357483115,
+  "turnover_annual_incl_initial": 1.9115587497182864,
+  "episodes": 82,
+  "avg_holding_days": 177.390243902439,
+  "doubled": 4,
+  "open_at_end": 10,
+  "no_trade_exits": 1,
+  "vs": {
+    "universe_ew": {
+      "cagr": 0.22963093910758126,
+      "volatility": 0.21633663662570934,
+      "sharpe_rf0": 1.0839238291582443,
+      "max_drawdown": -0.47898173464207083,
+      "calendar_years": {
+        "2019": -0.0284709416900486,
+        "2020": 0.3260792460408639,
+        "2021": 0.7387226201361201,
+        "2022": 0.06202802396698881,
+        "2023": -0.03903499089569895
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.2861205532057483,
+      "tracking_error": 0.1500890268046735,
+      "information_ratio": 0.27363864436002333,
+      "cagr_diff": 0.045353744250649086
+    },
+    "nifty500": {
+      "cagr": 0.15134515050554054,
+      "volatility": 0.1998458619318855,
+      "sharpe_rf0": 0.8201013449770318,
+      "max_drawdown": -0.3810593207227173,
+      "calendar_years": {
+        "2019": 0.12314538082303295,
+        "2020": 0.1789222020758081,
+        "2021": 0.3159610984964043,
+        "2022": 0.04246205451900931,
+        "2023": -0.0326186389669082
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.7572038421260439,
+      "tracking_error": 0.17395156485740945,
+      "information_ratio": 0.6419530247963194,
+      "cagr_diff": 0.1236395328526898
+    },
+    "midcap150": {
+      "cagr": 0.19447165703566727,
+      "volatility": 0.2023734876669792,
+      "sharpe_rf0": 0.9979563576020448,
+      "max_drawdown": -0.3845224051604903,
+      "calendar_years": {
+        "2019": 0.0856879931385548,
+        "2020": 0.255642209715794,
+        "2021": 0.481597960050999,
+        "2022": 0.03913339144865269,
+        "2023": -0.03009146100007576
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.035651344010722,
+      "tracking_error": 0.15733852896598494,
+      "information_ratio": 0.467798226175433,
+      "cagr_diff": 0.08051302632256307
+    },
+    "smallcap250": {
+      "cagr": 0.1860129003953348,
+      "volatility": 0.21168792756627366,
+      "sharpe_rf0": 0.9290828571286803,
+      "max_drawdown": -0.45488022800787176,
+      "calendar_years": {
+        "2019": 0.027748039408582503,
+        "2020": 0.26459455462961845,
+        "2021": 0.6333592284161349,
+        "2022": -0.026363797196496286,
+        "2023": -0.042714980366348576
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.978598391557922,
+      "tracking_error": 0.15531445207777683,
+      "information_ratio": 0.5079177614731805,
+      "cagr_diff": 0.08897178296289554
+    }
+  },
+  "bootstrap_vs_universe_ew": {
+    "point": 0.046425233791038245,
+    "lo": -0.1568627472325724,
+    "hi": 0.2179170446696449,
+    "level": 0.9,
+    "block": 21,
+    "n_boot": 5000,
+    "p_le_0": 0.3428
+  },
+  "config": {
+    "n": 10,
+    "buffer_mult": 2,
+    "rebalance": "quarterly",
+    "sector_cap": 3,
+    "cost": 0.002,
+    "delist_haircut": 1.0,
+    "wait_sessions": 5,
+    "no_trade_exit": 20,
+    "initial_capital": 500000.0
+  },
+  "label": "N10_buf2x_quarterly_cap3_c0.002_h1",
+  "decision_dates": [
+    "2019-02-15",
+    "2019-06-03",
+    "2019-08-16",
+    "2019-11-15",
+    "2020-02-17",
+    "2020-06-01",
+    "2020-08-17",
+    "2020-11-17",
+    "2021-02-15",
+    "2021-06-01",
+    "2021-08-16",
+    "2021-11-15",
+    "2022-02-15",
+    "2022-06-01",
+    "2022-08-16",
+    "2022-11-15"
+  ],
+  "in_sample_end": "2023-02-15",
+  "universe_median_size": 675.0,
+  "avg_holdings": 10.0,
+  "sector_source_share": {
+    "backfill": 0.439,
+    "none": 0.365,
+    "pit": 0.196
+  },
+  "benchmark_notes": {
+    "nifty": "NSE's official Total Returns Index (gross, tri column of data/external/nifty_tri.parquet) for Nifty 500, Midcap 150 and Smallcap 250; the two opens on the clock are the previous TRI close times the price index's overnight move (Clarification 17)",
+    "universe_ew": "includes dividends and the same costs as the strategy"
+  },
+  "sanity": {
+    "mcap_check": {
+      "D": "2021-02-15",
+      "caps": {
+        "RELIANCE": {
+          "model_cr": 1315528,
+          "reference_cr": 1300000,
+          "ratio": 1.012,
+          "within_20pct": true
+        },
+        "TCS": {
+          "model_cr": 1197295,
+          "reference_cr": 1200000,
+          "ratio": 0.998,
+          "within_20pct": true
+        },
+        "INFY": {
+          "model_cr": 558065,
+          "reference_cr": 560000,
+          "ratio": 0.997,
+          "within_20pct": true
+        }
+      }
+    },
+    "universe_size": {
+      "2019-02-15": 236,
+      "2019-06-03": 501,
+      "2019-08-16": 483,
+      "2019-11-15": 457,
+      "2020-02-17": 473,
+      "2020-06-01": 445,
+      "2020-08-17": 596,
+      "2020-11-17": 622,
+      "2021-02-15": 728,
+      "2021-06-01": 767,
+      "2021-08-16": 887,
+      "2021-11-15": 887,
+      "2022-02-15": 938,
+      "2022-06-01": 910,
+      "2022-08-16": 858,
+      "2022-11-15": 827
+    },
+    "n_extreme_daily_returns": 6,
+    "tcs_dividend_events": 18
+  }
+}

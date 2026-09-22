@@ -33,21 +33,46 @@ CREATE TABLE IF NOT EXISTS prices (
 """
 
 
+# Everything NSE printed that is NOT series EQ or BE (spec Clarification 34).
+# Same columns, separate table: `prices` must stay bit-for-bit what it was, or
+# the pre-registered universe moves. The primary key carries `series`, because
+# one symbol can print in two non-equity series on one session.
+SCHEMA_OTHER = """
+CREATE TABLE IF NOT EXISTS prices_other (
+    date        DATE     NOT NULL,
+    symbol      VARCHAR  NOT NULL,
+    series      VARCHAR  NOT NULL,
+    isin_code   VARCHAR,
+    open        DOUBLE,
+    high        DOUBLE,
+    low         DOUBLE,
+    close       DOUBLE,
+    prev_close  DOUBLE,
+    volume      BIGINT,
+    turnover    DOUBLE,
+    trades      BIGINT,
+    PRIMARY KEY (date, symbol, series)
+);
+"""
+
+
 def connect(path: Path = DB_PATH) -> duckdb.DuckDBPyConnection:
     path.parent.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect(str(path))
     con.execute(SCHEMA)
+    con.execute(SCHEMA_OTHER)
     return con
 
 
-def upsert(con: duckdb.DuckDBPyConnection, df: pd.DataFrame) -> int:
+def upsert(con: duckdb.DuckDBPyConnection, df: pd.DataFrame,
+           table: str = "prices") -> int:
     """Insert rows, ignoring days already stored. Safe to re-run."""
     if df.empty:
         return 0
     con.register("incoming", df)
-    before = con.execute("SELECT count(*) FROM prices").fetchone()[0]
-    con.execute("INSERT OR IGNORE INTO prices SELECT * FROM incoming")
-    after = con.execute("SELECT count(*) FROM prices").fetchone()[0]
+    before = con.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+    con.execute(f"INSERT OR IGNORE INTO {table} SELECT * FROM incoming")
+    after = con.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
     con.unregister("incoming")
     return after - before
 
@@ -67,9 +92,14 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
 
 
 PARQUET_DIR = Path("data/daily")
+# Deliberately NOT under data/daily: several jobs and the schema-parity test
+# glob data/daily/**/*.parquet as "the price archive", and these rows must
+# never reach it (Clarification 34).
+PARQUET_DIR_OTHER = Path("data/daily_other")
 
 
-def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
+def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR,
+                  key: tuple[str, ...] = ("date", "symbol")) -> list[Path]:
     """One parquet per calendar month.
 
     Monthly rather than daily: ~130 files for a decade instead of ~2,500, and
@@ -90,19 +120,28 @@ def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
         # pandas 3, which is a failure worth making impossible rather than
         # merely fixing upstream.
         chunk["date"] = pd.to_datetime(chunk["date"])
-        chunk = (chunk.drop_duplicates(subset=["date", "symbol"], keep="last")
-                      .sort_values(["date", "symbol"]))
+        chunk = (chunk.drop_duplicates(subset=list(key), keep="last")
+                      .sort_values(list(key)))
         chunk.to_parquet(p, index=False, compression="zstd")
         written.append(p)
     return written
 
 
 def rebuild_from_parquet(con: duckdb.DuckDBPyConnection,
-                         out_dir: Path = PARQUET_DIR) -> int:
+                         out_dir: Path = PARQUET_DIR,
+                         table: str = "prices") -> int:
     """Recreate the whole archive from committed parquet files."""
     pattern = str(out_dir / "**" / "*.parquet")
-    con.execute("DELETE FROM prices")
+    if not list(Path(out_dir).glob("**/*.parquet")):
+        return 0
+    con.execute(f"DELETE FROM {table}")
     con.execute(
-        f"INSERT INTO prices SELECT * FROM read_parquet('{pattern}', union_by_name=true)"
+        f"INSERT INTO {table} SELECT * FROM read_parquet('{pattern}', union_by_name=true)"
     )
-    return con.execute("SELECT count(*) FROM prices").fetchone()[0]
+    return con.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+
+
+def rebuild_other_from_parquet(con: duckdb.DuckDBPyConnection,
+                               out_dir: Path = PARQUET_DIR_OTHER) -> int:
+    """Recreate `prices_other` (the non-EQ/BE series) from parquet."""
+    return rebuild_from_parquet(con, out_dir, "prices_other")

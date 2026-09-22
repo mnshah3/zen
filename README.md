@@ -6,6 +6,12 @@ honestly, because they test against the companies that are still listed today.
 So the first job was building an archive that doesn't cheat, and a test harness
 that tries to break its own results.
 
+The answer, measured once on 3.6 years the design had never seen:
+**29.4% a year against 13.5% for the Nifty 500 including dividends**, and
+20.4% for the same universe equally weighted, with a smaller drawdown than
+either. The rules were public before the test. [What that does and does not
+prove](#the-result) is below.
+
 It runs unattended on GitHub Actions and emails me two briefs. It places no
 orders. It produces evidence, and I make the decisions.
 
@@ -20,8 +26,8 @@ fundamentals    102,711 quarterly filings · 2,629 companies · 2016 to 2026
 | If you want | Go to |
 |---|---|
 | What the emails look like | [sample brief](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-brief.html) |
-| What the research has shown so far | [What I've found so far](#what-ive-found-so-far) below |
-| Studies, including two I had to retract | [`research/studies/`](research/studies/) |
+| **The result, and what it does not prove** | [The result](#the-result) below |
+| The rules, fixed before the test | [`research/strategy/v1-spec.md`](research/strategy/v1-spec.md) |
 | Every hypothesis I've formally tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
 | The look-ahead detector | [`zen/validation/leak.py`](zen/validation/leak.py) |
 | What I got wrong | [Mistakes](#mistakes) below |
@@ -157,50 +163,103 @@ strategy this time.
 
 ---
 
-## What I've found so far
+## The result
 
-**Nothing that constitutes an edge yet.** The long-horizon studies I have run
-so far either failed proper testing or are unresolved, and I've kept them in
-instead of hiding them.
+**A fundamental screen, committed to this repo before it was tested, beat the
+market on data it had never seen.**
 
-This project is aimed at long-term investment, so the question that matters is
-whether a company's fundamentals and filings predict multi-year outperformance.
-My first long-horizon filing study used a category that turned out to be
-about a quarter regulatory penalties, which carry the opposite sign to the
-order wins I thought I was measuring. Those results are void. See
-[Mistakes](#mistakes).
+The rules were written into
+[research/strategy/v1-spec.md](research/strategy/v1-spec.md) and committed on
+21 September 2026. Everything from 15 February 2023 onward was locked in code
+and run **once**, on 22 September, after the rules were fixed and the code had
+been audited. This is the held-back period, 3.6 years:
 
-What I do have is baseline measurements, not edge:
+| | Return a year | Worst fall |
+|---|---|---|
+| **The strategy** | **29.4%** | **-23.8%** |
+| The same universe, equally weighted | 20.4% | -31.2% |
+| Nifty 500, dividends included | 13.5% | -18.6% |
+| Nifty Midcap 150 | 21.6% | |
+| Nifty Smallcap 250 | 22.1% | |
 
-- **Volume spikes may predict negative returns**, growing with the size of the
-  spike, against liquidity-matched controls (stocks with similar trading
-  volume). An audit re-measurement found almost no effect, that disagreement is
-  unresolved, and the spike ratio is still computed on unadjusted volume. See
-  [research/studies/volume_anomaly.md](research/studies/volume_anomaly.md).
+All three conditions set in advance were met: it beat the equal-weight universe
+by 9.0 points a year, beat the Nifty 500 by 15.9, and the ranking separated the
+best fifth of the universe (32.2% a year) from the worst (8.0%). It did so with
+a smaller drawdown than the same stocks equally weighted.
+
+**What this is not.** The 90% confidence interval for the margin over the
+equal-weight universe runs from -5.2 to +21.6 points a year, and there is an
+18% chance the true edge is zero or negative. Beating an index over 3.6 years
+does not prove skill, and this result cannot. It is evidence, not proof, and it
+is the honest kind: one measurement, on data the design never saw, with the
+rules public beforehand.
+
+Two more things the result does not let me hide. The strategy is **down 10.2%
+in 2026** while the same universe is up 7.5%, so this is what a bad patch looks
+like while living through it. And two of the five ranking groups, quality and
+low volatility, contributed nothing in either period. Removing them now would
+be fitting to the answer, so they stay until a new specification is written and
+tested from scratch.
+
+### What the strategy actually is
+
+At each quarterly date, a few weeks after the results deadline so the numbers
+are fresh:
+
+**Filters** (a stock must pass all of them): ordinary equity that traded
+recently, at least Rs 20 lakh of daily turnover, at least 200 sessions traded
+in the past year, not a bank, NBFC or insurer, four consecutive quarters of
+results already published, profitable over those four quarters, and a
+computable market capitalisation. That takes about 2,000 traded symbols down to
+roughly 830.
+
+**Ranking** (five groups, equally weighted, no tuning): profitability and its
+stability, revenue and profit growth, earnings and sales yield, 12-month
+momentum skipping the latest month, and low volatility.
+
+**Portfolio:** the best 10, at most 3 from any sector, equal weighted, a
+holding kept while it stays inside the top 20, 0.20% cost charged per side,
+dividends credited as cash.
+
+Full definitions, including every ambiguity resolved during the build and the
+date it was resolved, are in the specification.
+
+### How it was checked
+
+- **Two engines.** One production engine and one independent re-implementation,
+  written from the specification without sight of each other. They agree on
+  every stock, every date and every return.
+- **Four audits**, for look-ahead, survivorship, trade accounting and
+  statistics. They raised 17 findings and an independent sceptic had to
+  reproduce each one before it was accepted. 16 were real and were fixed,
+  including share counts that were wrong by 100x, a lender filter that used
+  today's list of lenders, and companies that changed ticker being treated as
+  dead.
+- **A cross-check against published data.** Our momentum factor correlates 0.72
+  to 0.81 with IIM Ahmedabad's published Indian factor returns.
+- **Selection by rule.** 36 portfolio variants were run in-sample, and the
+  plateau rule picked one before the held-back data was unlocked. It picked the
+  configuration that was written down first.
+- **181 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
+  including every failure below.
+
+### What came before, and failed
+
+Kept because they are the reason the result above is worth anything.
+
+- **The multibagger study found nothing.** Low-margin small caps looked like
+  they tripled twice as often. The base rate was wrong, overlapping windows
+  inflated the statistics threefold, and the effect turned out to be
+  dispersion: those stocks halve more often too.
+  [Write-up](research/studies/multibagger.md).
+- **A filing study was void**: the `orders` category turned out to be about a
+  quarter regulatory penalties, carrying the opposite sign.
+- **Volume spikes may predict negative returns**, but an audit re-measurement
+  found almost no effect and the disagreement is unresolved.
+  [Write-up](research/studies/volume_anomaly.md).
 - **Only about 42.6% of randomly chosen liquid stocks beat the Nifty 500** over
-  twelve months. It comes from about 40 entry dates, so the honest range is
-  roughly 38.5% to 46.7%. Any strategy has to clear that bar, not zero.
-- **Regulatory filings move prices by -0.04pp**, which is flat. I had written
-  into the code that they were bad news. They are not.
-- Order wins gain 0.85pp on the day a filing lands and give back 0.47pp over
-  the next three sessions. That is a short-horizon fact about the reaction, and
-  it is here because it corrected a wrong sign in the code. **It says nothing
-  about whether order wins precede multi-year compounding**, which is the
-  actual question and needs a different measurement entirely.
-
-**The multibagger study found nothing.** I asked whether anything visible at a
-month-end (margins, growth, momentum, size, order and expansion filings)
-predicted a stock tripling over the next two years. The first pass said
-low-margin small caps tripled twice as often. Proper testing took it apart.
-The base rate was wrong, overlapping windows inflated the t-statistics about
-threefold, and the effect turned out to be dispersion: those stocks halve more
-often too, and their average return is no better. Full write-up in
-[research/studies/multibagger.md](research/studies/multibagger.md).
-
-**Next** is testing a few factors that already have published evidence
-behind them, chosen in advance, instead of searching for new patterns. The
-design is written down before any result exists, in
-[research/strategy/v1-spec.md](research/strategy/v1-spec.md).
+  twelve months, with an honest range of 38.5% to 46.7%. That, not zero, is the
+  bar any strategy has to clear.
 
 ---
 

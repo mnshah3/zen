@@ -1,0 +1,57 @@
+name: 4. daily indices
+
+# NSE index closes (the benchmarks) and the derived total-return series.
+#
+# This workflow did not exist before 2026-09-21. The index archive had been
+# backfilled once by hand and nothing scheduled jobs.update_indices, so the
+# benchmarks froze at 2026-09-07 while prices kept updating. It runs on its own
+# rather than inside "1. daily prices" so that an index failure turns this run
+# red without blocking the price commit or the signal check chained off it.
+# update_indices exits non-zero when the index archive trails prices by more
+# than two sessions, so staleness fails loudly instead of sitting unnoticed.
+
+on:
+  schedule:
+    # 14:15 UTC = 19:45 IST: after the 13:30 UTC price run, and after NSE has
+    # posted the day's ind_close_all file.
+    - cron: "15 14 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      # The DuckDB file is derived and never committed, so rebuild it first.
+      - run: python -m jobs.rebuild_db
+
+      - name: fetch index closes
+        run: python -m jobs.update_indices --days 7
+
+      - name: derive total-return series
+        if: ${{ !cancelled() }}
+        run: python -m zen.data.index_tri
+
+      # Commit whatever was fetched even if the staleness check failed, so a
+      # partial catch-up is kept and the next run starts from it.
+      - name: commit new data
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          git add data/indices
+          git diff --staged --quiet && exit 0
+          git commit -m "data: indices $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main
+          git push

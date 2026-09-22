@@ -39,6 +39,11 @@ HEADERS = {
 COLUMNS = ["date", "symbol", "series", "isin_code", "open", "high", "low",
            "close", "prev_close", "volume", "turnover", "trades"]
 
+# The two series the universe is built from (spec rule 1). Everything else NSE
+# prints -- BZ and the other trade-for-trade lines, SM/ST (SME), GB/GS/TB
+# (government paper), N* (bonds), rights entitlements -- goes to `prices_other`.
+EQUITY_SERIES = ("EQ", "BE")
+
 
 def _session() -> requests.Session:
     """NSE rejects bare requests; prime cookies against the homepage first."""
@@ -74,12 +79,33 @@ def _file_date_matches(df: pd.DataFrame, d: date) -> bool:
     return (day in raw and mon in raw) or d.isoformat() in raw
 
 
+def split_series(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Split a normalised bhavcopy into (EQ/BE, everything else).
+
+    EQ is normal equity and BE is trade-to-trade; those two are the archive
+    (`prices`) the universe is built from, and spec rule 1 names them.
+
+    The rest used to be discarded at parse time, and that made the 20-session
+    no-trade exit fire on stocks that were still trading: a stock moved to the
+    BZ (trade-for-trade) series keeps trading every day but vanishes from
+    `prices`. PTC (Oct-Dec 2022), GMBREW and POKARNA (Dec 2020-Jan 2021) were
+    all force-sold that way while printing real prices in BZ. They are kept in
+    a SEPARATE table (`prices_other`) so the universe and every measure read
+    exactly the same rows as before, and only the exit rule looks wider
+    (spec Clarification 34).
+    """
+    eq = df["series"].isin(EQUITY_SERIES)
+    return df[eq].reset_index(drop=True), df[~eq].reset_index(drop=True)
+
+
 def _normalise(df: pd.DataFrame, d: date) -> pd.DataFrame:
-    """Map either NSE layout onto COLUMNS, equity series only.
+    """Map either NSE layout onto COLUMNS, every series kept.
 
     The date column is taken from the requested date rather than parsed out of
     the file. NSE's own stamp formatting is not stable across days, and the
     date we asked for is authoritative anyway.
+
+    Callers split the result with `split_series`.
     """
     df.columns = [c.strip() for c in df.columns]
 
@@ -111,8 +137,7 @@ def _normalise(df: pd.DataFrame, d: date) -> pd.DataFrame:
             "trades": df.get("TOTALTRADES"),
         })
 
-    # EQ = normal equity, BE = trade-to-trade. Both are real equity lines.
-    out = out[out["series"].isin(["EQ", "BE"])].copy()
+    out = out.copy()
     for c in ["open", "high", "low", "close", "prev_close", "volume", "turnover", "trades"]:
         out[c] = pd.to_numeric(out[c], errors="coerce")
     # Stored parquet holds datetime64; a plain date object here leaves the

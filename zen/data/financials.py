@@ -480,9 +480,15 @@ def rebuild_from_parquet(con, out_dir: Path = PARQUET_DIR) -> int:
     # One row per document. The same XBRL can appear in two quarter files when
     # a filing is re-broadcast across a boundary, so the insert is deduplicated
     # on the document itself rather than trusting the files not to overlap.
+    # 813 documents appear twice with the same figures but different period
+    # ends (almost always one year or one quarter apart, e.g. a Mar-2018 filing
+    # broadcast in May 2018 also stored as 2017-03-31, one second later). The
+    # copy with the LATEST period_end is the document's own period; the other
+    # is a mislabel. Ordering on broadcast_dt alone picked the mislabel in 685
+    # cases and was arbitrary in 150 exact ties (strategy v1 Clarification 22).
     con.execute(f"""INSERT INTO financials SELECT * EXCLUDE (rn) FROM (
         SELECT *, row_number() OVER (PARTITION BY xbrl_url
-                                     ORDER BY broadcast_dt DESC) AS rn
+                                     ORDER BY period_end DESC, broadcast_dt DESC) AS rn
         FROM read_parquet([{listed}], union_by_name=true)
         WHERE xbrl_url IS NOT NULL) WHERE rn = 1""")
     return con.execute("SELECT count(*) FROM financials").fetchone()[0]

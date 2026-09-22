@@ -1,0 +1,168 @@
+{
+  "mcap_check": {
+    "D": "2021-02-15",
+    "caps": {
+      "RELIANCE": {
+        "model_cr": 1315528,
+        "reference_cr": 1300000,
+        "ratio": 1.012,
+        "within_20pct": true
+      },
+      "TCS": {
+        "model_cr": 1197295,
+        "reference_cr": 1200000,
+        "ratio": 0.998,
+        "within_20pct": true
+      },
+      "INFY": {
+        "model_cr": 558065,
+        "reference_cr": 560000,
+        "ratio": 0.997,
+        "within_20pct": true
+      }
+    }
+  },
+  "universe_size": {
+    "2019-02-15": 236,
+    "2019-06-03": 501,
+    "2019-08-16": 483,
+    "2019-11-15": 457,
+    "2020-02-17": 473,
+    "2020-06-01": 445,
+    "2020-08-17": 596,
+    "2020-11-17": 622,
+    "2021-02-15": 728,
+    "2021-06-01": 767,
+    "2021-08-16": 887,
+    "2021-11-15": 887,
+    "2022-02-15": 938,
+    "2022-06-01": 910,
+    "2022-08-16": 858,
+    "2022-11-15": 827
+  },
+  "extreme_daily_returns": [
+    {
+      "date": "2019-08-06",
+      "symbol": "GFLLIMITED",
+      "ret": -0.8910711244820344,
+      "prev_adj_close": 880.85,
+      "adj_close": 95.95
+    },
+    {
+      "date": "2019-08-19",
+      "symbol": "AGI",
+      "ret": -0.7370662124760485,
+      "prev_adj_close": 234.85,
+      "adj_close": 61.75
+    },
+    {
+      "date": "2020-01-21",
+      "symbol": "SUVEN",
+      "ret": -0.9470890694974291,
+      "prev_adj_close": 301.45,
+      "adj_close": 15.95
+    },
+    {
+      "date": "2020-03-06",
+      "symbol": "BORORENEW",
+      "ret": -0.7359639830508475,
+      "prev_adj_close": 188.8,
+      "adj_close": 49.85
+    },
+    {
+      "date": "2020-12-23",
+      "symbol": "AURUM",
+      "ret": -0.9876223811697864,
+      "prev_adj_close": 985.65,
+      "adj_close": 12.2
+    },
+    {
+      "date": "2022-11-22",
+      "symbol": "NDLVENTURE",
+      "ret": -0.8422438465941614,
+      "prev_adj_close": 436.75,
+      "adj_close": 68.9
+    }
+  ],
+  "tcs_dividends": [
+    {
+      "date": "2019-01-17",
+      "cash_per_unit": 4.0
+    },
+    {
+      "date": "2019-06-04",
+      "cash_per_unit": 18.0
+    },
+    {
+      "date": "2019-07-16",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2019-10-17",
+      "cash_per_unit": 45.0
+    },
+    {
+      "date": "2020-01-23",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2020-03-19",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2020-06-03",
+      "cash_per_unit": 6.0
+    },
+    {
+      "date": "2020-07-16",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2020-10-14",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2021-01-14",
+      "cash_per_unit": 6.0
+    },
+    {
+      "date": "2021-05-25",
+      "cash_per_unit": 15.0
+    },
+    {
+      "date": "2021-07-15",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2021-10-14",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2022-01-19",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2022-05-25",
+      "cash_per_unit": 22.0
+    },
+    {
+      "date": "2022-07-14",
+      "cash_per_unit": 8.0
+    },
+    {
+      "date": "2022-10-17",
+      "cash_per_unit": 8.0
+    },
+    {
+      "date": "2023-01-16",
+      "cash_per_unit": 75.0
+    }
+  ],
+  "dividends_dropped_as_implausible": [
+    {
+      "symbol": "AURUM",
+      "ex_date": "2020-12-23",
+      "dps": 974.0
+    }
+  ]
+}

@@ -45,16 +45,21 @@ def main() -> int:
     have = store.stored_dates(con)
 
     session = bhavcopy._session()
-    added_rows, added_days, frames, d = 0, [], [], start
+    added_rows, added_days, frames, other, d = 0, [], [], [], start
 
     def flush() -> None:
         """Write buffered days out to parquet and clear the buffer."""
-        nonlocal frames
-        if not frames:
-            return
-        written = store.write_parquet(pd.concat(frames, ignore_index=True))
-        log.info("flushed %d days to %d month files", len(frames), len(written))
-        frames = []
+        nonlocal frames, other
+        if frames:
+            written = store.write_parquet(pd.concat(frames, ignore_index=True))
+            log.info("flushed %d days to %d month files", len(frames), len(written))
+            frames = []
+        if other:
+            # The non-EQ/BE series, stored apart so `prices` is untouched
+            # (Clarification 34): the 20-session no-trade exit reads them.
+            store.write_parquet(pd.concat(other, ignore_index=True),
+                                store.PARQUET_DIR_OTHER, ("date", "symbol", "series"))
+            other = []
 
     while d <= end:
         if d.weekday() < 5 and d not in have:
@@ -67,11 +72,15 @@ def main() -> int:
                 log.warning("%s: skipped (%s: %s)", d, type(e).__name__, e)
                 df = None
             if df is not None and not df.empty:
+                df, rest = bhavcopy.split_series(df)
                 n = store.upsert(con, df)
                 frames.append(df)
+                if not rest.empty:
+                    store.upsert(con, rest, "prices_other")
+                    other.append(rest)
                 added_rows += n
                 added_days.append(d)
-                log.info("%s stored %d rows", d, n)
+                log.info("%s stored %d rows (+%d other-series)", d, n, len(rest))
                 # Periodic flush so an interrupted multi-year backfill keeps
                 # everything it has already fetched.
                 if len(frames) >= FLUSH_EVERY:

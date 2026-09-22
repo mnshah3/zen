@@ -43,3 +43,15 @@ data/financials/legacy_missing.parquet
 
 # study panels: large, rebuilt by the scripts in jobs/
 data/study/*.parquet
+
+# Third-party index and factor data: free to download, not ours to redistribute.
+# data/external/SOURCES.md says where each came from and how to fetch it again.
+data/external/niftyindices/
+data/external/nifty_tri.parquet
+data/external/iima/*.csv
+data/indices/derived/
+
+# Backtest working output: rebuilt by jobs/backtest_v1.py in about two minutes.
+data/backtest/v1/ranks.parquet
+data/backtest/v1_holdout/ranks.parquet
+data/study/crosscheck_iima/

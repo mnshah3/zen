@@ -1,0 +1,12 @@
+IIM Ahmedabad Indian Fama-French-Momentum data library
+Agarwalla, S. K., Jacob, J. and Varma, J. R. (2013), Four factor model in Indian
+equities market, IIMA Working Paper 2013-09-05 (data updated periodically).
+
+Page:    https://faculty.iima.ac.in/iffm/Indian-Fama-French-Momentum/
+Files:   https://faculty.iima.ac.in/iffm/Indian-Fama-French-Momentum/DATA/<file name>
+Release: 2025-12 (coverage 1993-10 to 2025-12); files dated 22 Jan 2026.
+Re-checked 2026-09-21: 2025-12 is still the latest release on the page.
+Access:  public, no login; the page asks only for the citation above.
+
+Files are saved unmodified. Values are percent per month.
+Used by jobs/crosscheck_iima.py, which reads only 2016-01..2022-12 (holdout lock).
