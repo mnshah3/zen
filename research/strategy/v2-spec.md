@@ -264,3 +264,42 @@ names or swap in others from the system's top 30 with a written, dated reason,
 and both the system's book and the owner's are tracked so the value of the
 judgement is measured going forward. The details are to be specified with the
 dashboard, not here.
+
+### A4. Factor-index benchmarks: could the owner just buy the ETF?
+
+Approved by the owner on 2026-09-24. Most of v1's return is explained by the
+market and by value and momentum tilts, which an investor can buy cheaply
+through index funds. So v2 is also compared, on the same clock, with NSE's own
+factor indices, total return: Nifty 200 Momentum 30, Nifty 500 Value 50,
+Nifty 200 Quality 30, Nifty 100 Low Volatility 30 and Nifty Alpha 50. These
+are reported beside the Nifty 500. They are not added to the acceptance rules,
+because v1 was not held to them and v2 is judged against v1. But the write-up
+must say plainly whether v2 beat each of them, because a strategy that cannot
+beat a factor ETF should not be preferred to one.
+
+### A5. A quality factor built from the archive
+
+IIMA publishes market, size, value and momentum factors for India but no
+profitability or quality factor. v2 ranks on ROCE and margin stability, so a
+quality premium could otherwise be reported as alpha. A long-short quality
+factor is built from the archive, point in time, on the same liquid universe:
+operating margin for the whole period, and ROCE from February 2023 when balance
+sheets allow, each sorted into top and bottom 30% within big and small halves
+by market cap, in the manner of Fama and French. Attribution is reported both
+with and without it. The factor's construction is fixed here and not tuned.
+
+### A6. After Indian costs and taxes
+
+The figures that land in an owner's account are after costs and tax. v2, v1
+and a buy-and-hold Nifty 500 index fund are also reported after:
+
+- costs itemised for delivery trades (securities transaction tax, stamp duty,
+  exchange and SEBI charges, GST, depository charges) plus slippage, checked
+  against the 0.20% per side assumed in the backtest; and
+- capital gains tax by lot, with the rates and dates in force at the time:
+  short-term 15% and long-term 10% above Rs 1 lakh before 23 July 2024, then
+  20% and 12.5% above Rs 1.25 lakh; losses set off as the rules allow and
+  carried forward; the index fund taxed as held throughout and sold at the end.
+
+Reported, not added to the acceptance rules. A strategy that wins before tax
+and loses after it has not won for its owner.
