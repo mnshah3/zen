@@ -41,6 +41,9 @@ def main() -> int:
 
     builders = [
         ("prices", lambda: store.rebuild_from_parquet(con)),
+        # Non-EQ/BE series (trade-for-trade and others), kept apart so the
+        # universe reads exactly what it always did (spec Clarification 34).
+        ("prices_other", lambda: store.rebuild_other_from_parquet(con)),
         ("announcements", lambda: announcements.rebuild_from_parquet(con)),
         ("corpactions", lambda: corpactions.rebuild_from_parquet(con)),
         ("indices", lambda: indices.rebuild_from_parquet(con)),

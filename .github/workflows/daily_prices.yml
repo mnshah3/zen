@@ -30,6 +30,6 @@ jobs:
         run: |
           git config user.name  "zen-bot"
           git config user.email "actions@github.com"
-          git add data/daily
+          git add data/daily data/daily_other
           git diff --staged --quiet || git commit -m "data: bhavcopy $(date -u +%Y-%m-%d)"
           git push

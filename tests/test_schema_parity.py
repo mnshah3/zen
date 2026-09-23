@@ -33,6 +33,7 @@ TABLES = {
     "prices": (store.SCHEMA, "data/daily/**/*.parquet"),
     "announcements": (announcements.SCHEMA, "data/announcements/**/*.parquet"),
     "indices": (indices.SCHEMA, "data/indices/*.parquet"),
+    "prices_other": (store.SCHEMA_OTHER, "data/daily_other/**/*.parquet"),
 }
 
 

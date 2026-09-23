@@ -173,7 +173,14 @@ def fetch_day(d: date, raw_dir: Path | None = None,
 
     with zipfile.ZipFile(io.BytesIO(r.content)) as z:
         name = z.namelist()[0]
-        df = pd.read_csv(z.open(name), low_memory=False)
+        # Only an empty field is missing. NSE uses "NA" as a real series code
+        # (a government bond series), and pandas' default reading turned it
+        # into a missing value, which the prices_other table rejects. That
+        # crashed the daily price job on 2026-09-23. Checked across the whole
+        # raw archive: this changes nothing except those series codes, and the
+        # EQ/BE rows are identical either way.
+        df = pd.read_csv(z.open(name), low_memory=False,
+                         keep_default_na=False, na_values=[""])
 
     return _normalise(df, d)
 
