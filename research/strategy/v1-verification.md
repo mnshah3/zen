@@ -23,8 +23,15 @@ open.
 missing for about 650 companies, because the code that lists NSE's filings
 stopped at the first page that failed to load and returned the rest as if it
 were complete. The universe lost a third of its names at three rebalances. The
-listing was fixed, the quarter refilled and the test re-run with nothing else
-changed:
+listing was fixed and the quarter refilled.
+
+The same pass collected about 2,200 revised filings for the quarters from June
+2025 on. They are later versions of filings already held, which the regular
+updater had never fetched, and the engine uses each only after the date it was
+published. A second independent review rebuilt the database with the March
+refill alone and got about 33.8% for the strategy, so the revisions account
+for roughly 0.8 points of the change, through one different pick in August
+2026. The published figure includes both. No rule was changed:
 
 | Held-back period, open 15 Feb 2023 to open 18 Sep 2026 | Return a year | Worst fall |
 |---|---|---|
@@ -34,9 +41,11 @@ changed:
 | Nifty Midcap 150 | 21.3% | -20.9% |
 | Nifty Smallcap 250 | 21.8% | -26.0% |
 
-The margin over the equal-weight universe is 12.0 points a year. Its 90%
-interval, from a stationary bootstrap, is **-3.2 to +24.6 points**, with an
-**11% chance** the true margin is zero or negative.
+The margin over the equal-weight universe is 12.0 points a year in compound
+growth. A stationary bootstrap of the paired daily returns, compounding each
+resampled path on NSE's actual 246 sessions a year, gives a 90% interval of
+**-3.9 to +27.4 points**, and about 1 resample in 9 puts the margin at zero or
+below. Index returns in this table run from the close before each open.
 
 **Both engines agree.** The production engine and the independent
 re-implementation, which was extended to 2026 without sight of the production
@@ -79,8 +88,8 @@ December 2025 and leaves out 2026.
 
 | | Alpha a year | t | Market | Size | Value | Momentum |
 |---|---|---|---|---|---|---|
-| Strategy | 5.4% | **1.12** | 0.87 | 0.23 | 0.47 | 0.34 |
-| The universe, equal weight | 1.6% | **1.36** | 0.96 | 0.67 | 0.34 | -0.05 |
+| Strategy | 5.4% | **1.15** | 0.87 | 0.23 | 0.47 | 0.34 |
+| The universe, equal weight | 1.6% | **1.40** | 0.96 | 0.67 | 0.34 | -0.05 |
 
 **Neither alpha is statistically significant.** The value and momentum
 loadings are, strongly (t = 4.6 and 3.5). So the honest reading is that the
@@ -161,8 +170,10 @@ the gross profit, so the result is not carried by one or two names.
 
 At Rs 5 lakh a trade is a median of 0.017% of the stock's daily turnover. The
 95th percentile is 1.1%, and 6 of 454 trades exceed 5%. Those percentages
-scale with capital, so the fills stay realistic up to roughly Rs 50 lakh to
-Rs 1 crore.
+scale with capital. At Rs 50 lakh the 95th percentile would be about 11% of a
+day's turnover, which is already enough to move the price, so the fills in
+this backtest are realistic up to roughly Rs 25 to 50 lakh and optimistic
+beyond it.
 
 ## 8. Checked and ruled out
 

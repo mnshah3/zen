@@ -913,7 +913,7 @@ def main(argv=None) -> int:
     assert END in sessions_all, "END must be a session"
     sessions = sessions_all[sessions_all <= END]
     log(f"decision dates: {[d.date().isoformat() for d in Ds]}  end(open)={END.date()}")
-    assert len(Ds) == (16 if FULL_END is None else len(Ds))
+    assert len(Ds) == 16 if FULL_END is None else len(Ds) > 16, len(Ds)
 
     p = load_prices(con, END)
     log(f"prices {len(p):,} rows")

@@ -180,10 +180,15 @@ weighted, and it stays on record as the pre-registered result.
 
 An independent audit then found the archive was missing the March 2025
 quarter for about 650 companies, because the code listing NSE's filings
-stopped at the first page that failed to load. That was fixed, the quarter
-refilled, and the same configuration re-run with nothing else changed. This is
-the held-back period on the corrected archive, 3.6 years, open 15 February 2023
-to open 18 September 2026:
+stopped at the first page that failed to load. That was fixed and the quarter
+refilled. The same pass also collected about 2,200 revised filings for the
+later quarters, which the regular updater had never fetched. The engine only
+uses a revision after the date it was published, so both are legitimate, but
+they move the result: the March refill alone gives about 33.8% a year, and
+with the revisions as well it gives 33.0%, which is the figure below. The same
+configuration was re-run with no rule changed. This is the held-back period on
+the corrected archive, 3.6 years, open 15 February 2023 to open 18 September
+2026 (index returns run from the close before each of those opens):
 
 | | Return a year | Worst fall |
 |---|---|---|
@@ -204,16 +209,19 @@ to open 18 September 2026:
 - **It beats random picks from the same list.** Against 500 random ten-stock
   portfolios run through the same machinery, it lands at the 94th to 96th
   percentile, whether the random portfolios trade more than it does or less.
-- **It falls less than the market.** Against the Nifty 500 total return it
-  captured 129% of the rising months and 68% of the falling ones.
+- **It fell less than the market over the full period.** From 2019, against
+  the Nifty 500 total return, it captured 129% of the rising months and 68% of
+  the falling ones. That did not hold within the held-back period on its own,
+  where its worst fall, -23.8%, was deeper than the Nifty 500's -18.6%.
 - **The margin is probably real, but not proven.** Over the equal-weight
-  universe it is 12.0 points a year, with a 90% interval of -3.2 to +24.6 and
-  an 11% chance the true margin is zero or less.
+  universe it is 12.0 points a year. A 90% interval from a stationary
+  bootstrap runs from -3.9 to +27.4, and about 1 resample in 9 put the margin
+  at zero or below.
 
 **What it does not show:**
 
 - **Skill beyond known factors.** Regressed on IIM Ahmedabad's published Indian
-  factors, the strategy's alpha is 5.4% a year at t = 1.12, which is not
+  factors, the strategy's alpha is 5.4% a year at t = 1.15, which is not
   significant. Its value and momentum tilts are, strongly. Most of the return
   is the market plus factors that can be bought more cheaply.
 - **Robustness to the search.** After 195 logged trials, the deflated Sharpe
@@ -229,8 +237,10 @@ the audited build had finished and never checked by anyone else. The worst was
 a factor regression that subtracted the risk-free rate twice and turned an
 insignificant alpha into a nearly significant one, on which I then built a
 claim that the filters carried the strongest evidence. That claim is
-withdrawn. Every statistic above is now cross-checked against a standard
-library (statsmodels, quantstats, arch).
+withdrawn. The headline statistics are now cross-checked against standard
+libraries (statsmodels, quantstats, arch) in
+[`jobs/libcheck_v1.py`](jobs/libcheck_v1.py), and a second independent review
+checked the corrections themselves.
 
 ### What the strategy actually is
 
@@ -242,7 +252,9 @@ recently, at least Rs 20 lakh of daily turnover, at least 200 sessions traded
 in the past year, not a bank, NBFC or insurer, four consecutive quarters of
 results already published, profitable over those four quarters, and a
 computable market capitalisation. That takes about 2,000 traded symbols down to
-roughly 830.
+about 900 on average: 237 on the first date, when few companies had four
+quarters of tagged results yet, up to 1,334, and about 1,170 through the
+held-back period.
 
 **Ranking** (five groups, equally weighted, no tuning): profitability and its
 stability, revenue and profit growth, earnings and sales yield, 12-month
@@ -271,7 +283,7 @@ date it was resolved, are in the specification.
 - **Selection by rule.** 36 portfolio variants were run in-sample, and the
   plateau rule picked one before the held-back data was unlocked. It picked the
   configuration that was written down first.
-- **181 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
+- **195 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
   including every failure below.
 
 ### What came before, and failed

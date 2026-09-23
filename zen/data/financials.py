@@ -190,13 +190,22 @@ def listing(symbol: str | None = None, start: date | None = None,
                 try:
                     r = s.get(url, timeout=90)
                     r.raise_for_status()
-                    batch = _rows(r.json())
+                    payload = r.json()
+                    # A 200 carrying something other than rows (an error page,
+                    # a bot check) is a failure, not an empty page.
+                    if not isinstance(payload, (list, dict)) or (
+                            isinstance(payload, dict) and "data" not in payload):
+                        raise ValueError(f"unexpected payload: {str(payload)[:120]}")
+                    batch = _rows(payload)
                     break
                 except Exception as e:                               # noqa: BLE001
                     last_err = e
                     log.warning("page %d attempt %d failed (%s)", page, attempt + 1, e)
                     time.sleep(2 * (attempt + 1))
-                    s.get(WARMUP, timeout=25)
+                    try:
+                        s.get(WARMUP, timeout=25)
+                    except Exception:                                # noqa: BLE001
+                        pass
             if batch is None:
                 raise RuntimeError(
                     f"financials listing {start}..{end} failed on page {page} after "
@@ -206,6 +215,9 @@ def listing(symbol: str | None = None, start: date | None = None,
             raw.extend(batch)
             if len(batch) < page_size:
                 break
+        else:
+            raise RuntimeError(f"financials listing {start}..{end} still had rows after "
+                               f"{max_pages} pages; narrow the window rather than truncate")
 
     out = []
     for row in raw:
@@ -455,17 +467,32 @@ def upsert(con, df: pd.DataFrame) -> int:
 
 
 def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
+    """Append filings to one parquet per quarter, keeping every revision.
+
+    De-duplicated on the DOCUMENT (`xbrl_url`), like the table's primary key.
+    It used to de-duplicate on (symbol, period_end, consolidated) keeping the
+    last, which silently threw away every earlier version of a revised filing
+    each time it wrote. A backtest asking what was known in November would then
+    see January's correction. It had not fired only because the updater never
+    fetched revisions; the 2026-09-23 backfill added about 2,200 of them.
+
+    `period_end` is normalised to datetime64 on both sides. The backfill wrote
+    timestamps and this writer wrote dates, and pyarrow refuses to mix them.
+    """
     if df.empty:
         return []
+    df = df.copy()
+    df["period_end"] = pd.to_datetime(df["period_end"])
     written = []
     for q, chunk in df.groupby(df["period_end"].map(
             lambda d: f"{d:%Y-%m}" if pd.notna(d) else "unknown")):
         p = out_dir / f"{q}.parquet"
         p.parent.mkdir(parents=True, exist_ok=True)
         if p.exists():
-            chunk = pd.concat([pd.read_parquet(p), chunk], ignore_index=True)
-        chunk = chunk.drop_duplicates(subset=["symbol", "period_end", "consolidated"],
-                                      keep="last")
+            old = pd.read_parquet(p)
+            old["period_end"] = pd.to_datetime(old["period_end"])
+            chunk = pd.concat([old, chunk], ignore_index=True)
+        chunk = chunk.drop_duplicates(subset=["xbrl_url"], keep="first")
         chunk.to_parquet(p, index=False, compression="zstd")
         written.append(p)
     return written

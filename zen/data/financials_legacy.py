@@ -121,6 +121,10 @@ def listing(session, start: date, end: date, window_days: int = 7) -> pd.DataFra
                 r = session.get(url, timeout=60)
                 r.raise_for_status()
                 batch = r.json()
+                if not isinstance(batch, list):
+                    # A 200 that is not a list of filings is a failure, not an
+                    # empty week.
+                    raise ValueError(f"unexpected payload: {str(batch)[:120]}")
                 break
             except Exception as e:                               # noqa: BLE001
                 last_err = e

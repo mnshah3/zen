@@ -194,9 +194,22 @@ def main() -> int:
         FROM read_parquet({files}, union_by_name=true)
         WHERE period_end >= DATE '2018-03-31'
         GROUP BY 1 ORDER BY 1""").df()
-    q["neighbours"] = (q["companies"].shift(1) + q["companies"].shift(-1)) / 2
+    # One-sided at the ends, so the latest quarter, where a partial fetch is
+    # most likely, is checked too.
+    q["neighbours"] = pd.concat([q["companies"].shift(1), q["companies"].shift(-1)],
+                                axis=1).mean(axis=1)
     q["ratio"] = q["companies"] / q["neighbours"]
-    short = q[q["ratio"] < 0.9]
+    # Quarters confirmed short at NSE's own source on 2026-09-23: both the
+    # date-range listing and per-company queries return no filing for the
+    # missing companies. Reported, not failed, so the check stays meaningful.
+    known = {"2018-06-30", "2019-06-30", "2022-06-30"}
+    q["known_source_gap"] = q["period_end"].astype(str).str[:10].isin(known)
+    short = q[(q["ratio"] < 0.9) & ~q["known_source_gap"]]
+    gaps = q[(q["ratio"] < 0.9) & q["known_source_gap"]]
+    if not gaps.empty:
+        print("  known gaps at NSE's source: " + ", ".join(
+            f"{str(r.period_end)[:10]} ({int(r.companies)} vs {int(r.neighbours)})"
+            for r in gaps.itertuples()))
     print(q.tail(12).round(3).to_string(index=False))
     check("every quarter holds at least 90% of the average of its neighbours",
           short.empty,

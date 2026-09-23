@@ -614,8 +614,15 @@ changes a rule. It records what was true and when.
     names at the 2025-08-18, 2025-11-17 and 2026-02-16 rebalances. The
     listing now retries and then raises instead, the quarter has been
     refilled from NSE (2,166 companies, 14 documents confirmed absent by NSE
-    itself), and the other 2025 and 2026 quarters have had a few hundred
-    missing documents each restored. The one-shot final test stands on record
+    itself). The same pass added about 2,200 documents to the later 2025 and
+    2026 quarters. Almost all are REVISIONS of filings already held, not
+    missing companies: the regular updater skipped anything whose company,
+    quarter and basis it already had, so it never fetched a revision. The
+    engine uses each version only after its broadcast date, so they are
+    legitimate, and they move the held-back result from about 33.8% (March
+    refill alone) to 33.0%. From 2026-09-23 the updater skips by document
+    instead, so live and backfilled quarters follow the same revision policy,
+    and the parquet writer keeps every version rather than the last. The one-shot final test stands on record
     as it was run. A re-run on the completed archive is published beside it.
 
 37. **The clock for sub-periods.** The final test is measured from the value

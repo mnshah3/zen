@@ -5,9 +5,18 @@ specification lets a company with no label published before the decision date
 borrow its first-ever label (Clarification 8). The same backfill identifies
 lenders for rule 4, alongside a similar backfill of NBFC filing taxonomy
 (Clarification 28). Both are classifications, not prices or fundamentals, but
-both are information from after the decision date, and the second audit found
-they change who is in the universe: 854 names at 2023-06-01 against 823 when
-only labels published beforehand are allowed.
+both are information from after the decision date.
+
+The second audit reported 854 names against 823 at 2023-06-01 with and without
+them. That was measured on the archive before the March 2025 refill and with
+the audit's own reconstruction of the labels. This run, on the completed
+archive and through the engine itself, finds no universe row in the held-back
+period that depends on them: a backfilled label is a company's FIRST label,
+published by 2022, so from 2023 every labelled company already has one known
+before the date. The effect is before 2022, where it is large (a multiple of
+2.63 as specified against 2.39 with point-in-time labels only, over 2019-2023
+in the independent review) and unavoidable, because no point-in-time label
+exists at all.
 
 This re-runs the selected v1 configuration with those two backfills switched
 off, so a company is labelled only by what had been published before each

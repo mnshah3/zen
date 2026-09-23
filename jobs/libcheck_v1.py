@@ -73,7 +73,12 @@ def regression(nav: pd.Series) -> dict:
 
 def practitioner(nav: pd.Series) -> dict:
     r = nav.pct_change().dropna()
-    return {"cagr_pct": round(qs.stats.cagr(r, periods=252) * 100, 2),
+    yrs = (nav.index[-1] - nav.index[0]).days / 365.25
+    # quantstats counts returns and divides by 252 rather than using the
+    # calendar, and it drops the opening value, so its CAGR runs higher than a
+    # calendar-day CAGR on NSE's ~246 sessions a year. Both are reported.
+    return {"cagr_calendar_pct": round(((nav.iloc[-1] / nav.iloc[0]) ** (1 / yrs) - 1) * 100, 2),
+            "cagr_quantstats_pct": round(qs.stats.cagr(r, periods=252) * 100, 2),
             "sharpe": round(qs.stats.sharpe(r, periods=252), 3),
             "sortino": round(qs.stats.sortino(r, periods=252), 3),
             "calmar": round(qs.stats.calmar(r), 3),
@@ -82,20 +87,32 @@ def practitioner(nav: pd.Series) -> dict:
 
 
 def margin_interval(s: pd.Series, e: pd.Series, reps: int = 5000, seed: int = 7) -> dict:
-    """90% interval for the annualised margin over equal weight, final test only."""
-    j = pd.concat([s.rename("s"), e.rename("e")], axis=1).dropna().pct_change().dropna()
-    x = (j["s"] - j["e"]).values
+    """90% interval for the margin in annual growth rate over equal weight.
 
-    def ann(v):
-        return (1 + np.mean(v)) ** 252 - 1
+    The margin quoted in the README is a difference of compound annual growth
+    rates, so the interval is for exactly that: each bootstrap draw rebuilds
+    both return paths from the SAME resampled days and compounds them. An
+    earlier version bootstrapped the annualised mean daily difference, which is
+    a different statistic (10.1 points where the growth-rate margin is 12.0),
+    and annualised with 252 sessions where NSE averaged about 246 a year.
+    """
+    j = pd.concat([s.rename("s"), e.rename("e")], axis=1).dropna()
+    yrs = (j.index[-1] - j.index[0]).days / 365.25
+    r = j.pct_change().dropna()
+    per_year = len(r) / yrs
 
-    bs = StationaryBootstrap(21, x, seed=seed)
-    draws = np.array([ann(d[0][0]) for d in bs.bootstrap(reps)])
-    return {"point_pct": round(ann(x) * 100, 2),
+    def cagr_gap(rs, re_):
+        return (np.prod(1 + rs) ** (per_year / len(rs)) - np.prod(1 + re_) ** (per_year / len(re_)))
+
+    bs = StationaryBootstrap(21, r["s"].values, r["e"].values, seed=seed)
+    draws = np.array([cagr_gap(d[0][0], d[0][1]) for d in bs.bootstrap(reps)])
+    return {"point_pct": round(cagr_gap(r["s"].values, r["e"].values) * 100, 2),
             "lo90_pct": round(float(np.percentile(draws, 5)) * 100, 2),
             "hi90_pct": round(float(np.percentile(draws, 95)) * 100, 2),
-            "p_le_zero": round(float((draws <= 0).mean()), 3),
-            "method": "stationary bootstrap, mean block 21 sessions, 5000 draws"}
+            "share_of_draws_le_zero": round(float((draws <= 0).mean()), 3),
+            "sessions_per_year": round(per_year, 1),
+            "method": "stationary bootstrap of paired daily returns, mean block 21 "
+                      "sessions, 5000 draws, statistic = difference in compound annual growth"}
 
 
 def main(argv=None) -> int:

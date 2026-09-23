@@ -2,7 +2,8 @@
   "run": "data\\backtest\\v1_corrected",
   "full_period": {
     "strategy": {
-      "cagr_pct": 30.85,
+      "cagr_calendar_pct": 30.09,
+      "cagr_quantstats_pct": 30.85,
       "sharpe": 1.372,
       "sortino": 1.907,
       "calmar": 0.919,
@@ -10,7 +11,8 @@
       "volatility_pct": 21.27
     },
     "universe_ew": {
-      "cagr_pct": 22.77,
+      "cagr_calendar_pct": 22.23,
+      "cagr_quantstats_pct": 22.77,
       "sharpe": 1.116,
       "sortino": 1.478,
       "calmar": 0.475,
@@ -65,11 +67,12 @@
     "strategy_cagr_pct": 32.97,
     "universe_ew_cagr_pct": 21.03,
     "margin_interval": {
-      "point_pct": 10.1,
-      "lo90_pct": -3.18,
-      "hi90_pct": 24.64,
-      "p_le_zero": 0.109,
-      "method": "stationary bootstrap, mean block 21 sessions, 5000 draws"
+      "point_pct": 11.95,
+      "lo90_pct": -3.91,
+      "hi90_pct": 27.37,
+      "share_of_draws_le_zero": 0.107,
+      "sessions_per_year": 246.0,
+      "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
     },
     "nifty_500_tri_cagr_pct": 13.36,
     "nifty_midcap_150_tri_cagr_pct": 21.3,
