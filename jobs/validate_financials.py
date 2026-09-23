@@ -183,6 +183,27 @@ def main() -> int:
     print("\n  Check a few of these against the company's own filing before "
           "trusting the panel. Figures are in Rs crore.")
 
+    print("\n=== 9. NO QUARTER SHORT OF ITS NEIGHBOURS (whole archive) ===")
+    # The check that would have caught March 2025. A listing that stops at a
+    # failed page returns a quarter that looks complete and holds a third fewer
+    # companies. Company counts change slowly, so any quarter well below the
+    # quarters either side of it is a fetch failure until shown otherwise.
+    from zen.data.financials import statement_files
+    files = [str(f) for f in statement_files()]
+    q = con.execute(f"""SELECT period_end, count(DISTINCT symbol) AS companies
+        FROM read_parquet({files}, union_by_name=true)
+        WHERE period_end >= DATE '2018-03-31'
+        GROUP BY 1 ORDER BY 1""").df()
+    q["neighbours"] = (q["companies"].shift(1) + q["companies"].shift(-1)) / 2
+    q["ratio"] = q["companies"] / q["neighbours"]
+    short = q[q["ratio"] < 0.9]
+    print(q.tail(12).round(3).to_string(index=False))
+    check("every quarter holds at least 90% of the average of its neighbours",
+          short.empty,
+          "short: " + ", ".join(f"{str(r.period_end)[:10]} ({int(r.companies)} vs "
+                                f"{int(r.neighbours)})" for r in short.itertuples())
+          if not short.empty else "")
+
     con.close()
     print("\n" + "=" * 70)
     if FAIL:

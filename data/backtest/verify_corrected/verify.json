@@ -1,0 +1,145 @@
+{
+  "period": {
+    "start": "2019-02-15",
+    "end": "2026-09-18"
+  },
+  "headline": {
+    "strategy_cagr_pct": 30.06,
+    "universe_ew_cagr_pct": 22.05
+  },
+  "monkey_test": {
+    "strategy_cagr_pct": 30.06,
+    "strategy_turnover": 1.98,
+    "persistent": {
+      "draws": 500,
+      "random_median_pct": 20.51,
+      "random_p5_pct": 11.88,
+      "random_p95_pct": 30.69,
+      "random_best_pct": 36.05,
+      "random_median_turnover": 0.49,
+      "strategy_percentile": 94.4,
+      "beaten_by_n_random": 28
+    },
+    "fresh": {
+      "draws": 500,
+      "random_median_pct": 19.27,
+      "random_p5_pct": 10.45,
+      "random_p95_pct": 28.87,
+      "random_best_pct": 38.13,
+      "random_median_turnover": 3.95,
+      "strategy_percentile": 96.0,
+      "beaten_by_n_random": 20
+    }
+  },
+  "attribution": {
+    "strategy": {
+      "months": 82,
+      "first_month": "2019-03",
+      "last_month": "2025-12",
+      "alpha_monthly_pct": 0.4423097118141379,
+      "alpha_annual_pct": 5.4387603395969375,
+      "alpha_t": 1.116194322024896,
+      "r_squared": 0.7230961645600267,
+      "loadings": {
+        "market": 0.866,
+        "size_SMB": 0.231,
+        "value_HML": 0.465,
+        "momentum_WML": 0.34
+      },
+      "loading_t": {
+        "market": 9.45,
+        "size_SMB": 1.68,
+        "value_HML": 4.62,
+        "momentum_WML": 3.48
+      }
+    },
+    "universe_ew": {
+      "months": 82,
+      "first_month": "2019-03",
+      "last_month": "2025-12",
+      "alpha_monthly_pct": 0.1355042804491342,
+      "alpha_annual_pct": 1.6382248003425026,
+      "alpha_t": 1.3584813017277637,
+      "r_squared": 0.9822163759141488,
+      "loadings": {
+        "market": 0.96,
+        "size_SMB": 0.669,
+        "value_HML": 0.34,
+        "momentum_WML": -0.054
+      },
+      "loading_t": {
+        "market": 52.55,
+        "size_SMB": 19.67,
+        "value_HML": 11.11,
+        "momentum_WML": -1.94
+      }
+    }
+  },
+  "deflated_sharpe": {
+    "sharpe_annual": 1.3704430420462481,
+    "n_obs": 1872,
+    "n_trials": 195,
+    "prob_null_sampling_variance": 0.8239821472570188,
+    "prob_cross_trial_variance_36_grid": 0.9945074426071606,
+    "prob_grid_trials_only": 0.9351142263412111,
+    "note": "probability of genuine skill after the search; the spread between these is the honest answer, not any single one"
+  },
+  "subperiods": {
+    "in_sample_2019_2023": {
+      "strategy_cagr_pct": 27.5,
+      "universe_ew_cagr_pct": 22.98,
+      "diff_pct": 4.52,
+      "from_open": "2019-02-15",
+      "to_open": "2023-02-15"
+    },
+    "final_test_2023_2026": {
+      "strategy_cagr_pct": 32.97,
+      "universe_ew_cagr_pct": 21.03,
+      "diff_pct": 11.95,
+      "from_open": "2023-02-15",
+      "to_open": "2026-09-18"
+    }
+  },
+  "by_year": {
+    "2019": {
+      "strategy_pct": 10.8,
+      "universe_ew_pct": -2.9
+    },
+    "2020": {
+      "strategy_pct": 28.3,
+      "universe_ew_pct": 32.8
+    },
+    "2021": {
+      "strategy_pct": 95.4,
+      "universe_ew_pct": 73.9
+    },
+    "2022": {
+      "strategy_pct": -2.5,
+      "universe_ew_pct": 6.2
+    },
+    "2023": {
+      "strategy_pct": 74.8,
+      "universe_ew_pct": 53.2
+    },
+    "2024": {
+      "strategy_pct": 33.9,
+      "universe_ew_pct": 28.7
+    },
+    "2025": {
+      "strategy_pct": 21.8,
+      "universe_ew_pct": -11.2
+    },
+    "2026": {
+      "strategy_pct": -4.8,
+      "universe_ew_pct": 8.8
+    }
+  },
+  "capacity": {
+    "trades": 454,
+    "median_pct_of_daily_turnover": 0.017,
+    "p95_pct": 1.085,
+    "max_pct": 17.107,
+    "trades_over_5pct": 6,
+    "note": "at the backtest's Rs 5 lakh. Ten times the capital multiplies these by ten."
+  }
+}

@@ -1,0 +1,541 @@
+{
+  "strategy": {
+    "cagr": 0.3005973900670946,
+    "vol": 0.21264907537385003,
+    "sharpe_rf0": 1.3704430420462503,
+    "max_dd": -0.3355977760809461,
+    "total_return": 6.34965748175997,
+    "years": 7.5893223819301845,
+    "turnover_one_sided_annual": 1.9636407280001291,
+    "turnover_one_sided_annual_incl_initial": 1.9810178447161964,
+    "avg_holding_period_days": 179.58441558441558,
+    "n_positions_opened": 154,
+    "n_doubled_while_held": 8,
+    "avg_holdings": 10.0,
+    "dividends_credited": 0.5824443782238986,
+    "costs_paid": 0.2275479585693951,
+    "forced_exits": [
+      [
+        "2021-12-13",
+        "TATASTLBSL"
+      ]
+    ]
+  },
+  "universe_ew": {
+    "cagr": 0.2205401561126008,
+    "vol": 0.2025615753526588,
+    "sharpe_rf0": 1.107898629800413,
+    "max_dd": -0.4789600839824959,
+    "total_return": 3.5380740714157817,
+    "years": 7.5893223819301845,
+    "dividends_credited": 0.1862077022847214,
+    "costs_paid": 0.05047243036390929,
+    "n_forced_exits": 31
+  },
+  "strategy_vs_universe_ew": {
+    "tracking_error": 0.1360264490067894,
+    "information_ratio": 0.4925935687470105,
+    "active_return_ann": 0.06700575396023763
+  },
+  "calendar_years": {
+    "strategy": {
+      "2019": 0.10778681824878689,
+      "2020": 0.28298365902758005,
+      "2021": 0.9536045057711162,
+      "2022": -0.025210453962272616,
+      "2023": 0.748232769463153,
+      "2024": 0.33935193277548037,
+      "2025": 0.2176803123227702,
+      "2026": -0.047609573743938705
+    },
+    "universe_ew": {
+      "2019": -0.029024202487286654,
+      "2020": 0.3275740931462874,
+      "2021": 0.7389926051136371,
+      "2022": 0.06189993070610056,
+      "2023": 0.5320540690832762,
+      "2024": 0.28736911968273104,
+      "2025": -0.11191130996835497,
+      "2026": 0.08840257247142169
+    }
+  },
+  "index:NIFTY 500": {
+    "total_return_index": true,
+    "cagr": 0.14430528505857376,
+    "vol": 0.17256639459793038,
+    "sharpe_rf0": 0.8859659714244988,
+    "max_dd": -0.3810593207227173,
+    "total_return": 1.780565318178419,
+    "years": 7.586584531143052,
+    "strategy_vs": {
+      "tracking_error": 0.1480310425455628,
+      "information_ratio": 0.9392548067910222,
+      "active_return_ann": 0.13903886826520617
+    }
+  },
+  "index:NIFTY MIDCAP 150": {
+    "total_return_index": true,
+    "cagr": 0.20472098275165496,
+    "vol": 0.1844265847601192,
+    "sharpe_rf0": 1.1261165359791323,
+    "max_dd": -0.3845224051604902,
+    "total_return": 3.108204714855755,
+    "years": 7.586584531143052,
+    "strategy_vs": {
+      "tracking_error": 0.13660784268268836,
+      "information_ratio": 0.616662947481951,
+      "active_return_ann": 0.08424099491785728
+    }
+  },
+  "index:NIFTY SMALLCAP 250": {
+    "total_return_index": true,
+    "cagr": 0.2024386561800089,
+    "vol": 0.19769703330560578,
+    "sharpe_rf0": 1.0537211198322478,
+    "max_dd": -0.45488022800787165,
+    "total_return": 3.0495259186755996,
+    "years": 7.586584531143052,
+    "strategy_vs": {
+      "tracking_error": 0.13712891460057064,
+      "information_ratio": 0.6097130033561969,
+      "active_return_ann": 0.08360928236808937
+    }
+  },
+  "quintiles": {
+    "composite": {
+      "cagr_by_quintile": {
+        "Q1": 0.33065403336648713,
+        "Q2": 0.2870201258438465,
+        "Q3": 0.2301019477612476,
+        "Q4": 0.19738322292091115,
+        "Q5": 0.07784906384302781
+      },
+      "top_minus_bottom_cagr": 0.2528049695234593,
+      "top_minus_bottom_daily_ann": 0.2071906690413498
+    },
+    "quality": {
+      "cagr_by_quintile": {
+        "Q1": 0.21165690096258527,
+        "Q2": 0.24449543260400253,
+        "Q3": 0.24389457268945747,
+        "Q4": 0.22562356641190373,
+        "Q5": 0.18996566409712012
+      },
+      "top_minus_bottom_cagr": 0.021691236865465147,
+      "top_minus_bottom_daily_ann": 0.008777693825159335
+    },
+    "growth": {
+      "cagr_by_quintile": {
+        "Q1": 0.36135662465108864,
+        "Q2": 0.26075736563929586,
+        "Q3": 0.2138831519436588,
+        "Q4": 0.20047206638073511,
+        "Q5": 0.09036287980024849
+      },
+      "top_minus_bottom_cagr": 0.27099374485084016,
+      "top_minus_bottom_daily_ann": 0.2272680227838857
+    },
+    "value": {
+      "cagr_by_quintile": {
+        "Q1": 0.2661165596039279,
+        "Q2": 0.22994687590871377,
+        "Q3": 0.23220822857884893,
+        "Q4": 0.20883853636366956,
+        "Q5": 0.17248798363400453
+      },
+      "top_minus_bottom_cagr": 0.09362857596992336,
+      "top_minus_bottom_daily_ann": 0.09392908778322395
+    },
+    "momentum": {
+      "cagr_by_quintile": {
+        "Q1": 0.30856539153648077,
+        "Q2": 0.2572024997964124,
+        "Q3": 0.23062952930077607,
+        "Q4": 0.20780958515882042,
+        "Q5": 0.11254118372760757
+      },
+      "top_minus_bottom_cagr": 0.1960242078088732,
+      "top_minus_bottom_daily_ann": 0.16607825170874077
+    },
+    "risk": {
+      "cagr_by_quintile": {
+        "Q1": 0.1659791174422227,
+        "Q2": 0.22485982026302187,
+        "Q3": 0.2731215712107651,
+        "Q4": 0.24271989461574428,
+        "Q5": 0.19950440948481551
+      },
+      "top_minus_bottom_cagr": -0.0335252920425928,
+      "top_minus_bottom_daily_ann": -0.05196336910623196
+    }
+  },
+  "universe_sizes": {
+    "2019-02-15": 237,
+    "2019-06-03": 501,
+    "2019-08-16": 483,
+    "2019-11-15": 458,
+    "2020-02-17": 473,
+    "2020-06-01": 445,
+    "2020-08-17": 596,
+    "2020-11-17": 623,
+    "2021-02-15": 728,
+    "2021-06-01": 767,
+    "2021-08-16": 887,
+    "2021-11-15": 887,
+    "2022-02-15": 938,
+    "2022-06-01": 910,
+    "2022-08-16": 859,
+    "2022-11-15": 828,
+    "2023-02-15": 862,
+    "2023-06-01": 854,
+    "2023-08-16": 1032,
+    "2023-11-15": 1081,
+    "2024-02-15": 1174,
+    "2024-06-03": 1181,
+    "2024-08-16": 1239,
+    "2024-11-18": 1265,
+    "2025-02-17": 1255,
+    "2025-06-02": 1237,
+    "2025-08-18": 1231,
+    "2025-11-17": 1247,
+    "2026-02-16": 1235,
+    "2026-06-01": 1312,
+    "2026-08-17": 1334
+  },
+  "universe_median_size": 887.0,
+  "sanity_mcaps_2021": {
+    "2021-02-15": {
+      "RELIANCE": {
+        "mcap_cr": 1315528.0,
+        "in_universe": true,
+        "pe": 29.7
+      },
+      "TCS": {
+        "mcap_cr": 1197295.0,
+        "in_universe": true,
+        "pe": 36.7
+      },
+      "INFY": {
+        "mcap_cr": 558065.0,
+        "in_universe": true,
+        "pe": 29.9
+      }
+    },
+    "2021-06-01": {
+      "RELIANCE": {
+        "mcap_cr": 1392132.0,
+        "in_universe": true,
+        "pe": 29.3
+      },
+      "TCS": {
+        "mcap_cr": 1169515.0,
+        "in_universe": true,
+        "pe": 34.6
+      },
+      "INFY": {
+        "mcap_cr": 593575.0,
+        "in_universe": true,
+        "pe": 30.6
+      }
+    },
+    "2021-08-16": {
+      "RELIANCE": {
+        "mcap_cr": 1388694.0,
+        "in_universe": true,
+        "pe": 26.0
+      },
+      "TCS": {
+        "mcap_cr": 1280948.0,
+        "in_universe": true,
+        "pe": 35.8
+      },
+      "INFY": {
+        "mcap_cr": 729848.0,
+        "in_universe": true,
+        "pe": 35.9
+      }
+    },
+    "2021-11-15": {
+      "RELIANCE": {
+        "mcap_cr": 1698306.0,
+        "in_universe": true,
+        "pe": 29.1
+      },
+      "TCS": {
+        "mcap_cr": 1304060.0,
+        "in_universe": true,
+        "pe": 35.5
+      },
+      "INFY": {
+        "mcap_cr": 752145.0,
+        "in_universe": true,
+        "pe": 35.9
+      }
+    }
+  },
+  "sanity_max_abs_daily_return": {
+    "strategy": 0.10901763323026459,
+    "universe_ew": 0.11512662359692971
+  },
+  "sanity_largest_held_stock_moves": [
+    [
+      "VEDL",
+      "2026-04-30",
+      -0.6489788004136505
+    ],
+    [
+      "SKFINDIA",
+      "2025-10-15",
+      -0.5475401325772702
+    ],
+    [
+      "TMPV",
+      "2025-10-14",
+      -0.4015134317063943
+    ],
+    [
+      "SALASAR",
+      "2024-01-23",
+      0.3593947036569989
+    ],
+    [
+      "SANOFI",
+      "2024-06-13",
+      -0.35339260274108597
+    ],
+    [
+      "ASHOKLEY",
+      "2020-03-19",
+      -0.25214007782101167
+    ],
+    [
+      "MOTHERSON",
+      "2020-03-12",
+      -0.2434540389972144
+    ],
+    [
+      "CYIENT",
+      "2025-01-24",
+      -0.23378436120210788
+    ]
+  ],
+  "sanity_largest_dividend_yields_held": [
+    [
+      "BPCL",
+      "2021-09-16",
+      58.0,
+      0.11837942647208899
+    ],
+    [
+      "POLYPLEX",
+      "2021-02-17",
+      100.0,
+      0.10974539069359086
+    ],
+    [
+      "STYRENIX",
+      "2021-10-22",
+      192.0,
+      0.10812332817119527
+    ],
+    [
+      "VEDL",
+      "2020-10-28",
+      9.5,
+      0.09268292682926829
+    ],
+    [
+      "STYRENIX",
+      "2023-03-24",
+      80.0,
+      0.09120966822483183
+    ],
+    [
+      "COALINDIA",
+      "2020-03-19",
+      12.0,
+      0.0827300930713547
+    ],
+    [
+      "VEDL",
+      "2022-05-06",
+      31.5,
+      0.07773938795656467
+    ],
+    [
+      "VEDL",
+      "2022-07-26",
+      19.5,
+      0.0755813953488372
+    ]
+  ],
+  "holdout_guard_selftest": "FAILED: guard did not raise",
+  "ambiguities": [
+    "Sessions = distinct bhavcopy dates (EQ/BE rows). D = first session on/after the anchor. END = first session on/after 15 Feb 2023; the final NAV mark is at that session's OPEN (held names not trading at END are marked at last close).",
+    "Stock identity (spec Clarification 23): built from the (symbol, ISIN, first/last date) keys of the WHOLE bhavcopy archive (no prices), because companies renamed after 2023 have their old filings stored under the new symbol. (symbol, ISIN) spells linked when they share a symbol (ISIN change on split) or an ISIN (rename) with a gap <=10 sessions. Output symbol = symbol of the stock's last trade before D. Financials/corpactions/announcements mapped by symbol and date.",
+    "Rule 1: ISIN/series tested on the stock's last trade row before D. Rule 2: median over the 60 market sessions before D with 0 for sessions the stock did not trade. Rule 3: trading days in [D-365 calendar days, D).",
+    "Rule 4 lender/insurer = (a) NSE industry label matching bank|financ|insurance|nbfc (label = latest known before D, else the EARLIEST label ever recorded, because the announcements archive starts Jan 2022 -- a static-classification backfill), OR (b) for a stock with no label at all, any company name (from financials/announcements) matching bank/insurance/assurance/finance/financial/fincorp/finserv/finvest/credit/leasing, OR (c) the XBRL taxonomy vote of its latest-4-quarter filings known before D (from Jan 2020), else the static taxonomy backfill. Today's nse_list is logged, not used (Clarification 28). Delisted lenders are caught by (a) if they filed after 2022, by (b) by name, by (c) if they filed from 2020, and bank-format filings carry no revenue/EBITDA so they fail rule 6 anyway.",
+    "Basis per company at D: consolidated if consolidated filings known before D cover all four consecutive quarters ending at the latest period_end known at D (either basis), else standalone; every quarter then comes from that basis. (Quarterly consolidated filing only became mandatory from the Jun-2019 quarter, so 'where the company filed them' is read as 'filed them for every quarter the rules need'.) Revisions: latest broadcast_dt < D per (stock, basis, period_end).",
+    "Rule 5: the four most recent quarters of that basis must be consecutive (3-month steps) ending at the latest quarter; latest period_end >= D-200 days. TTM = sum of those 4 (all four non-null). Rule 6 needs TTM profit_normalised>0 and TTM ebitda>0.",
+    "Stability: sample std (ddof=1) of ebitda/revenue over the consecutive run from the latest quarter, capped at 8, needing >=4 non-null margins (revenue>0).",
+    "Growth: year-ago quarter = same basis, period_end 12 months earlier, need not be in the consecutive run; missing -> 0.5 percentile. Revenue growth needs year-ago revenue > 0.",
+    "Momentum: sessions are MARKET sessions; adjusted close at session t-21 and t-252 (D = t), forward-filled from the stock's last trade at or before that session.",
+    "Low vol: sample std (ddof=1) of log returns between consecutive traded adjusted closes within the last 252 market sessions [t-252, t-1] (spec Clarification 3).",
+    "Percentiles: pandas rank(pct=True, method='average') within the universe, higher value = higher percentile (so best -> 1); NaN/inf -> 0.5. Composite ties broken by symbol ascending.",
+    "Market cap: raw close = last traded close at or before the session before D (stock traded in the last 5 sessions). Shares = shares_implied of the latest known quarter's STANDALONE filing where it has one, else consolidated (spec Clarification 6), divided by split/bonus factors with ex_date strictly after that filing's broadcast calendar date and on/before the session before D. Non-positive/NaN -> excluded.",
+    "Portfolio: 'held' = positive shares at the open of D. Kept = held AND in universe AND rank <= 2N. Kept names count toward the sector cap (never force-sold for the cap). Vacancies filled in rank order skipping sectors at 3. Stocks with no NSE industry label are each their own sector (uncapped).",
+    "Rebalance (spec Clarification 11): V = cash + holdings at the D open (last close if not trading); every target is V/N; sells and trims first, then buys, scaled pro rata if cash net of costs cannot cover them; unfilled slots stay cash. Orders for stocks not trading on D wait up to 5 sessions (executed at that session's open at the rupee target, same sells-first rule) then are cancelled.",
+    "Dividends (spec Clarifications 13, 24): the amount of every 'dividend' clause, with or without 'Rs'; percent-of-face clauses and unit distributions skipped; same-day repeats of one amount count once; more than half the prior close is dropped as a parse error. Credited on the ex-session to shares held at the previous close. Splits/bonus scale share counts on the ex-session (ex_date on a non-session -> next session).",
+    "Forced exit: when a held stock has not traded for 20 consecutive market sessions it is sold at its last close on that 20th session, paying the 0.20% cost.",
+    "Universe EW benchmark uses the same simulator: all universe names at D, T = (V-costs)/|U|, same costs, dividends, delays and forced exit.",
+    "Quintiles: universe sorted by composite desc (symbol asc), np.array_split into 5; Q1 top; no costs, no buffer, same simulator. Spread reported as CAGR(Q1)-CAGR(Q5) and as the annualised mean daily return difference. Same for each group score.",
+    "Sharpe with rf = 0 on daily returns x sqrt(252). Turnover = sum |traded value| / 2 / mean NAV / years, excluding fills on or before the 5th session after the first D (spec Clarifications 18, 26; also reported including them). Holding period = calendar days from entry to exit (open spells censored at END). 'Doubled while held' = an adjusted close in the episode >= 2x the adjusted entry price (spec Clarification 18).",
+    "Null-factor split/bonus rows: the task note says use non-null factors only, but a few rows state the ratio in the subject with a null factor (in-sample: AJANTPHARM 2022-06-22 'Bonus- 1:2', a real -34% ex-date gap). Read as: re-parse equity 'Bonus a:b' -> b/(a+b) and 'Face value split from Rs X to Rs Y' -> Y/X; bonus debentures, NCRPS and preference bonuses stay unadjusted. Duplicate rows removed on (stock, ex_date, subject) before the same-day product (no in-sample case where the same factor repeats under a different subject).",
+    "END session: only its OPEN (and a trade flag) is loaded; its close and turnover are masked at load time.",
+    "Trials are NOT recorded by this checker (it duplicates the maker's run; recording would double-count the search).",
+    "Index benchmarks (spec Clarification 17, 2026-09-22): NSE's official Total Returns Index (gross, `tri`) for Nifty 500, Midcap 150 and Smallcap 250 from data/external/nifty_tri.parquet, close-to-close on the strategy's closes.",
+    "Rule 4 (spec Clarifications 28-29, 2026-09-22): today's nse_list no longer flags lenders; the XBRL taxonomy of the stock's filings for its latest 4 known quarters votes (NBFC_INDAS, BANKING, GI, LI; filings broadcast from Jan 2020, when the NBFC taxonomy began), with a static backfill from the stock's first four quarters under it for earlier dates. The lender-name net applies only to stocks with no industry label.",
+    "Data quality (spec Clarification 30, 2026-09-22): a filing whose revenue, implied shares and employee cost all break 30x in one direction against most of its 8 nearest known quarters is treated as not filed; a latest share count 30x from the median of up to 4 earlier quarters' counts is replaced by the other basis (if within 1.5x) or by that median."
+  ],
+  "reparsed_null_factor_actions": [
+    [
+      "2015-01-22",
+      "CORPBANK",
+      "Face Valus Split (Sub-Division) - From Rs 10/- Per To Rs 2/- Per Share",
+      "0.2"
+    ],
+    [
+      "2015-03-23",
+      "GRANULES",
+      "Face Value Split Rs 10 To Rs 1",
+      "0.1"
+    ],
+    [
+      "2015-07-23",
+      "MOTHERSON",
+      "Annual General Meeting / Dividend - Rs 3/- Per Share / Bonus - 1:2",
+      "0.6666666666666666"
+    ],
+    [
+      "2015-09-16",
+      "AEGISLOG",
+      "Face Value Split From Rs 10 To Rs 1",
+      "0.1"
+    ],
+    [
+      "2015-10-15",
+      "LAMBODHARA",
+      "Face Value Split From Rs 10 To Rs 5",
+      "0.5"
+    ],
+    [
+      "2015-10-29",
+      "SARLAPOLY",
+      "Face Value Split From Rs 10 To Re 1 (Record Date Revised)",
+      "0.1"
+    ],
+    [
+      "2016-06-06",
+      "LUXIND",
+      "Face Value Split From Rs 10 To Rs 2",
+      "0.2"
+    ],
+    [
+      "2016-08-12",
+      "PNCINFRA",
+      "Face Value Split From Rs 10 To Rs 2",
+      "0.2"
+    ],
+    [
+      "2016-08-30",
+      "VGUARD",
+      "Face Value Split From Rs 10 To Re 1",
+      "0.1"
+    ],
+    [
+      "2016-09-12",
+      "UNOMINDA",
+      "Face Value Split From Rs 10 To Rs 2",
+      "0.2"
+    ],
+    [
+      "2016-09-12",
+      "TRENT",
+      "Face Value Split From Rs 10 To Re 1",
+      "0.1"
+    ],
+    [
+      "2016-09-21",
+      "JMTAUTOLTD",
+      "Face Value Split From Rs 2 To Re 1",
+      "0.5"
+    ],
+    [
+      "2016-10-04",
+      "KAJARIACER",
+      "Face Value Split From Rs 2 To Re 1",
+      "0.5"
+    ],
+    [
+      "2016-10-06",
+      "GRASIM",
+      "Face Value Split From Rs 10 To Re 2",
+      "0.2"
+    ],
+    [
+      "2016-10-13",
+      "SHAH",
+      "Face Value Split From Rs 10 To Re 1",
+      "0.1"
+    ],
+    [
+      "2022-06-22",
+      "AJANTPHARM",
+      "Bonus- 1:2",
+      "0.6666666666666666"
+    ]
+  ],
+  "config": {
+    "N": 10,
+    "buffer": 20,
+    "sector_cap": 3,
+    "cost_per_side": 0.002,
+    "rebalance": "quarterly",
+    "dividends": "cash, zero interest",
+    "forced_exit": "20 sessions, last close",
+    "in_sample_dates": [
+      "2019-02-15",
+      "2019-06-03",
+      "2019-08-16",
+      "2019-11-15",
+      "2020-02-17",
+      "2020-06-01",
+      "2020-08-17",
+      "2020-11-17",
+      "2021-02-15",
+      "2021-06-01",
+      "2021-08-16",
+      "2021-11-15",
+      "2022-02-15",
+      "2022-06-01",
+      "2022-08-16",
+      "2022-11-15",
+      "2023-02-15",
+      "2023-06-01",
+      "2023-08-16",
+      "2023-11-15",
+      "2024-02-15",
+      "2024-06-03",
+      "2024-08-16",
+      "2024-11-18",
+      "2025-02-17",
+      "2025-06-02",
+      "2025-08-18",
+      "2025-11-17",
+      "2026-02-16",
+      "2026-06-01",
+      "2026-08-17"
+    ],
+    "end_open": "2026-09-18"
+  }
+}

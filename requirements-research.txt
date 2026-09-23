@@ -1,0 +1,7 @@
+# Research and verification only (jobs/verify_v1.py, jobs/libcheck_v1.py, v2 cross-validation).
+# Not needed by the daily jobs, which install requirements.txt alone.
+-r requirements.txt
+arch==8.0.0
+quantstats==0.0.81
+skfolio==1.3.0
+statsmodels==0.15.0

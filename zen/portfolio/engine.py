@@ -304,6 +304,12 @@ class Result:
     holdings: pd.DataFrame           # per rebalance D: target book
     episodes: pd.DataFrame           # per holding episode
     cash: pd.Series
+    # Portfolio value at the OPEN of every rebalance date, before any trade.
+    # Recorded, not recomputed: it is the same nav_open the rebalance sizes
+    # positions from. Without it a sub-period starting on a rebalance date can
+    # only be measured from that day's close, which is not the specification's
+    # clock and moved the published final-test figure by 0.1 points.
+    rebalance_open: pd.Series | None = None
 
 
 def simulate(panel: Panel, rebal: list[pd.Timestamp], choose, cfg: Config,
@@ -341,6 +347,7 @@ def simulate(panel: Panel, rebal: list[pd.Timestamp], choose, cfg: Config,
         entry_t[s] = -1
         entry_px[s] = np.nan
 
+    open_marks: dict = {}
     for t in range(t0, T):
         # 1. dividends to positions held at the previous close
         if t > t0:
@@ -352,6 +359,7 @@ def simulate(panel: Panel, rebal: list[pd.Timestamp], choose, cfg: Config,
             px_now = np.where(panel.traded[t], panel.open_[t],
                               panel.last[t - 1] if t > 0 else np.nan)
             nav_open = cash + float(np.nansum(units * px_now))
+            open_marks[dates[t]] = nav_open
             held = {syms[s] for s in np.flatnonzero(units > 0)}
             target, info = choose(D, held)
             tset = set(target)
@@ -472,7 +480,8 @@ def simulate(panel: Panel, rebal: list[pd.Timestamp], choose, cfg: Config,
     nav = nav_frame(dates[t0], cfg.initial_capital, dates[t0:t_end], nav_out[t0:t_end],
                     dates[t_end], nav_out[t_end])
     return Result(nav=nav, trades=pd.DataFrame(trades), holdings=pd.DataFrame(books),
-                  episodes=ep, cash=pd.Series(cash_out[t0:t_end + 1], index=dates[t0:t_end + 1]))
+                  episodes=ep, cash=pd.Series(cash_out[t0:t_end + 1], index=dates[t0:t_end + 1]),
+                  rebalance_open=pd.Series(open_marks, dtype=float))
 
 
 def nav_frame(start, start_value, close_dates, close_values, end, end_value) -> pd.DataFrame:

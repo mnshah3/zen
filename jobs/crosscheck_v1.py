@@ -9,6 +9,14 @@ Only one import from zen is allowed: zen.data.financials.statement_files.
 
     .venv/Scripts/python.exe -m jobs.crosscheck_v1            # in-sample only
     .venv/Scripts/python.exe -m jobs.crosscheck_v1 --no-leak-test
+    .venv/Scripts/python.exe -m jobs.crosscheck_v1 --run-final-test --end 2026-09-18 --out <dir>
+
+The full-period mode was added on 2026-09-23 by an independent auditor who
+extended this checker to 2026 without reading the production engine. It
+reproduced the production final test to fifteen decimal places. The lender
+name rule reads each company's latest name only, which is Clarification 29
+read literally; the earlier version matched every name a company had ever
+filed under and disagreed with production on one stock (TSFINV).
 
 Outputs (data/backtest/v1_check/):
     universe.csv   D, symbol                           every in-sample decision date
@@ -23,7 +31,8 @@ _guard(), which raises for anything after the in-sample end (the Feb 2023
 decision date, marked at its OPEN) unless --run-final-test is given. Price,
 corporate-action, dividend and index data are also truncated at load time to
 that date, so even a bug in the simulator cannot see the holdout. The flag
-exists because the spec requires one; this script is never run with it.
+exists because the spec requires one. It is used only to reproduce the final
+test after it has been run by the production engine, never to choose anything.
 """
 
 from __future__ import annotations
@@ -94,6 +103,8 @@ SCALE_NEIGH = 8
 SH_REF_Q = 4
 SH_ALT_TOL = 1.5
 
+FULL_END: pd.Timestamp | None = None
+LATEST_NAMES = {}
 UNLOCK = False
 END_DATE: pd.Timestamp | None = None
 
@@ -136,8 +147,11 @@ def decision_dates(sessions: pd.DatetimeIndex) -> tuple[list[pd.Timestamp], pd.T
         t = pd.Timestamp(y, m, d)
         i = sessions.searchsorted(t)
         return sessions[i]
-    ds = [first_on_or_after(y, m, d) for y in range(FIRST_YEAR, LAST_YEAR + 1) for m, d in ANCHORS]
-    return ds, first_on_or_after(*END_ANCHOR)
+    end = first_on_or_after(*END_ANCHOR) if FULL_END is None else FULL_END
+    ds = [first_on_or_after(y, m, d) for y in range(FIRST_YEAR, 2100) for m, d in ANCHORS
+          if pd.Timestamp(y, m, d) <= sessions[-1]]
+    ds = [x for x in ds if x < end]
+    return ds, end
 
 
 def load_prices(con, end: pd.Timestamp) -> pd.DataFrame:
@@ -635,11 +649,9 @@ def universe_and_measures(D, P: Panels, fin, lab, names, taxfill, ca) -> pd.Data
     sec = sector_at(lab, D)
     df["sector"] = sec.reindex(df.index)
     lab_lender = df["sector"].fillna("").str.contains(LENDER_LABEL)
-    name_lender = pd.Series([any(LENDER_NAME.search(n) for n in names.get(c, ()))
-                             for c in df.index], index=df.index)
-    fin_names = fin.groupby("cid")["company"].agg(lambda s: set(s.dropna()))
-    name_lender |= pd.Series([any(LENDER_NAME.search(n) for n in fin_names.get(c, ()))
-                              for c in df.index], index=df.index)
+    # Clarification 29 read literally: each stock's LATEST name only.
+    _ln = LATEST_NAMES
+    name_lender = pd.Series([bool(LENDER_NAME.search(_ln.get(c, "") or "")) for c in df.index], index=df.index)
     # Names are stored as at download (Clarification 29): the name net applies
     # only to stocks with no industry label at all.
     name_lender &= df["sector"].isna()
@@ -881,18 +893,27 @@ def main(argv=None) -> int:
     ap.add_argument("--run-final-test", action="store_true",
                     help="required to compute anything after the in-sample end. Do not use.")
     ap.add_argument("--no-leak-test", action="store_true")
+    ap.add_argument("--no-quintiles", action="store_true")
+    ap.add_argument("--end", default=None, help="final NAV mark (open) date; must be a session")
+    ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
-    if a.run_final_test:
-        raise SystemExit("This checker only implements the in-sample run; holdout is not run here.")
-    UNLOCK = False
+    global FULL_END, OUT
+    if a.out:
+        OUT = Path(a.out)
+    if a.end:
+        if not a.run_final_test:
+            raise SystemExit("--end after the in-sample end needs --run-final-test")
+        FULL_END = pd.Timestamp(a.end)
+    UNLOCK = bool(a.run_final_test)
 
     con = duck()
     sessions_all = all_sessions(con)
     Ds, END = decision_dates(sessions_all)
     END_DATE = END
+    assert END in sessions_all, "END must be a session"
     sessions = sessions_all[sessions_all <= END]
     log(f"decision dates: {[d.date().isoformat() for d in Ds]}  end(open)={END.date()}")
-    assert len(Ds) == 16
+    assert len(Ds) == (16 if FULL_END is None else len(Ds))
 
     p = load_prices(con, END)
     log(f"prices {len(p):,} rows")
@@ -907,6 +928,9 @@ def main(argv=None) -> int:
     fin = load_financials(con, spells)
     # static classification input (Clarification 28), like the label backfill
     taxfill = taxonomy_fill(fin)
+    global LATEST_NAMES
+    _f = fin.dropna(subset=["company"]).sort_values("broadcast_dt")
+    LATEST_NAMES = _f.groupby("cid")["company"].last().to_dict()
     fin = fin[fin["broadcast_dt"] < END]
     lab, names, flagged = load_labels(con, spells, P)
     log(f"financial rows {len(fin):,}; labelled stocks {lab['cid'].nunique()}; "
@@ -975,6 +999,10 @@ def main(argv=None) -> int:
         return step
 
     strat = base.run({t_idx[D]: make_step(D) for D in Ds}, t0, t_end)
+    _tr = pd.DataFrame(base.trades, columns=["t", "k", "d", "px", "val"])
+    _tr["date"] = P.sessions[_tr["t"].values].date
+    _tr["cid"] = P.cids[_tr["k"].values]
+    _tr.to_csv(OUT / "trades.csv", index=False)
     hold = pd.DataFrame(hold_rows, columns=["D", "symbol", "cid", "status", "rank", "sector"])
     hold.to_csv(OUT / "holdings.csv", index=False)
 
@@ -1005,7 +1033,7 @@ def main(argv=None) -> int:
 
     dates = pd.to_datetime(strat["date"])
     quint = {}
-    for key in ["composite", *GROUPS]:
+    for key in ([] if a.no_quintiles else ["composite", *GROUPS]):
         qn = quintile_navs(key)
         qp = {k: perf(pd.Series(v), dates)["cagr"] for k, v in qn.items()}
         spread = relative(pd.Series(qn["Q1"]), pd.Series(qn["Q5"]))

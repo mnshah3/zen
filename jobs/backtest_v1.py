@@ -235,6 +235,12 @@ def main(argv=None) -> int:
             out / f"episodes{suffix}.csv", index=False)
         wide_nav({"strategy": res.nav, "universe_ew": ew.nav, **idx}).to_csv(
             out / f"nav{suffix}.csv", index=False)
+        # Value at the open of every rebalance date, so a period that starts on
+        # one can be measured on the specification's open-to-open clock.
+        pd.DataFrame({"date": res.rebalance_open.index,
+                      "strategy_open": res.rebalance_open.values,
+                      "universe_ew_open": ew.rebalance_open.reindex(res.rebalance_open.index).values}
+                     ).to_csv(out / f"rebalance_open{suffix}.csv", index=False)
         (out / f"metrics{suffix}.json").write_text(json.dumps(rep, indent=2, default=str))
         (out / "sanity.json").write_text(json.dumps(san, indent=2, default=str))
         record(args, {"config": args.config, **engine.config_dict(cfg)}, rep)

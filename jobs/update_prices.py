@@ -56,7 +56,7 @@ def main() -> int:
             frames = []
         if other:
             # The non-EQ/BE series, stored apart so `prices` is untouched
-            # (Clarification 34): the 20-session no-trade exit reads them.
+            # (Clarification 34). NOT yet read by the engine: see Clarification 34.
             store.write_parquet(pd.concat(other, ignore_index=True),
                                 store.PARQUET_DIR_OTHER, ("date", "symbol", "series"))
             other = []

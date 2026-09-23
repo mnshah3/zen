@@ -55,3 +55,4 @@ data/indices/derived/
 data/backtest/v1/ranks.parquet
 data/backtest/v1_holdout/ranks.parquet
 data/study/crosscheck_iima/
+data/backtest/v1_corrected/ranks.parquet

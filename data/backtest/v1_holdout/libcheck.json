@@ -1,0 +1,78 @@
+{
+  "run": "data\\backtest\\v1_holdout",
+  "full_period": {
+    "strategy": {
+      "cagr_pct": 29.09,
+      "sharpe": 1.313,
+      "sortino": 1.825,
+      "calmar": 0.867,
+      "max_drawdown_pct": -33.56,
+      "volatility_pct": 21.17
+    },
+    "universe_ew": {
+      "cagr_pct": 22.51,
+      "sharpe": 1.107,
+      "sortino": 1.465,
+      "calmar": 0.47,
+      "max_drawdown_pct": -47.9,
+      "volatility_pct": 20.22
+    }
+  },
+  "regression_full_period": {
+    "strategy": {
+      "months": 82,
+      "first": "2019-03",
+      "last": "2025-12",
+      "alpha_annual_pct": 4.74,
+      "alpha_t": 1.02,
+      "r_squared": 0.724,
+      "loadings": {
+        "MF": 0.862,
+        "SMB": 0.243,
+        "HML": 0.465,
+        "WML": 0.347
+      },
+      "loading_t": {
+        "MF": 9.74,
+        "SMB": 1.82,
+        "HML": 4.8,
+        "WML": 3.63
+      }
+    },
+    "universe_ew": {
+      "months": 82,
+      "first": "2019-03",
+      "last": "2025-12",
+      "alpha_annual_pct": 1.57,
+      "alpha_t": 1.34,
+      "r_squared": 0.982,
+      "loadings": {
+        "MF": 0.96,
+        "SMB": 0.67,
+        "HML": 0.339,
+        "WML": -0.053
+      },
+      "loading_t": {
+        "MF": 54.21,
+        "SMB": 20.33,
+        "HML": 11.44,
+        "WML": -1.96
+      }
+    }
+  },
+  "final_test": {
+    "clock": "close of 2023-02-15 (no rebalance_open.csv in this run)",
+    "strategy_cagr_pct": 29.43,
+    "universe_ew_cagr_pct": 20.37,
+    "margin_interval": {
+      "point_pct": 7.66,
+      "lo90_pct": -5.85,
+      "hi90_pct": 22.21,
+      "p_le_zero": 0.173,
+      "method": "stationary bootstrap, mean block 21 sessions, 5000 draws"
+    },
+    "nifty_500_tri_cagr_pct": 13.36,
+    "nifty_midcap_150_tri_cagr_pct": 21.3,
+    "nifty_smallcap_250_tri_cagr_pct": 21.76
+  }
+}

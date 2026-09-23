@@ -6,11 +6,12 @@ honestly, because they test against the companies that are still listed today.
 So the first job was building an archive that doesn't cheat, and a test harness
 that tries to break its own results.
 
-The answer, measured once on 3.6 years the design had never seen:
-**29.3% a year against 13.5% for the Nifty 500 including dividends**, and
-20.5% for the same universe equally weighted, with a smaller drawdown than
-either. The rules were public before the test. [What that does and does not
-prove](#the-result) is below.
+The answer, on 3.6 years the design had never seen: **33.0% a year against
+13.4% for the Nifty 500 including dividends**, and 21.0% for the same universe
+equally weighted, with a smaller drawdown than the universe. The rules were
+public before the test. It beats random picks from the same list, but most of
+the return is the market and two well-known factors. [What that does and does
+not prove](#the-result) is below.
 
 It runs unattended on GitHub Actions and emails me two briefs. It places no
 orders. It produces evidence, and I make the decisions.
@@ -166,84 +167,70 @@ strategy this time.
 ## The result
 
 **A fundamental screen, committed to this repo before it was tested, beat the
-market on data it had never seen.**
+market on data it had never seen, by a margin unlikely to be luck. Most of its
+return is the market and two well-known factors, and what is left after them
+is not yet statistically significant.**
 
 The rules were written into
 [research/strategy/v1-spec.md](research/strategy/v1-spec.md) and committed on
 21 September 2026. Everything from 15 February 2023 onward was locked in code
-and the selected configuration was run on it on 22 September, after the rules
-were fixed and the code had been audited. Later runs over the same period were
-verification of that one fixed configuration, not new attempts. This is the
-held-back period, 3.6 years, measured from the open of 15 February 2023 to the
-open of 18 September 2026:
+and the configuration chosen in advance was run on it on 22 September. That
+one-shot run gave **29.3% a year against 20.5%** for the same universe equally
+weighted, and it stays on record as the pre-registered result.
+
+An independent audit then found the archive was missing the March 2025
+quarter for about 650 companies, because the code listing NSE's filings
+stopped at the first page that failed to load. That was fixed, the quarter
+refilled, and the same configuration re-run with nothing else changed. This is
+the held-back period on the corrected archive, 3.6 years, open 15 February 2023
+to open 18 September 2026:
 
 | | Return a year | Worst fall |
 |---|---|---|
-| **The strategy** | **29.3%** | **-23.8%** |
-| The same universe, equally weighted | 20.5% | -31.2% |
-| Nifty 500, dividends included | 13.5% | -18.6% |
-| Nifty Midcap 150 | 21.4% | |
-| Nifty Smallcap 250 | 21.9% | |
+| **The strategy** | **33.0%** | **-23.8%** |
+| The same universe, equally weighted | 21.0% | -31.1% |
+| Nifty 500, dividends included | 13.4% | -18.6% |
+| Nifty Midcap 150 | 21.3% | -20.9% |
+| Nifty Smallcap 250 | 21.8% | -26.0% |
 
-All three conditions set in advance were met: it beat the equal-weight universe
-by 8.8 points a year, beat the Nifty 500 by 15.8, and over the full period from
-2019 the ranking separated the best fifth of the universe (32.2% a year) from
-the worst (8.0%). It did so with a smaller drawdown than the same stocks
-equally weighted.
+**What backs it up**, all in
+[research/strategy/v1-verification.md](research/strategy/v1-verification.md):
 
-**What this is not.** The 90% confidence interval for the margin over the
-equal-weight universe runs from -6.0 to +24.2 points a year, and there is about
-a 16% chance the true edge is zero or negative. Beating an index over 3.6 years
-does not prove skill, and this result cannot. It is evidence, not proof, and it
-is the honest kind: one measurement, on data the design never saw, with the
-rules public beforehand.
+- **Two engines agree exactly.** An independent re-implementation, extended to
+  2026 without sight of the production code, picks the same stocks on all 31
+  rebalance dates and matches the daily portfolio value to fifteen decimal
+  places. A rebuild from raw exchange prices matched all 226 trades of the
+  one-shot run.
+- **It beats random picks from the same list.** Against 500 random ten-stock
+  portfolios run through the same machinery, it lands at the 94th to 96th
+  percentile, whether the random portfolios trade more than it does or less.
+- **It falls less than the market.** Against the Nifty 500 total return it
+  captured 129% of the rising months and 68% of the falling ones.
+- **The margin is probably real, but not proven.** Over the equal-weight
+  universe it is 12.0 points a year, with a 90% interval of -3.2 to +24.6 and
+  an 11% chance the true margin is zero or less.
 
-**Correction, 23 September 2026.** An independent audit of this result found
-errors in the statistics I published alongside it on 22 September. They were my
-own work, done after the audited build had finished and never checked by anyone
-else. The corrected figures are below, and the full audit is summarised in
-[research/strategy/v1-verification.md](research/strategy/v1-verification.md).
+**What it does not show:**
 
-What the audit confirmed:
+- **Skill beyond known factors.** Regressed on IIM Ahmedabad's published Indian
+  factors, the strategy's alpha is 5.4% a year at t = 1.12, which is not
+  significant. Its value and momentum tilts are, strongly. Most of the return
+  is the market plus factors that can be bought more cheaply.
+- **Robustness to the search.** After 195 logged trials, the deflated Sharpe
+  probability of skill is between 0.82 and 0.995 depending on the method, around
+  a usual bar of 0.95.
+- **A smooth ride.** The worst falls were -33.6% in 2020 and -30.7% over 15
+  months from April 2022, and it is 4.8% down in 2026 while the same universe is
+  up 8.8%.
 
-- **The result reproduces.** An independent re-implementation, extended to 2026
-  without sight of the production code, picked the same stocks on all 31
-  rebalance dates and matched the daily portfolio value to fifteen decimal
-  places. A separate rebuild from raw exchange prices matched all 226 trades in
-  the held-back period, 29.45% against 29.43%.
-- **Against 500 random ten-stock portfolios** from the same universe, run through
-  the same machinery, the strategy lands at the **95th percentile**.
-
-What was wrong, and the corrected figure:
-
-- **Factor alpha was overstated.** The regression on IIM Ahmedabad's published
-  Indian factors subtracted the risk-free rate twice. Correctly computed, the
-  strategy's alpha is **4.7% a year at t = 0.99**, and the filtered universe's
-  is 1.6% at t = 1.30. Neither is statistically significant, and the claim I
-  made that "the filters carry the strongest evidence" is withdrawn. Most of
-  the return is exposure to the market and to value and momentum, which are
-  factors anyone can buy.
-- **The deflated Sharpe probability of 0.78 is not a settled number.** It moves
-  between 0.42 and 0.99 depending on a defensible choice of how to estimate the
-  spread of Sharpe ratios across trials. I presented one choice as the answer.
-- **The final-test comparison was on mismatched clocks.** On the specification's
-  own clock, open of 15 February 2023 to open of 18 September 2026, it is
-  **29.3% against 20.5%**, a margin of 8.8 points rather than 9.0. The 90%
-  interval for that margin is **-6.0 to +24.2 points**, with about a 16% chance
-  the true edge is zero or negative.
-- **The archive is missing the March 2025 quarter for about 600 companies.** At
-  three rebalances in 2025 and 2026 that removed roughly a third of the
-  universe. A rough fill suggests the result would have been somewhat better,
-  not worse, but that is an estimate. The missing filings are being fetched and
-  the test re-run on complete data, and that re-run will be published next to
-  the original one-shot result rather than replacing it.
-
-Two more things the result does not let me hide. The strategy is **down 10.2%
-in 2026** while the same universe is up 7.5%, so this is what a bad patch looks
-like while living through it. And two of the five ranking groups, quality and
-low volatility, contributed nothing in either period. Removing them now would
-be fitting to the answer, so they stay until a new specification is written and
-tested from scratch.
+**Correction, 23 September 2026.** Statistics I published alongside the
+one-shot result on 22 September were wrong. They were my own work, done after
+the audited build had finished and never checked by anyone else. The worst was
+a factor regression that subtracted the risk-free rate twice and turned an
+insignificant alpha into a nearly significant one, on which I then built a
+claim that the filters carried the strongest evidence. That claim is
+withdrawn. Every statistic above is now cross-checked against a standard
+library (statsmodels, quantstats, arch).
 
 ### What the strategy actually is
 

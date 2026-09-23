@@ -304,8 +304,8 @@ reading available, or the only workable one where the archive forces a choice.
 The production engine and the independent cross-check were diffed level by
 level (decision dates, universe, measures, holdings, NAV). Each difference
 below was traced to a specific symbol and date and resolved by the most
-literal reading of the text above, before either implementation's returns
-were compared. Where one implementation simply departed from an existing
+literal reading of the text above. [Corrected 2026-09-23: the base
+in-sample result had already been computed when these were applied. See 35.] Where one implementation simply departed from an existing
 clarification (the cross-check took shares from the chosen basis against 6,
 used 253 closes for volatility against 3, took costs out of the target
 against 11 and measured "doubled" at exit against 18), that implementation
@@ -562,3 +562,64 @@ computing any return).
     and Smallcap 250 and asks for the Nifty 500 with dividends, so this
     follows the spec text. The file is not stored under `data/indices/`.
     Rows on or after the in-sample end date are never loaded.
+
+### 2026-09-23: disclosures from the second audit
+
+An independent audit of the finished result, run after the final test, found
+that this document did not describe everything the code does, and that one
+heading above overstated how early some rules were fixed. Nothing below
+changes a rule. It records what was true and when.
+
+33. **Linking a company across renames.** Clarification 23 says a symbol
+    change is linked when the old and new keys are within 10 sessions. The
+    code has used 60 since the 22 September fix round, and adds a third pass
+    that joins two components of the same ISIN issuer (the first seven
+    characters) when a company changes its symbol and its ISIN on the same
+    day, under four guards documented in `zen/universe/identity.py`. This was
+    written into the code and never into this document. Known limit: prices
+    run straight across a capital reduction at such a seam, so RUCHISOYA at
+    3.35 becomes PATANJALI at 17.0 as if it were a 407% return, and momentum
+    reads it that way. No seam stock was held in the final test. Over the
+    full period the likely effect is under 0.1 points a year, through one
+    SPLPETRO holding from August to November 2021.
+
+34. **Stocks moved to trade-for-trade are still force-sold.** The code
+    comments and the 22 September fix round describe keeping every non-EQ/BE
+    series in a separate `prices_other` store so that the 20-session no-trade
+    exit would not sell a stock NSE had moved to its BZ segment while it was
+    still trading. That fix was only half built: the store was never
+    backfilled for past dates, and the engine never reads it. The exit rule
+    therefore behaves exactly as Clarification 15 alone describes. The
+    strategy is unaffected, because its only forced exit in the whole run
+    was Tata Steel BSL's merger (31). The equal-weight benchmark holds every
+    name and may be slightly affected. Deferred to the v2 build, where it
+    will be implemented in both engines rather than patched in one.
+
+35. **When Clarifications 22 to 27 were written.** The heading of that
+    section says they were resolved "before either implementation's returns
+    were compared". That is not accurate. The base configuration's in-sample
+    result had already been computed and logged twice (`state/trials.jsonl`
+    rows 130 and 131: 25.76% a year, information ratio 0.166) before those
+    clarifications were applied, and the next logged run (row 132) was 28.70%
+    with an information ratio of 0.337. Each change was justified by a
+    specific accounting or data error rather than by its effect, and the
+    final test was run afterwards on the fixed code. But the rules were not
+    all fixed before any return had been seen, and a reader deciding how far
+    to trust the pre-registration should know that.
+
+36. **The March 2025 quarter was incomplete.** The financials archive held
+    1,516 companies for March 2025 against about 2,100 before and 2,200 after.
+    The listing code stopped at the first page that failed to load and
+    returned the rest as if it were complete. Rule 5 then removed about 430
+    names at the 2025-08-18, 2025-11-17 and 2026-02-16 rebalances. The
+    listing now retries and then raises instead, the quarter has been
+    refilled from NSE (2,166 companies, 14 documents confirmed absent by NSE
+    itself), and the other 2025 and 2026 quarters have had a few hundred
+    missing documents each restored. The one-shot final test stands on record
+    as it was run. A re-run on the completed archive is published beside it.
+
+37. **The clock for sub-periods.** The final test is measured from the value
+    at the open of 15 February 2023 to the open of the end date, as 16
+    requires. The first published figure used the close of 15 February
+    instead, because the open value was not recorded mid-run. The engine now
+    records the value at every rebalance open.

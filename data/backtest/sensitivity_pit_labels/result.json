@@ -1,0 +1,35 @@
+{
+  "as_specified": {
+    "final_test_strategy_cagr_pct": 32.97,
+    "final_test_universe_ew_cagr_pct": 21.03,
+    "final_test_mean_universe": 1169.3
+  },
+  "point_in_time_only": {
+    "final_test_strategy_cagr_pct": 32.97,
+    "final_test_universe_ew_cagr_pct": 21.03,
+    "final_test_mean_universe": 1169.3
+  },
+  "final_test_dates_with_a_different_book": 1,
+  "final_test_universe_rows_that_differ": 0,
+  "sector_label_sources": {
+    "as_specified": {
+      "none": 9162,
+      "pit": 8377
+    },
+    "point_in_time_only": {
+      "none": 9162,
+      "pit": 8377
+    }
+  },
+  "differences": [
+    {
+      "D": "2023-02-15",
+      "only_as_specified": [
+        "M&M"
+      ],
+      "only_point_in_time": [
+        "GHCL"
+      ]
+    }
+  ]
+}

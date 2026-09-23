@@ -1,0 +1,407 @@
+{
+  "mcap_check": {
+    "D": "2021-02-15",
+    "caps": {
+      "RELIANCE": {
+        "model_cr": 1315528,
+        "reference_cr": 1300000,
+        "ratio": 1.012,
+        "within_20pct": true
+      },
+      "TCS": {
+        "model_cr": 1197295,
+        "reference_cr": 1200000,
+        "ratio": 0.998,
+        "within_20pct": true
+      },
+      "INFY": {
+        "model_cr": 558065,
+        "reference_cr": 560000,
+        "ratio": 0.997,
+        "within_20pct": true
+      }
+    }
+  },
+  "universe_size": {
+    "2019-02-15": 237,
+    "2019-06-03": 501,
+    "2019-08-16": 483,
+    "2019-11-15": 458,
+    "2020-02-17": 473,
+    "2020-06-01": 445,
+    "2020-08-17": 596,
+    "2020-11-17": 623,
+    "2021-02-15": 728,
+    "2021-06-01": 767,
+    "2021-08-16": 887,
+    "2021-11-15": 887,
+    "2022-02-15": 938,
+    "2022-06-01": 910,
+    "2022-08-16": 859,
+    "2022-11-15": 828,
+    "2023-02-15": 862,
+    "2023-06-01": 854,
+    "2023-08-16": 1032,
+    "2023-11-15": 1081,
+    "2024-02-15": 1174,
+    "2024-06-03": 1181,
+    "2024-08-16": 1239,
+    "2024-11-18": 1265,
+    "2025-02-17": 1255,
+    "2025-06-02": 1237,
+    "2025-08-18": 1231,
+    "2025-11-17": 1247,
+    "2026-02-16": 1235,
+    "2026-06-01": 1312,
+    "2026-08-17": 1334
+  },
+  "extreme_daily_returns": [
+    {
+      "date": "2019-08-06",
+      "symbol": "GFLLIMITED",
+      "ret": -0.8910711244820344,
+      "prev_adj_close": 880.85,
+      "adj_close": 95.95
+    },
+    {
+      "date": "2019-08-19",
+      "symbol": "AGI",
+      "ret": -0.7370662124760485,
+      "prev_adj_close": 234.85,
+      "adj_close": 61.75
+    },
+    {
+      "date": "2020-01-21",
+      "symbol": "SUVEN",
+      "ret": -0.9470890694974291,
+      "prev_adj_close": 301.45,
+      "adj_close": 15.95
+    },
+    {
+      "date": "2020-01-27",
+      "symbol": "PATANJALI",
+      "ret": 4.074626865671641,
+      "prev_adj_close": 1.1166666666666667,
+      "adj_close": 5.666666666666666
+    },
+    {
+      "date": "2020-03-06",
+      "symbol": "BORORENEW",
+      "ret": -0.7359639830508475,
+      "prev_adj_close": 188.8,
+      "adj_close": 49.85
+    },
+    {
+      "date": "2020-12-23",
+      "symbol": "AURUM",
+      "ret": -0.9876223811697864,
+      "prev_adj_close": 985.65,
+      "adj_close": 12.2
+    },
+    {
+      "date": "2021-03-02",
+      "symbol": "WANBURY",
+      "ret": 1.7125,
+      "prev_adj_close": 40.0,
+      "adj_close": 108.5
+    },
+    {
+      "date": "2021-10-22",
+      "symbol": "3IINFOLTD",
+      "ret": 2.6686390532544384,
+      "prev_adj_close": 8.45,
+      "adj_close": 31.0
+    },
+    {
+      "date": "2022-08-12",
+      "symbol": "GVKPIL",
+      "ret": 1.0727272727272728,
+      "prev_adj_close": 2.75,
+      "adj_close": 5.7
+    },
+    {
+      "date": "2022-11-22",
+      "symbol": "NDLVENTURE",
+      "ret": -0.8422438465941614,
+      "prev_adj_close": 436.75,
+      "adj_close": 68.9
+    },
+    {
+      "date": "2023-03-29",
+      "symbol": "MIRZAINT",
+      "ret": -0.862962230571485,
+      "prev_adj_close": 252.85,
+      "adj_close": 34.65
+    },
+    {
+      "date": "2023-06-08",
+      "symbol": "NIITLTD",
+      "ret": -0.7613468179575728,
+      "prev_adj_close": 405.4,
+      "adj_close": 96.75
+    },
+    {
+      "date": "2023-10-16",
+      "symbol": "ASMS",
+      "ret": 1.046875,
+      "prev_adj_close": 6.4,
+      "adj_close": 13.1
+    },
+    {
+      "date": "2024-04-02",
+      "symbol": "AQYLON",
+      "ret": 10.546666666666667,
+      "prev_adj_close": 0.375,
+      "adj_close": 4.33
+    },
+    {
+      "date": "2024-07-01",
+      "symbol": "OCCL",
+      "ret": -0.7412941467028895,
+      "prev_adj_close": 809.8,
+      "adj_close": 209.5
+    },
+    {
+      "date": "2024-09-20",
+      "symbol": "ROSSELLIND",
+      "ret": -0.7251668945548138,
+      "prev_adj_close": 621.65,
+      "adj_close": 170.85
+    },
+    {
+      "date": "2024-10-11",
+      "symbol": "HERCULES",
+      "ret": -0.7061422889969067,
+      "prev_adj_close": 678.9,
+      "adj_close": 199.5
+    },
+    {
+      "date": "2025-03-10",
+      "symbol": "KESORAMIND",
+      "ret": -0.9525693630324346,
+      "prev_adj_close": 204.72,
+      "adj_close": 9.71
+    },
+    {
+      "date": "2025-05-14",
+      "symbol": "RAYMOND",
+      "ret": -0.6476379211148756,
+      "prev_adj_close": 1564.3,
+      "adj_close": 551.2
+    },
+    {
+      "date": "2025-05-22",
+      "symbol": "ABFRL",
+      "ret": -0.6659230340211935,
+      "prev_adj_close": 268.95,
+      "adj_close": 89.85
+    },
+    {
+      "date": "2025-07-11",
+      "symbol": "VERTOZ",
+      "ret": 8.499454743729553,
+      "prev_adj_close": 9.17,
+      "adj_close": 87.11
+    },
+    {
+      "date": "2025-09-24",
+      "symbol": "SHANKARA",
+      "ret": -0.7554265522463403,
+      "prev_adj_close": 990.5,
+      "adj_close": 242.25
+    },
+    {
+      "date": "2025-11-12",
+      "symbol": "ALLCARGO",
+      "ret": -0.6492471213463241,
+      "prev_adj_close": 33.87,
+      "adj_close": 11.88
+    },
+    {
+      "date": "2025-12-18",
+      "symbol": "VIVIMEDLAB",
+      "ret": 1.7142857142857144,
+      "prev_adj_close": 9.8,
+      "adj_close": 26.6
+    },
+    {
+      "date": "2025-12-26",
+      "symbol": "DCMSRIND",
+      "ret": -0.683317843866171,
+      "prev_adj_close": 172.16,
+      "adj_close": 54.52
+    },
+    {
+      "date": "2026-02-18",
+      "symbol": "SADHNANIQ",
+      "ret": -0.7040998217468806,
+      "prev_adj_close": 5.61,
+      "adj_close": 1.66
+    },
+    {
+      "date": "2026-04-09",
+      "symbol": "GAYAPROJ",
+      "ret": 1.6218487394957983,
+      "prev_adj_close": 5.95,
+      "adj_close": 15.6
+    },
+    {
+      "date": "2026-04-30",
+      "symbol": "VEDL",
+      "ret": -0.6489788004136505,
+      "prev_adj_close": 773.6,
+      "adj_close": 271.55
+    },
+    {
+      "date": "2026-09-02",
+      "symbol": "INDIAGLYCO",
+      "ret": -0.7875326077179096,
+      "prev_adj_close": 1111.7,
+      "adj_close": 236.2
+    },
+    {
+      "date": "2026-09-07",
+      "symbol": "HEGAM",
+      "ret": -0.6262272571232407,
+      "prev_adj_close": 728.25,
+      "adj_close": 272.2
+    }
+  ],
+  "tcs_dividends": [
+    {
+      "date": "2019-01-17",
+      "cash_per_unit": 4.0
+    },
+    {
+      "date": "2019-06-04",
+      "cash_per_unit": 18.0
+    },
+    {
+      "date": "2019-07-16",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2019-10-17",
+      "cash_per_unit": 45.0
+    },
+    {
+      "date": "2020-01-23",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2020-03-19",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2020-06-03",
+      "cash_per_unit": 6.0
+    },
+    {
+      "date": "2020-07-16",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2020-10-14",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2021-01-14",
+      "cash_per_unit": 6.0
+    },
+    {
+      "date": "2021-05-25",
+      "cash_per_unit": 15.0
+    },
+    {
+      "date": "2021-07-15",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2021-10-14",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2022-01-19",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2022-05-25",
+      "cash_per_unit": 22.0
+    },
+    {
+      "date": "2022-07-14",
+      "cash_per_unit": 8.0
+    },
+    {
+      "date": "2022-10-17",
+      "cash_per_unit": 8.0
+    },
+    {
+      "date": "2023-01-16",
+      "cash_per_unit": 75.0
+    },
+    {
+      "date": "2023-06-15",
+      "cash_per_unit": 24.0
+    },
+    {
+      "date": "2023-07-20",
+      "cash_per_unit": 9.0
+    },
+    {
+      "date": "2023-10-19",
+      "cash_per_unit": 9.0
+    },
+    {
+      "date": "2024-01-19",
+      "cash_per_unit": 27.0
+    },
+    {
+      "date": "2024-05-16",
+      "cash_per_unit": 28.0
+    },
+    {
+      "date": "2024-07-19",
+      "cash_per_unit": 10.0
+    },
+    {
+      "date": "2024-10-18",
+      "cash_per_unit": 10.0
+    },
+    {
+      "date": "2025-01-17",
+      "cash_per_unit": 76.0
+    },
+    {
+      "date": "2025-06-04",
+      "cash_per_unit": 30.0
+    },
+    {
+      "date": "2025-07-16",
+      "cash_per_unit": 11.0
+    },
+    {
+      "date": "2025-10-15",
+      "cash_per_unit": 11.0
+    },
+    {
+      "date": "2026-01-16",
+      "cash_per_unit": 57.0
+    },
+    {
+      "date": "2026-05-25",
+      "cash_per_unit": 31.0
+    },
+    {
+      "date": "2026-07-15",
+      "cash_per_unit": 12.0
+    }
+  ],
+  "dividends_dropped_as_implausible": [
+    {
+      "symbol": "AURUM",
+      "ex_date": "2020-12-23",
+      "dps": 974.0
+    }
+  ]
+}

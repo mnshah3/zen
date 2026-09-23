@@ -79,7 +79,13 @@ def risk(nav: pd.Series, bench: pd.Series | None = None) -> dict:
         "sharpe_rf0": r.mean() / r.std() * np.sqrt(252),
         # Sortino punishes only downside movement, which is the risk that
         # matters to someone who has to live with the account.
-        "sortino_rf0": r.mean() / downside.std() * np.sqrt(252) if len(downside) else np.nan,
+        # Downside deviation is the root mean square of returns below zero
+        # taken over ALL periods, not the standard deviation of the negative
+        # days alone. The earlier version used the latter and understated
+        # Sortino (1.60 where the standard definition gives 1.82); it now
+        # agrees with quantstats.
+        "sortino_rf0": (r.mean() / np.sqrt((np.minimum(r, 0) ** 2).mean()) * np.sqrt(252)
+                        if len(downside) else np.nan),
         "max_drawdown_pct": dd.min() * 100,
         # Calmar: return per unit of worst loss.
         "calmar": cagr / abs(dd.min()) if dd.min() < 0 else np.nan,
@@ -203,7 +209,14 @@ def exposure(holdings: pd.DataFrame) -> dict:
             "distinct_stocks_ever_held": int(h["symbol"].nunique()) if "symbol" in h else None}
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    import argparse
+    global RUN, OUT
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", default="data/backtest/v1_corrected")
+    ap.add_argument("--out", default="data/backtest/stats_corrected")
+    a = ap.parse_args(argv)
+    RUN, OUT = Path(a.run), Path(a.out)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     OUT.mkdir(parents=True, exist_ok=True)
     nav = pd.read_csv(RUN / "nav.csv"); nav["date"] = pd.to_datetime(nav["date"])

@@ -1,120 +1,199 @@
 # Is the v1 result skill or luck?
 
-> **Correction, 23 September 2026. Parts of this page are wrong.** An
-> independent audit found that the factor regression in section 2 subtracted the
-> risk-free rate twice. Corrected, the strategy's alpha is **4.7% a year at
-> t = 0.99** and the filtered universe's is **1.6% at t = 1.30**, so neither is
-> significant and the conclusion that "the filters matter more than the ranking"
-> is withdrawn. The regression also stops at December 2025, where the IIMA data
-> ends. The deflated Sharpe probability in section 3 depends heavily on a
-> modelling choice and ranges from 0.42 to 0.99. The calendar-year table in
-> section 4 started each year one session late, and the corrected figures differ
-> by up to 1.8 points. This page will be rewritten once the test has been re-run
-> on the complete archive, since the March 2025 quarter is missing for about 600
-> companies.
+Rewritten on 2026-09-23 after a second independent audit. The first version of
+this page, published the day before, carried a factor regression that
+subtracted the risk-free rate twice and several smaller errors. It is kept in
+the git history. What follows is recomputed on the corrected archive, with
+every statistic cross-checked against a standard library.
 
+**Short answer: the strategy beat the market and beat random picks from the
+same list by a margin that is unlikely to be luck, with smaller drawdowns. But
+most of its return is exposure to the market and to value and momentum, and
+its alpha after those factors is not statistically significant.**
 
-Run on 2026-09-22, after the held-back test, with
-[`jobs/verify_v1.py`](../../jobs/verify_v1.py). Full period, Feb 2019 to
-Sep 2026: strategy 28.3% a year, the same universe equally weighted 21.8%.
+## Two results, and why there are two
 
-**Short answer: the ranking beats chance, but the evidence is one step above
-borderline, and a large part of the return is known factors rather than
-anything new.**
+**The one-shot result.** On 22 September the selected configuration was run
+once on the held-back period, 15 February 2023 to 18 September 2026. That run
+is the pre-registered test and it stays on record as it was run: **29.3% a
+year against 20.5% for the same universe equally weighted**, measured open to
+open.
 
-## 1. The monkey test
+**The corrected result.** The audit then found that the March 2025 quarter was
+missing for about 650 companies, because the code that lists NSE's filings
+stopped at the first page that failed to load and returned the rest as if it
+were complete. The universe lost a third of its names at three rebalances. The
+listing was fixed, the quarter refilled and the test re-run with nothing else
+changed:
 
-2,000 random ten-stock portfolios, drawn from the same universe on the same
-dates and run through the same machinery: same costs, same buffer, same sector
-cap, same forced exits. Only the ranking is replaced by a coin toss.
+| Held-back period, open 15 Feb 2023 to open 18 Sep 2026 | Return a year | Worst fall |
+|---|---|---|
+| **The strategy** | **33.0%** | **-23.8%** |
+| The same universe, equally weighted | 21.0% | -31.1% |
+| Nifty 500, dividends included | 13.4% | -18.6% |
+| Nifty Midcap 150 | 21.3% | -20.9% |
+| Nifty Smallcap 250 | 21.8% | -26.0% |
 
-| | Return a year |
-|---|---|
-| The strategy | 28.3% |
-| Best of 2,000 random | 44.3% |
-| 95th percentile of random | 28.3% |
-| Median random | 19.3% |
-| 5th percentile of random | 10.6% |
+The margin over the equal-weight universe is 12.0 points a year. Its 90%
+interval, from a stationary bootstrap, is **-3.2 to +24.6 points**, with an
+**11% chance** the true margin is zero or negative.
 
-**The strategy lands at the 95th percentile. 100 of 2,000 random portfolios
-beat it.** So the ranking is doing something, and the something is worth about
-9 points a year over picking at random from the same filtered list. But one in
-twenty monkeys did better, which is the honest size of the evidence.
+**Both engines agree.** The production engine and the independent
+re-implementation, which was extended to 2026 without sight of the production
+code, pick the same stocks on all 31 rebalance dates of the corrected run and
+match the daily portfolio value to fifteen decimal places. A separate rebuild
+from raw exchange prices matched every one of the 226 trades in the original
+held-back run.
 
-## 2. Is it just known factors?
+The rest of this page uses the corrected run over the full period, February
+2019 to September 2026: **30.1% a year against 22.1%** for the same universe
+equally weighted.
 
-Monthly returns regressed on IIM Ahmedabad's published Indian factors, with
-Newey-West standard errors:
+## 1. Against random portfolios
+
+Random ten-stock portfolios drawn from the same universe on the same dates,
+run through the same machinery with the same buffer, sector cap, costs and
+forced exits. Only the ranking is replaced by chance.
+
+The first version of this test drew a fresh random order every quarter. Such
+portfolios churn far more than the strategy and pay far more in costs, which
+flatters the strategy. So there are now two versions, one trading more than
+the strategy and one trading less:
+
+| Random portfolios, 500 of each | Their turnover | Median return | Strategy's percentile |
+|---|---|---|---|
+| A fresh random order every quarter | 3.95x a year | 19.3% | **96th**, beaten by 20 |
+| One random score per stock for the whole run | 0.49x a year | 20.5% | **94th**, beaten by 28 |
+
+The strategy's turnover is 1.98x a year. Whether chance trades more or less
+than it does, the strategy lands around the 95th percentile. So the ranking
+adds something over picking at random from the same filtered list, and about
+one random portfolio in twenty does as well.
+
+## 2. How much of it is known factors?
+
+Monthly returns regressed on IIM Ahmedabad's published Indian factors
+(Agarwalla, Jacob and Varma), with Newey-West standard errors, computed with
+statsmodels. IIMA's data ends in December 2025, so this covers March 2019 to
+December 2025 and leaves out 2026.
 
 | | Alpha a year | t | Market | Size | Value | Momentum |
 |---|---|---|---|---|---|---|
-| Strategy | 9.5% | **1.96** | 0.86 | 0.25 | 0.46 | 0.35 |
-| The universe, equal weight | 6.8% | **5.54** | 0.96 | 0.67 | 0.34 | -0.05 |
+| Strategy | 5.4% | **1.12** | 0.87 | 0.23 | 0.47 | 0.34 |
+| The universe, equal weight | 1.6% | **1.36** | 0.96 | 0.67 | 0.34 | -0.05 |
 
-Two things follow.
+**Neither alpha is statistically significant.** The value and momentum
+loadings are, strongly (t = 4.6 and 3.5). So the honest reading is that the
+strategy's return is mostly the market, plus deliberate tilts towards cheap
+stocks and stocks already rising. Those tilts are the published factors the
+design was built on, which is the point of the design, but they are also
+available more cheaply than by running this strategy. What is left over after
+them is positive and cannot yet be told apart from noise.
 
-**The ranking's alpha is borderline.** t = 1.96 sits just under the
-conventional bar of 2, and far under the t > 3 that Harvey, Liu and Zhu (2016)
-argue for after many trials. Meaningful value and momentum loadings, both
-strongly significant, say a real part of the return is exposure to factors
-anyone can buy.
+## 3. Correcting for the search
 
-**The filters matter more than the ranking.** Simply holding everything that
-passes the filters, equally weighted, earns 6.8% a year of alpha at t = 5.54,
-which is far stronger evidence than the ranking's own. Being liquid,
-profitable, not a lender and having four quarters of published accounts is
-most of the edge here. That is a finding in its own right, and it was not what
-I expected.
+The project has logged 195 trials. The deflated Sharpe ratio (Bailey and Lopez
+de Prado 2014) asks how likely the observed Sharpe of 1.37 is to reflect real
+skill given how many things were tried. The answer depends on how the spread of
+Sharpe ratios across trials is estimated, so all three reasonable versions are
+reported:
 
-## 3. Deflated Sharpe
+| Method | Probability of skill |
+|---|---|
+| Sampling variance under the null, all 195 trials | 0.82 |
+| Counting only the 36 portfolio variants in the grid | 0.94 |
+| Observed spread of Sharpe across the 36 variants | 0.995 |
 
-The project has logged 193 trials. With that many attempts the best Sharpe you
-would expect from pure luck is 1.01 a year. The strategy's is 1.31.
+The usual bar is 0.95. One method clears it, one nearly does and one does not.
+That spread is the honest answer.
 
-**Probability of genuine skill: 0.78.** The usual bar is 0.95. So the Sharpe
-alone does not clear it.
+## 4. Year by year
 
-(`trials.deflated_sharpe` was mis-specified, comparing an annualised Sharpe
-with a per-period spread, so it returned roughly zero for anything. The version
-in `verify_v1.py` follows Bailey and Lopez de Prado (2014) in per-period units.)
-
-## 4. One good year?
+Each year measured from the previous year's final value.
 
 | Year | Strategy | Universe, equal weight |
 |---|---|---|
-| 2019 | +10.8% | -2.9% |
-| 2020 | +26.5% | +31.8% |
-| 2021 | +93.8% | +72.4% |
-| 2022 | -4.3% | +4.6% |
-| 2023 | +73.6% | +51.6% |
-| 2024 | +32.6% | +27.3% |
-| 2025 | +16.3% | -12.7% |
-| 2026 to date | -10.5% | +7.4% |
+| 2019 (from 15 Feb) | +10.8% | -2.9% |
+| 2020 | +28.3% | +32.8% |
+| 2021 | +95.4% | +73.9% |
+| 2022 | -2.5% | +6.2% |
+| 2023 | +74.8% | +53.2% |
+| 2024 | +33.9% | +28.7% |
+| 2025 | +21.8% | -11.2% |
+| 2026 to 18 Sep | -4.8% | +8.8% |
 
-Ahead in five years of eight. Not one lucky year, but not steady either. 2025
-is the standout, when the strategy gained 16% while the same universe lost 13%.
-2026 is the reverse and is happening now.
+Ahead in five years of eight. Over any rolling twelve months it beat the
+equal-weight universe 71% of the time and the Nifty 500 84% of the time. The
+worst twelve months against the universe were 26.6 points behind it.
 
-## 5. Could the trades be done?
+## 5. Risk
 
-At the backtest's Rs 5 lakh, a trade is a median of **0.02%** of the stock's
-daily turnover. The 95th percentile is 1.3%, and 7 of 458 trades exceed 5%.
+Computed by the project and checked against quantstats.
 
-At Rs 50 lakh those figures multiply by ten, and the largest trades start to
-move the price. **Capacity is roughly Rs 50 lakh to Rs 1 crore** before the
-fills in this backtest stop being realistic, which is a limit worth knowing
-before believing the numbers at a larger size.
+| | Strategy | Universe, equal weight | Nifty 500 TRI |
+|---|---|---|---|
+| Sharpe | 1.37 | 1.11 | 0.89 |
+| Sortino | 1.91 | 1.47 | 1.20 |
+| Calmar | 0.90 | 0.46 | 0.38 |
+| Worst fall | -33.6% | -47.9% | -38.1% |
 
-## What this changes
+Against the Nifty 500 total return, the strategy captured **129% of its rising
+months and 68% of its falling ones**, with a beta of 0.89. The equal-weight
+universe captured 131% and 109%. That asymmetry is the most useful property
+the strategy showed.
 
-1. **The filters earn their place**, with stronger statistical support than the
-   ranking. Keep them, and do not loosen them casually.
-2. **The ranking adds value beyond chance, but it is not proven.** Reporting it
-   as "beat the index by 15 points" without the monkey test and the factor
-   regression would be dishonest.
-3. **Part of the return is value and momentum**, which are buyable through
-   cheaper means. The genuinely new part is the borderline 9.5% alpha.
-4. **The next version should try to lift the alpha's significance**, not the
-   headline return: more positions to cut noise, ROCE-based quality which the
-   backtest never had, and a market trend filter to cut drawdown. All written
-   down before testing, as before.
+The drawdowns a holder would have lived through:
+
+| Started | Bottom | Recovered | Depth | Length |
+|---|---|---|---|---|
+| Jan 2020 | Mar 2020 | Nov 2020 | -33.6% | 9 months |
+| Apr 2022 | Jun 2022 | Jul 2023 | -30.7% | 15 months |
+| Sep 2024 | Feb 2025 | Sep 2025 | -23.8% | 12 months |
+| Feb 2026 | Mar 2026 | not yet | -16.5% | 7 months so far |
+
+## 6. Positions
+
+144 closed positions, 61% made money (price only, before dividends). The median
+was +7.2%, winners averaged +30.6% and losers -12.9%. The five best made 20% of
+the gross profit, so the result is not carried by one or two names.
+
+## 7. Could the trades be done?
+
+At Rs 5 lakh a trade is a median of 0.017% of the stock's daily turnover. The
+95th percentile is 1.1%, and 6 of 454 trades exceed 5%. Those percentages
+scale with capital, so the fills stay realistic up to roughly Rs 50 lakh to
+Rs 1 crore.
+
+## 8. Checked and ruled out
+
+**Later sector labels.** Labels come from announcements that start in 2022,
+and the rules let a company borrow its first-ever label before that. Re-run
+with labels restricted to those published before each date, the held-back
+period's universe is identical, row for row, and not one sector label in it
+came from later data. The only difference is a single holding for one quarter
+in February 2023 (M&M against GHCL), inherited from 2019 to 2021, and the
+held-back return is unchanged.
+
+## Known limits that remain
+
+- **June 2022 is missing for 214 companies at NSE's source**, and June 2018 and
+  2019 are similarly short. The listing and per-company queries both come back
+  without them, so it is not a fetch fault. The audit's rough estimate is that
+  it understates the strategy slightly rather than overstating it.
+- **Stocks moved to NSE's trade-for-trade segment are still force-sold** by the
+  20-session rule. It never touched the strategy, whose only forced exit was a
+  merger, but it may slightly affect the equal-weight benchmark. Fixed in both
+  engines as part of v2.
+- **Clarifications 22 to 27 were applied after in-sample returns had been
+  seen**, which the specification now discloses. The held-back test ran
+  afterwards on the fixed code.
+
+## What this changes for v2
+
+1. The filters are necessary but, on their own, not a source of alpha. The
+   earlier claim that they were is withdrawn.
+2. The ranking beats chance. Whether it beats the factors it is built from is
+   unresolved, and that is the question v2 should try to answer, not a higher
+   headline return.
+3. The asymmetry, 129% up capture against 68% down, is worth protecting. The
+   v2 trend filter and volatility sizing are aimed at it.

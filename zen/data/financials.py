@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from datetime import date, datetime
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -179,13 +180,27 @@ def listing(symbol: str | None = None, start: date | None = None,
         for page in range(1, max_pages + 1):
             url = BY_RANGE.format(frm=f"{start:%d-%m-%Y}", to=f"{end:%d-%m-%Y}",
                                   size=page_size, page=page)
-            try:
-                r = s.get(url, timeout=90)
-                r.raise_for_status()
-                batch = _rows(r.json())
-            except Exception as e:
-                log.warning("page %d failed (%s)", page, e)
-                break
+            # A failed page used to log a warning and stop, returning whatever
+            # had arrived so far as if it were the whole window. That is how
+            # the March 2025 quarter came to hold 1,516 companies against about
+            # 2,200 either side of it: results season is when pages fail, and
+            # a short list looks exactly like a quiet week. Retry, then raise.
+            batch, last_err = None, None
+            for attempt in range(3):
+                try:
+                    r = s.get(url, timeout=90)
+                    r.raise_for_status()
+                    batch = _rows(r.json())
+                    break
+                except Exception as e:                               # noqa: BLE001
+                    last_err = e
+                    log.warning("page %d attempt %d failed (%s)", page, attempt + 1, e)
+                    time.sleep(2 * (attempt + 1))
+                    s.get(WARMUP, timeout=25)
+            if batch is None:
+                raise RuntimeError(
+                    f"financials listing {start}..{end} failed on page {page} after "
+                    f"3 attempts ({last_err}); refusing to return a partial window")
             if not batch:
                 break
             raw.extend(batch)

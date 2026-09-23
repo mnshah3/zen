@@ -96,24 +96,43 @@ def _has_xbrl(url) -> bool:
     return u.lower().endswith(".xml")
 
 
-def listing(session, start: date, end: date, window_days: int = 45) -> pd.DataFrame:
+def listing(session, start: date, end: date, window_days: int = 7) -> pd.DataFrame:
     """Index every quarterly filing announced between two dates.
 
     Queried in windows rather than as one span because NSE truncates large
     responses silently -- a single 2018-2026 request returns a plausible but
     incomplete list, which is the kind of quiet loss nobody notices until a
     backtest already has a hole in it.
+
+    The window was 45 days, and that was still too wide: the June quarters of
+    2018, 2019 and 2022 came back 10 to 12% short of their neighbours, because
+    a 45-day window across late July and August spans the whole of results
+    season. And a window that failed, or answered with anything but 200,
+    silently counted as an empty week. Windows are now a week wide, and a
+    window that cannot be fetched after three attempts raises.
     """
     rows, cur = [], start
     while cur <= end:
-        stop = min(cur + timedelta(days=window_days), end)
+        stop = min(cur + timedelta(days=window_days - 1), end)
         url = LISTING.format(frm=cur.strftime("%d-%m-%Y"), to=stop.strftime("%d-%m-%Y"))
-        try:
-            r = session.get(url, timeout=60)
-            batch = r.json() if r.status_code == 200 else []
-        except Exception as e:                                   # noqa: BLE001
-            log.warning("listing %s..%s failed: %s", cur, stop, e)
-            batch = []
+        batch, last_err = None, None
+        for attempt in range(3):
+            try:
+                r = session.get(url, timeout=60)
+                r.raise_for_status()
+                batch = r.json()
+                break
+            except Exception as e:                               # noqa: BLE001
+                last_err = e
+                log.warning("listing %s..%s attempt %d failed: %s", cur, stop, attempt + 1, e)
+                time.sleep(2 * (attempt + 1))
+                try:
+                    session.get(WARMUP, timeout=30)
+                except Exception:                                # noqa: BLE001
+                    pass
+        if batch is None:
+            raise RuntimeError(f"legacy listing {cur}..{stop} failed after 3 attempts "
+                               f"({last_err}); refusing to treat it as an empty window")
         if isinstance(batch, list):
             rows.extend(batch)
             log.info("listing %s..%s: %d filings", cur, stop, len(batch))

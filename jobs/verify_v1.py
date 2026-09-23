@@ -24,10 +24,11 @@ flatter a strategy in at least four ways this file tries to catch.
   cannot be bought at the printed price. Trade value is compared with the
   stock's own turnover on the day.
 
-Also fixes the deflated Sharpe ratio. `trials.deflated_sharpe` was found by
-audit to return roughly zero whatever it is given, because it compares an
-annualised Sharpe with a per-period spread. The version here follows Bailey and
-Lopez de Prado (2014) with everything in per-period units.
+Corrected on 2026-09-23 after an independent audit: the factor regression had
+subtracted the risk-free rate twice, the final test was measured from the wrong
+mark, calendar years skipped their first session, the random portfolios were
+compared at a much higher turnover than the strategy, and the deflated Sharpe
+was reported as one number when it depends heavily on modelling choices.
 
     python -m jobs.verify_v1                 # 500 monkeys
     python -m jobs.verify_v1 --monkeys 2000
@@ -48,6 +49,7 @@ import pandas as pd
 
 from zen.portfolio import engine
 from zen.universe import pit
+from zen.validation import trials
 
 log = logging.getLogger(__name__)
 
@@ -83,33 +85,6 @@ def _norm_ppf(p: float) -> float:
     return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q / (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)
 
 
-def deflated_sharpe(returns: pd.Series, n_trials: int, var_trial_sr: float | None = None) -> dict:
-    """Bailey and Lopez de Prado (2014), in PER-PERIOD units throughout.
-
-    The expected maximum Sharpe under the null of no skill grows with how many
-    strategies were tried. A Sharpe that would be impressive after one attempt
-    is ordinary after two hundred.
-    """
-    r = returns.dropna().values
-    n = len(r)
-    sr = r.mean() / r.std(ddof=1)
-    g1 = float(pd.Series(r).skew())
-    g2 = float(pd.Series(r).kurt()) + 3.0            # pandas kurt is excess
-    if var_trial_sr is None:                          # spread of trial Sharpes
-        var_trial_sr = (1 + 0.5 * sr ** 2) / n        # asymptotic variance of SR
-    euler = 0.5772156649015329
-    t = max(int(n_trials), 2)
-    sr0 = sqrt(var_trial_sr) * ((1 - euler) * _norm_ppf(1 - 1.0 / t)
-                                + euler * _norm_ppf(1 - 1.0 / (t * np.e)))
-    denom = sqrt(max(1e-12, 1 - g1 * sr + (g2 - 1) / 4 * sr ** 2))
-    z = (sr - sr0) * sqrt(n - 1) / denom
-    return {"sharpe_per_period": sr, "sharpe_annual": sr * sqrt(252),
-            "expected_max_sharpe_under_null": sr0,
-            "expected_max_sharpe_annual": sr0 * sqrt(252),
-            "skew": g1, "kurtosis": g2, "n_obs": n, "n_trials": t,
-            "deflated_sharpe_prob": _norm_cdf(z)}
-
-
 def cagr(nav: pd.Series) -> float:
     yrs = (nav.index[-1] - nav.index[0]).days / 365.25
     return (nav.iloc[-1] / nav.iloc[0]) ** (1 / yrs) - 1
@@ -128,32 +103,64 @@ def load(con):
     return cal, is_end, decisions, ranks, panel
 
 
-def monkeys(panel, ranks, decisions, cfg, is_end, n_draws: int, seed: int = 20260922):
+def monkeys(panel, ranks, decisions, cfg, is_end, n_draws: int, mode: str = "persistent",
+            seed: int = 20260922):
     """Random ten-stock portfolios through the same machinery.
 
     Only the ORDER of the ranking is randomised. Every other rule -- the
     universe, the buffer, the sector cap, costs, dividends, the forced exit --
-    is the strategy's own, so the difference measured is the ranking and
-    nothing else.
+    is the strategy's own.
+
+    Two ways to randomise, because the first one flatters the strategy:
+
+      fresh       a new random order every quarter. A holding then almost never
+                  stays inside the hold band, so the random book churns far more
+                  than the strategy and pays far more in costs. Part of the
+                  strategy's apparent lead over these is just lower turnover.
+      persistent  one random score per stock for the whole run, ranked afresh
+                  within each date's universe. Churn then comes mostly from
+                  stocks entering and leaving the universe, as it largely does
+                  for the strategy, so the comparison is about selection rather
+                  than trading.
+
+    Returns (cagr per draw, annual one-way turnover per draw).
     """
     rng = np.random.default_rng(seed)
     byd = {D: g.set_index("symbol") for D, g in ranks.groupby("D")}
-    out = []
+    universe = sorted(ranks["symbol"].unique())
+    out, turn = [], []
     for i in range(n_draws):
+        if mode == "persistent":
+            score = pd.Series(rng.random(len(universe)), index=universe)
         shuffled = {}
         for D, g in byd.items():
             r = g.copy()
-            r["rank"] = rng.permutation(np.arange(1, len(r) + 1))
+            if mode == "persistent":
+                r["rank"] = score.reindex(r.index).rank(method="first").astype(int).values
+            else:
+                r["rank"] = rng.permutation(np.arange(1, len(r) + 1))
             shuffled[D] = r
+
         def choose(D, held, _s=shuffled):
             return engine.select_top(_s[pd.Timestamp(D)], held, cfg), {}
+
         res = engine.simulate(panel, engine.rebalance_dates(decisions, cfg.rebalance),
-                              choose, cfg, is_end, run_final_test=True, log_trades=False)
+                              choose, cfg, is_end, run_final_test=True, log_trades=True)
         nav = res.nav.set_index("date")["nav"]
         out.append(cagr(nav))
-        if (i + 1) % 50 == 0:
-            log.info("  %d/%d monkeys", i + 1, n_draws)
-    return np.array(out)
+        turn.append(turnover(res.trades, nav))
+        if (i + 1) % 100 == 0:
+            log.info("  %d/%d monkeys (%s)", i + 1, n_draws, mode)
+    return np.array(out), np.array(turn)
+
+
+def turnover(trades: pd.DataFrame, nav: pd.Series) -> float:
+    """Annual one-way turnover: half of everything bought and sold, per year,
+    over the average value of the book."""
+    if trades.empty or "value" not in trades:
+        return 0.0
+    yrs = (nav.index[-1] - nav.index[0]).days / 365.25
+    return float(trades["value"].abs().sum() / 2 / nav.mean() / yrs)
 
 
 def attribution(strategy_nav: pd.Series, ew_nav: pd.Series) -> dict:
@@ -180,7 +187,12 @@ def attribution(strategy_nav: pd.Series, ew_nav: pd.Series) -> dict:
             out[name] = {"error": f"only {len(d)} overlapping months"}
             continue
         y = (d["r"] - d["RF"]).values
-        X = np.column_stack([np.ones(len(d)), d["MF"] - d["RF"], d["SMB"], d["HML"], d["WML"]])
+        # IIMA's MF column is ALREADY the market return minus the risk-free
+        # rate. Subtracting RF again, as an earlier version of this file did,
+        # understated the market's return by RF every month, pushed that return
+        # into the intercept and roughly doubled the reported alpha: 9.5% at
+        # t=1.96 where the correct figure is 4.7% at t=0.99.
+        X = np.column_stack([np.ones(len(d)), d["MF"], d["SMB"], d["HML"], d["WML"]])
         beta, *_ = np.linalg.lstsq(X, y, rcond=None)
         resid = y - X @ beta
         n, k = X.shape
@@ -196,6 +208,7 @@ def attribution(strategy_nav: pd.Series, ew_nav: pd.Series) -> dict:
         names = ["alpha", "market", "size_SMB", "value_HML", "momentum_WML"]
         out[name] = {
             "months": int(n),
+            "first_month": str(d.index[0]), "last_month": str(d.index[-1]),
             "alpha_monthly_pct": float(beta[0] * 100),
             "alpha_annual_pct": float(((1 + beta[0]) ** 12 - 1) * 100),
             "alpha_t": float(beta[0] / se[0]),
@@ -233,10 +246,15 @@ def capacity(trades: pd.DataFrame, ranks: pd.DataFrame) -> dict:
 
 
 def main(argv=None) -> int:
+    global RANKS, OUT
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     ap = argparse.ArgumentParser()
     ap.add_argument("--monkeys", type=int, default=500)
+    ap.add_argument("--run", default="data/backtest/v1_corrected",
+                    help="backtest output folder whose ranks.parquet to use")
+    ap.add_argument("--out", default="data/backtest/verify")
     args = ap.parse_args(argv)
+    RANKS, OUT = Path(args.run) / "ranks.parquet", Path(args.out)
     OUT.mkdir(parents=True, exist_ok=True)
 
     con = pit.connect()
@@ -252,37 +270,72 @@ def main(argv=None) -> int:
     s_cagr, e_cagr = cagr(s_nav), cagr(e_nav)
     log.info("strategy %.1f%% a year, universe EW %.1f%%", s_cagr * 100, e_cagr * 100)
 
-    log.info("monkey test: %d random ten-stock portfolios", args.monkeys)
-    mk = monkeys(panel, ranks, decisions, cfg, is_end, args.monkeys)
-    pct = float((mk < s_cagr).mean() * 100)
-    monkey = {"draws": int(len(mk)), "strategy_cagr_pct": round(s_cagr * 100, 2),
-              "random_median_pct": round(float(np.median(mk)) * 100, 2),
-              "random_p5_pct": round(float(np.percentile(mk, 5)) * 100, 2),
-              "random_p95_pct": round(float(np.percentile(mk, 95)) * 100, 2),
-              "random_best_pct": round(float(mk.max()) * 100, 2),
-              "strategy_percentile": round(pct, 1),
-              "beaten_by_n_random": int((mk >= s_cagr).sum())}
-    pd.Series(mk).to_csv(OUT / "monkey_cagrs.csv", index=False, header=["cagr"])
+    monkey = {"strategy_cagr_pct": round(s_cagr * 100, 2),
+              "strategy_turnover": round(turnover(strat.trades, s_nav), 2)}
+    for mode in ("persistent", "fresh"):
+        log.info("monkey test (%s): %d random ten-stock portfolios", mode, args.monkeys)
+        mk, mt = monkeys(panel, ranks, decisions, cfg, is_end, args.monkeys, mode=mode)
+        monkey[mode] = {"draws": int(len(mk)),
+                        "random_median_pct": round(float(np.median(mk)) * 100, 2),
+                        "random_p5_pct": round(float(np.percentile(mk, 5)) * 100, 2),
+                        "random_p95_pct": round(float(np.percentile(mk, 95)) * 100, 2),
+                        "random_best_pct": round(float(mk.max()) * 100, 2),
+                        "random_median_turnover": round(float(np.median(mt)), 2),
+                        "strategy_percentile": round(float((mk < s_cagr).mean() * 100), 1),
+                        "beaten_by_n_random": int((mk >= s_cagr).sum())}
+        pd.DataFrame({"cagr": mk, "turnover": mt}).to_csv(OUT / f"monkey_{mode}.csv", index=False)
 
     log.info("factor attribution against IIMA")
     attr = attribution(s_nav, e_nav)
 
+    # Deflated Sharpe three ways. The answer depends on which variance of trial
+    # Sharpes is used and how many trials are counted, and none of the choices
+    # is obviously right here, so the spread is what gets reported.
     daily = s_nav.pct_change().dropna()
-    n_trials = sum(1 for _ in open("state/trials.jsonl", encoding="utf-8"))
-    dsr = deflated_sharpe(daily, n_trials)
+    n_trials = trials.lifetime()
+    sr = float(daily.mean() / daily.std())
+    g1, g2 = float(daily.skew()), float(daily.kurt()) + 3.0
+    grid = pd.read_csv("data/backtest/v1/grid.csv")
+    cross_var = float((grid["sharpe_rf0"] / np.sqrt(252)).var())
+    dsr = {"sharpe_annual": sr * np.sqrt(252), "n_obs": int(len(daily)), "n_trials": n_trials,
+           "prob_null_sampling_variance": trials.deflated_sharpe(sr, n_trials, len(daily), g1, g2),
+           "prob_cross_trial_variance_36_grid": trials.deflated_sharpe(
+               sr, n_trials, len(daily), g1, g2, var_trial_sharpe=cross_var),
+           "prob_grid_trials_only": trials.deflated_sharpe(sr, len(grid), len(daily), g1, g2),
+           "note": "probability of genuine skill after the search; the spread between these "
+                   "is the honest answer, not any single one"}
+
+    # Sub-periods on the specification's own clock: open of the first decision
+    # date to open of 15 Feb 2023, then open of 15 Feb 2023 to open of the end
+    # date. The engine records the value at every rebalance open for this.
+    split = pd.Timestamp("2023-02-15")
+    s_open, e_open = strat.rebalance_open, ew.rebalance_open
+
+    def seg(v0, v1, t0, t1):
+        return (v1 / v0) ** (365.25 / (t1 - t0).days) - 1
 
     sub = {}
-    for label, lo, hi in [("in_sample_2019_2023", "2019-02-15", "2023-02-15"),
-                          ("final_test_2023_2026", "2023-02-15", "2026-09-18")]:
-        a, b = s_nav.loc[lo:hi], e_nav.loc[lo:hi]
-        sub[label] = {"strategy_cagr_pct": round(cagr(a) * 100, 1),
-                      "universe_ew_cagr_pct": round(cagr(b) * 100, 1),
-                      "diff_pct": round((cagr(a) - cagr(b)) * 100, 1)}
+    for label, t0, v0s, v0e, t1, v1s, v1e in [
+            ("in_sample_2019_2023", s_nav.index[0], s_nav.iloc[0], e_nav.iloc[0],
+             split, s_open[split], e_open[split]),
+            ("final_test_2023_2026", split, s_open[split], e_open[split],
+             s_nav.index[-1], s_nav.iloc[-1], e_nav.iloc[-1])]:
+        a_, b_ = seg(v0s, v1s, t0, t1), seg(v0e, v1e, t0, t1)
+        sub[label] = {"strategy_cagr_pct": round(a_ * 100, 2),
+                      "universe_ew_cagr_pct": round(b_ * 100, 2),
+                      "diff_pct": round((a_ - b_) * 100, 2),
+                      "from_open": str(t0.date()), "to_open": str(t1.date())}
+
+    # Calendar years from the previous year-end value, not from the first mark
+    # of the year, which skipped the first session of every year.
     yearly = {}
-    for y, g in s_nav.groupby(s_nav.index.year):
-        e = e_nav.loc[g.index[0]:g.index[-1]]
-        yearly[int(y)] = {"strategy_pct": round((g.iloc[-1] / g.iloc[0] - 1) * 100, 1),
-                          "universe_ew_pct": round((e.iloc[-1] / e.iloc[0] - 1) * 100, 1)}
+    s_y = s_nav.groupby(s_nav.index.year).last()
+    e_y = e_nav.groupby(e_nav.index.year).last()
+    prev_s, prev_e = s_nav.iloc[0], e_nav.iloc[0]
+    for y in s_y.index:
+        yearly[int(y)] = {"strategy_pct": round((s_y[y] / prev_s - 1) * 100, 1),
+                          "universe_ew_pct": round((e_y[y] / prev_e - 1) * 100, 1)}
+        prev_s, prev_e = s_y[y], e_y[y]
 
     cap = capacity(strat.trades, ranks)
 
@@ -294,11 +347,13 @@ def main(argv=None) -> int:
     (OUT / "verify.json").write_text(json.dumps(report, indent=2, default=float))
 
     print("\n=== MONKEY TEST ===")
-    print(f"  strategy {monkey['strategy_cagr_pct']}%/yr vs random median "
-          f"{monkey['random_median_pct']}% (5th {monkey['random_p5_pct']}, "
-          f"95th {monkey['random_p95_pct']}, best {monkey['random_best_pct']})")
-    print(f"  percentile {monkey['strategy_percentile']}; beaten by "
-          f"{monkey['beaten_by_n_random']} of {monkey['draws']} random portfolios")
+    print(f"  strategy {monkey['strategy_cagr_pct']}%/yr, turnover {monkey['strategy_turnover']}x/yr")
+    for mode in ("persistent", "fresh"):
+        m = monkey[mode]
+        print(f"  {mode:10}: random median {m['random_median_pct']}% (turnover "
+              f"{m['random_median_turnover']}x), 95th {m['random_p95_pct']}%, best "
+              f"{m['random_best_pct']}%  ->  strategy at percentile {m['strategy_percentile']}, "
+              f"beaten by {m['beaten_by_n_random']}/{m['draws']}")
     print("\n=== FACTOR ATTRIBUTION (IIMA four factors) ===")
     for k, v in attr.items():
         if "error" in v:
@@ -306,9 +361,10 @@ def main(argv=None) -> int:
         print(f"  {k}: alpha {v['alpha_annual_pct']:.1f}%/yr  t={v['alpha_t']:.2f}  "
               f"R2={v['r_squared']:.2f}  loadings {v['loadings']}")
     print("\n=== DEFLATED SHARPE ===")
-    print(f"  Sharpe {dsr['sharpe_annual']:.2f} vs expected best under the null "
-          f"{dsr['expected_max_sharpe_annual']:.2f} after {dsr['n_trials']} trials"
-          f"  ->  probability of skill {dsr['deflated_sharpe_prob']:.3f}")
+    print(f"  Sharpe {dsr['sharpe_annual']:.2f} over {dsr['n_obs']} days, {dsr['n_trials']} lifetime trials")
+    print(f"  probability of skill: {dsr['prob_null_sampling_variance']:.3f} (null sampling variance), "
+          f"{dsr['prob_cross_trial_variance_36_grid']:.3f} (cross-trial variance, 36-variant grid), "
+          f"{dsr['prob_grid_trials_only']:.3f} (counting only the 36 grid trials)")
     print("\n=== SUBPERIODS ===")
     for k, v in sub.items():
         print(f"  {k}: {v['strategy_cagr_pct']}% vs EW {v['universe_ew_cagr_pct']}% "
