@@ -165,6 +165,8 @@ invented:
   information, not into the backtest as a signal.
 - **Technical entry timing.** Weak published evidence and a large number of ways
   to fool ourselves. Staggered entry gets the benefit without the search.
+  *[Superseded on 2026-09-23 by amendment A1 below: one pre-registered entry
+  rule, tested once against staggered entry.]*
 
 ---
 
@@ -178,3 +180,87 @@ acceptance rules above.
 
 These rules are now fixed. Anything learned during implementation goes in a
 dated Clarification, and nothing may be chosen by looking at a return.
+
+
+## Amendments before any v2 measurement (2026-09-23)
+
+Made on 2026-09-23, before any part of v2 had been built or run. Each says why.
+
+### A1. One technical entry rule, tested once against staggered entry
+
+Asked for by the owner: once a stock has passed the filters and been selected,
+decide when to buy it from its price action rather than always at the
+scheduled open. One rule is fixed here and tested once. It is not tuned.
+
+Applies to each tranche of a NEW position (item 5). A tranche is due on its
+scheduled session. From then on it is bought at the next session's open once,
+at the previous session's close, both of these hold on corporate-action
+adjusted closes:
+
+- the close is no more than 10% above its own 50-session simple average, and
+- the 14-session RSI, Wilder's smoothing, is below 70.
+
+If neither day qualifies within 30 sessions (about six weeks) of the scheduled
+session, the tranche is bought at the open of the 31st session regardless, so
+a selected stock is never skipped entirely. Each tranche waits independently
+from its own scheduled session. Cash for a waiting tranche is held uninvested.
+If the position leaves the book before a tranche is bought, the tranche is
+cancelled. Resizing an existing holding is unaffected and trades at the
+decision date.
+
+Why this rule: short-term reversal is among the most replicated patterns in
+equity returns (Jegadeesh 1990, Lehmann 1990). Stocks that have just surged
+tend to give some of it back over the following weeks, so declining to buy on
+a spike has a basis. Its strength in Indian mid and small caps specifically is
+not established, which is why it is tested rather than assumed.
+
+**Two runs, decided now.** v2 is run twice, identical except for entry: (a)
+staggered entry as item 5, (b) staggered entry with this rule. Both are logged.
+(b) is adopted only if all three hold, otherwise (a) is used:
+
+1. the average price paid for new positions, relative to the corporate-action
+   adjusted close on the session before each position's decision date, is
+   lower in (b) than in (a);
+2. annual return is not lower in (b); and
+3. maximum drawdown is not worse in (b).
+
+The adopted variant is then judged against the acceptance rules. No other
+threshold, lookback or indicator is tried.
+
+### A2. Acceptance rules restated against v1 measured on the same data
+
+The acceptance rules above were written on 2026-09-22 using v1 figures that a
+later audit found wrong. Rule 3 names "v1's 1.96", which came from a factor
+regression that subtracted the risk-free rate twice (the correct figure was
+t = 1.15). Rule 5 named a Rs 50 lakh capacity without defining how it is
+measured, and v1's corrected capacity is lower. A bar built on a wrong number
+is not a bar, so the rules are restated. Their intent is unchanged: v2 must
+beat v1 on risk without giving up return or evidence of skill.
+
+Every comparison is v2 against **v1 re-run on the same final archive with the
+same code and the same measurement jobs** (jobs/libcheck_v1.py, jobs/verify_v1.py,
+jobs/stats_v1.py), after the parser fix in stage A. v2 replaces v1 only if all
+hold:
+
+1. Maximum drawdown over the full period is at least 5 percentage points
+   smaller than v1's.
+2. Sortino and Calmar, as computed by quantstats, are both higher than v1's.
+3. Annual alpha against the IIMA four factors, computed with statsmodels and
+   Newey-West errors over the same months, is not lower than v1's, and its
+   t-statistic is not lower than v1's.
+4. Annual one-way turnover, including the initial build, is not higher than
+   v1's.
+5. Capacity is not worse: the 95th percentile of trade value as a share of
+   the stock's 60-session median turnover, at Rs 5 lakh, is not higher than
+   v1's.
+
+### A3. The owner's judgement, macro and policy views: live only, defined later
+
+Confirmed by the owner on 2026-09-23. These are not part of any backtest,
+because no historical record of them exists and any rule written now about
+which policies mattered would be hindsight. They will be a layer on top of the
+live strategy: each quarter the system proposes its book, the owner may veto
+names or swap in others from the system's top 30 with a written, dated reason,
+and both the system's book and the owner's are tracked so the value of the
+judgement is measured going forward. The details are to be specified with the
+dashboard, not here.
