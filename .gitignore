@@ -48,6 +48,7 @@ data/study/*.parquet
 # data/external/SOURCES.md says where each came from and how to fetch it again.
 data/external/niftyindices/
 data/external/nifty_tri.parquet
+data/external/nifty_price_endpoints.csv
 data/external/iima/*.csv
 data/indices/derived/
 

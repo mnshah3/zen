@@ -303,3 +303,44 @@ and a buy-and-hold Nifty 500 index fund are also reported after:
 
 Reported, not added to the acceptance rules. A strategy that wins before tax
 and loses after it has not won for its owner.
+
+## Clarification to A4, before any v2 measurement (2026-09-24)
+
+Written after the factor-index data was collected and before any v2 or v1
+re-run figure exists.
+
+**Where the open comes from.** Clarification 17's clock starts and ends each
+benchmark at a market open: TRI_open(d) = TRI_close(d-1) x price_open(d) /
+price_close(d-1). NSE prints no open, high or low for a factor index before it
+starts calculating the index live, only a back-calculated close. Nifty 200
+Momentum 30 has published opens from 12 Oct 2020 and Nifty 500 Value 50 from
+16 Dec 2024, so the v1 clock's first open (15 Feb 2019) has none for either,
+and Value 50 has none at the in-sample end (15 Feb 2023) either. Where the
+factor index has no published open, the overnight move of its parent index
+stands in:
+
+    TRI_open(d) = TRI_close(d-1) x parent_open(d) / parent_close(d-1)
+
+with parents Nifty 200 (Momentum 30, Quality 30), Nifty 500 (Value 50,
+Alpha 50) and Nifty 100 (Low Volatility 30), from `data/indices`. Tested on
+the 17 clock dates where both opens exist: the stand-in's overnight move
+differs from the real one by 0.10 percentage points on average and 0.26 at
+most, a single time per endpoint. Where a real open exists it is always used.
+The comparison is also reported with no overnight move at the affected
+endpoints (TRI_open(d) = TRI_close(d-1)); if v2's verdict against an index
+differs between the two, the write-up says so and calls it a tie.
+
+**Back-calculated history.** A factor index's figures before it went live are
+the provider's back-test of its own rules, not returns anyone could have
+earned, and indices tend to be launched after a strong back-test. The write-up
+gives each index's first live-published date and reports the comparison both
+over the whole period and over the live part only. Where the live part is too
+short to judge, it says so rather than leaning on the back-test.
+
+**Data.** `data/external/nifty_tri.parquet` holds the total-return closes for
+all eight indices to 23 Sep 2026, built by `jobs/build_nifty_tri.py`, which
+refuses any session missing against the Nifty 500 calendar, any conflicting
+duplicate and any change to rows already in use. The opens and prior closes for
+the five factor indices on 14-15 Feb 2019, 14-15 Feb 2023, 17-18 Sep 2026 and
+22-23 Sep 2026 are in `data/external/nifty_price_endpoints.csv`. Another end
+date needs those rows fetched first; the engine must refuse, never guess.
