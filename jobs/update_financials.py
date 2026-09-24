@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from zen.data import financials as fin, store
+from zen.data import financials as fin, store, xbrl_cache
 
 log = logging.getLogger(__name__)
 CHUNK_DAYS = 30          # one results-season slice at a time
@@ -78,9 +78,15 @@ def main() -> int:
             rows = []
             for meta in idx.to_dict("records"):
                 try:
-                    resp = session.get(meta["xbrl_url"], timeout=60)
-                    resp.raise_for_status()
-                    facts = fin.parse_xbrl(resp.content)
+                    # A stored copy is read instead of downloaded; a download
+                    # is stored before it is parsed (zen/data/xbrl_cache.py).
+                    content = xbrl_cache.get(meta["xbrl_url"])
+                    if content is None:
+                        resp = session.get(meta["xbrl_url"], timeout=60)
+                        resp.raise_for_status()
+                        content = resp.content
+                        xbrl_cache.put(meta["xbrl_url"], content)
+                    facts = fin.parse_xbrl(content)
                 except Exception:                                # noqa: BLE001
                     failed_docs += 1        # not in `have`, so retried next run
                     continue

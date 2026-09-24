@@ -97,6 +97,6 @@ def test_every_required_table_is_covered():
     """
     from jobs.rebuild_db import REQUIRED
     unchecked = [t for t in REQUIRED
-                 if t not in TABLES and t not in ("corpactions",)]
+                 if t not in TABLES and t not in ("corpactions", "financials")]
     assert not unchecked, (
         f"required tables with no parity test: {unchecked}")

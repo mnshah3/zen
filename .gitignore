@@ -56,3 +56,11 @@ data/backtest/v1/ranks.parquet
 data/backtest/v1_holdout/ranks.parquet
 data/study/crosscheck_iima/
 data/backtest/v1_corrected/ranks.parquet
+
+# Local copy of every downloaded XBRL filing (zen/data/xbrl_cache.py): large
+# and regenerable from NSE, kept so a parser fix can re-read from disk.
+data/raw_xbrl/
+
+# Re-parse working copies and the pre-swap backup (2026-09-24): kept locally, not in git.
+data/financials_staging/
+data/financials_backup_*/

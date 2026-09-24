@@ -101,8 +101,14 @@ TAGS = {
 DERIVED = ["ebitda", "profit_normalised", "shares_implied",
            "debt_total", "debt_to_equity", "has_balance_sheet"]
 
+# quarter_span_days is LAST, after xbrl_url, and must stay there. The table is
+# rebuilt with a positional INSERT ... SELECT * over read_parquet(union_by_name),
+# and union_by_name appends a column missing from the first file at the end. A
+# file written before the column existed then lines up with one written after
+# only if the new column is the last one in both.
 COLUMNS = ["symbol", "company", "period_end", "broadcast_dt", "consolidated",
-           "audited", *dict.fromkeys(TAGS.values()), *DERIVED, "xbrl_url"]
+           "audited", *dict.fromkeys(TAGS.values()), *DERIVED, "xbrl_url",
+           "quarter_span_days"]
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS financials (
@@ -127,6 +133,10 @@ CREATE TABLE IF NOT EXISTS financials (
     ebitda DOUBLE, profit_normalised DOUBLE, shares_implied DOUBLE,
     debt_total DOUBLE, debt_to_equity DOUBLE, has_balance_sheet BOOLEAN,
     xbrl_url VARCHAR,
+    -- Days spanned by the context the income-statement figures came from;
+    -- NULL when none were taken (a filing tagging only a half-year or year has
+    -- its duration figures left empty) and in rows parsed before the column.
+    quarter_span_days INTEGER,
     -- Keyed on the DOCUMENT, not on (symbol, period, basis). A company files a
     -- quarter and then files it again: 572 keys in this archive, 132 of them
     -- with revised figures. Keying on the period would keep only the last
@@ -241,7 +251,13 @@ def listing(symbol: str | None = None, start: date | None = None,
     return pd.DataFrame(out)
 
 
-def parse_xbrl(content: bytes) -> dict:
+# The longest span whose figures are accepted as "the quarter". Calendar
+# quarters run 89 to 92 days; 100 leaves room for a quarter that ends a few
+# days off the calendar and is still far below a half-year (181-183) or a year.
+QUARTER_MAX_DAYS = 100
+
+
+def parse_xbrl(content: bytes, detail: dict | None = None) -> dict:
     """Extract tagged figures for the period being reported.
 
     A filing carries several contexts: the quarter just ended, the year-ago
@@ -249,6 +265,28 @@ def parse_xbrl(content: bytes) -> dict:
     Duration facts are taken from the shortest span ending latest -- the
     quarter itself rather than a nine-month cumulative -- and instant facts
     from the latest instant, which is the balance-sheet date.
+
+    THE QUARTER MUST BE A QUARTER. "Shortest span ending latest" is only the
+    quarter when the filing tags one. DELTACORP's first Sep-2025 filing tags
+    its income statement for 2025-04-01 to 2025-09-30 and nothing shorter, so
+    the rule returned a half-year as the quarter (2,619.5m against a real
+    quarter of 1,310.5m in its own revised filing three days later). A March
+    filing carrying only the year would have been stored four times too large.
+    So duration facts are accepted only from a span of at most
+    QUARTER_MAX_DAYS. When the chosen span is longer, the filing's income
+    statement is treated as NOT REPORTED: left empty, never derived (no H1
+    minus Q1), because a derivation silently mixes two documents. Instant
+    (balance-sheet) facts are still taken; a half-year filing's balance sheet
+    is exactly as valid as a quarter's.
+
+    `quarter_span_days` is returned with the figures: the length in days of the
+    span the duration facts came from, absent when none were taken.
+
+    `detail`, when a dict is passed, is filled with why: duration_source
+    ("declared", "OneD", "audit_fallback" or None), rejected_span_days (the
+    length of a refused period; an undated OneD is accepted as the quarter, see
+    below, so it is never refused), and dropped_columns
+    -- figures present in the document that this rule refused.
     """
     try:
         root = ET.fromstring(content)
@@ -261,6 +299,10 @@ def parse_xbrl(content: bytes) -> dict:
     # Contexts whose ONLY dimension is the audit-qualification axis. Used to
     # fill a tag that has no undimensioned fact at all, never to override one.
     audited: dict[str, tuple] = {}
+    # Periods of the declared, dimensioned "One..." contexts. In the 2018-2024
+    # documents these carry the same reporting-period dates the undeclared
+    # OneD stands for; they date OneD when its own date facts are missing.
+    one_dim_spans: set[tuple[date, date]] = set()
     for ctx in root.iter():
         if not (ctx.tag.endswith("}context") or ctx.tag == "context"):
             continue
@@ -301,6 +343,8 @@ def parse_xbrl(content: bytes) -> dict:
             continue
 
         if dimensioned:
+            if period[0] == "span" and cid.startswith("One"):
+                one_dim_spans.add((period[1], period[2]))
             # One exception, and only one. AuditedOrAdjustedAxis is SEBI's
             # statement-of-impact-of-audit-qualifications disclosure, not a
             # business segment: AuditedMember is the company as reported and
@@ -325,65 +369,152 @@ def parse_xbrl(content: bytes) -> dict:
         else:
             instants[cid] = period[1]
 
-    wanted = set()
-    if spans:
-        latest_end = max(v[1] for v in spans.values())
-        shortest = min((v[1] - v[0]).days for v in spans.values() if v[1] == latest_end)
-        wanted |= {c for c, (a, b) in spans.items()
-                   if b == latest_end and (b - a).days == shortest}
+    def pick_duration(candidates: dict) -> tuple[set, int | None, set, int | None]:
+        """(accepted refs, their span, refused refs, the refused span)."""
+        if not candidates:
+            return set(), None, set(), None
+        latest_end = max(b for _, b in candidates.values())
+        shortest = min((b - a).days for a, b in candidates.values() if b == latest_end)
+        chosen = {c for c, (a, b) in candidates.items()
+                  if b == latest_end and (b - a).days == shortest}
+        if shortest <= QUARTER_MAX_DAYS:
+            return chosen, shortest, set(), None
+        return set(), None, chosen, shortest
+
+    dur, span_days, rejected, refused_days = pick_duration(spans)
+    rejected_days = [refused_days] if rejected else []
+    inst: set[str] = set()
     if instants:
         latest = max(instants.values())
-        wanted |= {c for c, d in instants.items() if d == latest}
+        inst |= {c for c, d in instants.items() if d == latest}
+
     # The 2018-2024 filings declare ONLY dimensioned segment contexts and then
     # reference the company-level figures through a context they never declare
     # -- "OneD" for the period and "OneI" for the balance-sheet instant. It is
     # invalid XBRL, but it is what NSE served for seven years, and a parser
     # that ignores it reads a filing as segment data with no company totals.
-    # An undeclared reference carries no segment by construction, and "One" is
-    # the taxonomy's name for the period being reported, so those two are safe
-    # to accept. Any other undeclared reference is left alone: missing a figure
-    # is recoverable, attributing a division's revenue to the company is not.
+    # An undeclared reference carries no segment by construction, so those two
+    # are safe to accept as the company. Any other undeclared reference is left
+    # alone: missing a figure is recoverable, attributing a division's revenue
+    # to the company is not.
+    #
+    # An undeclared OneD has no dates of its own, so its length is not taken on
+    # trust. The document states the period as facts under OneD --
+    # DateOfStartOfReportingPeriod and DateOfEndOfReportingPeriod -- and those
+    # decide. Banks' documents omit the start date; for them the declared
+    # "One..." segment contexts decide instead (the longest, if they differ):
+    # in the 515 sampled documents carrying both, the two sources agreed every
+    # time. A OneD whose length the document does not establish, or that is
+    # longer than a quarter, is refused like any other long span. Measured on
+    # 577 legacy documents (2018-2024): every one that dates OneD dates a
+    # quarter, and the figures reconcile with the neighbouring quarters -- in
+    # 165 of 168 testable September filings the stored June quarter plus OneD
+    # equals the half-year figure the same document reports, to within 3%.
     declared = set(spans) | set(instants)
-    for node in root.iter():
-        ref = node.get("contextRef")
-        if ref and ref not in declared and ref in ("OneD", "OneI"):
-            wanted.add(ref)
+    referenced = {n.get("contextRef") for n in root.iter()} - {None}
+    if "OneI" in referenced and "OneI" not in declared:
+        inst.add("OneI")
+    duration_source = "declared" if dur else None
+    if "OneD" in referenced and "OneD" not in declared:
+        stated: dict[str, str] = {}
+        for node in root.iter():
+            if node.get("contextRef") == "OneD":
+                tag = node.tag.split("}")[-1]
+                if tag in ("DateOfStartOfReportingPeriod", "DateOfEndOfReportingPeriod"):
+                    stated.setdefault(tag, (node.text or "").strip()[:10])
+        oned_days = None
+        try:
+            d = (date.fromisoformat(stated["DateOfEndOfReportingPeriod"])
+                 - date.fromisoformat(stated["DateOfStartOfReportingPeriod"])).days
+            oned_days = d if d >= 0 else None
+        except (KeyError, ValueError):
+            pass
+        if oned_days is None and one_dim_spans:
+            oned_days = max((b - a).days for a, b in one_dim_spans)
+        if oned_days is not None and oned_days <= QUARTER_MAX_DAYS:
+            dur.add("OneD")
+            if span_days is None:
+                span_days, duration_source = oned_days, "OneD"
+        elif oned_days is None:
+            # The document does not date OneD at all. Refusing it, as this
+            # rule first did, dropped real quarterly figures: in all 577 legacy
+            # documents where OneD CAN be dated it is exactly the quarter, and
+            # the old parser always took it. So an undated OneD is accepted as
+            # the quarter, and recorded as such so it can be told apart.
+            # quarter_span_days stays empty because no length was established.
+            dur.add("OneD")
+            if duration_source is None:
+                duration_source = "OneD_undated"
+        else:
+            # Dated, and longer than a quarter: refused like any long span.
+            rejected.add("OneD")
+            rejected_days.append(oned_days)
 
     # Audit-axis contexts for the same period, kept separate so they can only
-    # ever fill a gap.
-    fallback = set()
-    a_spans = {c: p for c, p in audited.items() if p[0] == "span"}
+    # ever fill a gap. The quarter rule applies to them exactly as above.
+    a_spans = {c: (p[1], p[2]) for c, p in audited.items() if p[0] == "span"}
     a_inst = {c: p for c, p in audited.items() if p[0] == "instant"}
-    if a_spans:
-        latest_end = max(p[2] for p in a_spans.values())
-        shortest = min((p[2] - p[1]).days for p in a_spans.values()
-                       if p[2] == latest_end)
-        fallback |= {c for c, p in a_spans.items()
-                     if p[2] == latest_end and (p[2] - p[1]).days == shortest}
+    fb_dur, fb_days, fb_rejected, fb_refused_days = pick_duration(a_spans)
+    if fb_rejected:
+        rejected |= fb_rejected
+        rejected_days.append(fb_refused_days)
+    fb_inst: set[str] = set()
     if a_inst:
         latest = max(p[1] for p in a_inst.values())
-        fallback |= {c for c, p in a_inst.items() if p[1] == latest}
+        fb_inst |= {c for c, p in a_inst.items() if p[1] == latest}
 
-    if not wanted and not fallback:
-        return {}
+    facts: dict = {}
+    source: dict[str, str] = {}
 
-    def collect(into: dict, refs: set) -> None:
+    def collect(refs: set) -> None:
+        # The first value in document order wins, as setdefault did.
         for node in root.iter():
             col = TAGS.get(node.tag.split("}")[-1])
-            if not col or node.get("contextRef") not in refs or not node.text:
+            ref = node.get("contextRef")
+            if not col or col in facts or ref not in refs or not node.text:
                 continue
             try:
-                into.setdefault(col, float(re.sub(r"[,\s]", "", node.text)))
+                facts[col] = float(re.sub(r"[,\s]", "", node.text))
             except ValueError:
                 continue
+            source[col] = ref
 
-    facts: dict[str, float] = {}
-    collect(facts, wanted)
-    if fallback:
-        # Second pass only. setdefault means anything already found from an
-        # undimensioned context stands, so this can add a missing figure and
-        # can never replace one.
-        collect(facts, fallback)
+    # OneD is the reported quarter. Some legacy filings also declare FourD with
+    # the SAME dates while it holds year-to-date values (240 of 910 sampled).
+    # The quarter used to win only because OneD comes first in the document.
+    # It now wins by rule: OneD is collected first, and FourD is not used at
+    # all when OneD is present, since its figures are not the quarter.
+    if "OneD" in dur:
+        dur = dur - {"FourD"}
+        collect({"OneD"} | inst)
+    if dur or inst:
+        collect(dur | inst)
+    if fb_dur or fb_inst:
+        # Second pass only: anything already found from an undimensioned
+        # context stands, so this can add a missing figure and never replace one.
+        collect(fb_dur | fb_inst)
+
+    took = set(source.values())
+    if took & dur:
+        facts["quarter_span_days"] = span_days
+    elif took & fb_dur:
+        facts["quarter_span_days"] = fb_days
+        duration_source = "audit_fallback"
+    else:
+        duration_source = None
+
+    if detail is not None:
+        dropped = set()
+        if rejected:
+            for node in root.iter():
+                col = TAGS.get(node.tag.split("}")[-1])
+                if (col and col not in facts and node.get("contextRef") in rejected
+                        and (node.text or "").strip()):
+                    dropped.add(col)
+        detail.update(duration_source=duration_source,
+                      quarter_span_days=facts.get("quarter_span_days"),
+                      rejected_span_days=max(rejected_days) if rejected_days else None,
+                      dropped_columns=sorted(dropped))
     return facts
 
 
@@ -452,6 +583,14 @@ def fetch(symbol: str | None = None, start: date | None = None,
 
 def ensure_schema(con) -> None:
     con.execute(SCHEMA)
+    # Migration: quarter_span_days arrived on 2026-09-24. A database built
+    # before then has a 41-column table, and every positional insert into it
+    # would fail, so the column is added in place. It goes last, which is
+    # where COLUMNS puts it.
+    con.execute("ALTER TABLE financials ADD COLUMN IF NOT EXISTS quarter_span_days INTEGER")
+
+
+_COLS_SQL = ", ".join(COLUMNS)
 
 
 def upsert(con, df: pd.DataFrame) -> int:
@@ -460,7 +599,8 @@ def upsert(con, df: pd.DataFrame) -> int:
     ensure_schema(con)
     con.register("incoming_fin", df)
     before = con.execute("SELECT count(*) FROM financials").fetchone()[0]
-    con.execute("INSERT OR IGNORE INTO financials SELECT * FROM incoming_fin")
+    con.execute(f"INSERT OR IGNORE INTO financials ({_COLS_SQL}) "
+                f"SELECT {_COLS_SQL} FROM incoming_fin")
     after = con.execute("SELECT count(*) FROM financials").fetchone()[0]
     con.unregister("incoming_fin")
     return after - before
@@ -517,7 +657,6 @@ def rebuild_from_parquet(con, out_dir: Path = PARQUET_DIR) -> int:
     files = statement_files(out_dir) if out_dir.exists() else []
     if not files:
         return 0
-    con.execute("DELETE FROM financials")
     listed = ", ".join(f"'{p.as_posix()}'" for p in files)
     # One row per document. The same XBRL can appear in two quarter files when
     # a filing is re-broadcast across a boundary, so the insert is deduplicated
@@ -528,11 +667,23 @@ def rebuild_from_parquet(con, out_dir: Path = PARQUET_DIR) -> int:
     # copy with the LATEST period_end is the document's own period; the other
     # is a mislabel. Ordering on broadcast_dt alone picked the mislabel in 685
     # cases and was arbitrary in 150 exact ties (strategy v1 Clarification 22).
-    con.execute(f"""INSERT INTO financials SELECT * EXCLUDE (rn) FROM (
-        SELECT *, row_number() OVER (PARTITION BY xbrl_url
-                                     ORDER BY period_end DESC, broadcast_dt DESC) AS rn
-        FROM read_parquet([{listed}], union_by_name=true)
-        WHERE xbrl_url IS NOT NULL) WHERE rn = 1""")
+    # Delete and insert in one transaction, with columns named rather than
+    # positional. Before 2026-09-24 a failed insert (a column-count mismatch
+    # after a schema change) left the table deleted and empty, and rebuild_db
+    # only logged a warning.
+    con.execute("BEGIN TRANSACTION")
+    try:
+        con.execute("DELETE FROM financials")
+        con.execute(f"""INSERT INTO financials ({_COLS_SQL})
+            SELECT {_COLS_SQL} FROM (
+                SELECT *, row_number() OVER (PARTITION BY xbrl_url
+                                             ORDER BY period_end DESC, broadcast_dt DESC) AS rn
+                FROM read_parquet([{listed}], union_by_name=true)
+                WHERE xbrl_url IS NOT NULL) WHERE rn = 1""")
+        con.execute("COMMIT")
+    except Exception:
+        con.execute("ROLLBACK")
+        raise
     return con.execute("SELECT count(*) FROM financials").fetchone()[0]
 
 

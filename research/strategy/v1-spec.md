@@ -630,3 +630,28 @@ changes a rule. It records what was true and when.
     requires. The first published figure used the close of 15 February
     instead, because the open value was not recorded mid-run. The engine now
     records the value at every rebalance open.
+
+### 2026-09-24: the quarter rule for filings
+
+38. **A figure is a quarter only if it is labelled as one.** Some filings tag
+    their income statement only for a half-year or a full year, with no
+    quarter-length period, and the parser used to store those figures as the
+    quarter: DELTACORP's first September 2025 filing reported April to
+    September revenue of Rs 2,619.5m as the quarter, where its revised filing
+    three days later gave Rs 1,310.5m. From 2026-09-24 income-statement
+    figures are accepted only from a period of at most 100 days, and a filing
+    without one is treated as reporting no income statement for the quarter.
+    Its balance sheet is still used. The 2018 to 2024 filings reference an
+    undeclared "OneD" period: where its length can be established (574 of 577
+    sampled) it is always the quarter, so an undated OneD is also taken as the
+    quarter. This changed 781 of 26,459 rows in the 2025 and 2026 files
+    (265 March 2025, 409 September 2025, 102 March 2026 and 5 in June and
+    December) and none in the 910 sampled older filings.
+
+    **Choosing the revision.** When a filing reports no income statement, it
+    is not a revision of the quarter's income statement. The income-statement
+    figures for a (company, basis, quarter) come from the latest filing
+    broadcast before D that reports at least one income-statement figure
+    (revenue, total income, other income, employee cost, EBITDA or
+    normalised profit). Balance-sheet figures are chosen separately and may
+    still come from such a filing, since its balance sheet is valid.

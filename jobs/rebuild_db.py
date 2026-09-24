@@ -31,7 +31,9 @@ log = logging.getLogger(__name__)
 # Tables the daily brief and the signal check read directly. A failure in one
 # of these is fatal, because the alternative is an email built on a table that
 # silently came back empty.
-REQUIRED = ("prices", "announcements", "corpactions", "indices")
+# financials became required on 2026-09-24. A failed rebuild used to leave the
+# table empty with only a warning, and every strategy reads it.
+REQUIRED = ("prices", "announcements", "corpactions", "indices", "financials")
 
 
 def main() -> int:

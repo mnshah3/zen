@@ -52,6 +52,7 @@ import pandas as pd
 
 from zen.data.bhavcopy import _session
 from zen.data.financials import PARQUET_DIR, _derive, parse_xbrl
+from zen.data import xbrl_cache
 
 log = logging.getLogger(__name__)
 
@@ -223,6 +224,11 @@ def _fetch_one(session, url: str, tries: int = 3):
     published, and retrying those forever would stall every future run. A
     timeout or a 5xx is transient and deserves another attempt. Treating the
     two the same is how a run either loses data silently or never finishes.
+
+    Every 200 body is stored in the local XBRL cache BEFORE it is parsed, so a
+    document the current parser reads as empty is still on disk for a later,
+    better parser. Callers check the cache first (see fetch_documents); this
+    function is the download path only.
     """
     for attempt in range(tries):
         try:
@@ -230,12 +236,25 @@ def _fetch_one(session, url: str, tries: int = 3):
             if r.status_code == 404:
                 return {}, "missing"
             if r.status_code == 200:
+                xbrl_cache.put(url, r.content)
                 facts = parse_xbrl(r.content)
                 return (facts, "ok") if facts else ({}, "empty")
         except Exception:                                        # noqa: BLE001
             pass
         time.sleep(1.5 * (attempt + 1))
     return {}, "failed"
+
+
+def _parse_cached(content: bytes):
+    """(facts, outcome) for a body read from the cache, with the outcomes a
+    download of the same bytes would have produced. A parse that raises is
+    "failed", as it is after _fetch_one's retries; retrying a deterministic
+    parse of the same bytes cannot change the answer, so it is not retried."""
+    try:
+        facts = parse_xbrl(content)
+    except Exception:                                            # noqa: BLE001
+        return {}, "failed"
+    return (facts, "ok") if facts else ({}, "empty")
 
 
 def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
@@ -287,8 +306,13 @@ def fetch_documents(session, index: pd.DataFrame, sleep: float = 0.15,
         return local.s
 
     def one(meta):
-        throttle()
-        facts, outcome = _fetch_one(sess(), meta["xbrl_url"])
+        cached = xbrl_cache.get(meta["xbrl_url"])
+        if cached is not None:
+            # Read from disk: no request, so no slot in the rate limit.
+            facts, outcome = _parse_cached(cached)
+        else:
+            throttle()
+            facts, outcome = _fetch_one(sess(), meta["xbrl_url"])
         if outcome == "failed":
             # A failure is the signal the connection has gone bad; the next
             # call on this thread builds a new one.

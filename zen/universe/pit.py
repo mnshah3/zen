@@ -428,6 +428,17 @@ def build_snapshot(con, D, static: "StaticLabels | None" = None) -> Snapshot:
     fin["period_end"] = pd.to_datetime(fin["period_end"])
     fin["broadcast_dt"] = pd.to_datetime(fin["broadcast_dt"])
     fin["symbol"] = ids.for_events(fin, "symbol", "broadcast_dt")
+    # A filing that reports no income statement at all is not a revision of
+    # the quarter's income statement. Since the parser fix of 2026-09-24 this
+    # is mostly a filing that tagged only a half-year or a year, whose figures
+    # are refused (spec Clarification 38). If such a filing was broadcast after
+    # a valid quarterly one, taking "the latest" would replace real figures
+    # with nothing, which happened for 13 company-quarters. So these rows are
+    # set aside before the latest revision is chosen. Banks keep other_income,
+    # so they are unaffected.
+    income = ["revenue", "total_income", "other_income", "employee_cost",
+              "ebitda", "profit_normalised"]
+    fin = fin[fin[income].notna().any(axis=1)]
     # Latest revision known before D per (symbol, basis, quarter).
     fin = (fin.sort_values(["symbol", "consolidated", "period_end", "broadcast_dt"])
               .drop_duplicates(["symbol", "consolidated", "period_end"], keep="last"))
