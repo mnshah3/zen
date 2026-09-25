@@ -63,9 +63,7 @@ REPO = Path(__file__).resolve().parents[2]
 DB_PATH = REPO / "data" / "zen.duckdb"
 NSE_LIST = REPO / "nse_list.json"
 
-SCRATCH_DUCK = Path(
-    r"C:\Users\mnsha\AppData\Local\Temp\claude\C--Users-mnsha-OneDrive-Desktop-Gostack"
-    r"\196360f9-eded-41ee-bd9a-762d776d6462\scratchpad\duck")
+SCRATCH_DUCK = REPO / "data" / "cache" / "duck"     # DuckDB spill folder (gitignored)
 
 # ---------------------------------------------------------------- spec constants
 TURNOVER_MIN = 20e5            # Rs 20 lakh median daily turnover

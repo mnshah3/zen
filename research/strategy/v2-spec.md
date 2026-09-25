@@ -344,3 +344,63 @@ duplicate and any change to rows already in use. The opens and prior closes for
 the five factor indices on 14-15 Feb 2019, 14-15 Feb 2023, 17-18 Sep 2026 and
 22-23 Sep 2026 are in `data/external/nifty_price_endpoints.csv`. Another end
 date needs those rows fetched first; the engine must refuse, never guess.
+
+## Clarification to A5 and to item 2, before any v2 measurement (2026-09-25)
+
+Written after an independent review of the quality-factor code and before any
+v2 figure exists. The reviewers had computed the factor under both readings of
+the universe question below, so that choice is made with those factor figures
+known. It follows A5's own words, it is the more conservative reading for v2,
+and the other reading is reported beside it.
+
+**EBIT, for item 2's ROCE, the ROCE hard filter and the factor.** The owner's
+standard ROCE (confirmed 2026-09-25): TTM EBIT is profit before exceptional
+items and tax plus finance costs, summed over the four latest quarters in the
+company's basis, each from the income-statement revision the snapshot keeps.
+Other income is in, exceptional items are out. Where a filing gives no
+pre-exceptional profit, profit before tax less exceptional items stands in
+(0.5% of filings, none of which report exceptional items). Capital is equity
+plus total borrowings from the latest balance sheet known before D in the same
+basis; a balance sheet with no borrowings line has no debt; equity must be
+positive; a balance sheet more than 400 days old is not used. v2's filter and
+ranking call the same code as the factor (`ttm_ebit` and
+`latest_balance_sheets` in zen/validation/factors.py).
+
+**Which balance sheet.** Chosen separately from the income statement, as
+Clarification 38 says: the latest period known before D, then its latest
+revision, including filings with no income statement and periods after the
+latest income quarter. Filings the scale screen set aside are excluded, and so
+is a balance sheet on a different unit scale from the company's other balance
+sheets: total assets and paid-up share capital both 30 times or more out, in
+the same direction, against most of its nearest neighbours, the same band and
+majority rule as the income screen (Clarification 30a). Added on the same day,
+after the independent check found one mis-scaled balance sheet (PURVA, March
+2023) moving a single month of the factor by 0.055 percentage points.
+
+**Universe.** "The same liquid universe" is v1's universe, rules 1 to 7,
+including rule 6 (TTM profit and TTM EBITDA positive): the only names v1 and v2
+can hold, so the quality premium A5 guards against is the one available inside
+it. Keeping loss-makers, the usual Fama-French practice, is reported as a
+labelled robustness line and never as the headline.
+
+**Sort.** Size is split at the median market cap of the whole universe, so the
+size breakpoint does not depend on the signal, as in Fama and French (theirs is
+the NYSE median). Within each half the 30th and 70th percentiles are taken
+among the names that have the signal, as A5 says (Fama and French take them
+across NYSE stocks regardless of size; disclosed). Portfolios are weighted by
+market cap at the close before formation.
+
+**Timing and returns.** Formed at the last session of each month from February
+2019 to August 2026 (ROCE from February 2023), on what was known at the open
+of that session, and held for the next calendar month close to close, the
+clock of IIMA's monthly factors. The first holding month, March 2019, is the
+first month of v1's attribution sample. Monthly re-formation on quarterly data
+follows Hou, Xue and Zhang (2015). Returns compound daily with cash dividends
+reinvested on the ex-date; splits and bonuses are adjusted; a stock that stops
+trading keeps its last close; a stock moved to the trade-for-trade BZ series is
+priced there. Demergers, consolidations and rights issues are not adjusted, a
+known limitation: the review found single months off by up to 1.3 percentage
+points with the means barely moved.
+
+**Attribution.** With and without the factor, on the identical set of months,
+checked in code.

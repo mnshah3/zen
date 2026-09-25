@@ -43,6 +43,7 @@ data/financials/legacy_missing.parquet
 
 # study panels: large, rebuilt by the scripts in jobs/
 data/study/*.parquet
+data/cache/
 
 # Third-party index and factor data: free to download, not ours to redistribute.
 # data/external/SOURCES.md says where each came from and how to fetch it again.
