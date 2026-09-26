@@ -13,6 +13,11 @@ Writes to data/backtest/v1/:
     holdings.csv          per rebalance D: symbol, rank, sector, weight, action
     trades.csv            every fill, cancellation and forced exit
     nav.csv               strategy, universe_ew and index NAVs on the strategy clock
+    in_sample_end_open.csv  every nav.csv column's value at the open of the
+                          in-sample end (15 Feb 2023), for sub-periods on the
+                          spec's clock (v1 disclosure 37); final test only
+    trade_for_trade.csv   holding episodes (strategy and universe_ew) that
+                          spanned a BZ-only session, valued and sellable in BZ
     metrics.json          every metric the spec lists, plus sanity checks
     sanity.json           the self-checks run on every build
 
@@ -22,7 +27,9 @@ and the engine re-checks the same guard independently. The unlock flag exists
 for the single, reviewed holdout run and for nothing else.
 
 Every run of a portfolio variant is appended to state/trials.jsonl (study
-'strategy_v1'), whatever it shows. --no-record exists only for tests.
+'strategy_v1'), whatever it shows. --no-record exists for tests and for a
+re-run of an already-recorded design on a corrected archive (the v1 re-run of
+v2-spec A2), which is not a new trial.
 """
 
 from __future__ import annotations
@@ -51,6 +58,17 @@ STUDY = "strategy_v1"
 INDICES = {"nifty500": ("NIFTY 500", "Nifty 500"),
            "midcap150": ("NIFTY MIDCAP 150", "Nifty Midcap 150"),
            "smallcap250": ("NIFTY SMALLCAP 250", "Nifty Smallcap 250")}
+# Factor indices (v2-spec A4 and its Clarification): TRI closes from the same
+# file; opens and prior closes from NSE's prints in
+# data/external/nifty_price_endpoints.csv; where NSE printed no open, the
+# parent's overnight move from the indices table. Each also has a
+# <key>_no_overnight column with no move where the stand-in would be used.
+# key: (TRI index_name, parent index_name in the indices table)
+FACTOR_INDICES = {"momentum30": ("NIFTY200 MOMENTUM 30", "Nifty 200"),
+                  "value50": ("NIFTY500 VALUE 50", "Nifty 500"),
+                  "quality30": ("NIFTY200 QUALITY 30", "Nifty 200"),
+                  "lowvol30": ("NIFTY100 LOW VOLATILITY 30", "Nifty 100"),
+                  "alpha50": ("NIFTY ALPHA 50", "Nifty 500")}
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -101,6 +119,29 @@ def index_navs(con, start, end, is_end, unlock):
             out[key] = engine.tri_nav(con, tri_name, price_name, start, end, is_end, unlock)
         except ValueError as e:
             log.warning("%s unavailable: %s", tri_name, e)
+    # A factor index that cannot be built stops the run: nothing is skipped.
+    for overnight, suffix in ((True, ""), (False, "_no_overnight")):
+        for key, (tri_name, parent) in FACTOR_INDICES.items():
+            out[key + suffix] = engine.factor_tri_nav(con, tri_name, parent, start, end, is_end,
+                                                      unlock, overnight=overnight)
+    return out
+
+
+def index_opens(con, start, d, end, is_end, unlock) -> dict:
+    """Every index column's level at the open of session d, on nav.csv's scale,
+    by the same rule each column uses at its own two opens."""
+    out = {}
+    for key, (tri_name, price_name) in INDICES.items():
+        try:
+            out[key] = engine.tri_value_at_open(con, tri_name, price_name, start, d, end,
+                                                is_end, unlock)
+        except ValueError as e:
+            log.warning("%s open on %s unavailable: %s", tri_name, pd.Timestamp(d).date(), e)
+    for overnight, suffix in ((True, ""), (False, "_no_overnight")):
+        for key, (tri_name, parent) in FACTOR_INDICES.items():
+            out[key + suffix] = engine.tri_value_at_open(con, tri_name, parent, start, d, end,
+                                                         is_end, unlock, factor=True,
+                                                         overnight=overnight)
     return out
 
 
@@ -221,7 +262,17 @@ def main(argv=None) -> int:
                      "data/external/nifty_tri.parquet) for Nifty 500, Midcap 150 and "
                      "Smallcap 250; the two opens on the clock are the previous TRI close "
                      "times the price index's overnight move (Clarification 17)",
+            "factor_indices": "NSE's TRI (tri column of the same file) for Nifty 200 Momentum 30, "
+                              "Nifty 500 Value 50, Nifty 200 Quality 30, Nifty 100 Low Volatility "
+                              "30 and Nifty Alpha 50; opens and prior closes as NSE printed them "
+                              "(data/external/nifty_price_endpoints.csv); where NSE printed no "
+                              "open, the parent index's overnight move (Nifty 200, 500, 200, 100, "
+                              "500); *_no_overnight: no move at those opens (v2-spec, "
+                              "Clarification to A4)",
             "universe_ew": "includes dividends and the same costs as the strategy",
+            "trade_for_trade": "a session with a BZ trade and no EQ/BE trade is traded: held "
+                               "names are valued at the BZ close and sold at the BZ open; "
+                               "nothing is bought in BZ (v2-spec, Clarification to A2)",
         }
         san = sanity(con, ranks, panel, decisions)
         rep["sanity"] = {k: san[k] for k in ("mcap_check", "universe_size")}
@@ -241,6 +292,20 @@ def main(argv=None) -> int:
                       "strategy_open": res.rebalance_open.values,
                       "universe_ew_open": ew.rebalance_open.reindex(res.rebalance_open.index).values}
                      ).to_csv(out / f"rebalance_open{suffix}.csv", index=False)
+        if decisions[0] < is_end < end:
+            # Every nav.csv column at the open of the in-sample end, so the
+            # in-sample and held-back parts are each measured open to open.
+            row = {"date": is_end.date(),
+                   "strategy": res.rebalance_open.get(is_end, np.nan),
+                   "universe_ew": ew.rebalance_open.get(is_end, np.nan),
+                   **index_opens(con, decisions[0], is_end, end, is_end, args.run_final_test)}
+            pd.DataFrame([row]).to_csv(out / f"in_sample_end_open{suffix}.csv", index=False)
+        t4t = pd.concat([engine.bz_holdings(panel, res).assign(portfolio="strategy"),
+                         engine.bz_holdings(panel, ew).assign(portfolio="universe_ew")],
+                        ignore_index=True)
+        t4t[["portfolio"] + engine.BZ_COLUMNS].to_csv(out / f"trade_for_trade{suffix}.csv",
+                                                      index=False)
+        rep["trade_for_trade_episodes"] = t4t["portfolio"].value_counts().to_dict()
         (out / f"metrics{suffix}.json").write_text(json.dumps(rep, indent=2, default=str))
         (out / "sanity.json").write_text(json.dumps(san, indent=2, default=str))
         record(args, {"config": args.config, **engine.config_dict(cfg)}, rep)

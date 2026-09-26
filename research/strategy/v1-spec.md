@@ -655,3 +655,41 @@ changes a rule. It records what was true and when.
     (revenue, total income, other income, employee cost, EBITDA or
     normalised profit). Balance-sheet figures are chosen separately and may
     still come from such a filing, since its balance sheet is valid.
+
+### 2026-09-26: a quarter with no income statement
+
+39. **A quarter no filing reports an income statement for is not yet
+    known.** Clarification 38 left one case open, and the two engines read it
+    differently in the v1 re-run: a (company, basis, quarter) for which every
+    filing broadcast before D reports no income statement, usually because
+    the company tagged only half-year or full-year figures. Such a quarter is
+    not a known quarter for anything built from the income statement: rules
+    5 and 6, the TTM sums, growth, stability and the basis choice of
+    Clarification 4. The company is ranked as if that quarter had not yet
+    been reported, on its latest quarters that have an income statement,
+    still subject to rule 5's 200 days. So under Clarification 4 consolidated
+    covers a quarter only if a consolidated filing reports its income
+    statement, and under Clarification 5 the unbroken run ends at such a
+    quarter. Its balance sheet is still used wherever a balance sheet is
+    used (v2).
+
+    Why: the quarter's income statement exists, but our archive cannot read
+    it as a quarter. Treating the quarter as reported but empty would drop
+    real companies from the universe because of how their filing was tagged,
+    a data artefact rather than anything about the business, and an investor
+    at D would read the latest income statement as the previous quarter's.
+    Falling back one quarter uses only what was known before D.
+
+    Effect: the production engine already did this (zen/universe/pit.py
+    drops such filings before choosing the revision). The independent checker
+    counted the quarter as known and failed rule 6, which removed 123
+    stock-dates from the 2025 and 2026 universes (for example AMRUTANJAN at
+    2 June 2025 and KNRCON's consolidated March 2025) and changed stability
+    on 79 rows. The strategy's holdings, trades and NAV are identical under
+    both readings; the equal-weight benchmark's end value differs by 0.095%.
+    Written before any v2 measurement, and applies to v2 unchanged.
+
+    Also the Clarification 28 filing-format vote: a filing that reports no
+    income statement does not vote, as in the production engine. In the v1
+    re-run the two readings give identical universes at all 31 dates, so this
+    fixes the text for v2 and changes nothing measured.

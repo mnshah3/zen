@@ -404,3 +404,149 @@ points with the means barely moved.
 
 **Attribution.** With and without the factor, on the identical set of months,
 checked in code.
+
+## Clarification to A2: the v1 re-run, before any v2 measurement (2026-09-25)
+
+A2 compares v2 with v1 re-run on the same final archive with the same code.
+Fixed here, before either is run:
+
+**Period.** From the first decision date (15 Feb 2019) to the open of
+18 Sep 2026, the end of v1's held-back test, so the re-run is comparable with
+it. v2 uses the same end.
+
+**Trade-for-trade stocks (v1 disclosure 34, both engines).** A session on which
+a held stock has no EQ or BE trade but trades in NSE's trade-for-trade series
+BZ is not a no-trade session for Clarification 15's 20-session exit. The
+holding is valued at the BZ close on such sessions, and a sale on such a
+session is made at the BZ price with the same per-side cost. Only BZ counts,
+the series NSE moves a stock to under surveillance; buying still needs the
+universe's EQ or BE rule, so no stock is bought in BZ. The equal-weight
+benchmark follows the same rule.
+
+**Benchmarks.** Nifty 500, Midcap 150 and Smallcap 250 as before, plus the five
+factor indices of A4 on the same clock, with the Clarification to A4's rule
+for a missing open and its no-overnight sensitivity.
+
+**Both engines.** The production engine and the independent checker
+(jobs/crosscheck_v1.py) implement Clarification 38 and the rules above from
+this text, separately. The re-run is accepted only when the two agree on every
+decision date's ranks and holdings and on every NAV column.
+
+## Clarification before the v2 build (2026-09-26)
+
+Written before any v2 code or figure exists. It fixes what items 1 to 8 and
+A1 leave open, so the two engines built from this text cannot differ by
+choice, and nothing can be chosen by looking at a result.
+
+**Quality group (item 2).** From the February 2023 decision date: ROCE, as the
+Clarification to A5 defines it and computed by the same code, and v1's
+Stability measure. Before it: v1's Margin and Stability, unchanged. A missing
+measure scores 0.5, as in v1. Each run reports the share of universe rows and
+of holdings that were ranked on ROCE.
+
+**Hard filters (item 3).** They are universe rules, added to v1's rules 1 to 7
+at every decision date:
+- market cap, v1's definition, above Rs 100 crore;
+- trailing P/E, market cap over TTM normalised profit, positive and at most 70;
+- from the February 2023 decision date, ROCE at least 10% and total debt over
+  equity below 1.5 with equity above zero, both from the balance sheet the
+  Clarification to A5 chooses. A stock with no usable balance sheet at D (none
+  known, one older than 400 days, or equity not positive) fails both: an owner
+  who sets a ROCE floor does not buy a company whose ROCE is unknown. Each run
+  reports how many stocks this excluded.
+Promoter holding stays live only.
+
+**Thesis-break exit (item 8).** Because the hard filters are universe rules, a
+holding that fails one at a decision date has left the universe and is sold at
+that date's open whatever its rank, as v1 sells any holding that leaves.
+
+**Positions (item 1) and sectors (item 7).** Twelve names, kept while in the
+universe and ranked within the top 24; vacancies filled best rank first under
+the cap of 3 per sector. The sector is the sector level of NSE's four-level
+classification in data/reference/industry_nse.parquet, joined by stock id so a
+renamed company keeps its label. These are today's labels applied to the past
+(disclosed). An unlabelled company is its own sector, as in v1 Clarification 8,
+and each run reports how many held slots were unlabelled.
+
+**Trend filter (item 4).** At decision date D, from Nifty 500 total-return
+closes up to the session before D: (1) the last close is below the mean of the
+last 200 closes; (2) the last close is at least 10% below the highest close of
+the last 252 sessions; (3) on at least 60% of the last 126 sessions the close
+was below its own trailing 200-close mean. Cash is 0, 20, 27.5 or 35% of NAV at
+D for 0 to 3 conditions true. The stock book is invested at (1 - cash) of NAV.
+
+**Sizing (item 6).** For the names held after D's decisions, weight is
+proportional to 1/sigma, sigma being the standard deviation v1's Low-volatility
+measure uses (daily adjusted log returns over the last 252 sessions), scaled to
+sum to (1 - cash). Each weight is then held within 0.5 and 1.5 times
+(1 - cash)/12, the excess or shortfall redistributed pro rata over the names
+not at a bound, until all are within it. A name with no sigma gets the equal
+weight (1 - cash)/12 before scaling. With fewer than 12 names the bounds still
+use (1 - cash)/12, and whatever the capped weights leave is held as cash.
+
+**Rebalancing and tranches (item 5, A1).** At D every holding kept is resized
+to its new target at D's open in full; a tranche of it still pending is
+cancelled, the new target replacing it. A new position's target value V, set
+at D's open, is bought in three tranches of V/3: at D, and at the 21st and 42nd
+sessions after D. In variant (a) each tranche buys at its session's open under
+v1's buying rules (a buy waits for an EQ or BE trade and is cancelled after 5
+sessions without one). In variant (b) each tranche follows A1 from its own
+scheduled session. Cash held for pending tranches, like trend-filter cash and
+dividends, earns nothing. A position that leaves the book cancels its pending
+tranches.
+
+**Unchanged from v1.** Universe rules 1 to 7, the four quarterly decision
+dates, the five equal-weight ranking groups and their other measures, 0.20%
+per side (0.40% sensitivity), dividends as cash, the 20-session forced exit
+with the trade-for-trade rule, and the benchmarks of the Clarification to A2.
+
+**A1's adoption test, made exact.** "Average price paid for new positions":
+for each new position, the unit-weighted average adjusted fill price over its
+tranches, divided by the adjusted close on the session before its D; averaged
+over all new positions weighted by V. Rules 2 and 3 use the CAGR and maximum
+drawdown of the full period.
+
+**Measurement.** The same jobs as v1 (libcheck, verify, stats), generalised to
+take a run folder; IIMA four-factor alpha with and without the A5 quality
+factor on the identical months; each factor index over the whole period and
+over its live part (Clarification to A4); after costs and tax (A6); the monkey
+test; and the deflated Sharpe counting every trial in trials.jsonl plus both
+v2 runs.
+
+**Safeguard 2 (cross-validation), corrected.** Combinatorial purged
+cross-validation measures how a procedure that fits something to past data does
+on data it did not see. v2's rules fit nothing, so every combinatorial path
+would reassemble the same returns and add no information; reporting it as a
+distribution would be false comfort. The one thing in v2 chosen from data is
+A1's choice between variants (a) and (b), so that choice is tested by
+combinatorially symmetric cross-validation (Bailey, Borwein, Lopez de Prado and
+Zhu, 2017): the daily returns of (a) and (b) are cut into 10 contiguous blocks,
+every choice of 5 blocks is the training half and the rest the test half, the
+A1 rule picks a variant on each training half, and the share of the 252
+splits in which the pick does worse on the test half than the variant not
+picked is reported (the probability of backtest overfitting). The distribution
+of outcomes the spec asked for comes instead from the stationary block
+bootstrap already used for v1, and from every 3-year window, for v2 and for v1
+on the same dates.
+
+## Clarification to A2's measurement, before any v2 figure (2026-09-26)
+
+The v1 baseline was measured and independently recomputed on 2026-09-26. Two
+readings of A2 are fixed here, before v2 is measured:
+
+- **Rule 3, the alpha t-statistic.** statsmodels OLS on monthly excess
+  returns with cov_type HAC, 3 lags and no small-sample correction, the
+  settings jobs/libcheck_v1.py has always used. v1: alpha 5.74% a year,
+  t 1.21 (82 months, March 2019 to December 2025). The hand-written
+  regression with the n/(n-k) correction gives t 1.17; it is reported beside
+  it, not used for the bar.
+- **Rule 5, capacity.** Every buy and sell in trades.csv, each against the
+  stock's 60-session median turnover before its trade date, 95th percentile,
+  at Rs 5 lakh. v1: 1.159%. Counting only fills on a decision date gives
+  0.976% and is reported beside it; it would miss v2's second and third
+  tranches, which is why every fill counts.
+
+v1's five A2 figures, the bar v2 must clear (data/backtest/v1_final/
+baseline_report.json): maximum drawdown -33.56% (v2 must be at -28.56% or
+shallower), Sortino 1.936 and Calmar 0.937 (quantstats), alpha 5.74% a year at
+t 1.21, turnover 1.958 a year, capacity 1.159%.

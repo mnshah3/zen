@@ -1,0 +1,639 @@
+{
+  "run": "data\\backtest\\v1_final",
+  "label": "v1",
+  "generated_utc": "2026-09-26T22:41:08+00:00",
+  "period": {
+    "start": "2019-02-15",
+    "end": "2026-09-18",
+    "clock": "open of the first decision date, every close, open of the end date (v1 Clarification 16)"
+  },
+  "sources": {
+    "libcheck": {
+      "path": "data\\backtest\\v1_final\\libcheck.json",
+      "sha256": "57ef133d5b5a35a18a51d610757d3b01c35305b8650df058e149190dd83b3881"
+    },
+    "verify": {
+      "path": "data\\backtest\\v1_final\\verify.json",
+      "sha256": "b071d98303cdd626717f1a1dd6e373f157dd93b200ab2d6072a2196db7f15601"
+    },
+    "stats": {
+      "path": "data\\backtest\\v1_final\\stats.json",
+      "sha256": "ecaf2d552b80dca1c4b3e80063052ad38ca0629a0e758711b6610a7b220ce587"
+    },
+    "attribution": {
+      "path": "data\\backtest\\v1_final\\attribution.json",
+      "sha256": "31c087a9a03d9c5bb252256241f06864a47ab70edff5f4e0ae9a192bc0859d92"
+    },
+    "after_tax": {
+      "path": "data\\backtest\\v1_final\\after_tax\\summary.json",
+      "sha256": "57119896b7a97165bae46285255bab074978d7fa989eed2be078d2e7bc9cab5d"
+    },
+    "metrics": {
+      "path": "data\\backtest\\v1_final\\metrics.json",
+      "sha256": "b9e97a75ec400dc7bcaa96a66762c3811c14a2123ed7a660b64904cf511d99b8"
+    }
+  },
+  "libraries": {
+    "quantstats": "0.0.81",
+    "statsmodels": "0.15.0",
+    "arch": "8.0.0",
+    "pandas": "3.0.5"
+  },
+  "a2_acceptance_quantities": {
+    "max_drawdown": {
+      "value": -0.33559777608094643,
+      "definition": "maximum drawdown over the full period: the worst fall of NAV from its running peak, from the returns between consecutive marks of nav.csv (open of the first decision date, every close, open of the end date), quantstats qs.stats.max_drawdown",
+      "source": "libcheck.json: full_period.strategy.exact.max_drawdown",
+      "check_metrics_json": -0.3355977760809461,
+      "bar_for_v2": {
+        "rule": "at least 5 percentage points smaller than v1's",
+        "v2_max_drawdown_must_be_at_least": -0.28559777608094644
+      }
+    },
+    "sortino": {
+      "value": 1.9363344957714033,
+      "definition": "quantstats qs.stats.sortino(returns, periods=252): mean return over the root mean square of the negative returns taken over all periods, times sqrt(252), zero risk-free rate",
+      "source": "libcheck.json: full_period.strategy.exact.sortino",
+      "bar_for_v2": {
+        "rule": "higher than v1's",
+        "v2_must_exceed": 1.9363344957714033
+      }
+    },
+    "calmar": {
+      "value": 0.9367149608263851,
+      "definition": "quantstats qs.stats.calmar(returns): quantstats' CAGR (compounded return over len(returns)/252 years) over the absolute maximum drawdown",
+      "source": "libcheck.json: full_period.strategy.exact.calmar",
+      "bar_for_v2": {
+        "rule": "higher than v1's",
+        "v2_must_exceed": 0.9367149608263851
+      }
+    },
+    "iima_alpha_annual": {
+      "value": 0.057400092243896195,
+      "definition": "IIMA four-factor alpha: monthly strategy return minus IIMA's RF regressed on IIMA's MF, SMB, HML and WML (survivorship-bias adjusted, Dec 2025 release), statsmodels OLS; monthly intercept annualised as (1 + a)^12 - 1",
+      "source": "libcheck.json: regression_full_period.strategy.exact.alpha_annual",
+      "months": {
+        "n": 82,
+        "first": "2019-03",
+        "last": "2025-12"
+      },
+      "bar_for_v2": {
+        "rule": "not lower than v1's, over the same months",
+        "v2_must_be_at_least": 0.057400092243896195
+      }
+    },
+    "iima_alpha_t": {
+      "value": 1.206375509599602,
+      "definition": "t-statistic of the intercept, statsmodels HAC (Newey-West, Bartlett kernel, 3 lags, statsmodels' default: no small-sample correction)",
+      "source": "libcheck.json: regression_full_period.strategy.exact.alpha_t",
+      "hand_rolled_with_small_sample_correction": {
+        "value": 1.1690173275982823,
+        "source": "verify.json: attribution.strategy.alpha_t",
+        "note": "the same regression with the n/(n-k) factor; not the A2 figure"
+      },
+      "bar_for_v2": {
+        "rule": "not lower than v1's",
+        "v2_must_be_at_least": 1.206375509599602
+      }
+    },
+    "turnover_annual_incl_initial": {
+      "value": 1.957688967486525,
+      "definition": "annual one-way turnover including the initial build: the value of every buy and sell / 2 / mean NAV over all marks / calendar years",
+      "source": "verify.json: turnover_annual_incl_initial",
+      "check_metrics_json": 1.9576889674865245,
+      "bar_for_v2": {
+        "rule": "not higher than v1's",
+        "v2_must_be_at_most": 1.957688967486525
+      }
+    },
+    "capacity_p95_share_of_turnover": {
+      "value": 0.011588713558527565,
+      "definition": "every buy and sell in trades.csv (cancellations excluded): |value| / median daily turnover of the stock over the 60 sessions before the trade date, untraded sessions as 0 (universe rule 2's measure, recomputed at each trade date); 95th percentile, linear interpolation; at the backtest's Rs 5 lakh starting capital",
+      "source": "verify.json: capacity_all_trades.p95",
+      "trades": 452,
+      "check_against_ranks": {
+        "matched": 442,
+        "worst_rel": 0.0
+      },
+      "decision_date_fills_only": {
+        "value_pct": 0.976,
+        "trades_matched": 442,
+        "source": "verify.json: capacity.p95_pct",
+        "note": "the earlier definition: only fills dated on a decision date on which the stock was in the universe; it would not count v2's later tranches at all"
+      },
+      "bar_for_v2": {
+        "rule": "not higher than v1's",
+        "v2_must_be_at_most": 0.011588713558527565
+      }
+    }
+  },
+  "headline": {
+    "strategy_cagr": {
+      "value": 0.30677147631337953,
+      "definition": "calendar-day CAGR over the full clock",
+      "source": "libcheck.json: full_period.strategy.exact.cagr_calendar"
+    },
+    "universe_ew_cagr": {
+      "value": 0.22029106529638498,
+      "definition": "calendar-day CAGR over the full clock",
+      "source": "libcheck.json: full_period.universe_ew.exact.cagr_calendar"
+    }
+  },
+  "final_test": {
+    "value": {
+      "clock": "open of 2023-02-15 to open of 2026-09-18",
+      "source": "in_sample_end_open.csv",
+      "years": 3.589322381930185,
+      "strategy_cagr_pct": 34.31,
+      "universe_ew_cagr_pct": 20.96,
+      "margin_interval": {
+        "point_pct": 13.35,
+        "lo90_pct": -2.68,
+        "hi90_pct": 29.23,
+        "share_of_draws_le_zero": 0.084,
+        "sessions_per_year": 246.3,
+        "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
+      },
+      "index_tri_cagr_pct": {
+        "nifty500": 13.5,
+        "midcap150": 21.42,
+        "smallcap250": 21.88,
+        "momentum30": 15.92,
+        "value50": 27.3,
+        "quality30": 11.34,
+        "lowvol30": 12.75,
+        "alpha50": 24.45,
+        "momentum30_no_overnight": 15.92,
+        "value50_no_overnight": 27.23,
+        "quality30_no_overnight": 11.34,
+        "lowvol30_no_overnight": 12.75,
+        "alpha50_no_overnight": 24.45
+      },
+      "index_clock": "TRI at the open of the in-sample end (in_sample_end_open.csv) to TRI at the open of the end date (nav.csv's last mark); *_no_overnight: no overnight move where NSE printed no open"
+    },
+    "definition": "held-back sub-period, open of the in-sample end to open of the end date, every column from in_sample_end_open.csv (v1 disclosure 37); percentages",
+    "source": "libcheck.json: final_test"
+  },
+  "factor_attribution": {
+    "iima_four_factor": {
+      "value": {
+        "months": 82,
+        "first": "2019-03",
+        "last": "2025-12",
+        "alpha_annual_pct": 5.74,
+        "alpha_t": 1.21,
+        "r_squared": 0.721,
+        "loadings": {
+          "MF": 0.865,
+          "SMB": 0.227,
+          "HML": 0.467,
+          "WML": 0.341
+        },
+        "loading_t": {
+          "MF": 9.7,
+          "SMB": 1.69,
+          "HML": 4.78,
+          "WML": 3.61
+        },
+        "exact": {
+          "alpha_monthly": 0.0046619291404727875,
+          "alpha_annual": 0.057400092243896195,
+          "alpha_t": 1.206375509599602,
+          "alpha_p": 0.227672734622811,
+          "r_squared": 0.7207653235277108
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "definition": "as the A2 alpha (same code, same months)",
+      "source": "attribution.json: iima_four_factor"
+    },
+    "with_quality_factor": {
+      "margin": {
+        "label": "headline: operating margin, whole period",
+        "months": 82,
+        "first": "2019-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "without": {
+          "alpha_annual": 0.057400092243896195,
+          "alpha_t": 1.206375509599602
+        },
+        "with": {
+          "alpha_annual": 0.05035517370485976,
+          "alpha_t": 1.1098752902410982,
+          "quality_loading": 0.221,
+          "quality_loading_t": 1.74
+        },
+        "source": "attribution.json: quality.margin"
+      },
+      "roce": {
+        "label": "headline: ROCE, its months from March 2023",
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "without": {
+          "alpha_annual": 0.112727476763129,
+          "alpha_t": 2.6133998964256464
+        },
+        "with": {
+          "alpha_annual": 0.03310121256493903,
+          "alpha_t": 0.7355021723731365,
+          "quality_loading": 0.815,
+          "quality_loading_t": 2.16
+        },
+        "source": "attribution.json: quality.roce"
+      },
+      "margin_no_r6": {
+        "label": "robustness only: margin, loss-makers kept",
+        "months": 82,
+        "first": "2019-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "without": {
+          "alpha_annual": 0.057400092243896195,
+          "alpha_t": 1.206375509599602
+        },
+        "with": {
+          "alpha_annual": 0.05181937915865431,
+          "alpha_t": 1.1332168860664646,
+          "quality_loading": 0.169,
+          "quality_loading_t": 1.0
+        },
+        "source": "attribution.json: quality.margin_no_r6"
+      },
+      "roce_no_r6": {
+        "label": "robustness only: ROCE, loss-makers kept",
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "without": {
+          "alpha_annual": 0.112727476763129,
+          "alpha_t": 2.6133998964256464
+        },
+        "with": {
+          "alpha_annual": 0.06970243526554487,
+          "alpha_t": 1.5342289494846992,
+          "quality_loading": 0.751,
+          "quality_loading_t": 2.91
+        },
+        "source": "attribution.json: quality.roce_no_r6"
+      }
+    },
+    "definition": "four-factor regression without and with the A5 quality factor (data/study/quality_factor.parquet, complete months), on identical months checked in code; alpha annualised, statsmodels HAC 3 lags"
+  },
+  "benchmarks": {
+    "definition": "excess CAGR = strategy CAGR minus benchmark CAGR (calendar days); information ratio = annualised mean daily return difference over its annualised standard deviation (252); zen/portfolio/metrics.py, equal to metrics.json on the whole period. Live part: from the close of the index's first live date to the open of the end date",
+    "rows": {
+      "nifty500": {
+        "name": "Nifty 500",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.1435963064485799,
+          "excess_cagr": 0.16317516986479963,
+          "information_ratio": 0.9743447134758915
+        },
+        "source": "attribution.json: benchmarks.nifty500"
+      },
+      "midcap150": {
+        "name": "Nifty Midcap 150",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.20375421997673882,
+          "excess_cagr": 0.10301725633664072,
+          "information_ratio": 0.6567278814808035
+        },
+        "source": "attribution.json: benchmarks.midcap150"
+      },
+      "smallcap250": {
+        "name": "Nifty Smallcap 250",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.2014038673942702,
+          "excess_cagr": 0.10536760891910935,
+          "information_ratio": 0.6497210502570965
+        },
+        "source": "attribution.json: benchmarks.smallcap250"
+      },
+      "momentum30": {
+        "name": "Nifty200 Momentum 30",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.15620723999441521,
+          "excess_cagr": 0.15056423631896432,
+          "information_ratio": 0.8561934379602443
+        },
+        "source": "attribution.json: benchmarks.momentum30",
+        "live_part": {
+          "from": "2020-10-12 close",
+          "to": "2026-09-18 open",
+          "years": 5.932922655715264,
+          "strategy_cagr": 0.36392073717225415,
+          "benchmark_cagr": 0.17469510133889732,
+          "excess_cagr": 0.18922563583335683,
+          "information_ratio": 1.0543134412771669,
+          "live_start": "2020-10-12",
+          "basis": "first date NSE printed an open (fallback)",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Momentum 30 has opens from 12 Oct 2020'. A search listed an NSE Indices press release titled 'NSE Indices launches Nifty200 Momentum 30 Index' at https://www.niftyindices.com/Press_Release/ind_prs25082020.pdf, but its text could not be read, so no launch sentence is quoted and its date is not used"
+        }
+      },
+      "value50": {
+        "name": "Nifty500 Value 50",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.22973743814597447,
+          "excess_cagr": 0.07703403816740506,
+          "information_ratio": 0.3817944938103713
+        },
+        "source": "attribution.json: benchmarks.value50",
+        "live_part": {
+          "from": "2024-12-16 close",
+          "to": "2026-09-18 open",
+          "years": 1.754962354551677,
+          "strategy_cagr": 0.06998452626536045,
+          "benchmark_cagr": 0.059010886767663084,
+          "excess_cagr": 0.010973639497697363,
+          "information_ratio": 0.1079285099540428,
+          "live_start": "2024-12-16",
+          "basis": "first date NSE printed an open (fallback)",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Value 50 from 16 Dec 2024'"
+        }
+      },
+      "quality30": {
+        "name": "Nifty200 Quality 30",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.11908946806780718,
+          "excess_cagr": 0.18768200824557235,
+          "information_ratio": 1.0110842683070378
+        },
+        "source": "attribution.json: benchmarks.quality30",
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.11908946806780718,
+          "excess_cagr": 0.18768200824557235,
+          "information_ratio": 1.0110842683070378,
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv"
+        }
+      },
+      "lowvol30": {
+        "name": "Nifty100 Low Volatility 30",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.1330856323314682,
+          "excess_cagr": 0.17368584398191134,
+          "information_ratio": 0.9574491130441036
+        },
+        "source": "attribution.json: benchmarks.lowvol30",
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.1330856323314682,
+          "excess_cagr": 0.17368584398191134,
+          "information_ratio": 0.9574491130441036,
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv"
+        }
+      },
+      "alpha50": {
+        "name": "Nifty Alpha 50",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.23478006873123936,
+          "excess_cagr": 0.07199140758214018,
+          "information_ratio": 0.382514440856424
+        },
+        "source": "attribution.json: benchmarks.alpha50",
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.23478006873123936,
+          "excess_cagr": 0.07199140758214018,
+          "information_ratio": 0.382514440856424,
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv"
+        }
+      },
+      "momentum30_no_overnight": {
+        "name": "Nifty200 Momentum 30 (no overnight move where NSE printed no open)",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.15655397154182382,
+          "excess_cagr": 0.1502175047715557,
+          "information_ratio": 0.8542769080048548
+        },
+        "source": "attribution.json: benchmarks.momentum30_no_overnight",
+        "live_part": {
+          "from": "2020-10-12 close",
+          "to": "2026-09-18 open",
+          "years": 5.932922655715264,
+          "strategy_cagr": 0.36392073717225415,
+          "benchmark_cagr": 0.17469510133889732,
+          "excess_cagr": 0.18922563583335683,
+          "information_ratio": 1.0543134412771618,
+          "live_start": "2020-10-12",
+          "basis": "first date NSE printed an open (fallback)",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Momentum 30 has opens from 12 Oct 2020'. A search listed an NSE Indices press release titled 'NSE Indices launches Nifty200 Momentum 30 Index' at https://www.niftyindices.com/Press_Release/ind_prs25082020.pdf, but its text could not be read, so no launch sentence is quoted and its date is not used"
+        }
+      },
+      "value50_no_overnight": {
+        "name": "Nifty500 Value 50 (no overnight move where NSE printed no open)",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.2300705539979413,
+          "excess_cagr": 0.07670092231543824,
+          "information_ratio": 0.3799848719572915
+        },
+        "source": "attribution.json: benchmarks.value50_no_overnight",
+        "live_part": {
+          "from": "2024-12-16 close",
+          "to": "2026-09-18 open",
+          "years": 1.754962354551677,
+          "strategy_cagr": 0.06998452626536045,
+          "benchmark_cagr": 0.059010886767663084,
+          "excess_cagr": 0.010973639497697363,
+          "information_ratio": 0.1079285099540451,
+          "live_start": "2024-12-16",
+          "basis": "first date NSE printed an open (fallback)",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Value 50 from 16 Dec 2024'"
+        }
+      },
+      "quality30_no_overnight": {
+        "name": "Nifty200 Quality 30 (no overnight move where NSE printed no open)",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.11908946806780718,
+          "excess_cagr": 0.18768200824557235,
+          "information_ratio": 1.0110842683070378
+        },
+        "source": "attribution.json: benchmarks.quality30_no_overnight",
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.11908946806780718,
+          "excess_cagr": 0.18768200824557235,
+          "information_ratio": 1.0110842683070378,
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv"
+        }
+      },
+      "lowvol30_no_overnight": {
+        "name": "Nifty100 Low Volatility 30 (no overnight move where NSE printed no open)",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.1330856323314682,
+          "excess_cagr": 0.17368584398191134,
+          "information_ratio": 0.9574491130441036
+        },
+        "source": "attribution.json: benchmarks.lowvol30_no_overnight",
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.1330856323314682,
+          "excess_cagr": 0.17368584398191134,
+          "information_ratio": 0.9574491130441036,
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv"
+        }
+      },
+      "alpha50_no_overnight": {
+        "name": "Nifty Alpha 50 (no overnight move where NSE printed no open)",
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.23478006873123936,
+          "excess_cagr": 0.07199140758214018,
+          "information_ratio": 0.382514440856424
+        },
+        "source": "attribution.json: benchmarks.alpha50_no_overnight",
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "strategy_cagr": 0.30677147631337953,
+          "benchmark_cagr": 0.23478006873123936,
+          "excess_cagr": 0.07199140758214018,
+          "information_ratio": 0.382514440856424,
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv"
+        }
+      }
+    }
+  },
+  "after_tax": {
+    "definition": "jobs/after_tax.py (v2-spec A6): itemised Indian costs and slippage, capital gains tax by lot with advance tax; statistics from the value if everything were sold at each mark after exit costs and tax; benchmark: a growth-option Nifty 500 index fund held throughout",
+    "source": "after_tax/summary.json",
+    "strategy_cagr": 0.2581459917974167,
+    "strategy_max_drawdown": -0.3167294246435364,
+    "strategy_end_liquidated": 2856676.130720831,
+    "benchmark_growth_cagr": 0.13080705250434121,
+    "benchmark_growth_end_liquidated": 1271020.6485363792,
+    "excess_cagr_vs_growth_fund": 0.1273389392930755,
+    "information_ratio_vs_growth_fund": 0.8495923737714869,
+    "tax_paid_during": 457950.0,
+    "itemised_costs_total": 102764.20965690316,
+    "flat_costs_total": 93770.08822286702,
+    "capital": 500000.0,
+    "replay_check_worst_rel": 6.556434465765934e-16
+  },
+  "monkey_test": {
+    "value": {
+      "strategy_cagr_pct": 30.68,
+      "strategy_turnover": 1.96,
+      "replay_worst_rel": 2.220446049250313e-16,
+      "persistent": {
+        "draws": 500,
+        "random_median_pct": 20.66,
+        "random_p5_pct": 11.46,
+        "random_p95_pct": 29.94,
+        "random_best_pct": 40.51,
+        "random_median_turnover": 0.5,
+        "strategy_percentile": 96.0,
+        "beaten_by_n_random": 20
+      },
+      "fresh": {
+        "draws": 500,
+        "random_median_pct": 19.3,
+        "random_p5_pct": 10.77,
+        "random_p95_pct": 28.35,
+        "random_best_pct": 45.83,
+        "random_median_turnover": 3.95,
+        "strategy_percentile": 98.6,
+        "beaten_by_n_random": 7
+      }
+    },
+    "definition": "random portfolios through the same engine and rules, ranking order randomised (persistent and fresh), 500 draws each",
+    "source": "verify.json: monkey_test"
+  },
+  "deflated_sharpe": {
+    "value": {
+      "sharpe_annual": 1.3923969032307002,
+      "n_obs": 1872,
+      "n_trials": 195,
+      "prob_null_sampling_variance": 0.838148444046608,
+      "prob_cross_trial_variance_36_grid": 0.9953138106738788,
+      "prob_grid_trials_only": 0.9418809695990067,
+      "grid_file": "C:\\Users\\mnsha\\projects\\zen\\data\\backtest\\v1\\grid.csv",
+      "note": "probability of genuine skill after the search; the spread between these is the honest answer, not any single one"
+    },
+    "definition": "Bailey and Lopez de Prado deflated Sharpe, three variance choices",
+    "source": "verify.json: deflated_sharpe"
+  }
+}

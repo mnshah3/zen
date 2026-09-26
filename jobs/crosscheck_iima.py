@@ -85,9 +85,7 @@ IIMA_URL = "https://faculty.iima.ac.in/iffm/Indian-Fama-French-Momentum/"
 IIMA_RELEASE = "2025-12"
 IIMA_DIR = ROOT / "data" / "external" / "iima"
 OUT_DIR = ROOT / "data" / "study" / "crosscheck_iima"
-DUCK_TMP = (r"C:\Users\mnsha\AppData\Local\Temp\claude"
-            r"\C--Users-mnsha-OneDrive-Desktop-Gostack"
-            r"\196360f9-eded-41ee-bd9a-762d776d6462\scratchpad\duck")
+DUCK_TMP = str(ROOT / "data" / "cache" / "duck")     # DuckDB spill folder (gitignored)
 
 FIRST_MONTH = pd.Period("2016-01", "M")      # first holding month compared
 LAST_MONTH = pd.Period("2022-12", "M")       # last holding month compared

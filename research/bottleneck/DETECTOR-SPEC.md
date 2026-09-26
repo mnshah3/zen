@@ -298,7 +298,7 @@ REJECTED = {
 }
 ```
 
-File written to `C:\Users\mnsha\AppData\Local\Temp\claude\C--Users-mnsha-OneDrive-Desktop-Gostack\196360f9-eded-41ee-bd9a-762d776d6462\scratchpad\themes.py` — copy it to `zen/monitor/themes.py`.
+File written to a scratch `themes.py` — copy it to `zen/monitor/themes.py`.
 
 ## Notes on specific keyword choices
 

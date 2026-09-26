@@ -18,11 +18,35 @@ name rule reads each company's latest name only, which is Clarification 29
 read literally; the earlier version matched every name a company had ever
 filed under and disagreed with production on one stock (TSFINV).
 
-Outputs (data/backtest/v1_check/):
-    universe.csv   D, symbol                           every in-sample decision date
+Re-run changes of 2026-09-25, written from the spec text alone (v1 Clarification
+38 and the v2-spec "Clarification to A4" and "Clarification to A2: the v1
+re-run"), still without reading the production engine:
+  * income-statement figures for a (stock, basis, quarter) come from the latest
+    filing before D that reports at least one income-statement figure; the
+    quarter itself is known from any filing (Clarification 38);
+  * trade-for-trade: a held stock trading only in NSE's BZ series is not in a
+    no-trade session, is valued at the BZ close and may be SOLD at the BZ open;
+    it is never bought there (both books);
+  * benchmarks: the three broad TRIs and the five factor TRIs on the NAV clock,
+    with the parent-index stand-in for a missing factor open and the
+    no-overnight sensitivity columns.
+
+Change of 2026-09-26 (v1 Clarification 39), still without reading the production
+engine: a (stock, basis, quarter) for which no filing broadcast before D reports
+an income statement is no longer a known quarter for anything built from the
+income statement (the data screens, the basis choice, rules 5 and 6, TTM sums,
+growth, stability and the share count). The stock is ranked on its latest
+quarters that have one. Before this, such a quarter counted as known with no
+figures, so its TTM was missing and the stock failed rule 6.
+
+Outputs (data/backtest/v1_check/ or --out):
+    universe.csv   D, symbol                           every decision date
     ranks.csv      D, symbol, 8 measures, 5 groups, composite, rank, sector
     holdings.csv   D, symbol, status                   BASE config target book
-    nav.csv        date, mark, strategy, universe_ew   daily, from D0 open to END open
+    nav.csv        date, mark, strategy, universe_ew, nifty500, midcap150,
+                   smallcap250, momentum30, value50, quality30, lowvol30, alpha50,
+                   <factor>_no_overnight x5            daily, from D0 open to END open
+    t4t_events.csv book, date, cid, event              every session the BZ rule touched a holding
     metrics.json   metrics, diagnostics, sanity checks, ambiguity readings
 
 HOLDOUT LOCK
@@ -54,8 +78,7 @@ sys.path.insert(0, str(ROOT))
 from zen.data.financials import statement_files  # noqa: E402  (the only zen import)
 
 OUT = ROOT / "data" / "backtest" / "v1_check"
-DUCK_TMP = (r"C:\Users\mnsha\AppData\Local\Temp\claude\C--Users-mnsha-OneDrive-Desktop-Gostack"
-            r"\196360f9-eded-41ee-bd9a-762d776d6462\scratchpad\duck")
+DUCK_TMP = ROOT / "data" / "cache" / "duck"          # git-ignored spill directory
 
 # ---------------------------------------------------------------- spec constants
 ANCHORS = [(2, 15), (6, 1), (8, 15), (11, 15)]
@@ -103,8 +126,34 @@ SCALE_NEIGH = 8
 SH_REF_Q = 4
 SH_ALT_TOL = 1.5
 
+# Clarification 38: the income-statement figures that make a filing "report an
+# income statement", and the per-quarter fields taken from that filing. The
+# implied share count is profit / EPS, an income-statement figure itself.
+IS_FIGURES = ("revenue", "total_income", "other_income", "employee_cost", "ebitda",
+              "profit_normalised")
+IS_CARRY = ["revenue", "total_income", "employee_cost", "ebitda", "profit_normalised",
+            "shares_implied"]
+QUARTER_MAX_DAYS = 100
+
+# Benchmarks (Clarification 17/32 and the v2-spec Clarification to A4). NAV
+# column -> (name in nifty_tri.parquet, price index in data/indices). The broad
+# indices take their open from data/indices; a factor index takes its open and
+# prior close from nifty_price_endpoints.csv, and where NSE printed no open the
+# parent index's overnight move stands in.
+BROAD_IDX = {"nifty500": ("NIFTY 500", "Nifty 500"),
+             "midcap150": ("NIFTY MIDCAP 150", "Nifty Midcap 150"),
+             "smallcap250": ("NIFTY SMALLCAP 250", "Nifty Smallcap 250")}
+FACTOR_IDX = {"momentum30": ("NIFTY200 MOMENTUM 30", "Nifty 200"),
+              "value50": ("NIFTY500 VALUE 50", "Nifty 500"),
+              "quality30": ("NIFTY200 QUALITY 30", "Nifty 200"),
+              "lowvol30": ("NIFTY100 LOW VOLATILITY 30", "Nifty 100"),
+              "alpha50": ("NIFTY ALPHA 50", "Nifty 500")}
+NAV_COLS = ["date", "mark", "strategy", "universe_ew", *BROAD_IDX, *FACTOR_IDX,
+            *[c + "_no_overnight" for c in FACTOR_IDX]]
+
 FULL_END: pd.Timestamp | None = None
 LATEST_NAMES = {}
+QUARTER_RULE_INFO: dict = {}
 UNLOCK = False
 END_DATE: pd.Timestamp | None = None
 
@@ -128,9 +177,9 @@ def log(msg: str) -> None:
 
 # ================================================================ loading
 def duck() -> duckdb.DuckDBPyConnection:
-    Path(DUCK_TMP).mkdir(parents=True, exist_ok=True)
+    DUCK_TMP.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
-    con.execute(f"SET temp_directory='{Path(DUCK_TMP).as_posix()}'")
+    con.execute(f"SET temp_directory='{DUCK_TMP.as_posix()}'")
     con.execute("SET memory_limit='8GB'")
     return con
 
@@ -169,6 +218,47 @@ def load_prices(con, end: pd.Timestamp) -> pd.DataFrame:
     p["date"] = pd.to_datetime(p["date"])
     assert p["date"].max() <= end
     return p
+
+
+def load_bz(con, end: pd.Timestamp) -> pd.DataFrame:
+    """NSE's trade-for-trade series BZ (the source of the prices_other table),
+    read only for the v2-spec Clarification to A2's trade-for-trade rule. Only
+    BZ counts. The END session is marked at its OPEN: its close is not loaded."""
+    b = con.execute(f"""
+        SELECT CAST(date AS DATE) AS date, symbol, isin_code AS isin, open,
+               CASE WHEN CAST(date AS DATE) < DATE '{end.date()}' THEN close END AS close,
+               turnover
+        FROM read_parquet('{(ROOT / 'data/daily_other').as_posix()}/**/*.parquet', union_by_name=true)
+        WHERE series = 'BZ' AND date >= '{PRICE_START}' AND CAST(date AS DATE) <= DATE '{end.date()}'
+        """).df()
+    b["date"] = pd.to_datetime(b["date"])
+    assert b["date"].max() <= end
+    # a sale on a BZ session is made at its open, so every BZ row must carry one
+    assert b["open"].notna().all() and (b["open"] > 0).all(), "BZ row without an open"
+    return b
+
+
+def map_bz(b: pd.DataFrame, spells: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Stock id for each BZ row: its (symbol, ISIN) spell when that spell traded
+    in EQ/BE, else the one stock id carrying that ISIN, else the symbol's spell
+    by date (as for every other symbol-dated input)."""
+    exact = spells.drop_duplicates(["symbol", "isin"]).set_index(["symbol", "isin"])["cid"]
+    cid = pd.Series(exact.reindex(pd.MultiIndex.from_frame(b[["symbol", "isin"]])).values, index=b.index)
+    n_exact = int(cid.notna().sum())
+    per_isin = spells.groupby("isin")["cid"].nunique()
+    isin1 = spells[spells["isin"].isin(per_isin.index[per_isin == 1])].drop_duplicates("isin") \
+        .set_index("isin")["cid"]
+    miss = cid.isna()
+    cid[miss] = b.loc[miss, "isin"].map(isin1)
+    n_isin = int((miss & cid.notna()).sum())
+    miss = cid.isna()
+    known_sym = b["symbol"].isin(set(spells["symbol"]))
+    if (miss & known_sym).any():
+        cid[miss & known_sym] = map_symbol_dates(b[miss & known_sym], "symbol", "date", spells)
+    n_sym = int((miss & cid.notna()).sum())
+    out = b.assign(cid=cid.values).dropna(subset=["cid"])
+    return out, {"bz_rows": int(len(b)), "by_symbol_isin": n_exact, "by_isin": n_isin,
+                 "by_symbol_date": n_sym, "unmapped": int(len(b) - len(out))}
 
 
 def load_identity_keys(con) -> pd.DataFrame:
@@ -287,7 +377,7 @@ class Panels:
     """Wide (session x stock) arrays. Raw prices; adjustment factors separate."""
 
     def __init__(self, p: pd.DataFrame, spells: pd.DataFrame, sessions: pd.DatetimeIndex,
-                 ca: pd.DataFrame):
+                 ca: pd.DataFrame, bz: pd.DataFrame | None = None):
         p = p.merge(spells[["symbol", "isin", "cid"]], on=["symbol", "isin"], how="left")
         assert p["cid"].notna().all()
         # one row per (cid, date): the one with the most turnover
@@ -331,14 +421,49 @@ class Panels:
         self.adj = self.close * self.C
         adj_ff = pd.DataFrame(self.adj).ffill().values
         # raw-equivalent last close, correct across a split with no trade
+        # (EQ/BE only: the universe, the measures and market cap use this)
         self.mark = adj_ff / self.C
-        # stale counter: consecutive sessions without a trade (0 on a trading day)
-        cnt = np.zeros((self.T, self.K), dtype=np.int32)
-        run = np.zeros(self.K, dtype=np.int32)
-        for t in range(self.T):
-            run = np.where(self.traded[t], 0, run + 1)
-            cnt[t] = run
-        self.stale = cnt
+        del adj_ff
+
+        # --- trade-for-trade (v2-spec Clarification to A2). A BZ session is a
+        # session with a BZ trade and NO EQ/BE trade for the stock id. Such a
+        # session is not a no-trade session, a holding is valued at its BZ
+        # close, and a sale may be made at its BZ open. Buying never uses it.
+        self.bz_traded = np.zeros((self.T, self.K), bool)
+        self.bz_open = np.full((self.T, self.K), np.nan)
+        hclose = self.close.copy()
+        self.bz_info = {"bz_sessions": 0}
+        if bz is not None and len(bz):
+            b = bz[bz["cid"].isin(self.cids) & bz["date"].isin(sessions)]
+            b = b.sort_values(["turnover", "symbol", "isin"], ascending=[False, True, True]) \
+                .drop_duplicates(["cid", "date"])
+            bri = sessions.get_indexer(b["date"])
+            bci = self.cids.get_indexer(b["cid"])
+            keep = ~self.traded[bri, bci]            # an EQ/BE trade that session wins
+            bri, bci, b = bri[keep], bci[keep], b[keep]
+            self.bz_traded[bri, bci] = True
+            self.bz_open[bri, bci] = b["open"].values
+            hclose[bri, bci] = b["close"].values     # NaN at END (open only)
+            self.bz_info = {"bz_sessions": int(keep.sum()),
+                            "bz_rows_same_session_as_eq": int((~keep).sum()),
+                            "bz_stocks": int(len(np.unique(bci)))}
+        # holding mark: last close in EQ/BE or, on BZ sessions, BZ
+        self.hadj = hclose * self.C
+        self.hmark = pd.DataFrame(self.hadj).ffill().values / self.C
+        del hclose
+
+        # stale counters: consecutive sessions without a trade (0 on a trading
+        # day). `stale` counts BZ sessions as trading (the rule); `stale_eq`
+        # counts EQ/BE only (the rule before the re-run, for the effect report)
+        def _count(tr):
+            cnt = np.zeros((self.T, self.K), dtype=np.int32)
+            run = np.zeros(self.K, dtype=np.int32)
+            for t in range(self.T):
+                run = np.where(tr[t], 0, run + 1)
+                cnt[t] = run
+            return cnt
+        self.stale_eq = _count(self.traded)
+        self.stale = _count(self.traded | self.bz_traded)
         self.dps = np.zeros((self.T, self.K))
 
     def add_dividends(self, dv: pd.DataFrame) -> None:
@@ -346,10 +471,15 @@ class Panels:
         ki = self.cids.get_indexer(dv["cid"])
         ok = (ti < self.T) & (ki >= 0)
         self.dropped_dividends = []
+        self.dividend_check_bz_diff = []
         for t, k, a in zip(ti[ok], ki[ok], dv["dps"].values[ok]):
             # Clarification 13: more than half the prior close (in ex-date share
-            # units) is a parse error and is dropped
-            prior = self.mark[t - 1, k] * self.F[t, k] if t > 0 else np.nan
+            # units) is a parse error and is dropped. The prior close is the
+            # holding's last close, which on a BZ session is the BZ close.
+            prior = self.hmark[t - 1, k] * self.F[t, k] if t > 0 else np.nan
+            prior_eq = self.mark[t - 1, k] * self.F[t, k] if t > 0 else np.nan
+            if (np.isfinite(prior) and a > 0.5 * prior) != (np.isfinite(prior_eq) and a > 0.5 * prior_eq):
+                self.dividend_check_bz_diff.append((str(self.sessions[t].date()), self.cids[k], a))
             if np.isfinite(prior) and a > 0.5 * prior:
                 self.dropped_dividends.append((str(self.sessions[t].date()), self.cids[k], a))
                 continue
@@ -430,6 +560,10 @@ def load_financials(con, spells) -> pd.DataFrame:
         SELECT * EXCLUDE (rn) FROM (
           SELECT symbol, company, period_end, broadcast_dt, consolidated, revenue, ebitda,
                  profit_normalised, shares_implied, xbrl_url, total_income, employee_cost,
+                 other_income, quarter_span_days,
+                 -- Clarification 38: the filing reports an income statement for
+                 -- the quarter when it carries at least one of these figures
+                 ({' OR '.join(c + ' IS NOT NULL' for c in IS_FIGURES)}) AS has_is,
                  regexp_extract(xbrl_url, '{TAXONOMY_RX}', 1) AS taxonomy,
                  -- a document stored twice under two period ends is one filing; its
                  -- period is the LATEST of the two (spec Clarification 22)
@@ -439,6 +573,20 @@ def load_financials(con, spells) -> pd.DataFrame:
           WHERE xbrl_url IS NOT NULL) WHERE rn = 1""").df()
     f["period_end"] = pd.to_datetime(f["period_end"])
     f["broadcast_dt"] = pd.to_datetime(f["broadcast_dt"])
+    # Clarification 38's quarter rule is applied by the parser: an income-
+    # statement figure is stored only from a period of at most 100 days (an
+    # undated OneD period counts as the quarter). Check the files obey it: no
+    # income-statement figure may sit on a filing whose labelled span is longer.
+    span = f["quarter_span_days"]
+    long_is = f["has_is"] & span.notna() & (span > QUARTER_MAX_DAYS)
+    assert not long_is.any(), f"{int(long_is.sum())} filings carry income figures from a span > 100 days"
+    QUARTER_RULE_INFO.clear()
+    QUARTER_RULE_INFO.update({
+        "filings": int(len(f)), "no_income_statement": int((~f["has_is"]).sum()),
+        "no_income_statement_with_shares_implied": int((~f["has_is"] & f["shares_implied"].notna()).sum()),
+        "dated_span_days_min_max": [None if span.dropna().empty else int(span.min()),
+                                    None if span.dropna().empty else int(span.max())],
+        "income_from_span_over_100_days": int(long_is.sum())})
     f["qn"] = f["period_end"].dt.year * 12 + f["period_end"].dt.month   # month number
     f = f[f["period_end"].dt.month % 3 == 0]
     f["cid"] = map_symbol_dates(f, "symbol", "broadcast_dt", spells)
@@ -532,15 +680,55 @@ def sector_at(lab: pd.DataFrame, D) -> pd.Series:
     return before.combine_first(earliest)
 
 
-def fundamentals_at(fin: pd.DataFrame, D, ca: pd.DataFrame | None = None) -> pd.DataFrame:
-    f = fin[fin["broadcast_dt"] < D]
-    f = f.sort_values(["broadcast_dt", "xbrl_url"]).drop_duplicates(["cid", "consolidated", "qn"], keep="last")
+def fundamentals_at(fin: pd.DataFrame, D, ca: pd.DataFrame | None = None,
+                    diag: dict | None = None) -> pd.DataFrame:
+    fa = fin[fin["broadcast_dt"] < D].sort_values(["broadcast_dt", "xbrl_url"])
+    key = ["cid", "consolidated", "qn"]
+    # For the lender vote a quarter is known from any filing for it; its latest
+    # revision (latest broadcast) carries the filing format. Everything built
+    # from the income statement uses only quarters that have one (C39, below).
+    f = fa.drop_duplicates(key, keep="last")
+    # Clarification 38: the income-statement figures (and the implied share
+    # count, which is profit / EPS) come from the latest filing broadcast before
+    # D that reports at least one income-statement figure. A later filing with
+    # no income statement is not a revision of it. v1 uses no balance-sheet
+    # figure, so nothing else is chosen from the filings.
+    fi = fa[fa["has_is"]].drop_duplicates(key, keep="last")
+    fi = fi[key + IS_CARRY + ["broadcast_dt", "xbrl_url"]].rename(
+        columns={"broadcast_dt": "is_bdt", "xbrl_url": "is_url"})
+    f = f.drop(columns=IS_CARRY).merge(fi, on=key, how="left")
+    c38 = f["is_url"].notna() & (f["is_url"] != f["xbrl_url"])     # an earlier revision's income statement
     # lender-taxonomy votes over the latest 4 known quarters (Clarification 28)
     lqn = f.groupby("cid")["qn"].transform("max")
     w = f[(f["qn"] > lqn - 12) & (f["broadcast_dt"] >= NBFC_TAX_START)]
     votes = w.assign(l=w["taxonomy"].isin(LENDER_TAX)).groupby("cid")["l"].agg(["sum", "count"])
-    # mis-scaled filings count as not filed (Clarification 30a)
-    f = f[~_scale_breaks(f)]
+    # Clarification 39: a (stock, basis, quarter) for which no filing broadcast
+    # before D reports an income statement is not a known quarter for anything
+    # built from the income statement -- the data screens of 30 (which compare
+    # revenue, share count and employee cost), the basis choice (4), the run and
+    # stability (5), rule 6's TTM sums, growth and the share count (profit / EPS).
+    # The stock is ranked on its latest quarters that have one. The lender vote
+    # above reads the filing format, not the income statement, so it still
+    # counts every known quarter.
+    no_is = f["is_url"].isna()
+    if diag is not None:
+        lat_any = f.groupby("cid")["qn"].max()
+        lat_is = f[~no_is].groupby("cid")["qn"].max().reindex(lat_any.index)
+        back = lat_any[lat_is.isna() | (lat_is < lat_any)]
+        diag["c38_income_from_earlier_revision"] = int(c38.sum())
+        diag["c38_quarters_without_income_statement"] = int(no_is.sum())
+        diag["c38_cases"] = f.loc[c38, ["cid", "consolidated", "period_end", "xbrl_url", "is_url"]] \
+            .astype(str).values.tolist()
+        diag["c39_quarters_not_known"] = int(no_is.sum())
+        diag["c39_stocks_latest_quarter_has_no_income_statement"] = int(len(back))
+        diag["c39_stocks_with_no_quarter_left"] = int(lat_is.isna().sum())
+    f = f[~no_is]
+    # mis-scaled filings count as not filed (Clarification 30a), judged on the
+    # income statement each quarter uses
+    brk = _scale_breaks(f)
+    if diag is not None:
+        diag["c38_screened_earlier_revision"] = int((brk & c38.reindex(f.index)).sum())
+    f = f[~brk]
     # Basis: consolidated when the company's consolidated filings cover the four
     # consecutive quarters ending at its latest known quarter (any basis);
     # otherwise standalone for every quarter.
@@ -558,7 +746,8 @@ def fundamentals_at(fin: pd.DataFrame, D, ca: pd.DataFrame | None = None) -> pd.
     sa = lq[~lq["consolidated"] & lq["shares_implied"].notna()].set_index("cid")
     co = lq[lq["consolidated"] & lq["shares_implied"].notna()].set_index("cid")
     sh = sa["shares_implied"].combine_first(co["shares_implied"])
-    sh_bdt = sa["broadcast_dt"].combine_first(co["broadcast_dt"])
+    # the count's own filing: the one its income statement came from (C38)
+    sh_bdt = sa["is_bdt"].combine_first(co["is_bdt"])
     sh_fix = pd.Series("", index=sh.index, dtype=object)
     # Clarification 30b: a count 30x or more from the median of up to four
     # earlier quarters' counts (standalone first, carried through splits and
@@ -577,7 +766,7 @@ def fundamentals_at(fin: pd.DataFrame, D, ca: pd.DataFrame | None = None) -> pd.
         for r in g.itertuples():
             m = 1.0
             if ev_all is not None:
-                ev = ev_all[(ev_all["ex_date"] > pd.Timestamp(r.broadcast_dt).normalize())
+                ev = ev_all[(ev_all["ex_date"] > pd.Timestamp(r.is_bdt).normalize())
                             & (ev_all["ex_date"] <= bl)]
                 if len(ev):
                     m = 1.0 / ev["factor"].prod()
@@ -588,7 +777,7 @@ def fundamentals_at(fin: pd.DataFrame, D, ca: pd.DataFrame | None = None) -> pd.
         alt = co if c in sa.index else sa
         if c in alt.index and alt.at[c, "shares_implied"] > 0 and \
                 1 / SH_ALT_TOL <= alt.at[c, "shares_implied"] / ref <= SH_ALT_TOL:
-            sh[c], sh_bdt[c], sh_fix[c] = alt.at[c, "shares_implied"], alt.at[c, "broadcast_dt"], "other_basis"
+            sh[c], sh_bdt[c], sh_fix[c] = alt.at[c, "shares_implied"], alt.at[c, "is_bdt"], "other_basis"
         else:
             sh[c], sh_fix[c] = ref, "carried_reference"
     f = f[f["consolidated"] == f["cid"].map(use_cons)]
@@ -628,7 +817,7 @@ def fundamentals_at(fin: pd.DataFrame, D, ca: pd.DataFrame | None = None) -> pd.
     return out
 
 
-def universe_and_measures(D, P: Panels, fin, lab, names, taxfill, ca) -> pd.DataFrame:
+def universe_and_measures(D, P: Panels, fin, lab, names, taxfill, ca, diag: dict | None = None) -> pd.DataFrame:
     t = P.idx(D)
     prev = t - 1
     # --- rule 1: ordinary equity, traded in the last 5 sessions before D
@@ -656,7 +845,7 @@ def universe_and_measures(D, P: Panels, fin, lab, names, taxfill, ca) -> pd.Data
     # only to stocks with no industry label at all.
     name_lender &= df["sector"].isna()
     # --- rules 5-6: fundamentals
-    fu = fundamentals_at(fin, D, ca)
+    fu = fundamentals_at(fin, D, ca, diag)
     df = df.join(fu, how="left")
     tn, tl = df["tax_new"].fillna(0), df["tax_lender"].fillna(0)
     df["lender"] = (lab_lender | name_lender | ((tn > 0) & (2 * tl >= tn)) |
@@ -722,8 +911,15 @@ def score(df: pd.DataFrame) -> pd.DataFrame:
 
 # ================================================================ simulator
 class Book:
-    def __init__(self, P: Panels, cost: float, exit_mult: float = 1.0):
-        self.P, self.cost, self.exit_mult = P, cost, exit_mult
+    """Share-count simulator. With bz=True (the rule for the re-run) a BZ
+    session counts as trading for the no-trade exit, a holding is valued at the
+    BZ close, and a sale or trim may fill at the BZ open; buys need an EQ/BE
+    trade. bz=False is the rule before the re-run, kept only to report the
+    trade-for-trade rule's effect."""
+
+    def __init__(self, P: Panels, cost: float, exit_mult: float = 1.0, bz: bool = True,
+                 name: str = ""):
+        self.P, self.cost, self.exit_mult, self.bz, self.name = P, cost, exit_mult, bz, name
         self.sh = np.zeros(P.K)
         self.cash = 1.0
         self.pending: dict[int, tuple[float, int]] = {}
@@ -733,6 +929,32 @@ class Book:
         self.forced: list[tuple] = []
         self.open_spells: dict[int, tuple[int, float]] = {}
         self.closed_spells: list[tuple] = []
+        self.cmark = P.hmark if bz else P.mark        # close mark of a holding
+        self.cadj = P.hadj if bz else P.adj
+        self.stale = P.stale if bz else P.stale_eq
+        self.t4t: list[tuple] = []                     # (t, k, event)
+
+    # --- prices
+    def _px(self, t, k) -> float:
+        """Execution price at the open of t for an executable order."""
+        P = self.P
+        return P.open[t, k] if P.traded[t, k] else P.bz_open[t, k]
+
+    def _val(self, t) -> np.ndarray:
+        """Holding value per share at the open of t: the EQ/BE open, else (rule
+        on) the BZ open, else the last close."""
+        P = self.P
+        if self.bz:
+            return np.where(P.traded[t], P.open[t], np.where(P.bz_traded[t], P.bz_open[t], self.cmark[t]))
+        return np.where(P.traded[t], P.open[t], P.mark[t])
+
+    def _can(self, t, k, tgt) -> bool:
+        """Can the order for k fill at the open of t? Any order on an EQ/BE
+        session; with the rule on, a sale or trim on a BZ session."""
+        P = self.P
+        if P.traded[t, k]:
+            return True
+        return bool(self.bz and P.bz_traded[t, k] and tgt < self.sh[k] * P.bz_open[t, k] - 1e-12)
 
     def _exec(self, t, k, price, tgt_val):
         new = tgt_val / price if tgt_val > 0 else 0.0
@@ -757,14 +979,18 @@ class Book:
     def _fill(self, t, orders: dict):
         """Execute rupee targets at the open of t (spec Clarification 11): sells
         (and trims) first, then buys, scaled down pro rata if cash net of costs
-        cannot cover every buy."""
+        cannot cover every buy. Every order passed here is executable (_can)."""
         P = self.P
         buys = []
         for k, tgt in orders.items():
-            cur = self.sh[k] * P.open[t, k]
+            px = self._px(t, k)
+            cur = self.sh[k] * px
             if tgt < cur - 1e-12:
-                self._exec(t, k, P.open[t, k], tgt)
+                if not P.traded[t, k]:
+                    self.t4t.append((t, k, "sale_at_bz_open"))
+                self._exec(t, k, px, tgt)
             elif tgt > cur + 1e-12:
+                assert P.traded[t, k], "a buy must fill on an EQ/BE session"
                 buys.append((k, tgt - cur))
         need = sum(d for _, d in buys) * (1 + self.cost)
         scale = min(1.0, self.cash / need) if need > 0 else 0.0
@@ -775,7 +1001,7 @@ class Book:
     def rebalance(self, t, targets: np.ndarray, slots: int):
         P = self.P
         self.pending.clear()
-        ref = np.where(P.traded[t], P.open[t], P.mark[t])
+        ref = self._val(t)
         held = np.flatnonzero(self.sh > 0)
         V = self.cash + np.nansum(self.sh[held] * ref[held])
         inS = np.zeros(P.K, bool)
@@ -786,7 +1012,7 @@ class Book:
         now = {}
         for k in np.union1d(held, targets):
             tgt = T if inS[k] else 0.0
-            if P.traded[t, k]:
+            if self._can(t, k, tgt):
                 now[k] = tgt
             else:
                 self.pending[k] = (tgt, t + EXEC_WAIT)
@@ -808,8 +1034,11 @@ class Book:
                 self.cash += d
                 self.divs += d
             if t == t_end:
-                px = np.where(P.traded[t], P.open[t], P.mark[t])
+                px = self._val(t)
                 held = self.sh > 0
+                if self.bz:
+                    for k in np.flatnonzero(held & P.bz_traded[t]):
+                        self.t4t.append((t, k, "end_valued_at_bz_open"))
                 out.append((P.sessions[t], "open", self.cash + np.nansum(self.sh[held] * px[held])))
                 break
             # 3. orders at the open
@@ -821,40 +1050,50 @@ class Book:
                 now = {}
                 for k in list(self.pending):
                     tgt, dl = self.pending[k]
-                    if P.traded[t, k]:
+                    if self._can(t, k, tgt):
                         now[k] = tgt
                         del self.pending[k]
                     elif t >= dl:
                         del self.pending[k]
                 self._fill(t, now)
             # 4. forced exit after 20 sessions without a trade, at the last close
-            stale = np.flatnonzero((self.sh > 0) & (P.stale[t] >= FORCED_EXIT_SESSIONS))
+            stale = np.flatnonzero((self.sh > 0) & (self.stale[t] >= FORCED_EXIT_SESSIONS))
             for k in stale:
-                self._exec(t, k, P.mark[t, k] * self.exit_mult, 0.0)
+                self._exec(t, k, self.cmark[t, k] * self.exit_mult, 0.0)
                 self.pending.pop(k, None)
                 self.forced.append((P.sessions[t], P.cids[k]))
             # 5. mark at the close
             held = self.sh > 0
-            out.append((P.sessions[t], "close", self.cash + np.nansum(self.sh[held] * P.mark[t][held])))
+            if self.bz:
+                for k in np.flatnonzero(held & P.bz_traded[t]):
+                    self.t4t.append((t, k, "valued_at_bz_close"))
+                for k in np.flatnonzero(held & (P.stale_eq[t] >= FORCED_EXIT_SESSIONS)):
+                    self.t4t.append((t, k, "eq_only_rule_would_have_force_sold"))
+            out.append((P.sessions[t], "close", self.cash + np.nansum(self.sh[held] * self.cmark[t][held])))
         return pd.DataFrame(out, columns=["date", "mark", "nav"])
 
     def spells(self, t_end) -> pd.DataFrame:
         """Holding spells with adjusted entry/exit prices (price return only)."""
         P = self.P
         rows = list(self.closed_spells)
+        val = self._val(t_end)
         for k, (t0, e) in self.open_spells.items():
-            px = P.open[t_end, k] if P.traded[t_end, k] else P.mark[t_end, k]
-            rows.append((P.cids[k], P.sessions[t0], P.sessions[t_end], px * P.C[t_end, k] / e, True, e))
+            rows.append((P.cids[k], P.sessions[t0], P.sessions[t_end], val[k] * P.C[t_end, k] / e, True, e))
         sp = pd.DataFrame(rows, columns=["cid", "entry", "exit", "gross", "open_at_end", "entry_adj"])
         # Clarification 18: doubled = an adjusted CLOSE during the episode reached
-        # twice the (adjusted) entry price
+        # twice the (adjusted) entry price (the holding's close: BZ on BZ sessions)
         mx = []
         for r in sp.itertuples():
             k = P.cids.get_loc(r.cid)
-            seg = P.adj[P.idx(r.entry):P.idx(r.exit) + 1, k]
+            seg = self.cadj[P.idx(r.entry):P.idx(r.exit) + 1, k]
             mx.append(np.nanmax(seg) if np.isfinite(seg).any() else np.nan)
         sp["max_adj_close"] = mx
         return sp
+
+    def t4t_frame(self) -> pd.DataFrame:
+        P = self.P
+        return pd.DataFrame([(self.name, P.sessions[t].date(), P.cids[k], ev) for t, k, ev in self.t4t],
+                            columns=["book", "date", "cid", "event"])
 
 
 # ================================================================ metrics
@@ -884,6 +1123,101 @@ def calendar_years(nav: pd.Series, dates: pd.Series) -> dict:
         out[str(y)] = g.iloc[-1] / prev - 1
         prev = g.iloc[-1]
     return out
+
+
+def benchmark_columns(con, clock: pd.DataFrame, sessions: pd.DatetimeIndex) -> tuple[pd.DataFrame, dict]:
+    """Total-return benchmark levels on the NAV clock (Clarification 16/17 and
+    the v2-spec Clarification to A4), each normalised to 1 at the first open.
+
+    Closes are NSE's gross TRI (`tri`). At the two opens,
+        TRI_open(d) = TRI_close(d-1) x price_open(d) / price_close(d-1),
+    with the broad indices' price levels from data/indices and the factor
+    indices' from nifty_price_endpoints.csv. Where NSE printed no factor open,
+    the parent index's overnight move stands in; the *_no_overnight column
+    then uses TRI_close(d-1) and is otherwise identical. A missing TRI close,
+    price level or endpoint row raises: the engine refuses, it never guesses."""
+    d0, dE = pd.Timestamp(clock["date"].iloc[0]), pd.Timestamp(clock["date"].iloc[-1])
+    assert clock["mark"].iloc[0] == "open" and clock["mark"].iloc[-1] == "open"
+    ends = {d: sessions[sessions.get_loc(d) - 1] for d in (d0, dE)}
+    # TRI closes: from the session before the first open to the session before
+    # the last open. The END session's TRI close is never loaded (holdout lock).
+    tri = con.execute(f"""SELECT CAST(date AS DATE) AS date, index_name, tri FROM read_parquet(
+        '{(ROOT / 'data/external/nifty_tri.parquet').as_posix()}')
+        WHERE CAST(date AS DATE) >= DATE '{ends[d0].date()}' AND CAST(date AS DATE) < DATE '{dE.date()}'
+        """).df()
+    tri["date"] = pd.to_datetime(tri["date"])
+    _guard(tri["date"].max())
+    assert not tri.duplicated(["index_name", "date"]).any()
+    # price levels at the four endpoint sessions; the END session's close is not read
+    pdates = sorted({d0, ends[d0], dE, ends[dE]})
+    parents = sorted({p for _, p in BROAD_IDX.values()} | {p for _, p in FACTOR_IDX.values()})
+    px = con.execute(f"""SELECT CAST(date AS DATE) AS date, index_name, open,
+            CASE WHEN CAST(date AS DATE) < DATE '{dE.date()}' THEN close END AS close
+        FROM read_parquet('{(ROOT / 'data/indices').as_posix()}/*.parquet', union_by_name=true)
+        WHERE index_name IN ({', '.join(repr(x) for x in parents)})
+          AND CAST(date AS DATE) IN ({', '.join(f"DATE '{d.date()}'" for d in pdates)})""").df()
+    px["date"] = pd.to_datetime(px["date"])
+    assert not px.duplicated(["index_name", "date"]).any()
+    pxi = px.set_index(["index_name", "date"])
+    ep = pd.read_csv(ROOT / "data/external/nifty_price_endpoints.csv", dtype=str)
+    ep["Date"] = pd.to_datetime(ep["Date"], format="%d %b %Y")
+    assert not ep.duplicated(["IndexName", "Date"]).any()
+    epi = ep.set_index(["IndexName", "Date"])
+
+    def level(tab, name, d, col):
+        if (name, d) not in tab.index:
+            raise SystemExit(f"refusing: no {col} for {name} on {d.date()} (fetch it first)")
+        v = tab.at[(name, d), col]
+        return v
+
+    def price_ratio(name, d) -> float:
+        o, c = level(pxi, name, d, "open"), level(pxi, name, ends[d], "close")
+        if not (pd.notna(o) and pd.notna(c) and o > 0 and c > 0):
+            raise SystemExit(f"refusing: {name} has no open on {d.date()} or close on {ends[d].date()}")
+        return float(o) / float(c)
+
+    closes = clock[clock["mark"] == "close"]["date"].map(pd.Timestamp)
+    cols, info = {}, {}
+    for col, (tri_name, parent) in [*BROAD_IDX.items(), *FACTOR_IDX.items()]:
+        s = tri[tri["index_name"] == tri_name].set_index("date")["tri"]
+        miss = [d for d in [ends[d0], *closes] if d not in s.index or not (s[d] > 0)]
+        if miss:
+            raise SystemExit(f"refusing: {tri_name} TRI missing on {len(miss)} clock sessions, "
+                             f"first {miss[0].date()}")
+        opens, opens_no, how = {}, {}, {}
+        for d in (d0, dE):
+            if col in BROAD_IDX:
+                r, src = price_ratio(parent, d), "own open (data/indices)"
+                r_no = r
+            else:
+                o = level(epi, tri_name, d, "Open")
+                c = level(epi, tri_name, ends[d], "Close")
+                c = float(c)
+                if isinstance(o, str) and o.strip() not in ("-", ""):
+                    r, src = float(o) / c, "own open (endpoints csv)"
+                    r_no = r
+                else:
+                    r, src = price_ratio(parent, d), f"parent {parent} overnight move"
+                    r_no = 1.0
+            opens[d] = float(s[ends[d]]) * r
+            opens_no[d] = float(s[ends[d]]) * r_no
+            how[str(d.date())] = {"source": src, "overnight_ratio": r,
+                                  "tri_prev_close": float(s[ends[d]])}
+        lv = []
+        lv_no = []
+        for d, mk in zip(clock["date"].map(pd.Timestamp), clock["mark"]):
+            if mk == "close":
+                lv.append(float(s[d])); lv_no.append(float(s[d]))
+            else:
+                if d not in opens:
+                    raise SystemExit(f"refusing: an open mark on {d.date()} is not a clock endpoint")
+                lv.append(opens[d]); lv_no.append(opens_no[d])
+        lv = np.array(lv); lv_no = np.array(lv_no)
+        cols[col] = lv / lv[0]
+        if col in FACTOR_IDX:
+            cols[col + "_no_overnight"] = lv_no / lv_no[0]
+        info[col] = {"tri_name": tri_name, "price_or_parent": parent, "endpoints": how}
+    return pd.DataFrame(cols, index=clock.index), info
 
 
 # ================================================================ main
@@ -920,12 +1254,16 @@ def main(argv=None) -> int:
     spells = build_ids(load_identity_keys(con), all_sessions(con, "1990-01-01"))
     ca, dv = load_corpactions(con, END, spells)
     reparsed = list(ca.attrs.get("reparsed", []))
-    P = Panels(p, spells, sessions, ca)
+    bz, bz_map = map_bz(load_bz(con, END), spells)
+    P = Panels(p, spells, sessions, ca, bz)
     P.add_dividends(dv)
     log(f"re-parsed null-factor split/bonus rows: {reparsed}")
+    log(f"BZ (trade-for-trade) rows mapped {bz_map}; in panel {P.bz_info}; "
+        f"dividend parse check changed by BZ closes: {P.dividend_check_bz_diff}")
     log(f"panels {P.T} x {P.K}; split/bonus events {len(ca)}; dividends {len(dv)} "
         f"(unparsed {dv.attrs['unparsed']})")
     fin = load_financials(con, spells)
+    log(f"quarter rule (Clarification 38) in the files: {QUARTER_RULE_INFO}")
     # static classification input (Clarification 28), like the label backfill
     taxfill = taxonomy_fill(fin)
     global LATEST_NAMES
@@ -937,9 +1275,11 @@ def main(argv=None) -> int:
         f"nse_list lender ids {len(flagged)} (diagnostic only); taxonomy backfill {len(taxfill)}")
 
     OUT.mkdir(parents=True, exist_ok=True)
-    frames, scored = [], {}
+    frames, scored, c38 = [], {}, {}
     for D in Ds:
-        df = universe_and_measures(D, P, fin, lab, names, taxfill, ca)
+        dg: dict = {}
+        df = universe_and_measures(D, P, fin, lab, names, taxfill, ca, dg)
+        c38[str(D.date())] = dg
         u = score(df)
         frames.append(df)
         scored[D] = u
@@ -947,7 +1287,10 @@ def main(argv=None) -> int:
             f"+365 {(df.r1 & df.r2 & df.r3).sum()}, +nonlender {(df.r1 & df.r2 & df.r3 & df.r4).sum()}, "
             f"+r5 {(df.r1 & df.r2 & df.r3 & df.r4 & df.r5).sum()}, "
             f"+r6 {(df.r1 & df.r2 & df.r3 & df.r4 & df.r5 & df.r6).sum()}, "
-            f"cons {int(u['consolidated'].sum())})")
+            f"cons {int(u['consolidated'].sum())}; C38 earlier-revision income {dg['c38_income_from_earlier_revision']}, "
+            f"screened {dg['c38_screened_earlier_revision']}; C39 quarters not known "
+            f"{dg['c39_quarters_not_known']}, stocks falling back "
+            f"{dg['c39_stocks_latest_quarter_has_no_income_statement']})")
 
     # ---------------- outputs: universe + ranks
     uni = pd.concat([u[["D", "symbol"]] for u in scored.values()])
@@ -963,7 +1306,7 @@ def main(argv=None) -> int:
     # ---------------- BASE portfolio
     t_idx = {D: P.idx(D) for D in Ds}
     t0, t_end = t_idx[Ds[0]], P.idx(END)
-    base = Book(P, COST)
+    base = Book(P, COST, name="strategy")
     hold_rows = []
 
     # The book must be simulated forward to know what is held at each D, so the
@@ -987,18 +1330,19 @@ def main(argv=None) -> int:
             count[s] = count.get(s, 0) + 1
         return out, set(keep)
 
-    def make_step(D):
+    def make_step(D, rec: list | None):
         def step(book, t):
             held = {P.cids[k] for k in np.flatnonzero(book.sh > 0)}
             sel, keep = pick(D, scored[D], held)
-            for c in sel:
-                hold_rows.append((D.date(), scored[D].at[c, "symbol"], c,
-                                  "kept" if c in keep else "new", int(scored[D].at[c, "rank"]),
-                                  scored[D].at[c, "sector"]))
+            if rec is not None:
+                for c in sel:
+                    rec.append((D.date(), scored[D].at[c, "symbol"], c,
+                                "kept" if c in keep else "new", int(scored[D].at[c, "rank"]),
+                                scored[D].at[c, "sector"]))
             return P.cids.get_indexer(sel), N
         return step
 
-    strat = base.run({t_idx[D]: make_step(D) for D in Ds}, t0, t_end)
+    strat = base.run({t_idx[D]: make_step(D, hold_rows) for D in Ds}, t0, t_end)
     _tr = pd.DataFrame(base.trades, columns=["t", "k", "d", "px", "val"])
     _tr["date"] = P.sessions[_tr["t"].values].date
     _tr["cid"] = P.cids[_tr["k"].values]
@@ -1007,15 +1351,26 @@ def main(argv=None) -> int:
     hold.to_csv(OUT / "holdings.csv", index=False)
 
     # ---------------- universe equal-weight benchmark (same costs)
-    ew = Book(P, COST)
+    ew = Book(P, COST, name="universe_ew")
     plan = {t_idx[D]: (P.cids.get_indexer(scored[D].index), len(scored[D])) for D in Ds}
     ew_nav = ew.run(plan, t0, t_end)
 
     nav = strat.rename(columns={"nav": "strategy"})
     nav["universe_ew"] = ew_nav["nav"].values
     assert (nav["date"].values == ew_nav["date"].values).all()
-    nav["date"] = nav["date"].dt.date
+    bench, bench_info = benchmark_columns(con, nav[["date", "mark"]], sessions)
+    nav = pd.concat([nav, bench], axis=1)[NAV_COLS]
+    nav["date"] = pd.to_datetime(nav["date"]).dt.date
     nav.to_csv(OUT / "nav.csv", index=False)
+
+    # ---------------- trade-for-trade effect: the same books under the rule
+    # before the re-run (EQ/BE only). Reported, never used to choose anything.
+    base_eq = Book(P, COST, bz=False, name="strategy_eq_only")
+    strat_eq = base_eq.run({t_idx[D]: make_step(D, None) for D in Ds}, t0, t_end)
+    ew_eq = Book(P, COST, bz=False, name="universe_ew_eq_only")
+    ew_nav_eq = ew_eq.run(plan, t0, t_end)
+    t4t = pd.concat([base.t4t_frame(), ew.t4t_frame()], ignore_index=True)
+    t4t.to_csv(OUT / "t4t_events.csv", index=False)
 
     # ---------------- quintile diagnostics (no buffer, no costs)
     def quintile_navs(key: str) -> dict:
@@ -1048,24 +1403,47 @@ def main(argv=None) -> int:
     m["strategy_vs_universe_ew"] = relative(s_nav, e_nav)
     m["calendar_years"] = {"strategy": calendar_years(s_nav, dates),
                            "universe_ew": calendar_years(e_nav, dates)}
-    # index context: NSE's official Total Returns Index (gross `tri` column,
-    # data/external/nifty_tri.parquet; Clarification 17), close-to-close on the
-    # strategy's closes, rows before END only (holdout lock)
-    idx = con.execute(f"""SELECT CAST(date AS DATE) AS date, index_name, tri AS close FROM read_parquet(
-        '{(ROOT / 'data/external/nifty_tri.parquet').as_posix()}')
-        WHERE CAST(date AS DATE) < DATE '{END.date()}' AND index_name IN
-        ('NIFTY 500','NIFTY MIDCAP 150','NIFTY SMALLCAP 250')""").df()
-    idx["date"] = pd.to_datetime(idx["date"])
-    closes = strat[strat["mark"] == "close"].copy()
-    closes["date"] = pd.to_datetime(closes["date"])
-    closes["ew"] = ew_nav.loc[ew_nav["mark"] == "close", "nav"].values
-    for nm, g in idx.groupby("index_name"):
-        _guard(g["date"].max())
-        s = g.set_index("date")["close"].reindex(closes["date"]).ffill()
-        ss = pd.Series(closes["nav"].values)
-        ii = pd.Series(s.values)
-        m[f"index:{nm}"] = {"total_return_index": True, **perf(ii / ii.iloc[0], closes["date"].reset_index(drop=True)),
-                            "strategy_vs": relative(ss, ii)}
+    # benchmarks on the NAV clock (Clarification 16/17; v2-spec Clarification to
+    # A4): gross TRI, open-to-open, every column of nav.csv
+    m["benchmarks_how"] = bench_info
+    for col in NAV_COLS[4:]:
+        bn = nav[col]
+        m[f"index:{col}"] = {"total_return_index": True, **perf(bn, dates),
+                             "strategy_vs": relative(s_nav, bn), "universe_ew_vs": relative(e_nav, bn),
+                             "end_nav": float(bn.iloc[-1])}
+
+    # trade-for-trade effect: what the BZ rule changed, against the same books
+    # run under the EQ/BE-only rule (reported, never used to choose anything)
+    def _t4t_summary(bk: Book, bk_eq: Book, nav_bz: pd.Series, nav_eq: pd.Series) -> dict:
+        ev = bk.t4t_frame()
+        by = {}
+        for c, g in ev.groupby("cid"):
+            e = {k: sorted(str(x) for x in gg["date"]) for k, gg in g.groupby("event")}
+            by[c] = {"bz_close_sessions": len(e.get("valued_at_bz_close", [])),
+                     "first_bz_close": (e.get("valued_at_bz_close") or [None])[0],
+                     "last_bz_close": (e.get("valued_at_bz_close") or [None])[-1],
+                     "sales_at_bz_open": e.get("sale_at_bz_open", []),
+                     "end_valued_at_bz_open": bool(e.get("end_valued_at_bz_open")),
+                     "eq_only_rule_first_forced_sale": (e.get("eq_only_rule_would_have_force_sold") or [None])[0]}
+        f_bz = {(str(d.date()), c) for d, c in bk.forced}
+        f_eq = {(str(d.date()), c) for d, c in bk_eq.forced}
+        pa, pb = perf(nav_bz, dates), perf(nav_eq, dates)
+        return {"holdings_touched": by,
+                "forced_exits_rule": sorted(f_bz), "forced_exits_eq_only": sorted(f_eq),
+                "forced_exits_only_under_eq_only": sorted(f_eq - f_bz),
+                "forced_exits_only_under_rule": sorted(f_bz - f_eq),
+                "end_nav_rule": float(nav_bz.iloc[-1]), "end_nav_eq_only": float(nav_eq.iloc[-1]),
+                "cagr_rule": pa["cagr"], "cagr_eq_only": pb["cagr"],
+                "max_dd_rule": pa["max_dd"], "max_dd_eq_only": pb["max_dd"],
+                "max_abs_nav_diff": float(np.max(np.abs(nav_bz.values / nav_eq.values - 1)))}
+
+    assert (strat_eq["date"].values == strat["date"].values).all()
+    m["trade_for_trade"] = {
+        "strategy": _t4t_summary(base, base_eq, s_nav, pd.Series(strat_eq["nav"].values)),
+        "universe_ew": _t4t_summary(ew, ew_eq, e_nav, pd.Series(ew_nav_eq["nav"].values)),
+        "bz_mapping": bz_map, "bz_panel": P.bz_info,
+        "dividend_parse_check_changed_by_bz": P.dividend_check_bz_diff}
+    m["clarification_38"] = {"quarter_rule_in_files": dict(QUARTER_RULE_INFO), "by_decision_date": c38}
 
     # turnover, holding period, doubles
     tr = pd.DataFrame(base.trades, columns=["t", "k", "d", "px", "val"])
@@ -1088,7 +1466,8 @@ def main(argv=None) -> int:
         "forced_exits": [(str(d.date()), c) for d, c in base.forced],
     })
     m["universe_ew"].update({"dividends_credited": ew.divs, "costs_paid": ew.costs,
-                             "n_forced_exits": len(ew.forced)})
+                             "n_forced_exits": len(ew.forced),
+                             "forced_exits": [(str(d.date()), c) for d, c in ew.forced]})
     m["quintiles"] = quint
     sizes = {str(D.date()): int(len(u)) for D, u in scored.items()}
     m["universe_sizes"] = sizes
@@ -1129,9 +1508,11 @@ def main(argv=None) -> int:
     dy.sort(key=lambda r: -r[3])
     m["sanity_largest_dividend_yields_held"] = dy[:8]
     # holdout guard self-test: must raise for the first session after END
+    # (not applicable when --run-final-test has unlocked it)
     try:
         _guard(END + pd.Timedelta(days=1))
-        m["holdout_guard_selftest"] = "FAILED: guard did not raise"
+        m["holdout_guard_selftest"] = ("not applicable: unlocked by --run-final-test" if UNLOCK
+                                       else "FAILED: guard did not raise")
     except HoldoutViolation:
         m["holdout_guard_selftest"] = "ok: raises after " + str(END.date())
 
@@ -1150,6 +1531,14 @@ def main(argv=None) -> int:
     log(f"strategy: {json.dumps(m['strategy'], default=_js)[:400]}")
     log(f"universe_ew: {json.dumps(m['universe_ew'], default=_js)[:300]}")
     log(f"vs EW: {m['strategy_vs_universe_ew']}")
+    for col in NAV_COLS[2:]:
+        pf = perf(nav[col], dates)
+        log(f"  {col:26s} CAGR {pf['cagr']:8.4%}  maxDD {pf['max_dd']:8.4%}  end NAV {nav[col].iloc[-1]:.6f}")
+    for bk in ("strategy", "universe_ew"):
+        tt = m["trade_for_trade"][bk]
+        log(f"trade-for-trade [{bk}]: holdings touched {len(tt['holdings_touched'])}; "
+            f"end NAV rule {tt['end_nav_rule']:.6f} vs EQ-only {tt['end_nav_eq_only']:.6f}; "
+            f"forced exits only under EQ-only {tt['forced_exits_only_under_eq_only']}")
     return 0
 
 
@@ -1216,8 +1605,19 @@ AMBIGUITIES = [
     "consecutive quarters ending at the latest period_end known at D (either basis), else "
     "standalone; every quarter then comes from that basis. (Quarterly consolidated filing only "
     "became mandatory from the Jun-2019 quarter, so 'where the company filed them' is read as "
-    "'filed them for every quarter the rules need'.) Revisions: "
-    "latest broadcast_dt < D per (stock, basis, period_end).",
+    "'filed them for every quarter the rules need'.) Revisions (Clarification 38): a quarter is "
+    "known from any filing broadcast before D; its income-statement figures (revenue, EBITDA, "
+    "normalised profit, total income, employee cost) and implied share count come from the latest "
+    "filing before D that reports at least one income-statement figure (revenue, total income, "
+    "other income, employee cost, EBITDA or normalised profit). A (stock, basis, quarter) with no "
+    "such filing is not a known quarter for anything built from the income statement "
+    "(Clarification 39): the data screens, the basis choice, the run, rule 5's 200 days, the TTM "
+    "sums, growth, stability and the share count all use the stock's latest quarters that have an "
+    "income statement, so consolidated covers a quarter only if a consolidated filing reports its "
+    "income statement and the run ends at such a quarter. The share count's split/bonus adjustment "
+    "starts from the broadcast date of the filing its income statement came from. The lender vote "
+    "reads the filing format, not the income statement, so it still uses each known quarter's "
+    "latest filing.",
     "Rule 5: the four most recent quarters of that basis must be consecutive (3-month steps) "
     "ending at the latest quarter; latest period_end >= D-200 days. TTM = sum of those 4 "
     "(all four non-null). Rule 6 needs TTM profit_normalised>0 and TTM ebitda>0.",
@@ -1251,7 +1651,13 @@ AMBIGUITIES = [
     "Credited on the ex-session to shares held at the previous close. "
     "Splits/bonus scale share counts on the ex-session (ex_date on a non-session -> next session).",
     "Forced exit: when a held stock has not traded for 20 consecutive market sessions it is "
-    "sold at its last close on that 20th session, paying the 0.20% cost.",
+    "sold at its last close on that 20th session, paying the 0.20% cost. Trade-for-trade (v2-spec "
+    "Clarification to A2): a session with a BZ trade and no EQ/BE trade for the stock is not a "
+    "no-trade session; a holding is valued at its BZ close on it (and at its BZ open at a "
+    "rebalance or END open); a sale or trim may fill at the BZ open with the same cost, pending "
+    "orders included; a buy (new or resize up) needs an EQ/BE session. The universe, measures and "
+    "market cap use EQ/BE only. The dividend parse check's prior close is the holding's last close "
+    "(BZ on BZ sessions). 'Doubled while held' uses the holding's closes (BZ on BZ sessions).",
     "Universe EW benchmark uses the same simulator: all universe names at D, T = (V-costs)/|U|, "
     "same costs, dividends, delays and forced exit.",
     "Quintiles: universe sorted by composite desc (symbol asc), np.array_split into 5; Q1 top; "
@@ -1272,9 +1678,14 @@ AMBIGUITIES = [
     "masked at load time.",
     "Trials are NOT recorded by this checker (it duplicates the maker's run; recording would "
     "double-count the search).",
-    "Index benchmarks (spec Clarification 17, 2026-09-22): NSE's official Total Returns Index "
-    "(gross, `tri`) for Nifty 500, Midcap 150 and Smallcap 250 from data/external/nifty_tri.parquet, "
-    "close-to-close on the strategy's closes.",
+    "Index benchmarks (spec Clarification 17; v2-spec Clarification to A4): NSE's gross TRI from "
+    "data/external/nifty_tri.parquet on the NAV clock, normalised to 1 at the first open. At the two "
+    "opens TRI_open(d) = TRI_close(d-1) x open(d) / close(d-1): the broad indices' price levels from "
+    "data/indices; the factor indices' from nifty_price_endpoints.csv, and where it prints '-' the "
+    "parent's (Nifty 200 for Momentum 30 and Quality 30, Nifty 500 for Value 50 and Alpha 50, Nifty "
+    "100 for Low Volatility 30) from data/indices. <factor>_no_overnight uses TRI_close(d-1) where the "
+    "stand-in is used and equals the main column elsewhere. Any missing TRI close or endpoint "
+    "price raises. Metrics are computed on the full clock.",
     "Rule 4 (spec Clarifications 28-29, 2026-09-22): today's nse_list no longer flags lenders; the "
     "XBRL taxonomy of the stock's filings for its latest 4 known quarters votes (NBFC_INDAS, BANKING, "
     "GI, LI; filings broadcast from Jan 2020, when the NBFC taxonomy began), with a static backfill "

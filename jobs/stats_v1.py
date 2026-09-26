@@ -23,7 +23,15 @@ hold a strategy:
   WHERE THE MONEY WAS EXPOSED. Sector weights over time, and how concentrated
   the book was.
 
-    python -m jobs.stats_v1
+Generic over a run folder since 2026-09-26 (v2-spec A2: v1 and v2 measured by
+the same jobs). Every series is on the run's own clock (nav.csv, every mark):
+the benchmark is the run's nifty500 column, NSE's TRI with the open marks the
+engine computed, where an earlier version reindexed TRI closes onto the dates
+and so put the end date's close against the strategy's end-date open.
+
+    python -m jobs.stats_v1 --run data/backtest/v1_final --label v1
+
+Writes <run>/stats.json (or --out FILE).
 """
 
 from __future__ import annotations
@@ -36,11 +44,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from jobs import libcheck_v1 as lc  # noqa: E402
+
 log = logging.getLogger(__name__)
 
-RUN = Path("data/backtest/v1_holdout")
-OUT = Path("data/backtest/stats")
-TRI = Path("data/external/nifty_tri.parquet")
+TRI = ROOT / "data" / "external" / "nifty_tri.parquet"
 
 
 def drawdowns(nav: pd.Series, top: int = 5) -> pd.DataFrame:
@@ -209,40 +221,60 @@ def exposure(holdings: pd.DataFrame) -> dict:
             "distinct_stocks_ever_held": int(h["symbol"].nunique()) if "symbol" in h else None}
 
 
-def main(argv=None) -> int:
-    import argparse
-    global RUN, OUT
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--run", default="data/backtest/v1_corrected")
-    ap.add_argument("--out", default="data/backtest/stats_corrected")
-    a = ap.parse_args(argv)
-    RUN, OUT = Path(a.run), Path(a.out)
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    OUT.mkdir(parents=True, exist_ok=True)
-    nav = pd.read_csv(RUN / "nav.csv"); nav["date"] = pd.to_datetime(nav["date"])
-    nav = nav.set_index("date")
-    s = nav["strategy"].dropna()
-    ew = nav["universe_ew"].dropna()
+def benchmark(clock: pd.DataFrame, col: str = "nifty500") -> tuple[pd.Series, str]:
+    """The Nifty 500 total return on the run's clock; TRI closes only if the run has none."""
+    if col in clock.columns:
+        return clock[col].astype(float), f"nav.csv column {col} (NSE TRI on the run's clock)"
     tri = pd.read_parquet(TRI)
     n500 = tri[tri.index_name == "NIFTY 500"].set_index("date")["tri"].sort_index()
+    n500.index = pd.DatetimeIndex(n500.index) + lc.CLOSE_AT
+    return n500, "NIFTY 500 TRI closes from data/external/nifty_tri.parquet (no nifty500 column)"
 
-    rep = {"period": {"start": str(s.index[0].date()), "end": str(s.index[-1].date())}}
+
+def build(run: Path, label: str) -> tuple[dict, pd.DataFrame]:
+    run = Path(run)
+    clock = lc.load_clock(run)
+    s = clock["strategy"].dropna()
+    ew = clock["universe_ew"].dropna()
+    n500, src = benchmark(clock)
+
+    rep = {"run": str(run), "label": label,
+           "period": {"start": str(s.index[0].date()), "end": str(s.index[-1].date())},
+           "benchmark_source": src}
     rep["strategy"] = risk(s, n500)
     rep["universe_ew"] = risk(ew, n500)
     rep["nifty500_tri"] = risk(n500.loc[s.index[0]:s.index[-1]])
     rep["rolling_12m_vs_universe_ew"] = rolling_excess(s, ew)
     rep["rolling_12m_vs_nifty500_tri"] = rolling_excess(s, n500)
     dd = drawdowns(s)
+    if not dd.empty:
+        dd = dd.copy()
+        for c in ("start", "trough", "recovered"):
+            dd[c] = pd.to_datetime(dd[c]).dt.normalize()
     rep["worst_drawdowns"] = json.loads(dd.to_json(orient="records", date_format="iso")) if not dd.empty else []
     for name, f in (("positions", "episodes.csv"), ("exposure", "holdings.csv")):
-        p = RUN / f
+        p = run / f
         if p.exists():
             df = pd.read_csv(p)
-            rep[name] = (positions(df, pd.read_csv(RUN / "trades.csv"))
+            rep[name] = (positions(df, pd.read_csv(run / "trades.csv"))
                          if name == "positions" else exposure(df))
-    monthly = (s.resample("ME").last().pct_change().dropna() * 100).round(1)
-    rep["monthly_pct"] = {str(k.date()): v for k, v in monthly.items()}
-    (OUT / "stats_v1.json").write_text(json.dumps(rep, indent=2, default=float))
+    monthly = (lc.monthly_returns(s) * 100).round(1)
+    rep["monthly_pct"] = {str(k.to_timestamp(how="end").date()): v for k, v in monthly.items()}
+    return rep, dd
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", default="data/backtest/v1_final", help="backtest output folder")
+    ap.add_argument("--label", default=None, help="name for this run (default: folder name)")
+    ap.add_argument("--out", default=None, help="output file (default <run>/stats.json)")
+    a = ap.parse_args(argv)
+    run = Path(a.run)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    rep, dd = build(run, a.label or run.name)
+    out = Path(a.out) if a.out else run / "stats.json"
+    out.write_text(json.dumps(rep, indent=2, default=float))
 
     def show(d, keys):
         return "  ".join(f"{k}={d[k]:.2f}" for k in keys if k in d and pd.notna(d[k]))
@@ -272,7 +304,7 @@ def main(argv=None) -> int:
         print(d.round(1).to_string(index=False))
     print("\n=== POSITIONS ===");  print(" ", rep.get("positions"))
     print("\n=== EXPOSURE ===");   print(" ", rep.get("exposure"))
-    print(f"\nwritten to {OUT}/stats_v1.json")
+    print(f"\nwritten to {out}")
     return 0
 
 

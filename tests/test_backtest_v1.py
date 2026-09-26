@@ -108,8 +108,9 @@ def _synthetic(split_on: int = 6, dividend_on: int = 8):
 
 
 def store_schema() -> str:
+    """prices and prices_other: the engine reads BZ rows from the second (trade-for-trade)."""
     from zen.data import store
-    return store.SCHEMA
+    return store.SCHEMA + store.SCHEMA_OTHER
 
 
 def test_split_does_not_move_adjusted_returns():
