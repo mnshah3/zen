@@ -53,5 +53,8 @@ jobs:
           git add data/indices
           git diff --staged --quiet && exit 0
           git commit -m "data: indices $(date -u +%Y-%m-%d)"
-          git pull --rebase origin main
-          git push
+          for i in 1 2 3; do            # another job may have pushed meanwhile
+            git pull --rebase origin main && git push && exit 0
+            sleep $((i * 15))
+          done
+          exit 1
