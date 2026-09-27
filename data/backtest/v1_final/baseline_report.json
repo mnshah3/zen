@@ -1,7 +1,7 @@
 {
   "run": "data\\backtest\\v1_final",
-  "label": "v1",
-  "generated_utc": "2026-09-26T22:41:08+00:00",
+  "label": "v1_final",
+  "generated_utc": "2026-09-27T14:33:10+00:00",
   "period": {
     "start": "2019-02-15",
     "end": "2026-09-18",
@@ -9,28 +9,28 @@
   },
   "sources": {
     "libcheck": {
-      "path": "data\\backtest\\v1_final\\libcheck.json",
-      "sha256": "57ef133d5b5a35a18a51d610757d3b01c35305b8650df058e149190dd83b3881"
+      "path": "data/backtest/v1_final/libcheck.json",
+      "sha256": "b7fa7aad23578108c1e6117bfc3dcb0084c67f05605136b0c7108fec21cd2f08"
     },
     "verify": {
-      "path": "data\\backtest\\v1_final\\verify.json",
-      "sha256": "b071d98303cdd626717f1a1dd6e373f157dd93b200ab2d6072a2196db7f15601"
+      "path": "data/backtest/v1_final/verify.json",
+      "sha256": "c1380b25d8347cec8eba84b0a6b8558d465d619439c2c36c0e0c676f35932186"
     },
     "stats": {
-      "path": "data\\backtest\\v1_final\\stats.json",
-      "sha256": "ecaf2d552b80dca1c4b3e80063052ad38ca0629a0e758711b6610a7b220ce587"
+      "path": "data/backtest/v1_final/stats.json",
+      "sha256": "dfad994383e3b6c70c19c540fa1c8221a05fcfbf50c7296df0c54cfe2afbc4b6"
     },
     "attribution": {
-      "path": "data\\backtest\\v1_final\\attribution.json",
-      "sha256": "31c087a9a03d9c5bb252256241f06864a47ab70edff5f4e0ae9a192bc0859d92"
+      "path": "data/backtest/v1_final/attribution.json",
+      "sha256": "053f434b8627902fc0050fcdd1ce76c49627fbb2f85c79163595428d1b3dbd1f"
     },
     "after_tax": {
-      "path": "data\\backtest\\v1_final\\after_tax\\summary.json",
-      "sha256": "57119896b7a97165bae46285255bab074978d7fa989eed2be078d2e7bc9cab5d"
+      "path": "data/backtest/v1_final/after_tax/summary.json",
+      "sha256": "c7554ad5e5b0cca7246bb4e925898512f231ab2e49e61c508b035d410cd97f0e"
     },
     "metrics": {
-      "path": "data\\backtest\\v1_final\\metrics.json",
-      "sha256": "b9e97a75ec400dc7bcaa96a66762c3811c14a2123ed7a660b64904cf511d99b8"
+      "path": "data/backtest/v1_final/metrics.json",
+      "sha256": "80d76a1997963f193b0ac7a16b8db99fe85a3ce423fbdd9eefd4793889f96e82"
     }
   },
   "libraries": {
@@ -630,7 +630,7 @@
       "prob_null_sampling_variance": 0.838148444046608,
       "prob_cross_trial_variance_36_grid": 0.9953138106738788,
       "prob_grid_trials_only": 0.9418809695990067,
-      "grid_file": "C:\\Users\\mnsha\\projects\\zen\\data\\backtest\\v1\\grid.csv",
+      "grid_file": "data/backtest/v1/grid.csv",
       "note": "probability of genuine skill after the search; the spread between these is the honest answer, not any single one"
     },
     "definition": "Bailey and Lopez de Prado deflated Sharpe, three variance choices",

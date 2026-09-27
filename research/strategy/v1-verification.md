@@ -13,11 +13,13 @@ its alpha after those factors is not statistically significant.**
 
 ## Two results, and why there are two
 
-**The one-shot result.** On 22 September the selected configuration was run
-once on the held-back period, 15 February 2023 to 18 September 2026. That run
-is the pre-registered test and it stays on record as it was run: **29.3% a
-year against 20.5% for the same universe equally weighted**, measured open to
-open.
+**The one-shot result.** On 22 September the selected configuration was run on
+the held-back period, 15 February 2023 to 18 September 2026, after a first
+attempt that failed to rebalance was discarded and the bug fixed (v1
+disclosure 40). That run is the pre-registered test and it stays on record as
+it was run: **29.4% a year against 20.4% for the same universe equally
+weighted**, measured from the close of 15 February 2023, the clock used at the
+time (data/backtest/v1_holdout/nav.csv).
 
 **The corrected result.** The audit then found that the March 2025 quarter was
 missing for about 650 companies, because the code that lists NSE's filings

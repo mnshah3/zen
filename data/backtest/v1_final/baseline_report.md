@@ -1,4 +1,4 @@
-# Baseline for the v2 comparison: v1
+# Baseline for the v2 comparison: v1_final
 
 Run `data/backtest/v1_final`, 2019-02-15 to 2026-09-18, measured open to open. Every number below is read from the measurement jobs' own output files, listed with their definitions in `baseline_report.json`.
 

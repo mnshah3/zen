@@ -35,8 +35,26 @@ SHORT_LIVE_YEARS = 3      # wording only: a live part shorter than this is calle
                           # to judge (Clarification to A4); no figure or rule depends on it
 
 
+TEXT_SUFFIXES = {".json", ".csv", ".md", ".txt", ".py"}
+REPO = Path(__file__).resolve().parents[1]
+
+
 def sha256(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    """SHA-256 of a file; text files with line endings normalised to \\n, so the
+    hash is the same on a Windows checkout (CRLF) and a fresh clone (LF)."""
+    data = Path(path).read_bytes()
+    if Path(path).suffix.lower() in TEXT_SUFFIXES:
+        data = data.replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()
+
+
+def repo_path(p: Path) -> str:
+    """A path as the repo sees it: relative, forward slashes, no local folders."""
+    p = Path(p).resolve()
+    try:
+        return p.relative_to(REPO).as_posix()
+    except ValueError:
+        return p.as_posix()
 
 
 def pick(doc: dict, key: str):
@@ -61,7 +79,7 @@ def load(run: Path) -> tuple[dict, dict]:
         if not p.exists():
             raise FileNotFoundError(f"{p}: run the measurement job first (see module docstring)")
         docs[k] = json.loads(p.read_text(encoding="utf-8"))
-        files[k] = {"path": str(p), "sha256": sha256(p)}
+        files[k] = {"path": repo_path(p), "sha256": sha256(p)}
     return docs, files
 
 

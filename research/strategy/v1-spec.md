@@ -693,3 +693,16 @@ changes a rule. It records what was true and when.
     income statement does not vote, as in the production engine. In the v1
     re-run the two readings give identical universes at all 31 dates, so this
     fixes the text for v2 and changes nothing measured.
+
+### 2026-09-27: disclosure
+
+40. **The held-back test's first attempt was discarded.** On 22 September
+    2026 the first run of the final test held the November 2022 portfolio
+    frozen for four years instead of rebalancing: the decision dates were not
+    extended into the held-back period. The attempt was discarded, the bug
+    fixed (jobs/backtest_v1.py now extends the decision dates for the final
+    test) and the test run again the same day with no rule changed. That run
+    is the one-shot result on record (commit 6223419). The discarded attempt
+    measured a portfolio that could not have existed under the rules, so it
+    is not a result of the strategy; it is disclosed so that "run once" is
+    not read as more than it was.

@@ -6,21 +6,40 @@ honestly, because they test against the companies that are still listed today.
 So the first job was building an archive that doesn't cheat, and a test harness
 that tries to break its own results.
 
-The answer, on 3.6 years the design had never seen: **33.0% a year against
-13.4% for the Nifty 500 including dividends**, and 21.0% for the same universe
-equally weighted, with a smaller drawdown than the universe. The rules were
-public before the test. It beats random picks from the same list, but most of
-the return is the market and two well-known factors. [What that does and does
-not prove](#the-result) is below.
+<!-- numbers:headline:start -->
+The answer, on 3.6 years the design had never seen: **34.3% a year against
+13.5% for the Nifty 500 including dividends**, and 21.0% for the same universe
+equally weighted. That is the held-back test as re-run on 25-26 Sep 2026 on a
+repaired archive, with the rules for picking stocks unchanged; the first run
+stays on record [below](#the-result). Over the whole 7.6 years from Feb 2019
+it made 30.7% a year, and its worst fall was -33.6% against -38.1% for the
+Nifty 500 and -47.9% for the same universe.
+<!-- numbers:headline:end -->
+
+The rules were public before the test. It beats random picks from the same
+list, but most of the return is the market and two well-known factors. [What
+that does and does not prove](#the-result) is below.
 
 It runs unattended on GitHub Actions and emails me two briefs. It places no
 orders. It produces evidence, and I make the decisions.
 
+<!-- numbers:archive:start -->
 ```
-prices        5,351,915 rows · 2,892 sessions · 4,060 ticker symbols · Jan 2015 to Sep 2026
-filings         783,510 announcements · 2,539 companies · 2022 to 2026
-fundamentals    102,711 quarterly filings · 2,629 companies · 2016 to 2026
+prices        5,360,616 rows · 2,895 sessions · 4,066 ticker symbols · Jan 2015 to Sep 2026
+filings         783,510 announcements · 2,539 symbols · Jan 2022 to Sep 2026
+fundamentals    105,818 quarterly results filings · 2,642 symbols · quarters ending Mar 2018 to Jun 2026
+indices              23 NSE index series · Jan 2015 to Sep 2026
 ```
+
+Counted up to 23 Sep 2026.
+<!-- numbers:archive:end -->
+
+Most of the backtest and archive figures in this README are written by
+[`jobs/readme_numbers.py`](jobs/readme_numbers.py) from the committed results
+and the database, and
+[`tests/test_readme_numbers.py`](tests/test_readme_numbers.py) fails if the
+README drifts from them. The few written by hand name the file or
+clarification they come from.
 
 ### Where to look first
 
@@ -28,6 +47,7 @@ fundamentals    102,711 quarterly filings · 2,629 companies · 2016 to 2026
 |---|---|
 | What the emails look like | [sample brief](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-brief.html) |
 | **The result, and what it does not prove** | [The result](#the-result) below |
+| The headline and acceptance figures, each with the file and key it comes from | [`data/backtest/v1_final/baseline_report.md`](data/backtest/v1_final/baseline_report.md) and its `.json`; the rest are in `stats.json`, `verify.json`, `libcheck.json` and `nav.csv` beside it |
 | The rules, fixed before the test | [`research/strategy/v1-spec.md`](research/strategy/v1-spec.md) |
 | Every hypothesis I've formally tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
 | The look-ahead detector | [`zen/validation/leak.py`](zen/validation/leak.py) |
@@ -98,19 +118,27 @@ Companies that delisted, collapsed or got absorbed are just missing from the
 sample. So the strategy only ever gets measured against the survivors, and every
 result comes out better than it was.
 
-It isn't a small effect. Counting ordinary equity only, this archive holds
-**3,548 ticker symbols**, and **2,563** of them traded in September 2026. That
-leaves **985 symbols** that were tradeable and are no longer quoted. About 200
-of those are renames of companies that still trade, which leaves roughly
-**780 that genuinely left the market**.
+<!-- numbers:survivorship:start -->
+It isn't a small effect. Counting ordinary equity only (ISIN security type 01,
+so no ETFs or rights entitlements), this archive holds **3,325 ticker
+symbols**. Linked across renames and ISIN changes by
+[`zen/universe/identity.py`](zen/universe/identity.py), they belong to **3,050
+companies**, and 2,560 of those traded in NSE's main equity series in Sep
+2026, up to the 23rd. That leaves **490 companies** that were tradeable at
+some point since 1 Jan 2015 and are no longer quoted there. Of those, 35 still
+trade in NSE's trade-for-trade segment; the other **455** traded in no NSE
+series at all that month.
+<!-- numbers:survivorship:end -->
 
 The universe on each date is whatever actually traded that day:
 
-| Month | Equity securities trading |
+<!-- numbers:survivorship_months:start -->
+| Month | Ordinary equity symbols trading |
 |------|---------------------------|
 | Mar 2015 | 1,476 |
-| Jun 2023 | 1,880 |
-| Sep 2026 | 2,563 |
+| Jun 2023 | 1,875 |
+| Sep 2026, to the 23rd | 2,563 |
+<!-- numbers:survivorship_months:end -->
 
 It's built from NSE daily bhavcopy files, which record every security that
 traded that day. The universe on any past date is what actually existed then,
@@ -167,69 +195,170 @@ strategy this time.
 ## The result
 
 **A fundamental screen, committed to this repo before it was tested, beat the
-market on data it had never seen, by a margin unlikely to be luck. Most of its
-return is the market and two well-known factors, and what is left after them
-is not yet statistically significant.**
+market on data it had never seen, and beat random picks from the same list.
+Most of its return is the market and two well-known factors, and what is left
+after them is not yet statistically significant.**
 
 The rules were written into
 [research/strategy/v1-spec.md](research/strategy/v1-spec.md) and committed on
-21 September 2026. Everything from 15 February 2023 onward was locked in code
-and the configuration chosen in advance was run on it on 22 September. That
-one-shot run gave **29.3% a year against 20.5%** for the same universe equally
-weighted, and it stays on record as the pre-registered result.
+21 September 2026. Everything from 15 February 2023 onward was locked in code,
+and on 22 September the configuration chosen in advance was run on it. The
+first attempt that day had a bug: it held the November 2022 portfolio frozen
+for four years instead of rebalancing. That attempt was discarded, the bug
+fixed and the test run again the same day with no rule changed (commit
+6223419; v1 disclosure 40). That run stays on record as the pre-registered
+result.
 
-An independent audit then found the archive was missing the March 2025
-quarter for about 650 companies, because the code listing NSE's filings
-stopped at the first page that failed to load. That was fixed and the quarter
-refilled. The same pass also collected about 2,200 revised filings for the
-later quarters, which the regular updater had never fetched. The engine only
-uses a revision after the date it was published, so both are legitimate, but
-they move the result: the March refill alone gives about 33.8% a year, and
-with the revisions as well it gives 33.0%, which is the figure below. The same
-configuration was re-run with no rule changed. This is the held-back period on
-the corrected archive, 3.6 years, open 15 February 2023 to open 18 September
-2026 (index returns run from the close before each of those opens):
+Two faults in the archive came to light after it, both in the data rather than
+the rules. The code listing NSE's filings stopped at the first page that
+failed to load, so the archive held the March 2025 quarter for only 1,516
+companies. It now holds 2,166, and the same pass fetched about 2,200 later
+documents, almost all revisions the regular updater had never collected
+(Clarification 36); the run was repeated on 23 September. And some filings tag
+their income statement only for a half-year or a year, which the parser stored
+as the quarter (Clarification 38, 24 September). A figure now counts as a
+quarter only if its period is at most 100 days long, and Clarification 39
+settles how a quarter with no such figure is read, a case the two engines had
+read differently; the strategy's holdings are the same under both readings.
+The whole run, the held-back years included, was repeated on 25 and 26
+September 2026 with no rule for choosing or weighting stocks changed. One exit detail was
+completed at the same time: a session on which a held stock trades only in
+NSE's trade-for-trade segment now counts as a trading day for the 20-session
+exit, as the 22 September fixes had intended but never delivered to the engine
+(v1 disclosure 34; v2-spec, Clarification to A2).
 
-| | Return a year | Worst fall |
-|---|---|---|
-| **The strategy** | **33.0%** | **-23.8%** |
-| The same universe, equally weighted | 21.0% | -31.1% |
-| Nifty 500, dividends included | 13.4% | -18.6% |
-| Nifty Midcap 150 | 21.3% | -20.9% |
-| Nifty Smallcap 250 | 21.8% | -26.0% |
+<!-- numbers:history:start -->
+| Run | What changed | Held back, a year | Same universe, equal weight, held back | Whole period, a year |
+|---|---|---|---|---|
+| 22 Sep 2026 | the one-shot test, as run | 29.43%\* | 20.37%\* | 28.35% |
+| 23 Sep 2026 | March 2025 quarter refilled, revised filings added (Clarification 36) | 32.97% | 21.03% | 30.06% |
+| 25-26 Sep 2026 | only quarter-length figures read as a quarter (Clarifications 38 and 39); the current result | **34.31%** | 20.96% | **30.68%** |
 
-**What backs it up**, all in
-[research/strategy/v1-verification.md](research/strategy/v1-verification.md):
+\* From the close of 15 Feb 2023, the clock used at the time. The later runs
+start at the open, as Clarification 16 requires (Clarification 37).
 
-- **Two engines agree exactly.** An independent re-implementation, extended to
-  2026 without sight of the production code, picks the same stocks on all 31
-  rebalance dates and matches the daily portfolio value to fifteen decimal
-  places. A rebuild from raw exchange prices matched all 226 trades of the
-  one-shot run.
-- **It beats random picks from the same list.** Against 500 random ten-stock
-  portfolios run through the same machinery, it lands at the 94th to 96th
-  percentile, whether the random portfolios trade more than it does or less.
-- **It fell less than the market over the full period.** From 2019, against
-  the Nifty 500 total return, it captured 129% of the rising months and 68% of
-  the falling ones. That did not hold within the held-back period on its own,
-  where its worst fall, -23.8%, was deeper than the Nifty 500's -18.6%.
-- **The margin is probably real, but not proven.** Over the equal-weight
-  universe it is 12.0 points a year. A 90% interval from a stationary
-  bootstrap runs from -3.9 to +27.4, and about 1 resample in 9 put the margin
-  at zero or below.
+At the 17 Nov 2025 rebalance the one-shot run bought five stocks, and three of
+them, CESC, FMGOETZE and IMPAL, were bought while the archive held their
+April-to-September figures as the September quarter; the 23 Sep run still
+bought IMPAL that way. The current run holds ASHOKLEY in place of IMPAL for
+that quarter and picks the same stocks as the 23 Sep run at every other
+rebalance. Counting trade-for-trade sessions as trading days changed five
+holdings of the equal-weight universe and none of the strategy's
+([`trade_for_trade.csv`](data/backtest/v1_final/trade_for_trade.csv)).
+<!-- numbers:history:end -->
+
+The current run, on the repaired archive:
+
+<!-- numbers:results:start -->
+Open of 15 Feb 2019 to open of 18 Sep 2026, 7.6 years, of which the last 3.6,
+from the open of 15 Feb 2023, were held back:
+
+| | Whole period, a year | Worst fall | Held back, a year | Worst fall |
+|---|---|---|---|---|
+| **The strategy** | **30.68%** | **-33.6%** | **34.31%** | **-23.8%** |
+| The same universe, equally weighted | 22.03% | -47.9% | 20.96% | -31.3% |
+| Nifty 500 | 14.36% | -38.1% | 13.50% | -18.6% |
+| Nifty Midcap 150 | 20.38% | -38.5% | 21.42% | -20.9% |
+| Nifty Smallcap 250 | 20.14% | -45.5% | 21.88% | -26.0% |
+| Nifty200 Momentum 30 † | 15.62% | -34.0% | 15.92% | -31.6% |
+| Nifty500 Value 50 † | 22.97% | -53.4% | 27.30% | -22.2% |
+| Nifty200 Quality 30 | 11.91% | -29.1% | 11.34% | -22.4% |
+| Nifty100 Low Volatility 30 | 13.31% | -30.6% | 12.75% | -18.1% |
+| Nifty Alpha 50 | 23.48% | -38.3% | 24.45% | -31.3% |
+
+Indices are NSE's total return indices, dividends included, on the strategy's
+clock; where NSE printed no open for a factor index, its parent index's
+overnight move stands in (v2-spec, Clarification to A4). The strategy is ahead
+of every one of them in both periods.
+
+† A factor index's figures from before it went live are NSE's back-test of its
+own rules, not returns anyone could have earned. NSE's launch dates could not
+be read from an NSE document, so each live part starts at the first date NSE
+printed an open for the index. Nifty200 Momentum 30 is live from 12 Oct 2020,
+and over those 5.9 years the strategy made 36.4% a year against the index's
+17.5%. Nifty500 Value 50 is live from 16 Dec 2024, and over those 1.8 years
+the strategy made 7.0% a year against the index's 5.9%, which is too short to
+judge; the first 1.8 of its 3.6 held-back years are back-test. The other three
+factor indices are live over the whole period.
+<!-- numbers:results:end -->
+
+**What backs it up.** The figures in this section come from the run's own
+output files in [`data/backtest/v1_final`](data/backtest/v1_final). The
+measured ones are listed with their definition, file and key in
+[`baseline_report.md`](data/backtest/v1_final/baseline_report.md) and its
+`.json`; the held-back worst falls above are worked out from the run's
+`nav.csv` by the same rule as the whole period's. The method behind each
+check is explained in
+[research/strategy/v1-verification.md](research/strategy/v1-verification.md),
+written on 23 September for the previous run, whose figures it still shows.
+
+<!-- numbers:backing:start -->
+- **Two engines agree exactly.** The production engine and an independent
+  re-implementation written from the specification alone
+  ([`jobs/crosscheck_v1.py`](jobs/crosscheck_v1.py)) hold the same stocks with
+  the same ranks on all 31 decision dates, 310 positions in all, and their
+  daily values agree on all 15 series (the strategy, the equal-weight universe
+  and 13 index series) to within 1e-14 of each other
+  ([`v1_final_check`](data/backtest/v1_final_check)).
+- **It beats random picks from the same list.** Against 500 random portfolios
+  run through the same engine and rules with one random ranking kept for the
+  whole run, it lands at the 96th percentile: 20 did at least as well, and the
+  median random portfolio made 20.7% a year. Against 500 with a fresh random
+  ranking each quarter it lands at the 98.6th: 7 did as well, and the median
+  random portfolio made 19.3%. The first kind turned over 0.5 times a year,
+  the second 3.95, the strategy 1.96.
+- **It fell less than the market over the whole period.** In the months the
+  Nifty 500 rose, the strategy rose 1.30 times as much on average; in the
+  months it fell, 0.66 times as much. Over rolling twelve-month windows it was
+  ahead of the Nifty 500 84% of the time and of the same universe 72%. That
+  did not hold within the held-back period on its own, where its worst fall,
+  -23.8%, was deeper than the Nifty 500's -18.6%.
+- **The margin over the same universe is probably real, but not proven.** In
+  the held-back period it is 13.35 points a year. A 90% interval from a
+  stationary bootstrap of the paired daily returns runs from -2.68 to +29.23
+  points, and 8.4% of the resamples put the margin at zero or below.
+<!-- numbers:backing:end -->
 
 **What it does not show:**
 
-- **Skill beyond known factors.** Regressed on IIM Ahmedabad's published Indian
-  factors, the strategy's alpha is 5.4% a year at t = 1.15, which is not
-  significant. Its value and momentum tilts are, strongly. Most of the return
-  is the market plus factors that can be bought more cheaply.
+<!-- numbers:limits:start -->
+- **Skill beyond known factors.** Regressed on IIM Ahmedabad's published
+  Indian four factors over the 82 months from Mar 2019 to Dec 2025, the last
+  month IIMA has published, the strategy's alpha is 5.74% a year at t = 1.21
+  (1.17 with a small-sample correction), which is not significant. Its value
+  and momentum tilts are, strongly (t = 4.78 and 3.61), and the four factors
+  explain 72% of its monthly returns' variation. Most of the return is the
+  market plus factors that can be bought more cheaply.
+- **That what is left is more than a quality tilt.** Adding a quality factor
+  built from the archive (v2-spec A5, operating-margin version, the same 82
+  months) lowers the alpha to 5.04% (t = 1.11). Over the 34 months from Mar
+  2023, where the factor can use return on capital, the alpha is 11.27% (t =
+  2.61) without the factor, which on its own would count as significant, and
+  3.31% (t = 0.74) with it: quality accounts for 71% of the alpha in that
+  window, which is only 2.8 years long.
 - **Robustness to the search.** After 195 logged trials, the deflated Sharpe
-  probability of skill is between 0.82 and 0.995 depending on the method, around
-  a usual bar of 0.95.
-- **A smooth ride.** The worst falls were -33.6% in 2020 and -30.7% over 15
-  months from April 2022, and it is 4.8% down in 2026 while the same universe is
-  up 8.8%.
+  probability of skill is between 0.838 and 0.995 depending on how the spread
+  across trials is estimated, around a usual bar of 0.95.
+- **A smooth ride.** The worst falls were -33.6% from Jan 2020 to Mar 2020,
+  back to its peak by Nov 2020, and -30.7% from Apr 2022 to Jun 2022, back to
+  its peak by Jul 2023. The deepest that started inside the held-back period
+  was -23.8% from Sep 2024 to Feb 2025, back to its peak by Sep 2025. From the
+  end of 2025 to the open of 18 Sep 2026 it is down 3.3% while the same
+  universe is up 8.7%, and it is still below its Feb 2026 peak, having been
+  16.5% below it at the worst in Mar 2026.
+<!-- numbers:limits:end -->
+
+<!-- numbers:after_tax:start -->
+**After Indian costs and tax.** From Rs 5 lakh at the open of 15 Feb 2019,
+with itemised Indian trading costs, an assumed 0.1% slippage a side and
+capital gains tax by lot at the rates in force at the time
+([`jobs/after_tax.py`](jobs/after_tax.py), v2-spec A6), the strategy would
+have been worth Rs 28.6 lakh if sold at the open of 18 Sep 2026, 25.8% a year,
+after paying Rs 4.6 lakh of tax along the way; its worst fall on that basis
+was -31.7%. A Nifty 500 index fund with a 0.16% expense ratio, held throughout
+and sold at the end, gives Rs 12.7 lakh, 13.1% a year. Before 6 Sep 2019, the
+start of the index fund whose costs are used, that fund is hypothetical.
+<!-- numbers:after_tax:end -->
 
 **Correction, 23 September 2026.** Statistics I published alongside the
 one-shot result on 22 September were wrong. They were my own work, done after
@@ -251,10 +380,14 @@ are fresh:
 recently, at least Rs 20 lakh of daily turnover, at least 200 sessions traded
 in the past year, not a bank, NBFC or insurer, four consecutive quarters of
 results already published, profitable over those four quarters, and a
-computable market capitalisation. That takes about 2,000 traded symbols down to
-about 900 on average: 237 on the first date, when few companies had four
-quarters of tagged results yet, up to 1,334, and about 1,170 through the
-held-back period.
+computable market capitalisation.
+
+<!-- numbers:funnel:start -->
+Across the 31 decision dates that takes an average of 1,853 ordinary-equity
+symbols that traded recently down to an average of 903: 237 on the first date,
+when few companies had four quarters of tagged results yet, up to 1,316, and
+1,158 on average through the held-back period.
+<!-- numbers:funnel:end -->
 
 **Ranking** (five groups, equally weighted, no tuning): profitability and its
 stability, revenue and profit growth, earnings and sales yield, 12-month
@@ -339,7 +472,7 @@ cron, so strategies never run against a stale archive.
 | NSE bhavcopy | daily OHLCV, everything listed including later-delisted | free |
 | NSE corporate filings | every announcement, timestamped by the exchange | free |
 | NSE XBRL financials | quarterly income statement and balance sheet | free |
-| NSE indices | 18 benchmark series | free |
+| NSE indices | daily levels of the index series counted above, and total-return series for the eight benchmarks in the result | free |
 | RSS and a news API | Indian market, macro and global news | free tiers |
 | Google Gemini | plain-English explanations, optional | free tier |
 
@@ -384,6 +517,7 @@ pip install -r requirements.txt
 python -m jobs.update_prices --days 7      # fetch recent sessions
 python -m jobs.daily_brief --dry-run       # render locally, send nothing
 python -m pytest tests/                    # includes the leak detector
+python -m jobs.readme_numbers --check      # README figures still match their sources
 ```
 
 Backfill history:
@@ -434,12 +568,19 @@ so the true count is higher than the line count.
 **Working:** the price archive, corporate filings, quarterly fundamentals, both
 emails, the news to data bridge, corporate-action adjustment, matched controls,
 the trial log, look-ahead detection, and schema-parity tests that stop the data
-and the database definitions drifting apart.
+and the database definitions drifting apart. Strategy v1 is built, tested on
+its held-back years, re-run on the repaired archive and measured, as
+[above](#the-result).
 
-**Next:** a pre-registered backtest of published factors (profitability,
-value, growth, momentum and low volatility) on a point-in-time universe that
-includes the stocks that later died, with 2023 onward held back and tested
-once. The spec is in [research/strategy/v1-spec.md](research/strategy/v1-spec.md).
+**Next:** strategy v2 is specified and pre-registered in
+[research/strategy/v2-spec.md](research/strategy/v2-spec.md): approved on 22
+September 2026, with amendments and clarifications up to 26 September, all
+written before any v2 figure existed. It has not been built or run yet, so
+there are no v2 results. It will be measured by the same jobs on the same
+archive as v1, and replaces v1 only if it clears every bar set in its
+amendment A2, which
+[`baseline_report.md`](data/backtest/v1_final/baseline_report.md) lists
+against v1's figures.
 
 **Limits I'd rather state than have found:**
 
@@ -459,5 +600,5 @@ once. The spec is in [research/strategy/v1-spec.md](research/strategy/v1-spec.md
 The momentum screen currently wired in is a **calibration baseline, not a
 strategy for real money**. Momentum is well documented and I know roughly what
 it should return, so it tests whether the harness reports honestly. If
-validation comes back with an implausible number, the harness is broken. The
-real strategy comes after I've shown the harness can be trusted.
+validation comes back with an implausible number, the harness is broken.
+Neither v1 nor v2 is wired into the emails.

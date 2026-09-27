@@ -85,7 +85,7 @@
     "prob_null_sampling_variance": 0.838148444046608,
     "prob_cross_trial_variance_36_grid": 0.9953138106738788,
     "prob_grid_trials_only": 0.9418809695990067,
-    "grid_file": "C:\\Users\\mnsha\\projects\\zen\\data\\backtest\\v1\\grid.csv",
+    "grid_file": "data/backtest/v1/grid.csv",
     "note": "probability of genuine skill after the search; the spread between these is the honest answer, not any single one"
   },
   "subperiods": {

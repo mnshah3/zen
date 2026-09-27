@@ -1,0 +1,4207 @@
+{
+  "test": "v1 ranking, full archive against an archive truncated before each decision date",
+  "generated_utc": "2026-09-27T14:00:13+00:00",
+  "git_head": "d3eb964fb31329a55c0a3afa32812bf48781046f",
+  "database": {
+    "path": "data/zen.duckdb",
+    "bytes": 1625042944,
+    "modified_utc": "2026-09-24T10:16:45+00:00",
+    "opened": "read-only"
+  },
+  "code_path": "jobs/backtest_v1.ranks_for -> zen.portfolio.engine.build_ranks -> zen.signals.composite.compute (build_snapshot, universe, measures, score)",
+  "truncation_rules": {
+    "prices": "sessions strictly before D",
+    "prices_other": "sessions strictly before D",
+    "indices": "index levels of sessions strictly before D",
+    "financials": "filings broadcast before D 00:00",
+    "announcements": "announcements disseminated before D 00:00",
+    "corpactions": "corporate actions with ex-date strictly before D"
+  },
+  "compared": "every column of the ranks frame (universe, measures, percentiles, group scores, composite, rank, market cap, sector, fundamentals), the funnel and the data-quality audit trail; exact equality, NaN equal to NaN, and the same column types",
+  "held_fixed": "pit.StaticLabels is loaded once from the full archive and given to both runs, as jobs/backtest_v1.py does: the first-ever NSE industry label (v1 Clarification 8), the lender-taxonomy backfill (28), company names (29), today's NSE list (diagnostics only, 28) and the stock identity across renames (23, 33). The spec declares these static and outside the leak test's scope; they feed the sector cap, the lender flag and the mapping of tickers to stocks, never a price, a filing figure or a return.",
+  "leaky_variants": {
+    "filings_on_D": "Reads filings broadcast on D itself: the financials cut moves from D 00:00 to D+1 00:00.",
+    "prices_through_D": "Reads D's own session: every price query bounded by `date < D` becomes `date < D+1`."
+  },
+  "summary": {
+    "dates": 31,
+    "passed": 31,
+    "failed": [],
+    "full_archive_reproduces_committed_ranks": {
+      "dates": 31,
+      "identical": 31,
+      "differ": []
+    },
+    "leaky_variants": {
+      "filings_on_D": {
+        "dates": 31,
+        "leak_changes_ranking": 25,
+        "caught": 25,
+        "missed": [],
+        "nothing_to_catch": [
+          "2019-02-15",
+          "2019-06-03",
+          "2020-02-17",
+          "2020-11-17",
+          "2023-06-01",
+          "2026-08-17"
+        ],
+        "no_rewrite": [],
+        "truncated_not_equal_honest": []
+      },
+      "prices_through_D": {
+        "dates": 31,
+        "leak_changes_ranking": 31,
+        "caught": 31,
+        "missed": [],
+        "nothing_to_catch": [],
+        "no_rewrite": [],
+        "truncated_not_equal_honest": []
+      }
+    }
+  },
+  "dates": [
+    {
+      "D": "2019-02-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          237,
+          237
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 8138,
+          "removed": 17715,
+          "removed_undated": 0,
+          "latest": "2019-02-14"
+        },
+        "financials": {
+          "rows": 6258,
+          "removed": 99560,
+          "removed_undated": 0,
+          "latest": "2019-02-13 17:49:18"
+        },
+        "indices": {
+          "rows": 19323,
+          "removed": 40619,
+          "removed_undated": 0,
+          "latest": "2019-02-14"
+        },
+        "prices": {
+          "rows": 1597466,
+          "removed": 3763150,
+          "removed_undated": 0,
+          "latest": "2019-02-14"
+        },
+        "prices_other": {
+          "rows": 163018,
+          "removed": 869018,
+          "removed_undated": 0,
+          "latest": "2019-02-14"
+        }
+      },
+      "universe": {
+        "full": 237,
+        "truncated": 237
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            237,
+            237
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            5,
+            5
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": false,
+          "leak_changes_ranking": false,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 237,
+          "members_changed": 0,
+          "differing_columns": [],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 237,
+          "members_changed": 0,
+          "differing_columns": [
+            "adj_close_s21",
+            "adj_close_s252",
+            "composite",
+            "earnings_yield",
+            "grp_momentum",
+            "grp_risk",
+            "grp_value",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "low_vol",
+            "mcap",
+            "median_turnover_60",
+            "mom_12_1",
+            "pct_earnings_yield",
+            "pct_low_vol",
+            "pct_mom_12_1",
+            "pct_sales_yield",
+            "rank",
+            "raw_close",
+            "sales_yield"
+          ],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 0,
+      "passed": true,
+      "seconds": 22.4
+    },
+    {
+      "D": "2019-06-03",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          501,
+          501
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 8364,
+          "removed": 17489,
+          "removed_undated": 0,
+          "latest": "2019-05-31"
+        },
+        "financials": {
+          "rows": 8746,
+          "removed": 97072,
+          "removed_undated": 0,
+          "latest": "2019-06-01 16:29:54"
+        },
+        "indices": {
+          "rows": 20723,
+          "removed": 39219,
+          "removed_undated": 0,
+          "latest": "2019-05-31"
+        },
+        "prices": {
+          "rows": 1711834,
+          "removed": 3648782,
+          "removed_undated": 0,
+          "latest": "2019-05-31"
+        },
+        "prices_other": {
+          "rows": 183124,
+          "removed": 848912,
+          "removed_undated": 0,
+          "latest": "2019-05-31"
+        }
+      },
+      "universe": {
+        "full": 501,
+        "truncated": 501
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            501,
+            501
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            2,
+            2
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": false,
+          "leak_changes_ranking": false,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 501,
+          "members_changed": 0,
+          "differing_columns": [],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 499,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 2,
+      "passed": true,
+      "seconds": 27.2
+    },
+    {
+      "D": "2019-08-16",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          483,
+          483
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 9038,
+          "removed": 16815,
+          "removed_undated": 0,
+          "latest": "2019-08-14"
+        },
+        "financials": {
+          "rows": 10788,
+          "removed": 95030,
+          "removed_undated": 0,
+          "latest": "2019-08-15 19:42:17"
+        },
+        "indices": {
+          "rows": 21743,
+          "removed": 38199,
+          "removed_undated": 0,
+          "latest": "2019-08-14"
+        },
+        "prices": {
+          "rows": 1795244,
+          "removed": 3565372,
+          "removed_undated": 0,
+          "latest": "2019-08-14"
+        },
+        "prices_other": {
+          "rows": 197891,
+          "removed": 834145,
+          "removed_undated": 0,
+          "latest": "2019-08-14"
+        }
+      },
+      "universe": {
+        "full": 483,
+        "truncated": 483
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            483,
+            483
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            2,
+            2
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 484,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 484,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 39,
+      "passed": true,
+      "seconds": 26.3
+    },
+    {
+      "D": "2019-11-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          458,
+          458
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 10037,
+          "removed": 15816,
+          "removed_undated": 0,
+          "latest": "2019-11-14"
+        },
+        "financials": {
+          "rows": 13109,
+          "removed": 92709,
+          "removed_undated": 0,
+          "latest": "2019-11-14 23:57:52"
+        },
+        "indices": {
+          "rows": 22903,
+          "removed": 37039,
+          "removed_undated": 0,
+          "latest": "2019-11-14"
+        },
+        "prices": {
+          "rows": 1891040,
+          "removed": 3469576,
+          "removed_undated": 0,
+          "latest": "2019-11-14"
+        },
+        "prices_other": {
+          "rows": 215060,
+          "removed": 816976,
+          "removed_undated": 0,
+          "latest": "2019-11-14"
+        }
+      },
+      "universe": {
+        "full": 458,
+        "truncated": 458
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            458,
+            458
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            5,
+            5
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 456,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 458,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 292,
+      "passed": true,
+      "seconds": 27.8
+    },
+    {
+      "D": "2020-02-17",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          473,
+          473
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 10258,
+          "removed": 15595,
+          "removed_undated": 0,
+          "latest": "2020-02-14"
+        },
+        "financials": {
+          "rows": 16183,
+          "removed": 89635,
+          "removed_undated": 0,
+          "latest": "2020-02-15 22:24:15"
+        },
+        "indices": {
+          "rows": 24203,
+          "removed": 35739,
+          "removed_undated": 0,
+          "latest": "2020-02-14"
+        },
+        "prices": {
+          "rows": 1998514,
+          "removed": 3362102,
+          "removed_undated": 0,
+          "latest": "2020-02-14"
+        },
+        "prices_other": {
+          "rows": 235145,
+          "removed": 796891,
+          "removed_undated": 0,
+          "latest": "2020-02-14"
+        }
+      },
+      "universe": {
+        "full": 473,
+        "truncated": 473
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            473,
+            473
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            8,
+            8
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": false,
+          "leak_changes_ranking": false,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 473,
+          "members_changed": 0,
+          "differing_columns": [],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 476,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 11,
+      "passed": true,
+      "seconds": 30.1
+    },
+    {
+      "D": "2020-06-01",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          445,
+          445
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 10687,
+          "removed": 15166,
+          "removed_undated": 0,
+          "latest": "2020-05-29"
+        },
+        "financials": {
+          "rows": 16814,
+          "removed": 89004,
+          "removed_undated": 0,
+          "latest": "2020-05-31 12:50:34"
+        },
+        "indices": {
+          "rows": 25543,
+          "removed": 34399,
+          "removed_undated": 0,
+          "latest": "2020-05-29"
+        },
+        "prices": {
+          "rows": 2108366,
+          "removed": 3252250,
+          "removed_undated": 0,
+          "latest": "2020-05-29"
+        },
+        "prices_other": {
+          "rows": 256754,
+          "removed": 775282,
+          "removed_undated": 0,
+          "latest": "2020-05-29"
+        }
+      },
+      "universe": {
+        "full": 445,
+        "truncated": 445
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            445,
+            445
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            8,
+            8
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 446,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 445,
+          "members_changed": 0,
+          "differing_columns": [
+            "adj_close_s21",
+            "adj_close_s252",
+            "composite",
+            "earnings_yield",
+            "grp_momentum",
+            "grp_risk",
+            "grp_value",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "low_vol",
+            "mcap",
+            "median_turnover_60",
+            "mom_12_1",
+            "pct_earnings_yield",
+            "pct_low_vol",
+            "pct_mom_12_1",
+            "pct_sales_yield",
+            "rank",
+            "raw_close",
+            "sales_yield"
+          ],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 3,
+      "passed": true,
+      "seconds": 28.3
+    },
+    {
+      "D": "2020-08-17",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          596,
+          596
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 11052,
+          "removed": 14801,
+          "removed_undated": 0,
+          "latest": "2020-08-14"
+        },
+        "financials": {
+          "rows": 20507,
+          "removed": 85311,
+          "removed_undated": 0,
+          "latest": "2020-08-15 23:16:57"
+        },
+        "indices": {
+          "rows": 26643,
+          "removed": 33299,
+          "removed_undated": 0,
+          "latest": "2020-08-14"
+        },
+        "prices": {
+          "rows": 2199013,
+          "removed": 3161603,
+          "removed_undated": 0,
+          "latest": "2020-08-14"
+        },
+        "prices_other": {
+          "rows": 274646,
+          "removed": 757390,
+          "removed_undated": 0,
+          "latest": "2020-08-14"
+        }
+      },
+      "universe": {
+        "full": 596,
+        "truncated": 596
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            596,
+            596
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            10,
+            10
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 595,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 598,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 5,
+      "passed": true,
+      "seconds": 31.8
+    },
+    {
+      "D": "2020-11-17",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          623,
+          623
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 12092,
+          "removed": 13761,
+          "removed_undated": 0,
+          "latest": "2020-11-13"
+        },
+        "financials": {
+          "rows": 24564,
+          "removed": 81254,
+          "removed_undated": 0,
+          "latest": "2020-11-16 21:04:51"
+        },
+        "indices": {
+          "rows": 27923,
+          "removed": 32019,
+          "removed_undated": 0,
+          "latest": "2020-11-13"
+        },
+        "prices": {
+          "rows": 2306235,
+          "removed": 3054381,
+          "removed_undated": 0,
+          "latest": "2020-11-13"
+        },
+        "prices_other": {
+          "rows": 294645,
+          "removed": 737391,
+          "removed_undated": 0,
+          "latest": "2020-11-13"
+        }
+      },
+      "universe": {
+        "full": 623,
+        "truncated": 623
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            623,
+            623
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            19,
+            19
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": false,
+          "leak_changes_ranking": false,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 623,
+          "members_changed": 0,
+          "differing_columns": [],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 623,
+          "members_changed": 0,
+          "differing_columns": [
+            "adj_close_s21",
+            "adj_close_s252",
+            "composite",
+            "earnings_yield",
+            "grp_momentum",
+            "grp_risk",
+            "grp_value",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "low_vol",
+            "mcap",
+            "median_turnover_60",
+            "mom_12_1",
+            "pct_earnings_yield",
+            "pct_low_vol",
+            "pct_mom_12_1",
+            "pct_sales_yield",
+            "rank",
+            "raw_close",
+            "sales_yield"
+          ],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 21,
+      "passed": true,
+      "seconds": 32.6
+    },
+    {
+      "D": "2021-02-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          728,
+          728
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 12493,
+          "removed": 13360,
+          "removed_undated": 0,
+          "latest": "2021-02-12"
+        },
+        "financials": {
+          "rows": 27599,
+          "removed": 78219,
+          "removed_undated": 0,
+          "latest": "2021-02-14 20:11:22"
+        },
+        "indices": {
+          "rows": 29143,
+          "removed": 30799,
+          "removed_undated": 0,
+          "latest": "2021-02-12"
+        },
+        "prices": {
+          "rows": 2409668,
+          "removed": 2950948,
+          "removed_undated": 0,
+          "latest": "2021-02-12"
+        },
+        "prices_other": {
+          "rows": 315190,
+          "removed": 716846,
+          "removed_undated": 0,
+          "latest": "2021-02-12"
+        }
+      },
+      "universe": {
+        "full": 728,
+        "truncated": 728
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            728,
+            728
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            22,
+            22
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 728,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 729,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 35,
+      "passed": true,
+      "seconds": 30.9
+    },
+    {
+      "D": "2021-06-01",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          767,
+          767
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 12760,
+          "removed": 13093,
+          "removed_undated": 0,
+          "latest": "2021-05-31"
+        },
+        "financials": {
+          "rows": 29005,
+          "removed": 76813,
+          "removed_undated": 0,
+          "latest": "2021-05-31 23:12:43"
+        },
+        "indices": {
+          "rows": 30556,
+          "removed": 29386,
+          "removed_undated": 0,
+          "latest": "2021-05-31"
+        },
+        "prices": {
+          "rows": 2530483,
+          "removed": 2830133,
+          "removed_undated": 0,
+          "latest": "2021-05-31"
+        },
+        "prices_other": {
+          "rows": 337009,
+          "removed": 695027,
+          "removed_undated": 0,
+          "latest": "2021-05-31"
+        }
+      },
+      "universe": {
+        "full": 767,
+        "truncated": 767
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            767,
+            767
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            25,
+            25
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 766,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 767,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 45,
+      "passed": true,
+      "seconds": 31.0
+    },
+    {
+      "D": "2021-08-16",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          887,
+          887
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 13313,
+          "removed": 12540,
+          "removed_undated": 0,
+          "latest": "2021-08-13"
+        },
+        "financials": {
+          "rows": 33308,
+          "removed": 72510,
+          "removed_undated": 0,
+          "latest": "2021-08-15 23:41:30"
+        },
+        "indices": {
+          "rows": 31668,
+          "removed": 28274,
+          "removed_undated": 0,
+          "latest": "2021-08-13"
+        },
+        "prices": {
+          "rows": 2623161,
+          "removed": 2737455,
+          "removed_undated": 0,
+          "latest": "2021-08-13"
+        },
+        "prices_other": {
+          "rows": 353897,
+          "removed": 678139,
+          "removed_undated": 0,
+          "latest": "2021-08-13"
+        }
+      },
+      "universe": {
+        "full": 887,
+        "truncated": 887
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            887,
+            887
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            32,
+            32
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 888,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 888,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 19,
+      "passed": true,
+      "seconds": 32.8
+    },
+    {
+      "D": "2021-11-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          887,
+          887
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {
+          "sector": [
+            "object",
+            "str"
+          ]
+        },
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 0,
+          "removed": 783510,
+          "removed_undated": 0,
+          "latest": null
+        },
+        "corpactions": {
+          "rows": 14543,
+          "removed": 11310,
+          "removed_undated": 0,
+          "latest": "2021-11-12"
+        },
+        "financials": {
+          "rows": 36186,
+          "removed": 69632,
+          "removed_undated": 0,
+          "latest": "2021-11-14 23:20:37"
+        },
+        "indices": {
+          "rows": 32969,
+          "removed": 26973,
+          "removed_undated": 0,
+          "latest": "2021-11-12"
+        },
+        "prices": {
+          "rows": 2732565,
+          "removed": 2628051,
+          "removed_undated": 0,
+          "latest": "2021-11-12"
+        },
+        "prices_other": {
+          "rows": 373256,
+          "removed": 658780,
+          "removed_undated": 0,
+          "latest": "2021-11-12"
+        }
+      },
+      "universe": {
+        "full": 887,
+        "truncated": 887
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            887,
+            887
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            34,
+            34
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 886,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 887,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 97,
+      "passed": true,
+      "seconds": 33.4
+    },
+    {
+      "D": "2022-02-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          938,
+          938
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 15892,
+          "removed": 767618,
+          "removed_undated": 0,
+          "latest": "2022-02-14 23:35:16"
+        },
+        "corpactions": {
+          "rows": 14843,
+          "removed": 11010,
+          "removed_undated": 0,
+          "latest": "2022-02-14"
+        },
+        "financials": {
+          "rows": 38969,
+          "removed": 66849,
+          "removed_undated": 0,
+          "latest": "2022-02-14 23:57:38"
+        },
+        "indices": {
+          "rows": 34377,
+          "removed": 25565,
+          "removed_undated": 0,
+          "latest": "2022-02-14"
+        },
+        "prices": {
+          "rows": 2850303,
+          "removed": 2510313,
+          "removed_undated": 0,
+          "latest": "2022-02-14"
+        },
+        "prices_other": {
+          "rows": 394271,
+          "removed": 637765,
+          "removed_undated": 0,
+          "latest": "2022-02-14"
+        }
+      },
+      "universe": {
+        "full": 938,
+        "truncated": 938
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            938,
+            938
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            39,
+            39
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 936,
+          "members_changed": 4,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 942,
+          "members_changed": 4,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 260,
+      "passed": true,
+      "seconds": 34.5
+    },
+    {
+      "D": "2022-06-01",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          910,
+          910
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 54851,
+          "removed": 728659,
+          "removed_undated": 0,
+          "latest": "2022-05-31 23:27:32"
+        },
+        "corpactions": {
+          "rows": 15143,
+          "removed": 10710,
+          "removed_undated": 0,
+          "latest": "2022-05-31"
+        },
+        "financials": {
+          "rows": 42279,
+          "removed": 63539,
+          "removed_undated": 0,
+          "latest": "2022-05-31 22:36:19"
+        },
+        "indices": {
+          "rows": 35939,
+          "removed": 24003,
+          "removed_undated": 0,
+          "latest": "2022-05-31"
+        },
+        "prices": {
+          "rows": 2984403,
+          "removed": 2376213,
+          "removed_undated": 0,
+          "latest": "2022-05-31"
+        },
+        "prices_other": {
+          "rows": 416810,
+          "removed": 615226,
+          "removed_undated": 0,
+          "latest": "2022-05-31"
+        }
+      },
+      "universe": {
+        "full": 910,
+        "truncated": 910
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            910,
+            910
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            51,
+            51
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 911,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 911,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 20,
+      "passed": true,
+      "seconds": 34.9
+    },
+    {
+      "D": "2022-08-16",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          859,
+          859
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 86157,
+          "removed": 697353,
+          "removed_undated": 0,
+          "latest": "2022-08-15 23:56:39"
+        },
+        "corpactions": {
+          "rows": 15827,
+          "removed": 10026,
+          "removed_undated": 0,
+          "latest": "2022-08-12"
+        },
+        "financials": {
+          "rows": 44859,
+          "removed": 60959,
+          "removed_undated": 0,
+          "latest": "2022-08-15 13:17:54"
+        },
+        "indices": {
+          "rows": 37083,
+          "removed": 22859,
+          "removed_undated": 0,
+          "latest": "2022-08-12"
+        },
+        "prices": {
+          "rows": 3084196,
+          "removed": 2276420,
+          "removed_undated": 0,
+          "latest": "2022-08-12"
+        },
+        "prices_other": {
+          "rows": 432655,
+          "removed": 599381,
+          "removed_undated": 0,
+          "latest": "2022-08-12"
+        }
+      },
+      "universe": {
+        "full": 859,
+        "truncated": 859
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            859,
+            859
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            50,
+            50
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 859,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 864,
+          "members_changed": 5,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 20,
+      "passed": true,
+      "seconds": 36.2
+    },
+    {
+      "D": "2022-11-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          828,
+          828
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 121661,
+          "removed": 661849,
+          "removed_undated": 0,
+          "latest": "2022-11-14 23:56:51"
+        },
+        "corpactions": {
+          "rows": 17019,
+          "removed": 8834,
+          "removed_undated": 0,
+          "latest": "2022-11-14"
+        },
+        "financials": {
+          "rows": 47503,
+          "removed": 58315,
+          "removed_undated": 0,
+          "latest": "2022-11-14 23:41:13"
+        },
+        "indices": {
+          "rows": 38425,
+          "removed": 21517,
+          "removed_undated": 0,
+          "latest": "2022-11-14"
+        },
+        "prices": {
+          "rows": 3202904,
+          "removed": 2157712,
+          "removed_undated": 0,
+          "latest": "2022-11-14"
+        },
+        "prices_other": {
+          "rows": 453883,
+          "removed": 578153,
+          "removed_undated": 0,
+          "latest": "2022-11-14"
+        }
+      },
+      "universe": {
+        "full": 828,
+        "truncated": 828
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            828,
+            828
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            53,
+            53
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 834,
+          "members_changed": 12,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 828,
+          "members_changed": 0,
+          "differing_columns": [
+            "adj_close_s21",
+            "adj_close_s252",
+            "composite",
+            "earnings_yield",
+            "grp_momentum",
+            "grp_risk",
+            "grp_value",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "low_vol",
+            "mcap",
+            "median_turnover_60",
+            "mom_12_1",
+            "pct_earnings_yield",
+            "pct_low_vol",
+            "pct_mom_12_1",
+            "pct_sales_yield",
+            "rank",
+            "raw_close",
+            "sales_yield"
+          ],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 410,
+      "passed": true,
+      "seconds": 36.1
+    },
+    {
+      "D": "2023-02-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          862,
+          862
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 155684,
+          "removed": 627826,
+          "removed_undated": 0,
+          "latest": "2023-02-14 23:47:00"
+        },
+        "corpactions": {
+          "rows": 17334,
+          "removed": 8519,
+          "removed_undated": 0,
+          "latest": "2023-02-14"
+        },
+        "financials": {
+          "rows": 50843,
+          "removed": 54975,
+          "removed_undated": 0,
+          "latest": "2023-02-14 23:31:30"
+        },
+        "indices": {
+          "rows": 39855,
+          "removed": 20087,
+          "removed_undated": 0,
+          "latest": "2023-02-14"
+        },
+        "prices": {
+          "rows": 3331542,
+          "removed": 2029074,
+          "removed_undated": 0,
+          "latest": "2023-02-14"
+        },
+        "prices_other": {
+          "rows": 477462,
+          "removed": 554574,
+          "removed_undated": 0,
+          "latest": "2023-02-14"
+        }
+      },
+      "universe": {
+        "full": 862,
+        "truncated": 862
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            862,
+            862
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            58,
+            58
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 863,
+          "members_changed": 7,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 863,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 260,
+      "passed": true,
+      "seconds": 36.8
+    },
+    {
+      "D": "2023-06-01",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          854,
+          854
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 200619,
+          "removed": 582891,
+          "removed_undated": 0,
+          "latest": "2023-05-31 23:46:39"
+        },
+        "corpactions": {
+          "rows": 17639,
+          "removed": 8214,
+          "removed_undated": 0,
+          "latest": "2023-05-31"
+        },
+        "financials": {
+          "rows": 54361,
+          "removed": 51457,
+          "removed_undated": 0,
+          "latest": "2023-05-31 22:42:49"
+        },
+        "indices": {
+          "rows": 41396,
+          "removed": 18546,
+          "removed_undated": 0,
+          "latest": "2023-05-31"
+        },
+        "prices": {
+          "rows": 3471593,
+          "removed": 1889023,
+          "removed_undated": 0,
+          "latest": "2023-05-31"
+        },
+        "prices_other": {
+          "rows": 504039,
+          "removed": 527997,
+          "removed_undated": 0,
+          "latest": "2023-05-31"
+        }
+      },
+      "universe": {
+        "full": 854,
+        "truncated": 854
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            854,
+            854
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            64,
+            64
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": false,
+          "leak_changes_ranking": false,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 854,
+          "members_changed": 0,
+          "differing_columns": [],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 855,
+          "members_changed": 5,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 16,
+      "passed": true,
+      "seconds": 38.8
+    },
+    {
+      "D": "2023-08-16",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1032,
+          1032
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 237000,
+          "removed": 546510,
+          "removed_undated": 0,
+          "latest": "2023-08-15 23:12:41"
+        },
+        "corpactions": {
+          "rows": 18412,
+          "removed": 7441,
+          "removed_undated": 0,
+          "latest": "2023-08-14"
+        },
+        "financials": {
+          "rows": 57680,
+          "removed": 48138,
+          "removed_undated": 0,
+          "latest": "2023-08-15 21:20:08"
+        },
+        "indices": {
+          "rows": 42540,
+          "removed": 17402,
+          "removed_undated": 0,
+          "latest": "2023-08-14"
+        },
+        "prices": {
+          "rows": 3576590,
+          "removed": 1784026,
+          "removed_undated": 0,
+          "latest": "2023-08-14"
+        },
+        "prices_other": {
+          "rows": 526487,
+          "removed": 505549,
+          "removed_undated": 0,
+          "latest": "2023-08-14"
+        }
+      },
+      "universe": {
+        "full": 1032,
+        "truncated": 1032
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1032,
+            1032
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            64,
+            64
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1032,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1031,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 16,
+      "passed": true,
+      "seconds": 40.3
+    },
+    {
+      "D": "2023-11-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1081,
+          1081
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 281557,
+          "removed": 501953,
+          "removed_undated": 0,
+          "latest": "2023-11-14 23:51:18"
+        },
+        "corpactions": {
+          "rows": 19638,
+          "removed": 6215,
+          "removed_undated": 0,
+          "latest": "2023-11-13"
+        },
+        "financials": {
+          "rows": 61012,
+          "removed": 44806,
+          "removed_undated": 0,
+          "latest": "2023-11-14 23:40:17"
+        },
+        "indices": {
+          "rows": 43882,
+          "removed": 16060,
+          "removed_undated": 0,
+          "latest": "2023-11-13"
+        },
+        "prices": {
+          "rows": 3702614,
+          "removed": 1658002,
+          "removed_undated": 0,
+          "latest": "2023-11-13"
+        },
+        "prices_other": {
+          "rows": 554974,
+          "removed": 477062,
+          "removed_undated": 0,
+          "latest": "2023-11-13"
+        }
+      },
+      "universe": {
+        "full": 1081,
+        "truncated": 1081
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1081,
+            1081
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            68,
+            68
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1081,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1087,
+          "members_changed": 6,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 65,
+      "passed": true,
+      "seconds": 42.2
+    },
+    {
+      "D": "2024-02-15",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1174,
+          1174
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 319615,
+          "removed": 463895,
+          "removed_undated": 0,
+          "latest": "2024-02-14 23:45:27"
+        },
+        "corpactions": {
+          "rows": 19927,
+          "removed": 5926,
+          "removed_undated": 0,
+          "latest": "2024-02-14"
+        },
+        "financials": {
+          "rows": 64361,
+          "removed": 41457,
+          "removed_undated": 0,
+          "latest": "2024-02-14 23:56:28"
+        },
+        "indices": {
+          "rows": 45246,
+          "removed": 14696,
+          "removed_undated": 0,
+          "latest": "2024-02-14"
+        },
+        "prices": {
+          "rows": 3832646,
+          "removed": 1527970,
+          "removed_undated": 0,
+          "latest": "2024-02-14"
+        },
+        "prices_other": {
+          "rows": 588687,
+          "removed": 443349,
+          "removed_undated": 0,
+          "latest": "2024-02-14"
+        }
+      },
+      "universe": {
+        "full": 1174,
+        "truncated": 1174
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1174,
+            1174
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            70,
+            70
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1178,
+          "members_changed": 8,
+          "differing_columns": [],
+          "funnel_identical": false
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1175,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 174,
+      "passed": true,
+      "seconds": 44.0
+    },
+    {
+      "D": "2024-06-03",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1181,
+          1181
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 371902,
+          "removed": 411608,
+          "removed_undated": 0,
+          "latest": "2024-06-02 23:38:45"
+        },
+        "corpactions": {
+          "rows": 20237,
+          "removed": 5616,
+          "removed_undated": 0,
+          "latest": "2024-05-31"
+        },
+        "financials": {
+          "rows": 68034,
+          "removed": 37784,
+          "removed_undated": 0,
+          "latest": "2024-06-02 14:45:53"
+        },
+        "indices": {
+          "rows": 46786,
+          "removed": 13156,
+          "removed_undated": 0,
+          "latest": "2024-05-31"
+        },
+        "prices": {
+          "rows": 3982542,
+          "removed": 1378074,
+          "removed_undated": 0,
+          "latest": "2024-05-31"
+        },
+        "prices_other": {
+          "rows": 628890,
+          "removed": 403146,
+          "removed_undated": 0,
+          "latest": "2024-05-31"
+        }
+      },
+      "universe": {
+        "full": 1181,
+        "truncated": 1181
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1181,
+            1181
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            70,
+            70
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1181,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "consolidated",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1184,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 2,
+      "passed": true,
+      "seconds": 44.2
+    },
+    {
+      "D": "2024-08-16",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1239,
+          1239
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 413194,
+          "removed": 370316,
+          "removed_undated": 0,
+          "latest": "2024-08-15 23:56:12"
+        },
+        "corpactions": {
+          "rows": 21054,
+          "removed": 4799,
+          "removed_undated": 0,
+          "latest": "2024-08-14"
+        },
+        "financials": {
+          "rows": 71587,
+          "removed": 34231,
+          "removed_undated": 0,
+          "latest": "2024-08-15 21:54:08"
+        },
+        "indices": {
+          "rows": 47959,
+          "removed": 11983,
+          "removed_undated": 0,
+          "latest": "2024-08-14"
+        },
+        "prices": {
+          "rows": 4093398,
+          "removed": 1267218,
+          "removed_undated": 0,
+          "latest": "2024-08-14"
+        },
+        "prices_other": {
+          "rows": 660270,
+          "removed": 371766,
+          "removed_undated": 0,
+          "latest": "2024-08-14"
+        }
+      },
+      "universe": {
+        "full": 1239,
+        "truncated": 1239
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1239,
+            1239
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            72,
+            72
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1239,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1240,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 13,
+      "passed": true,
+      "seconds": 50.0
+    },
+    {
+      "D": "2024-11-18",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1265,
+          1265
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 462579,
+          "removed": 320931,
+          "removed_undated": 0,
+          "latest": "2024-11-17 20:42:16"
+        },
+        "corpactions": {
+          "rows": 22340,
+          "removed": 3513,
+          "removed_undated": 0,
+          "latest": "2024-11-14"
+        },
+        "financials": {
+          "rows": 75343,
+          "removed": 30475,
+          "removed_undated": 0,
+          "latest": "2024-11-16 19:39:34"
+        },
+        "indices": {
+          "rows": 49431,
+          "removed": 10511,
+          "removed_undated": 0,
+          "latest": "2024-11-14"
+        },
+        "prices": {
+          "rows": 4235176,
+          "removed": 1125440,
+          "removed_undated": 0,
+          "latest": "2024-11-14"
+        },
+        "prices_other": {
+          "rows": 701932,
+          "removed": 330104,
+          "removed_undated": 0,
+          "latest": "2024-11-14"
+        }
+      },
+      "universe": {
+        "full": 1265,
+        "truncated": 1265
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1265,
+            1265
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            72,
+            72
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1265,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1266,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 13,
+      "passed": true,
+      "seconds": 56.6
+    },
+    {
+      "D": "2025-02-17",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1255,
+          1255
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 503684,
+          "removed": 279826,
+          "removed_undated": 0,
+          "latest": "2025-02-16 23:52:05"
+        },
+        "corpactions": {
+          "rows": 22655,
+          "removed": 3198,
+          "removed_undated": 0,
+          "latest": "2025-02-14"
+        },
+        "financials": {
+          "rows": 79173,
+          "removed": 26645,
+          "removed_undated": 0,
+          "latest": "2025-02-16 14:28:51"
+        },
+        "indices": {
+          "rows": 50880,
+          "removed": 9062,
+          "removed_undated": 0,
+          "latest": "2025-02-14"
+        },
+        "prices": {
+          "rows": 4377293,
+          "removed": 983323,
+          "removed_undated": 0,
+          "latest": "2025-02-14"
+        },
+        "prices_other": {
+          "rows": 743718,
+          "removed": 288318,
+          "removed_undated": 0,
+          "latest": "2025-02-14"
+        }
+      },
+      "universe": {
+        "full": 1255,
+        "truncated": 1255
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1255,
+            1255
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            73,
+            73
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1255,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "consolidated",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1254,
+          "members_changed": 5,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 13,
+      "passed": true,
+      "seconds": 68.2
+    },
+    {
+      "D": "2025-06-02",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1238,
+          1238
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 549428,
+          "removed": 234082,
+          "removed_undated": 0,
+          "latest": "2025-06-01 23:35:22"
+        },
+        "corpactions": {
+          "rows": 22911,
+          "removed": 2942,
+          "removed_undated": 0,
+          "latest": "2025-05-30"
+        },
+        "financials": {
+          "rows": 83248,
+          "removed": 22570,
+          "removed_undated": 0,
+          "latest": "2025-06-01 13:12:55"
+        },
+        "indices": {
+          "rows": 52444,
+          "removed": 7498,
+          "removed_undated": 0,
+          "latest": "2025-05-30"
+        },
+        "prices": {
+          "rows": 4534009,
+          "removed": 826607,
+          "removed_undated": 0,
+          "latest": "2025-05-30"
+        },
+        "prices_other": {
+          "rows": 790170,
+          "removed": 241866,
+          "removed_undated": 0,
+          "latest": "2025-05-30"
+        }
+      },
+      "universe": {
+        "full": 1238,
+        "truncated": 1238
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1238,
+            1238
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            72,
+            72
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1238,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "consolidated",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1236,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 26,
+      "passed": true,
+      "seconds": 71.1
+    },
+    {
+      "D": "2025-08-18",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1195,
+          1195
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 591337,
+          "removed": 192173,
+          "removed_undated": 0,
+          "latest": "2025-08-17 21:26:23"
+        },
+        "corpactions": {
+          "rows": 23585,
+          "removed": 2268,
+          "removed_undated": 0,
+          "latest": "2025-08-14"
+        },
+        "financials": {
+          "rows": 87436,
+          "removed": 18382,
+          "removed_undated": 0,
+          "latest": "2025-08-17 12:54:31"
+        },
+        "indices": {
+          "rows": 53686,
+          "removed": 6256,
+          "removed_undated": 0,
+          "latest": "2025-08-14"
+        },
+        "prices": {
+          "rows": 4660797,
+          "removed": 699819,
+          "removed_undated": 0,
+          "latest": "2025-08-14"
+        },
+        "prices_other": {
+          "rows": 827828,
+          "removed": 204208,
+          "removed_undated": 0,
+          "latest": "2025-08-14"
+        }
+      },
+      "universe": {
+        "full": 1195,
+        "truncated": 1195
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1195,
+            1195
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            74,
+            74
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1195,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "consolidated",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1196,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 8,
+      "passed": true,
+      "seconds": 87.6
+    },
+    {
+      "D": "2025-11-17",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1205,
+          1205
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 637905,
+          "removed": 145605,
+          "removed_undated": 0,
+          "latest": "2025-11-16 23:46:29"
+        },
+        "corpactions": {
+          "rows": 24307,
+          "removed": 1546,
+          "removed_undated": 0,
+          "latest": "2025-11-14"
+        },
+        "financials": {
+          "rows": 91612,
+          "removed": 14206,
+          "removed_undated": 0,
+          "latest": "2025-11-15 20:04:25"
+        },
+        "indices": {
+          "rows": 55089,
+          "removed": 4853,
+          "removed_undated": 0,
+          "latest": "2025-11-14"
+        },
+        "prices": {
+          "rows": 4808092,
+          "removed": 552524,
+          "removed_undated": 0,
+          "latest": "2025-11-14"
+        },
+        "prices_other": {
+          "rows": 873809,
+          "removed": 158227,
+          "removed_undated": 0,
+          "latest": "2025-11-14"
+        }
+      },
+      "universe": {
+        "full": 1205,
+        "truncated": 1205
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1205,
+            1205
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            73,
+            73
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1205,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1207,
+          "members_changed": 6,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 11,
+      "passed": true,
+      "seconds": 93.6
+    },
+    {
+      "D": "2026-02-16",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1181,
+          1181
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 676669,
+          "removed": 106841,
+          "removed_undated": 0,
+          "latest": "2026-02-15 23:57:39"
+        },
+        "corpactions": {
+          "rows": 24589,
+          "removed": 1264,
+          "removed_undated": 0,
+          "latest": "2026-02-13"
+        },
+        "financials": {
+          "rows": 96345,
+          "removed": 9473,
+          "removed_undated": 0,
+          "latest": "2026-02-15 14:53:12"
+        },
+        "indices": {
+          "rows": 56515,
+          "removed": 3427,
+          "removed_undated": 0,
+          "latest": "2026-02-13"
+        },
+        "prices": {
+          "rows": 4962281,
+          "removed": 398335,
+          "removed_undated": 0,
+          "latest": "2026-02-13"
+        },
+        "prices_other": {
+          "rows": 921046,
+          "removed": 110990,
+          "removed_undated": 0,
+          "latest": "2026-02-13"
+        }
+      },
+      "universe": {
+        "full": 1181,
+        "truncated": 1181
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1181,
+            1181
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            74,
+            74
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1181,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "earnings_yield",
+            "grp_value",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_sales_yield",
+            "rank",
+            "sales_yield",
+            "shares",
+            "shares_filed"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1182,
+          "members_changed": 1,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 10,
+      "passed": true,
+      "seconds": 71.5
+    },
+    {
+      "D": "2026-06-01",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1295,
+          1295
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 725391,
+          "removed": 58119,
+          "removed_undated": 0,
+          "latest": "2026-05-31 23:06:13"
+        },
+        "corpactions": {
+          "rows": 24863,
+          "removed": 990,
+          "removed_undated": 0,
+          "latest": "2026-05-29"
+        },
+        "financials": {
+          "rows": 100926,
+          "removed": 4892,
+          "removed_undated": 0,
+          "latest": "2026-05-31 22:32:59"
+        },
+        "indices": {
+          "rows": 58079,
+          "removed": 1863,
+          "removed_undated": 0,
+          "latest": "2026-05-29"
+        },
+        "prices": {
+          "rows": 5138066,
+          "removed": 222550,
+          "removed_undated": 0,
+          "latest": "2026-05-29"
+        },
+        "prices_other": {
+          "rows": 973533,
+          "removed": 58503,
+          "removed_undated": 0,
+          "latest": "2026-05-29"
+        }
+      },
+      "universe": {
+        "full": 1295,
+        "truncated": 1295
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1295,
+            1295
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            77,
+            77
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1295,
+          "members_changed": 0,
+          "differing_columns": [
+            "composite",
+            "consec_quarters",
+            "earnings_yield",
+            "grp_growth",
+            "grp_quality",
+            "grp_value",
+            "latest_period_end",
+            "loo_growth",
+            "loo_momentum",
+            "loo_quality",
+            "loo_risk",
+            "loo_value",
+            "margin",
+            "mcap",
+            "pct_earnings_yield",
+            "pct_margin",
+            "pct_profit_growth",
+            "pct_rev_growth",
+            "pct_sales_yield",
+            "pct_stability",
+            "profit_growth",
+            "rank",
+            "rev_growth",
+            "sales_yield",
+            "shares",
+            "shares_filed",
+            "stability",
+            "ttm_ebitda",
+            "ttm_profit",
+            "ttm_revenue"
+          ],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1296,
+          "members_changed": 3,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 11,
+      "passed": true,
+      "seconds": 70.2
+    },
+    {
+      "D": "2026-08-17",
+      "full_archive_reproduces_committed_ranks": {
+        "identical": true,
+        "rows": [
+          1316,
+          1316
+        ],
+        "differing_columns": {},
+        "storage_types_differ": {},
+        "only_rebuilt": [],
+        "only_committed": []
+      },
+      "truncated_archive": {
+        "announcements": {
+          "rows": 770367,
+          "removed": 13143,
+          "removed_undated": 0,
+          "latest": "2026-08-16 23:57:17"
+        },
+        "corpactions": {
+          "rows": 25571,
+          "removed": 282,
+          "removed_undated": 0,
+          "latest": "2026-08-14"
+        },
+        "financials": {
+          "rows": 105640,
+          "removed": 178,
+          "removed_undated": 0,
+          "latest": "2026-08-15 14:52:12"
+        },
+        "indices": {
+          "rows": 59321,
+          "removed": 621,
+          "removed_undated": 0,
+          "latest": "2026-08-14"
+        },
+        "prices": {
+          "rows": 5282879,
+          "removed": 77737,
+          "removed_undated": 0,
+          "latest": "2026-08-14"
+        },
+        "prices_other": {
+          "rows": 1014249,
+          "removed": 17787,
+          "removed_undated": 0,
+          "latest": "2026-08-14"
+        }
+      },
+      "universe": {
+        "full": 1316,
+        "truncated": 1316
+      },
+      "honest": {
+        "ranks": {
+          "rows": [
+            1316,
+            1316
+          ],
+          "same_members": true,
+          "only_first": [],
+          "only_second": [],
+          "same_order": true,
+          "differing_columns": {},
+          "identical": true
+        },
+        "funnel": {
+          "rows": [
+            1,
+            1
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "data_quality": {
+          "rows": [
+            77,
+            77
+          ],
+          "differing_columns": {},
+          "identical": true
+        },
+        "identical": true
+      },
+      "leaky": {
+        "filings_on_D": {
+          "caught": false,
+          "leak_changes_ranking": false,
+          "missed": false,
+          "rewrites_full": 1,
+          "rewrites_truncated": 1,
+          "truncated_equals_honest": true,
+          "universe_full": 1316,
+          "members_changed": 0,
+          "differing_columns": [],
+          "funnel_identical": true
+        },
+        "prices_through_D": {
+          "caught": true,
+          "leak_changes_ranking": true,
+          "missed": false,
+          "rewrites_full": 2,
+          "rewrites_truncated": 2,
+          "truncated_equals_honest": true,
+          "universe_full": 1318,
+          "members_changed": 2,
+          "differing_columns": [],
+          "funnel_identical": false
+        }
+      },
+      "filings_broadcast_on_D": 6,
+      "passed": true,
+      "seconds": 70.6
+    }
+  ]
+}

@@ -65,6 +65,7 @@ if str(ROOT) not in sys.path:
 from jobs import libcheck_v1 as lc  # noqa: E402
 from zen.universe import pit  # noqa: E402
 from zen.validation import trials  # noqa: E402
+from jobs.baseline_report import repo_path as baseline_report_path  # noqa: E402
 
 log = logging.getLogger(__name__)
 
@@ -450,7 +451,7 @@ def deflated(s_nav: pd.Series, grid_path: Path = GRID) -> dict:
             "prob_cross_trial_variance_36_grid": trials.deflated_sharpe(
                 sr, n_trials, len(daily), g1, g2, var_trial_sharpe=cross_var),
             "prob_grid_trials_only": trials.deflated_sharpe(sr, len(grid), len(daily), g1, g2),
-            "grid_file": str(grid_path),
+            "grid_file": baseline_report_path(grid_path),
             "note": "probability of genuine skill after the search; the spread between these "
                     "is the honest answer, not any single one"}
 
