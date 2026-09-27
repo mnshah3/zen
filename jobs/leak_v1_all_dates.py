@@ -306,13 +306,21 @@ def _dq_sorted(dq: pd.DataFrame) -> pd.DataFrame:
     return dq.sort_values(cols, kind="stable").reset_index(drop=True)
 
 
-def committed_ranks(run: Path, D) -> pd.DataFrame | None:
+def committed_ranks(run: Path, D, ids=None) -> pd.DataFrame | None:
+    """The run's saved ranking at D. A stock id is labelled by the company's latest
+    ticker, so a rename after the run was saved (SANGINITA to AGASTYAEN, 25 Sep
+    2026) changes the label, not the company. With `ids`, each saved label is
+    mapped through the current identity links first, so the comparison is by
+    company and a later rename cannot fail it."""
     p = Path(run) / "ranks.parquet"
     if not p.exists():
         return None
     r = pd.read_parquet(p)
     r["D"] = pd.to_datetime(r["D"])
-    return r[r["D"] == pd.Timestamp(D)].reset_index(drop=True)
+    r = r[r["D"] == pd.Timestamp(D)].reset_index(drop=True)
+    if ids is not None and not ids.empty and len(r):
+        r["symbol"] = ids.for_events(r, "symbol", "D")
+    return r
 
 
 # ---------------------------------------------------------------- one date
@@ -331,7 +339,7 @@ def check_date(con, D, static, src: Path = pit.DB_PATH, run: Path = RUN,
     t0 = time.time()
     rep = {"D": str(D.date())}
     full = ranking(con, D, static)
-    committed = committed_ranks(run, D)
+    committed = committed_ranks(run, D, static.ids)
     if committed is not None:
         c = compare_frames(full["ranks"], committed, key="symbol", check_dtype=False)
         rep["full_archive_reproduces_committed_ranks"] = {
