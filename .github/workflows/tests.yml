@@ -1,0 +1,36 @@
+name: tests
+
+# Runs the test suite on a fresh checkout, as anyone cloning the repo would.
+# Tests that need the local archive (data/zen.duckdb, built with
+# jobs/rebuild_db) or non-redistributable external data skip themselves
+# (tests/conftest.py); everything else must pass. The exact library versions
+# behind the published results are in requirements-lock.txt.
+
+on:
+  push:
+    paths-ignore:
+      - "data/daily/**"
+      - "data/daily_other/**"
+      - "data/indices/**"
+      - "state/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - name: install the pinned libraries
+        run: pip install -r requirements-lock.txt
+      - name: run the tests
+        run: python -m pytest -q -p no:cacheprovider
