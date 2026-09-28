@@ -13,6 +13,13 @@ exactly the number a job wrote.
     python -m jobs.baseline_report --run RUN --label L
 
 Writes <run>/baseline_report.json and <run>/baseline_report.md.
+
+The same report is written for a v2 run (metrics.json engine 'v2'): its figures
+are the same quantities from the same files, the bars a later challenger would
+face are left out (v2's own verdict against v1 is jobs/v2_verdict.py's), and
+the text says so. `--allow-missing after_tax` writes the report while the
+after-tax job has not been run on the folder, with the after-tax section marked
+as not measured; every other source is always required.
 """
 
 from __future__ import annotations
@@ -72,15 +79,31 @@ def figure(docs: dict, src: str, key: str, definition: str, **extra) -> dict:
             "source": f"{SOURCES[src]}: {key}", **extra}
 
 
-def load(run: Path) -> tuple[dict, dict]:
+OPTIONAL_SOURCES = ("after_tax",)     # may be allowed missing with --allow-missing
+
+
+def load(run: Path, allow_missing: tuple = ()) -> tuple[dict, dict]:
+    """Every source file of the report; a missing one stops the job unless it is named
+    in `allow_missing` (only OPTIONAL_SOURCES may be), when it is recorded as missing."""
+    bad = set(allow_missing) - set(OPTIONAL_SOURCES)
+    if bad:
+        raise ValueError(f"only {OPTIONAL_SOURCES} may be missing, not {sorted(bad)}")
     docs, files = {}, {}
     for k, rel in SOURCES.items():
         p = Path(run) / rel
         if not p.exists():
+            if k in allow_missing:
+                docs[k] = None
+                files[k] = {"path": repo_path(p), "missing": True}
+                continue
             raise FileNotFoundError(f"{p}: run the measurement job first (see module docstring)")
         docs[k] = json.loads(p.read_text(encoding="utf-8"))
         files[k] = {"path": repo_path(p), "sha256": sha256(p)}
     return docs, files
+
+
+def is_v2_run(docs: dict) -> bool:
+    return (docs.get("metrics") or {}).get("engine") == "v2"
 
 
 def a2_quantities(docs: dict) -> dict:
@@ -161,9 +184,42 @@ def benchmark_table(docs: dict) -> dict:
     return out
 
 
-def build(run: Path, label: str) -> dict:
+AFTER_TAX_DEFINITION = ("jobs/after_tax.py (v2-spec A6): itemised Indian costs and slippage, "
+                        "capital gains tax by lot with advance tax; statistics from the value "
+                        "if everything were sold at each mark after exit costs and tax; "
+                        "benchmark: a growth-option Nifty 500 index fund held throughout")
+
+
+def after_tax_section(tax: dict | None) -> dict:
+    """The after-tax figures of after_tax/summary.json; marked as not measured when
+    the file was allowed to be missing."""
+    if tax is None:
+        return {"definition": AFTER_TAX_DEFINITION, "source": "after_tax/summary.json",
+                "not_measured": True,
+                "reason": "after_tax/summary.json is not in the run folder: jobs/after_tax.py "
+                          "has not been run on it (the report was written with "
+                          "--allow-missing after_tax)"}
+    return {
+        "definition": AFTER_TAX_DEFINITION,
+        "source": "after_tax/summary.json",
+        "strategy_cagr": tax["after_tax_stats"]["strategy"]["cagr"],
+        "strategy_max_drawdown": tax["after_tax_stats"]["strategy"]["max_drawdown"],
+        "strategy_end_liquidated": tax["strategy"]["after_tax_end_liquidated"],
+        "benchmark_growth_cagr": tax["after_tax_stats"]["benchmark_growth"]["cagr"],
+        "benchmark_growth_end_liquidated": tax["benchmark"]["growth"]["after_tax_end_liquidated"],
+        "excess_cagr_vs_growth_fund": tax["after_tax_stats"]["strategy_vs_benchmark_growth"]["cagr_diff"],
+        "information_ratio_vs_growth_fund":
+            tax["after_tax_stats"]["strategy_vs_benchmark_growth"]["information_ratio"],
+        "tax_paid_during": tax["strategy"]["tax_paid_during"],
+        "itemised_costs_total": tax["strategy"]["itemised_costs_total"],
+        "flat_costs_total": tax["strategy"]["flat_costs_total"],
+        "capital": tax["strategy"]["capital"],
+        "replay_check_worst_rel": tax["replay_check"]["worst_rel_error"]}
+
+
+def build(run: Path, label: str, allow_missing: tuple = ()) -> dict:
     run = Path(run)
-    docs, files = load(run)
+    docs, files = load(run, allow_missing)
     lib, ver, att, tax = docs["libcheck"], docs["verify"], docs["attribution"], docs["after_tax"]
     q = att["quality"]
     rep = {
@@ -209,25 +265,7 @@ def build(run: Path, label: str) -> dict:
                           "equal to metrics.json on the whole period. Live part: from the close "
                           "of the index's first live date to the open of the end date",
             "rows": benchmark_table(docs)},
-        "after_tax": {
-            "definition": "jobs/after_tax.py (v2-spec A6): itemised Indian costs and slippage, "
-                          "capital gains tax by lot with advance tax; statistics from the value "
-                          "if everything were sold at each mark after exit costs and tax; "
-                          "benchmark: a growth-option Nifty 500 index fund held throughout",
-            "source": "after_tax/summary.json",
-            "strategy_cagr": tax["after_tax_stats"]["strategy"]["cagr"],
-            "strategy_max_drawdown": tax["after_tax_stats"]["strategy"]["max_drawdown"],
-            "strategy_end_liquidated": tax["strategy"]["after_tax_end_liquidated"],
-            "benchmark_growth_cagr": tax["after_tax_stats"]["benchmark_growth"]["cagr"],
-            "benchmark_growth_end_liquidated": tax["benchmark"]["growth"]["after_tax_end_liquidated"],
-            "excess_cagr_vs_growth_fund": tax["after_tax_stats"]["strategy_vs_benchmark_growth"]["cagr_diff"],
-            "information_ratio_vs_growth_fund":
-                tax["after_tax_stats"]["strategy_vs_benchmark_growth"]["information_ratio"],
-            "tax_paid_during": tax["strategy"]["tax_paid_during"],
-            "itemised_costs_total": tax["strategy"]["itemised_costs_total"],
-            "flat_costs_total": tax["strategy"]["flat_costs_total"],
-            "capital": tax["strategy"]["capital"],
-            "replay_check_worst_rel": tax["replay_check"]["worst_rel_error"]},
+        "after_tax": after_tax_section(tax),
         "monkey_test": figure(docs, "verify", "monkey_test",
                               "random portfolios through the same engine and rules, ranking "
                               "order randomised (persistent and fresh), 500 draws each"),
@@ -235,6 +273,13 @@ def build(run: Path, label: str) -> dict:
                                   "Bailey and Lopez de Prado deflated Sharpe, three variance "
                                   "choices"),
     }
+    if is_v2_run(docs):
+        # A v2 run is measured, not a baseline: the bars it would set for a later
+        # challenger are left out. Its verdict against v1 is jobs/v2_verdict.py's.
+        rep["engine"] = "v2"
+        rep["verdict"] = "data/backtest/v2_verdict.json (jobs/v2_verdict.py)"
+        for fig in rep["a2_acceptance_quantities"].values():
+            fig.pop("bar_for_v2", None)
     return rep
 
 
@@ -243,30 +288,9 @@ def pct(x: float, nd: int = 1, sign: bool = False) -> str:
     return f"{x * 100:+.{nd}f}%" if sign else f"{x * 100:.{nd}f}%"
 
 
-def markdown(rep: dict) -> str:
-    a = rep["a2_acceptance_quantities"]
-    mdd, so, ca = a["max_drawdown"], a["sortino"], a["calmar"]
-    al, at, tu, cp = (a["iima_alpha_annual"], a["iima_alpha_t"],
-                      a["turnover_annual_incl_initial"], a["capacity_p95_share_of_turnover"])
-    ft = rep["final_test"]["value"]
-    fa = rep["factor_attribution"]["with_quality_factor"]
-    rows = rep["benchmarks"]["rows"]
-    tax = rep["after_tax"]
-    mk = rep["monkey_test"]["value"]
-    L = []
-    L.append(f"# Baseline for the v2 comparison: {rep['label']}")
-    L.append("")
-    L.append(f"Run `{Path(rep['run']).as_posix()}`, {rep['period']['start']} to {rep['period']['end']}, measured "
-             "open to open. Every number below is read from the measurement jobs' own output "
-             "files, listed with their definitions in `baseline_report.json`.")
-    L.append("")
-    L.append(f"The strategy grew {pct(rep['headline']['strategy_cagr']['value'])} a year, the "
-             f"same universe equally weighted {pct(rep['headline']['universe_ew_cagr']['value'])}.")
-    L.append("")
-    L.append("## What v2 has to beat (A2)")
-    L.append("")
-    L.append("v2 replaces v1 only if all five hold.")
-    L.append("")
+def a2_table_v1(mdd, so, ca, al, at, tu, cp) -> list[str]:
+    """The baseline's A2 section: v1's five quantities and the bar each sets for v2."""
+    L = ["## What v2 has to beat (A2)", "", "v2 replaces v1 only if all five hold.", ""]
     L.append("| Measure | v1 | v2 must be |")
     L.append("|---|---|---|")
     L.append(f"| Maximum drawdown | {pct(mdd['value'], 2)} | no deeper than "
@@ -292,6 +316,61 @@ def markdown(rep: dict) -> str:
              f"{cp['decision_date_fills_only']['value_pct']:.3f}%, but that version would not "
              f"see v2's second and third tranches.")
     L.append("")
+    return L
+
+
+def a2_table_v2(rep, mdd, so, ca, al, at, tu, cp) -> list[str]:
+    """A v2 run's A2 section: its five quantities; the verdict is elsewhere."""
+    L = ["## The five A2 quantities", "",
+         f"The same quantities v1's baseline reports, measured on this run. Whether they clear "
+         f"v1's bars is decided in `{rep['verdict'].split(' ')[0]}`.", "",
+         f"| Measure | {rep['label']} |", "|---|---|",
+         f"| Maximum drawdown | {pct(mdd['value'], 2)} |",
+         f"| Sortino (quantstats) | {so['value']:.3f} |",
+         f"| Calmar (quantstats) | {ca['value']:.3f} |",
+         f"| IIMA four-factor alpha, a year | {pct(al['value'], 2)} |",
+         f"| t-statistic of that alpha | {at['value']:.2f} |",
+         f"| Turnover a year, incl. initial build | {tu['value']:.3f}x |",
+         f"| Capacity: 95th percentile trade as a share of 60-session median turnover | "
+         f"{pct(cp['value'], 3)} |", "",
+         f"The alpha is over {al['months']['n']} months ({al['months']['first']} to "
+         f"{al['months']['last']}), the last month IIMA has published. The t-statistic is "
+         f"statsmodels' Newey-West figure without a small-sample correction; with it, as the "
+         f"project's hand-written regression does, it is "
+         f"{at['hand_rolled_with_small_sample_correction']['value']:.2f}. Capacity counts all "
+         f"{cp['trades']} buys and sells, every tranche included, against the stock's median "
+         f"turnover in the 60 sessions before each trade; counting only trades filled on a "
+         f"decision date gives {cp['decision_date_fills_only']['value_pct']:.3f}%, which "
+         f"leaves out the second and third tranches.", ""]
+    return L
+
+
+def markdown(rep: dict) -> str:
+    a = rep["a2_acceptance_quantities"]
+    mdd, so, ca = a["max_drawdown"], a["sortino"], a["calmar"]
+    al, at, tu, cp = (a["iima_alpha_annual"], a["iima_alpha_t"],
+                      a["turnover_annual_incl_initial"], a["capacity_p95_share_of_turnover"])
+    ft = rep["final_test"]["value"]
+    fa = rep["factor_attribution"]["with_quality_factor"]
+    rows = rep["benchmarks"]["rows"]
+    tax = rep["after_tax"]
+    mk = rep["monkey_test"]["value"]
+    v2 = rep.get("engine") == "v2"
+    L = []
+    L.append(f"# Measurements of a v2 run: {rep['label']}" if v2 else
+             f"# Baseline for the v2 comparison: {rep['label']}")
+    L.append("")
+    L.append(f"Run `{Path(rep['run']).as_posix()}`, {rep['period']['start']} to {rep['period']['end']}, measured "
+             "open to open. Every number below is read from the measurement jobs' own output "
+             "files, listed with their definitions in `baseline_report.json`.")
+    L.append("")
+    L.append(f"The strategy grew {pct(rep['headline']['strategy_cagr']['value'])} a year, the "
+             f"same universe equally weighted {pct(rep['headline']['universe_ew_cagr']['value'])}.")
+    L.append("")
+    if v2:
+        L.extend(a2_table_v2(rep, mdd, so, ca, al, at, tu, cp))
+    else:
+        L.extend(a2_table_v1(mdd, so, ca, al, at, tu, cp))
     L.append("## Is the alpha a quality premium?")
     L.append("")
     m, r = fa["margin"], fa["roce"]
@@ -353,7 +432,15 @@ def markdown(rep: dict) -> str:
              f"{max(abs(rows[c]['whole_period']['excess_cagr'] - rows[c.replace('_no_overnight', '')]['whole_period']['excess_cagr']) for c in rows if c.endswith('_no_overnight')) * 100:.2f} "
              "percentage points.")
     L.append("")
-    L.append(f"## Held-back part, {ft['clock']}")
+    if v2:
+        L.append(f"## After the in-sample end, {ft['clock']}")
+        L.append("")
+        L.append("Not a held-back test for v2: its rules were written after v1's full-period "
+                 "results were known, so it reuses data v1 has already seen (v2-spec, 'How it "
+                 "gets tested, and the honest problem'). The split is reported only because v1's "
+                 "report has it.")
+    else:
+        L.append(f"## Held-back part, {ft['clock']}")
     L.append("")
     idx = ft.get("index_tri_cagr_pct", {})
     L.append(f"Strategy {ft['strategy_cagr_pct']:.2f}% a year, equal weight "
@@ -365,11 +452,15 @@ def markdown(rep: dict) -> str:
     L.append("")
     L.append("## After Indian costs and tax")
     L.append("")
-    L.append(f"From Rs {tax['capital']:,.0f}, the strategy would have been worth "
-             f"Rs {tax['strategy_end_liquidated']:,.0f} if sold at the end after costs and tax, "
-             f"{pct(tax['strategy_cagr'])} a year; a Nifty 500 index fund Rs "
-             f"{tax['benchmark_growth_end_liquidated']:,.0f}, {pct(tax['benchmark_growth_cagr'])} "
-             f"a year. The strategy paid Rs {tax['tax_paid_during']:,.0f} in tax along the way.")
+    if tax.get("not_measured"):
+        L.append(f"Not measured: {tax['reason']}.")
+    else:
+        L.append(f"From Rs {tax['capital']:,.0f}, the strategy would have been worth "
+                 f"Rs {tax['strategy_end_liquidated']:,.0f} if sold at the end after costs and "
+                 f"tax, {pct(tax['strategy_cagr'])} a year; a Nifty 500 index fund Rs "
+                 f"{tax['benchmark_growth_end_liquidated']:,.0f}, "
+                 f"{pct(tax['benchmark_growth_cagr'])} a year. The strategy paid "
+                 f"Rs {tax['tax_paid_during']:,.0f} in tax along the way.")
     L.append("")
     if "persistent" in mk:
         p, f = mk["persistent"], mk["fresh"]
@@ -395,9 +486,11 @@ def main(argv=None) -> int:
     ap.add_argument("--run", default="data/backtest/v1_final", help="backtest output folder")
     ap.add_argument("--label", default=None, help="name for this run (default: folder name)")
     ap.add_argument("--name", default="baseline_report", help="output file stem")
+    ap.add_argument("--allow-missing", action="append", default=[], choices=OPTIONAL_SOURCES,
+                    help="write the report without this source, marked as not measured")
     args = ap.parse_args(argv)
     run = Path(args.run)
-    rep = build(run, args.label or run.name)
+    rep = build(run, args.label or run.name, tuple(args.allow_missing))
     (run / f"{args.name}.json").write_text(json.dumps(rep, indent=2), encoding="utf-8")
     (run / f"{args.name}.md").write_text(markdown(rep) + "\n", encoding="utf-8")
     print(f"written to {run / args.name}.json and .md")

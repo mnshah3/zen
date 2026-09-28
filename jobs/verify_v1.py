@@ -39,6 +39,15 @@ and first checks that doing so reproduces the run's own NAV to 1e-9: if it
 does not, the random portfolios would not be the same machinery, and the job
 stops rather than compare unlike things.
 
+A v2 run (metrics.json says engine 'v2', written by jobs/backtest_v2.py) is
+replayed through the v2 engine instead, with zen.portfolio.engine_v2.Replay:
+the run's own config, decision dates, ranks, trend-filter cash (re-derived and
+checked against decisions.csv), panel and, in variant (b), A1's table. The same
+1e-9 reproduction is required first. The random orders are drawn exactly as
+for v1 (same seed, same two modes); only the ranking order changes, and the
+universe, band, sector cap, each name's own sigma for sizing, the trend cash,
+the tranches, A1, costs, dividends and the forced exit are the run's own.
+
     python -m jobs.verify_v1 --run data/backtest/v1_final --label v1   # 500 monkeys
     python -m jobs.verify_v1 --run ... --monkeys 0                       # files only
 
@@ -208,6 +217,74 @@ def monkeys(engine, panel, ranks, decisions, cfg, is_end, n_draws: int, mode: st
     return np.array(out), np.array(turn)
 
 
+# ---------------------------------------------------------------- monkey test, v2 runs
+MONKEY_MODES = ("persistent", "fresh")
+
+
+def is_v2(metrics_json: dict) -> bool:
+    """A run of the v2 engine: jobs/backtest_v2.py writes engine 'v2' into metrics.json."""
+    return (metrics_json or {}).get("engine") == "v2"
+
+
+def load_replay_v2(con, r: dict, static=None):
+    """The v2 engine exactly as the run used it (zen.portfolio.engine_v2.Replay.from_run)."""
+    from zen.portfolio import engine_v2
+
+    return engine_v2.Replay.from_run(con, r["run"], static=static)
+
+
+def reproduce_v2(replay, nav_strategy: pd.Series) -> float:
+    """Re-run the v2 strategy through the replay and require the run's own NAV,
+    mark for mark, to REPRODUCE_TOL. Anything else (another number of marks, a
+    larger difference, a NaN) means the replay is not the run's machinery, and
+    random portfolios drawn through it would compare unlike things."""
+    worst = float(replay.reproduce(np.asarray(nav_strategy, dtype=float)))
+    if not np.isfinite(worst) or worst > REPRODUCE_TOL:
+        raise RuntimeError(f"v2 replay differs from nav.csv by up to {worst:.3g}: not the same "
+                           "machinery; the monkey test would be meaningless")
+    return worst
+
+
+def shuffled_ranks_v2(byd: dict, universe: list, rng, mode: str) -> pd.DataFrame:
+    """One draw's ranks for a v2 run: v1's two randomisations (see `monkeys`),
+    drawn from the generator in the same order, applied to the rank column only.
+    `byd` maps each decision date to its rows of the run's ranks (in date order)."""
+    if mode not in MONKEY_MODES:
+        raise ValueError(f"mode must be one of {MONKEY_MODES}, not {mode!r}")
+    if mode == "persistent":
+        score = pd.Series(rng.random(len(universe)), index=universe)
+    parts = []
+    for D, g in byd.items():
+        r = g.copy()
+        if mode == "persistent":
+            r["rank"] = score.reindex(r["symbol"].to_numpy()).rank(method="first").astype(int).values
+        else:
+            r["rank"] = rng.permutation(np.arange(1, len(r) + 1))
+        parts.append(r)
+    return pd.concat(parts, ignore_index=True)
+
+
+def monkeys_v2(replay, n_draws: int, mode: str = "persistent", seed: int = 20260922):
+    """Random portfolios through the v2 engine (engine_v2.Replay): the ranking order
+    randomised as `monkeys` does for v1, everything else the run's own.
+
+    Returns (cagr per draw, annual one-way turnover per draw)."""
+    rng = np.random.default_rng(seed)
+    ranks = replay.ranks
+    byd = {D: g for D, g in ranks.groupby("D")}
+    universe = sorted(ranks["symbol"].unique())
+    out, turn = [], []
+    for i in range(n_draws):
+        shuffled = shuffled_ranks_v2(byd, universe, rng, mode)
+        res = replay.simulate(replay.chooser(shuffled), log_trades=True)
+        nav = res.nav.set_index("date")["nav"]
+        out.append(cagr(nav))
+        turn.append(turnover(res.trades, nav))
+        if (i + 1) % 100 == 0:
+            log.info("  %d/%d monkeys (%s, v2)", i + 1, n_draws, mode)
+    return np.array(out), np.array(turn)
+
+
 # ---------------------------------------------------------------- turnover
 def turnover(trades: pd.DataFrame, nav: pd.Series) -> float:
     """Annual one-way turnover: half of everything bought and sold, per year,
@@ -297,6 +374,10 @@ def capacity(trades: pd.DataFrame, ranks: pd.DataFrame) -> dict:
     liq["D"] = pd.to_datetime(liq["D"])
     j = t.merge(liq, on=["symbol", "D"], how="left")
     j["share_of_turnover"] = j[value_col].abs() / j["median_turnover_60"]
+    if "side" in j:
+        # A cancellation trades nothing. Dated on a decision date (v2 cancels pending
+        # tranches there) its zero value would count as a perfectly liquid trade.
+        j.loc[j["side"] == "cancel", "share_of_turnover"] = np.nan
     ok = j["share_of_turnover"].dropna()
     return {"trades": int(len(j)), "matched": int(len(ok)),
             "median_pct_of_daily_turnover": round(float(ok.median() * 100), 3),
@@ -468,13 +549,25 @@ def run_verify(run: Path, label: str, n_monkeys: int, out: Path, con=None) -> di
     monkey = {"strategy_cagr_pct": round(s_cagr * 100, 2),
               "strategy_turnover": round(turnover(r["trades"], s_nav), 2)}
     if n_monkeys > 0:
-        engine, cfg, is_end, decisions, ranks, panel, rft = load_engine(con, r)
-        _, worst = reproduce(engine, panel, ranks, decisions, cfg, is_end, rft, s_nav)
+        if is_v2(r["metrics"]):
+            replay = load_replay_v2(con, r, static)
+            worst = reproduce_v2(replay, s_nav)
+            monkey["engine"] = ("v2: zen.portfolio.engine_v2.Replay (the run's config, decision "
+                                "dates, ranks, trend-filter cash, panel and A1 table)")
+
+            def draw(mode):
+                return monkeys_v2(replay, n_monkeys, mode=mode)
+        else:
+            engine, cfg, is_end, decisions, ranks, panel, rft = load_engine(con, r)
+            _, worst = reproduce(engine, panel, ranks, decisions, cfg, is_end, rft, s_nav)
+
+            def draw(mode):
+                return monkeys(engine, panel, ranks, decisions, cfg, is_end, n_monkeys,
+                               mode=mode, run_final_test=rft)
         monkey["replay_worst_rel"] = worst
         for mode in ("persistent", "fresh"):
             log.info("monkey test (%s): %d random portfolios", mode, n_monkeys)
-            mk, mt = monkeys(engine, panel, ranks, decisions, cfg, is_end, n_monkeys, mode=mode,
-                             run_final_test=rft)
+            mk, mt = draw(mode)
             monkey[mode] = {"draws": int(len(mk)),
                             "random_median_pct": round(float(np.median(mk)) * 100, 2),
                             "random_p5_pct": round(float(np.percentile(mk, 5)) * 100, 2),

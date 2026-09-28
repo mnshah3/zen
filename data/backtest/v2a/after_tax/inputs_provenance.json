@@ -1,0 +1,34 @@
+{
+ "database": {
+  "path": "C:\\Users\\mnsha\\projects\\zen\\data\\zen.duckdb",
+  "used_for_rebuild": true,
+  "size_bytes": 1934897152,
+  "mtime_utc": "2026-09-27T18:45:33.165085+00:00"
+ },
+ "files": {
+  "dividends": {
+   "path": "data\\backtest\\v2a\\after_tax\\dividends.csv",
+   "sha256": "f9ffcf523c2d01c9972da1608a629455782bd5c1aa68ad1708f832181b41f15a"
+  },
+  "close_px": {
+   "path": "data\\backtest\\v2a\\after_tax\\close_px.csv",
+   "sha256": "964dfeb19e590731f6dc7888d82695c9174d514e0acce015734de027a473f5de"
+  },
+  "end_px": {
+   "path": "data\\backtest\\v2a\\after_tax\\end_px.csv",
+   "sha256": "69ce0d0ac4cc5c5ddb56d4460c5602e1a035e99b17984dcac446d1fa715dc340"
+  },
+  "bench": {
+   "path": "data\\backtest\\v2a\\after_tax\\bench.csv",
+   "sha256": "6891acdbcdb8b4d1b8f2d554d5fd49a06dff8a44bf199c7cd30920423c1ae8c0"
+  },
+  "bonuses": {
+   "path": "data\\backtest\\v2a\\after_tax\\bonuses.csv",
+   "sha256": "0f28105e1321942a53da90362c07bdea2291f8a38156536a93a1772b628d6844"
+  },
+  "corp_unmodelled": {
+   "path": "data\\backtest\\v2a\\after_tax\\corp_unmodelled.csv",
+   "sha256": "829d12f42bb32b618e2771c06a1259a4aaee1614d6d52f35c7f4c38bf2ae7c52"
+  }
+ }
+}

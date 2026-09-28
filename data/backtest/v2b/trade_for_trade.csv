@@ -1,0 +1,5 @@
+portfolio,symbol,entry,exit,exit_reason,bz_sessions,first_bz,last_bz,exit_fill_in_bz
+universe_ew,PTC,2022-08-16,2022-11-15,rebalance,14,2022-10-25,2022-11-15,True
+universe_ew,GMBREW,2019-06-03,2025-08-18,rebalance,21,2020-12-28,2021-01-25,False
+universe_ew,POKARNA,2019-08-16,2025-08-18,rebalance,24,2020-12-28,2021-01-29,False
+universe_ew,REFEX,2020-11-17,2026-09-18,open_at_end,16,2020-12-28,2021-01-18,False

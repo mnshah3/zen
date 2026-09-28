@@ -1,0 +1,177 @@
+{
+  "run": "data\\backtest\\v2b",
+  "label": "v2b",
+  "period": {
+    "start": "2019-02-15",
+    "end": "2026-09-18"
+  },
+  "headline": {
+    "strategy_cagr_pct": 19.93,
+    "universe_ew_cagr_pct": 23.82
+  },
+  "monkey_test": {
+    "strategy_cagr_pct": 19.93,
+    "strategy_turnover": 1.95,
+    "engine": "v2: zen.portfolio.engine_v2.Replay (the run's config, decision dates, ranks, trend-filter cash, panel and A1 table)",
+    "replay_worst_rel": 2.220446049250313e-16,
+    "persistent": {
+      "draws": 500,
+      "random_median_pct": 17.04,
+      "random_p5_pct": 10.84,
+      "random_p95_pct": 24.23,
+      "random_best_pct": 34.26,
+      "random_median_turnover": 0.65,
+      "strategy_percentile": 74.8,
+      "beaten_by_n_random": 126
+    },
+    "fresh": {
+      "draws": 500,
+      "random_median_pct": 10.14,
+      "random_p5_pct": 5.47,
+      "random_p95_pct": 14.87,
+      "random_best_pct": 17.82,
+      "random_median_turnover": 3.56,
+      "strategy_percentile": 100.0,
+      "beaten_by_n_random": 0
+    }
+  },
+  "attribution": {
+    "strategy": {
+      "months": 82,
+      "first_month": "2019-03",
+      "last_month": "2025-12",
+      "alpha_monthly_pct": 0.06605701781498219,
+      "alpha_annual_pct": 0.7955704940711295,
+      "alpha_t": 0.16747491596410405,
+      "r_squared": 0.6678232142641538,
+      "loadings": {
+        "market": 0.639,
+        "size_SMB": 0.239,
+        "value_HML": 0.289,
+        "momentum_WML": 0.246
+      },
+      "loading_t": {
+        "market": 9.07,
+        "size_SMB": 2.41,
+        "value_HML": 3.4,
+        "momentum_WML": 3.13
+      }
+    },
+    "universe_ew": {
+      "months": 82,
+      "first_month": "2019-03",
+      "last_month": "2025-12",
+      "alpha_monthly_pct": 0.2865341093303635,
+      "alpha_annual_pct": 3.4931173984247055,
+      "alpha_t": 3.0598384461256285,
+      "r_squared": 0.9811236122248151,
+      "loadings": {
+        "market": 0.955,
+        "size_SMB": 0.666,
+        "value_HML": 0.337,
+        "momentum_WML": -0.063
+      },
+      "loading_t": {
+        "market": 44.5,
+        "size_SMB": 20.72,
+        "value_HML": 8.41,
+        "momentum_WML": -2.01
+      }
+    }
+  },
+  "deflated_sharpe": {
+    "sharpe_annual": 1.221491477945329,
+    "n_obs": 1872,
+    "n_trials": 197,
+    "prob_null_sampling_variance": 0.7054216426383055,
+    "prob_cross_trial_variance_36_grid": 0.9843584726953789,
+    "prob_grid_trials_only": 0.8702061375084109,
+    "grid_file": "data/backtest/v1/grid.csv",
+    "note": "probability of genuine skill after the search; the spread between these is the honest answer, not any single one"
+  },
+  "subperiods": {
+    "in_sample": {
+      "strategy_cagr_pct": 16.03,
+      "universe_ew_cagr_pct": 24.45,
+      "diff_pct": -8.41,
+      "from_open": "2019-02-15",
+      "to_open": "2023-02-15"
+    },
+    "final_test": {
+      "strategy_cagr_pct": 24.42,
+      "universe_ew_cagr_pct": 23.13,
+      "diff_pct": 1.29,
+      "from_open": "2023-02-15",
+      "to_open": "2026-09-18"
+    }
+  },
+  "by_year": {
+    "2019": {
+      "strategy_pct": 4.4,
+      "universe_ew_pct": -2.7
+    },
+    "2020": {
+      "strategy_pct": 22.4,
+      "universe_ew_pct": 32.7
+    },
+    "2021": {
+      "strategy_pct": 52.4,
+      "universe_ew_pct": 77.2
+    },
+    "2022": {
+      "strategy_pct": -5.4,
+      "universe_ew_pct": 8.8
+    },
+    "2023": {
+      "strategy_pct": 43.1,
+      "universe_ew_pct": 53.9
+    },
+    "2024": {
+      "strategy_pct": 32.1,
+      "universe_ew_pct": 31.8
+    },
+    "2025": {
+      "strategy_pct": 11.9,
+      "universe_ew_pct": -8.0
+    },
+    "2026": {
+      "strategy_pct": 1.9,
+      "universe_ew_pct": 8.9
+    }
+  },
+  "turnover_annual_incl_initial": 1.9493126706904227,
+  "capacity": {
+    "trades": 912,
+    "matched": 482,
+    "median_pct_of_daily_turnover": 0.016,
+    "p95_pct": 0.402,
+    "max_pct": 2.094,
+    "trades_over_5pct": 0,
+    "note": "at the backtest's Rs 5 lakh. Ten times the capital multiplies these by ten."
+  },
+  "capacity_all_trades": {
+    "trades": 897,
+    "zero_turnover_trades": 0,
+    "p95": 0.003727581608585755,
+    "p95_pct": 0.373,
+    "median_pct": 0.016,
+    "max_pct": 11.289,
+    "trades_over_5pct": 2,
+    "p95_by_side": {
+      "buy": 0.003038341139900353,
+      "sell": 0.005284216253126041
+    },
+    "trades_by_reason": {
+      "rebalance": 358,
+      "tranche1": 186,
+      "tranche2": 185,
+      "tranche3": 167,
+      "no trade for 20 sessions": 1
+    },
+    "definition": "every buy and sell in trades.csv (cancellations excluded): |value| / median daily turnover of the stock over the 60 sessions before the trade date, untraded sessions as 0 (universe rule 2's measure, recomputed at each trade date); 95th percentile, linear interpolation; at the backtest's Rs 5 lakh starting capital",
+    "check_against_ranks": {
+      "matched": 482,
+      "worst_rel": 0.0
+    }
+  }
+}

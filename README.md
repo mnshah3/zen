@@ -574,15 +574,36 @@ and the database definitions drifting apart. Strategy v1 is built, tested on
 its held-back years, re-run on the repaired archive and measured, as
 [above](#the-result).
 
-**Next:** strategy v2 is specified and pre-registered in
-[research/strategy/v2-spec.md](research/strategy/v2-spec.md): approved on 22
-September 2026, with amendments and clarifications up to 26 September, all
-written before any v2 figure existed. It has not been built or run yet, so
-there are no v2 results. It will be measured by the same jobs on the same
-archive as v1, and replaces v1 only if it clears every bar set in its
-amendment A2, which
-[`baseline_report.md`](data/backtest/v1_final/baseline_report.md) lists
-against v1's figures.
+**Strategy v2 was tested and did not replace v1.** v2 added my own hard
+filters (ROCE at least 10%, debt to equity below 1.5, market cap above Rs 100
+crore, P/E at most 70), twelve positions, a graded cash filter, three-tranche
+entry, volatility sizing and NSE sector caps, all fixed in
+[research/strategy/v2-spec.md](research/strategy/v2-spec.md) before it was
+run. Two engines, one written from the spec without reading the other, built
+it and agree on every holding, trade and daily value; the rules and code were
+public on GitHub before the one full-period run. It passed two of the five
+bars set in advance and failed three
+([`data/backtest/v2_verdict.md`](data/backtest/v2_verdict.md), every figure
+with its file and key):
+
+| | v1 | v2 |
+|---|---|---|
+| Growth a year | 30.7% | 21.3% |
+| Worst fall | -33.6% | -26.3% |
+| Sortino, Calmar | 1.94, 0.94 | 1.74, 0.83 |
+| IIMA four-factor alpha a year, t | 5.7%, 1.21 | 1.1%, 0.23 |
+| After costs and tax, a year | 25.8% | 17.8% |
+
+It made the ride smoother, as intended, but gave up too much return to do it,
+so v1 stays. Buying every stock that passed v2's filters in equal amounts made
+23.8% a year, more than v2's own ranking and sizing on top of them: the filters
+picked a strong pool, and the extra machinery cost return. The technical entry
+rule it tested (variant b) bought slightly cheaper but ended lower and was not
+adopted. v2 is weaker evidence than v1 by construction: its rules were written
+after v1's results were known, so it had no unseen data to be tested on.
+
+**Next:** tracking v1 forward, on data that does not exist yet, is the only
+evidence still to be had.
 
 **Limits I'd rather state than have found:**
 

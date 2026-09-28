@@ -1,7 +1,9 @@
 # Strategy v2: proposed rules
 
-**Approved on 2026-09-22 and not yet tested.** Nothing here has been run. The
-rules were fixed before any measurement, which is the entire point.
+**Approved on 2026-09-22 and tested once on 2026-09-28: v2 did not replace v1.**
+The rules were fixed before any measurement, which is the entire point. The
+result, with every figure's source, is in data/backtest/v2_verdict.md and in
+"Result" at the end of this file.
 
 ## Why v2 exists
 
@@ -602,3 +604,25 @@ and the code looked its date up in a calendar that ends there. Such a tranche
 is now reported as pending at the end ("scheduled after the end"), with its cash
 held in the NAV as cash, which is what the simulation already did. No rule or
 figure changed; a test reproduces the case. The run was then made once.
+
+## Result (2026-09-28)
+
+Each variant was run once on the full period (15 Feb 2019 to the 18 Sep 2026
+open) by both engines, which agree on every figure; both runs are recorded in
+state/trials.jsonl. data/backtest/v2_verdict.md (written by jobs/v2_verdict.py
+and recomputed independently) gives every figure with its file and key.
+
+- **A1:** variant (b) bought new positions slightly cheaper (1.0332 against
+  1.0376 of the prior close) but grew 19.93% a year against (a)'s 21.25% and
+  its worst fall was 0.003 points deeper, so rules 2 and 3 fail and (a),
+  staggered entry, is adopted.
+- **A2, v2 (a) against v1:** rule 1 holds (worst fall -26.34% against
+  -33.56%, 7.22 points shallower) and rule 5 holds (capacity 0.418% against
+  1.159%); rule 2 fails (Sortino 1.744 against 1.936, Calmar 0.826 against
+  0.937), rule 3 fails (alpha 1.07% a year at t 0.23 against 5.74% at t 1.21)
+  and rule 4 fails narrowly (turnover 1.986 against 1.958). **v1 stays.**
+
+What the owner uses is v1. v2's lessons, stated without being tested again:
+the hard filters picked a strong pool (its equal-weight universe grew 23.8% a
+year), and the ranking, sizing and cash filter on top of it cost return while
+cutting the worst fall.

@@ -1,0 +1,164 @@
+{
+  "run": "data\\backtest\\v2b",
+  "label": "v2b",
+  "clock": {
+    "first": "2019-02-15 09:15:00",
+    "last": "2026-09-18 09:15:00",
+    "marks": 1873
+  },
+  "full_period": {
+    "strategy": {
+      "cagr_calendar_pct": 19.93,
+      "cagr_quantstats_pct": 20.4,
+      "sharpe": 1.221,
+      "sortino": 1.689,
+      "calmar": 0.774,
+      "max_drawdown_pct": -26.34,
+      "volatility_pct": 16.3,
+      "exact": {
+        "cagr_calendar": 0.19927694446441957,
+        "cagr_quantstats": 0.20400216234350177,
+        "sharpe": 1.221491477945329,
+        "sortino": 1.6889068490734769,
+        "calmar": 0.7744616645413184,
+        "max_drawdown": -0.2634115692018453,
+        "volatility": 0.16298275928611927,
+        "n_returns": 1872
+      }
+    },
+    "universe_ew": {
+      "cagr_calendar_pct": 23.82,
+      "cagr_quantstats_pct": 24.4,
+      "sharpe": 1.183,
+      "sortino": 1.571,
+      "calmar": 0.507,
+      "max_drawdown_pct": -48.16,
+      "volatility_pct": 20.21,
+      "exact": {
+        "cagr_calendar": 0.23821910788073075,
+        "cagr_quantstats": 0.24395765778894019,
+        "sharpe": 1.182523525879996,
+        "sortino": 1.5709414075772343,
+        "calmar": 0.5065968052278325,
+        "max_drawdown": -0.48156177708073933,
+        "volatility": 0.20214027808835802,
+        "n_returns": 1872
+      }
+    }
+  },
+  "regression_full_period": {
+    "strategy": {
+      "months": 82,
+      "first": "2019-03",
+      "last": "2025-12",
+      "alpha_annual_pct": 0.8,
+      "alpha_t": 0.17,
+      "r_squared": 0.668,
+      "loadings": {
+        "MF": 0.639,
+        "SMB": 0.239,
+        "HML": 0.289,
+        "WML": 0.246
+      },
+      "loading_t": {
+        "MF": 9.36,
+        "SMB": 2.48,
+        "HML": 3.51,
+        "WML": 3.23
+      },
+      "exact": {
+        "alpha_monthly": 0.0006605701781498402,
+        "alpha_annual": 0.007955704940711295,
+        "alpha_t": 0.17282689684885444,
+        "alpha_p": 0.8627874945369343,
+        "r_squared": 0.6678232142641538
+      },
+      "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+    },
+    "universe_ew": {
+      "months": 82,
+      "first": "2019-03",
+      "last": "2025-12",
+      "alpha_annual_pct": 3.49,
+      "alpha_t": 3.16,
+      "r_squared": 0.981,
+      "loadings": {
+        "MF": 0.955,
+        "SMB": 0.666,
+        "HML": 0.337,
+        "WML": -0.063
+      },
+      "loading_t": {
+        "MF": 45.92,
+        "SMB": 21.39,
+        "HML": 8.68,
+        "WML": -2.07
+      },
+      "exact": {
+        "alpha_monthly": 0.002865341093303657,
+        "alpha_annual": 0.034931173984247055,
+        "alpha_t": 3.1576214292058684,
+        "alpha_p": 0.0015906197478479495,
+        "r_squared": 0.9811236122248151
+      },
+      "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+    }
+  },
+  "agreement_with_metrics_json": {
+    "cagr": {
+      "library": 0.19927694446441957,
+      "project": 0.19927694446441957,
+      "difference": 0.0,
+      "agree": true
+    },
+    "max_drawdown": {
+      "library": -0.2634115692018453,
+      "project": -0.2634115692018453,
+      "difference": 0.0,
+      "agree": true
+    },
+    "volatility": {
+      "library": 0.16298275928611927,
+      "project": 0.16298275928611927,
+      "difference": 0.0,
+      "agree": true
+    },
+    "sharpe_rf0": {
+      "library": 1.221491477945329,
+      "project": 1.2214914779453292,
+      "difference": -2.220446049250313e-16,
+      "agree": true
+    }
+  },
+  "final_test": {
+    "clock": "open of 2023-02-15 to open of 2026-09-18",
+    "source": "in_sample_end_open.csv",
+    "years": 3.589322381930185,
+    "strategy_cagr_pct": 24.42,
+    "universe_ew_cagr_pct": 23.13,
+    "margin_interval": {
+      "point_pct": 1.29,
+      "lo90_pct": -11.02,
+      "hi90_pct": 12.59,
+      "share_of_draws_le_zero": 0.42,
+      "sessions_per_year": 246.3,
+      "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
+    },
+    "index_tri_cagr_pct": {
+      "nifty500": 13.5,
+      "midcap150": 21.42,
+      "smallcap250": 21.88,
+      "momentum30": 15.92,
+      "value50": 27.3,
+      "quality30": 11.34,
+      "lowvol30": 12.75,
+      "alpha50": 24.45,
+      "momentum30_no_overnight": 15.92,
+      "value50_no_overnight": 27.23,
+      "quality30_no_overnight": 11.34,
+      "lowvol30_no_overnight": 12.75,
+      "alpha50_no_overnight": 24.45
+    },
+    "index_clock": "TRI at the open of the in-sample end (in_sample_end_open.csv) to TRI at the open of the end date (nav.csv's last mark); *_no_overnight: no overnight move where NSE printed no open"
+  }
+}

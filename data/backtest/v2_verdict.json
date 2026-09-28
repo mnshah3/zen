@@ -1,0 +1,1364 @@
+{
+  "title": "Strategy v2 against v1: A1's adoption, A2's verdict and safeguard 2",
+  "generated_utc": "2026-09-28T18:57:23+00:00",
+  "spec": "research/strategy/v2-spec.md (A1, A2, A4-A6, the Clarification before the v2 build and the Clarification to A2's measurement)",
+  "runs": {
+    "v1": "data/backtest/v1_final",
+    "a": "data/backtest/v2a",
+    "b": "data/backtest/v2b"
+  },
+  "period": {
+    "start": "2019-02-15 09:15:00",
+    "end": "2026-09-18 09:15:00",
+    "marks": 1873
+  },
+  "libraries": {
+    "quantstats": "0.0.81",
+    "statsmodels": "0.15.0",
+    "arch": "8.0.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "readings": {
+    "cscv_blocks": "the returns between consecutive marks of nav.csv, cut into 10 contiguous blocks by numpy.array_split",
+    "cscv_rule": "rule 1 on the new positions whose decision date's close falls in the half (V-weighted mean of a1.json's ratio); rules 2 and 3 on the half's returns joined in time order: compounded return (same number of returns for both variants, so any annualisation keeps the order) and maximum drawdown with the starting value as a peak",
+    "cscv_worse": "the pick does worse on the test half when the A1 rule applied to the test half picks the other variant; per-criterion outcomes reported beside it",
+    "windows_3y": "a window starts at every mark and ends at the last mark dated on or before the same calendar date three years later; calendar-day CAGR (365.25), maximum drawdown from the window's first value"
+  },
+  "a1_adoption": {
+    "definition": "research/strategy/v2-spec.md A1 and the Clarification before the v2 build ('A1's adoption test, made exact'): (b) is adopted only if all three hold, otherwise (a)",
+    "rules": [
+      {
+        "rule": 1,
+        "name": "entry_price",
+        "text": "the average price paid for new positions, relative to the adjusted close on the session before each position's decision date, is lower in (b)",
+        "a": {
+          "value": 1.0375862940041123,
+          "source": "data/backtest/v2a/a1.json: v_weighted_ratio"
+        },
+        "b": {
+          "value": 1.03319401900634,
+          "source": "data/backtest/v2b/a1.json: v_weighted_ratio"
+        },
+        "holds": true,
+        "b_minus_a": -0.004392274997772283
+      },
+      {
+        "rule": 2,
+        "name": "cagr",
+        "text": "annual return (full-period CAGR) is not lower in (b)",
+        "a": {
+          "value": 0.212527529587077,
+          "source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.cagr_calendar"
+        },
+        "b": {
+          "value": 0.19927694446441957,
+          "source": "data/backtest/v2b/libcheck.json: full_period.strategy.exact.cagr_calendar"
+        },
+        "holds": false,
+        "b_minus_a": -0.013250585122657421
+      },
+      {
+        "rule": 3,
+        "name": "max_drawdown",
+        "text": "maximum drawdown (full period) is not worse in (b)",
+        "a": {
+          "value": -0.26337823329426624,
+          "source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.max_drawdown"
+        },
+        "b": {
+          "value": -0.2634115692018453,
+          "source": "data/backtest/v2b/libcheck.json: full_period.strategy.exact.max_drawdown"
+        },
+        "holds": false,
+        "b_minus_a": -3.333590757903515e-05
+      }
+    ],
+    "all_hold": false,
+    "adopted": "a",
+    "adopted_run": "data/backtest/v2a",
+    "check": "rules 2 and 3 equal each run's metrics.json (cagr, max_drawdown) and rule 1 its metrics.json a1.v_weighted_ratio, to 1e-9"
+  },
+  "a2_verdict": {
+    "definition": "research/strategy/v2-spec.md A2 as the Clarification to A2's measurement (2026-09-26) fixes it: v2 replaces v1 only if all five hold",
+    "variant": "a",
+    "run": "data/backtest/v2a",
+    "against": "data/backtest/v1_final/baseline_report.json",
+    "rules": [
+      {
+        "rule": 1,
+        "text": "maximum drawdown over the full period at least 5 percentage points smaller than v1's",
+        "parts": {
+          "max_drawdown": {
+            "v1": -0.33559777608094643,
+            "v2": -0.26337823329426624,
+            "v2_must_be_at_least": -0.28559777608094644,
+            "passes": true,
+            "improvement_points": 7.221954278668019,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.max_drawdown.value",
+            "v2_source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.max_drawdown",
+            "bar_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.max_drawdown.bar_for_v2.v2_max_drawdown_must_be_at_least"
+          }
+        },
+        "passes": true
+      },
+      {
+        "rule": 2,
+        "text": "Sortino and Calmar, as quantstats computes them, both higher than v1's",
+        "parts": {
+          "sortino": {
+            "v1": 1.9363344957714033,
+            "v2": 1.7442326722661208,
+            "passes": false,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.sortino.value",
+            "v2_source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.sortino"
+          },
+          "calmar": {
+            "v1": 0.9367149608263851,
+            "v2": 0.8261671366906148,
+            "passes": false,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.calmar.value",
+            "v2_source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.calmar"
+          }
+        },
+        "passes": false
+      },
+      {
+        "rule": 3,
+        "text": "IIMA four-factor annual alpha (statsmodels, Newey-West HAC 3 lags, no small-sample correction) not lower than v1's over the same months, and its t-statistic not lower than v1's",
+        "parts": {
+          "iima_alpha_annual": {
+            "v1": 0.057400092243896195,
+            "v2": 0.010697701687015782,
+            "passes": false,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.iima_alpha_annual.value",
+            "v2_source": "data/backtest/v2a/libcheck.json: regression_full_period.strategy.exact.alpha_annual"
+          },
+          "iima_alpha_t": {
+            "v1": 1.206375509599602,
+            "v2": 0.23200502278826882,
+            "passes": false,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.iima_alpha_t.value",
+            "v2_source": "data/backtest/v2a/libcheck.json: regression_full_period.strategy.exact.alpha_t"
+          }
+        },
+        "months": {
+          "n": 82,
+          "first": "2019-03",
+          "last": "2025-12"
+        },
+        "passes": false
+      },
+      {
+        "rule": 4,
+        "text": "annual one-way turnover, including the initial build, not higher than v1's",
+        "parts": {
+          "turnover_annual_incl_initial": {
+            "v1": 1.957688967486525,
+            "v2": 1.9857241403777202,
+            "passes": false,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.turnover_annual_incl_initial.value",
+            "v2_source": "data/backtest/v2a/verify.json: turnover_annual_incl_initial"
+          }
+        },
+        "passes": false
+      },
+      {
+        "rule": 5,
+        "text": "capacity not worse: the 95th percentile, over every buy and sell, of trade value over the stock's 60-session median turnover, at Rs 5 lakh, not higher than v1's",
+        "parts": {
+          "capacity_p95_share_of_turnover": {
+            "v1": 0.011588713558527565,
+            "v2": 0.004184507294789671,
+            "passes": true,
+            "v1_source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.capacity_p95_share_of_turnover.value",
+            "v2_source": "data/backtest/v2a/verify.json: capacity_all_trades.p95"
+          }
+        },
+        "passes": true
+      }
+    ],
+    "rules_passed": [
+      1,
+      5
+    ],
+    "rules_failed": [
+      2,
+      3,
+      4
+    ],
+    "all_pass": false,
+    "verdict": "v1 stays: v2 does not replace it",
+    "hand_rolled_t_beside": {
+      "v1": {
+        "value": 1.1690173275982823,
+        "source": "data/backtest/v1_final/verify.json: attribution.strategy.alpha_t"
+      },
+      "v2": {
+        "value": 0.2248204556302166,
+        "source": "data/backtest/v2a/verify.json: attribution.strategy.alpha_t"
+      },
+      "note": "the n/(n-k) corrected t, reported beside the A2 figure, not used for it"
+    },
+    "capacity_decision_date_fills_beside": {
+      "v1": {
+        "value": 0.976,
+        "source": "data/backtest/v1_final/verify.json: capacity.p95_pct"
+      },
+      "v2": {
+        "value": 0.434,
+        "source": "data/backtest/v2a/verify.json: capacity.p95_pct"
+      },
+      "note": "percent; only fills on a decision date, which misses v2's later tranches"
+    }
+  },
+  "safeguard_2": {
+    "cscv_a1_choice": {
+      "splits": 252,
+      "blocks": 10,
+      "training_blocks": 5,
+      "block_sizes": [
+        188,
+        188,
+        187,
+        187,
+        187,
+        187,
+        187,
+        187,
+        187,
+        187
+      ],
+      "picked_b_on_training": 0,
+      "pbo": 0.0,
+      "worse_splits": 0,
+      "pbo_when_a_picked": 0.0,
+      "pbo_when_b_picked": null,
+      "beside": {
+        "share_pick_lower_test_growth": 0.011904761904761904,
+        "share_pick_deeper_test_drawdown": 0.5,
+        "share_pick_higher_test_entry_ratio": 0.8611111111111112,
+        "note": "each criterion alone on the test half, for the pick against the other variant; not the probability of overfitting, which uses the whole rule"
+      },
+      "logit_note": "with two variants the pick's relative rank on the test half is 2/3 or 1/3, a logit of +ln 2 or -ln 2, so the probability of backtest overfitting is simply the share of splits in which it is -ln 2",
+      "whole_period_pick": "a",
+      "check": "the same rule on all ten blocks picks the adopted variant, as the run files' figures do",
+      "positions_per_block": [
+        30,
+        16,
+        18,
+        16,
+        12,
+        20,
+        22,
+        18,
+        17,
+        17
+      ],
+      "definition": "combinatorially symmetric cross-validation (Bailey, Borwein, Lopez de Prado and Zhu 2017) of A1's choice, as the Clarification before the v2 build defines it",
+      "splits_file": "data/backtest/v2_verdict_cscv_splits.csv"
+    },
+    "bootstrap": {
+      "method": "jobs/libcheck_v1.margin_interval, the bootstrap v1's final test used: 90% interval for the difference in compound annual growth of two NAV series, each draw rebuilding both paths from the same resampled returns",
+      "v2_minus_v1": {
+        "point_pct": -9.42,
+        "lo90_pct": -17.98,
+        "hi90_pct": -2.29,
+        "share_of_draws_le_zero": 0.986,
+        "sessions_per_year": 246.7,
+        "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
+      },
+      "v2_minus_its_universe_ew": {
+        "point_pct": -2.57,
+        "lo90_pct": -14.84,
+        "hi90_pct": 8.63,
+        "share_of_draws_le_zero": 0.662,
+        "sessions_per_year": 246.7,
+        "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
+      },
+      "v1_minus_its_universe_ew": {
+        "point_pct": 8.65,
+        "lo90_pct": -3.63,
+        "hi90_pct": 20.41,
+        "share_of_draws_le_zero": 0.121,
+        "sessions_per_year": 246.7,
+        "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
+      },
+      "clock": "2019-02-15 09:15:00 to 2026-09-18 09:15:00, 1873 marks, the same for both",
+      "note": "percentage points of compound annual growth; stationary bootstrap of paired returns between marks, mean block 21, 5000 draws, seed 7 (jobs/libcheck_v1.margin_interval, as v1's final test used)"
+    },
+    "windows_3y": {
+      "windows": 1135,
+      "first": {
+        "start": "2019-02-15 09:15:00",
+        "end": "2022-02-15 15:30:00"
+      },
+      "last": {
+        "start": "2023-09-18 15:30:00",
+        "end": "2026-09-18 09:15:00"
+      },
+      "v2_cagr": {
+        "min": 0.15398529674462558,
+        "median": 0.26534255288438713,
+        "max": 0.34337323425404653
+      },
+      "v1_cagr": {
+        "min": 0.2182318690646574,
+        "median": 0.3936336277997421,
+        "max": 0.5457052467577903
+      },
+      "cagr_diff": {
+        "min": -0.21218112524183952,
+        "median": -0.1251071879176755,
+        "max": -0.050475481237484576
+      },
+      "v2_max_drawdown": {
+        "min": -0.26337823329426635,
+        "median": -0.2376998456662014,
+        "max": -0.21314962187556274
+      },
+      "v1_max_drawdown": {
+        "min": -0.3355977760809461,
+        "median": -0.3070946031790509,
+        "max": -0.23775882486325706
+      },
+      "share_v2_cagr_higher": 0.0,
+      "share_v2_drawdown_shallower": 1.0,
+      "share_v2_drawdown_shallower_by_5_points": 0.690748898678414,
+      "worst_v2_cagr": {
+        "value": 0.15398529674462558,
+        "start": "2022-04-11 15:30:00",
+        "end": "2025-04-11 15:30:00"
+      },
+      "worst_v1_cagr": {
+        "value": 0.2182318690646574,
+        "start": "2022-03-03 15:30:00",
+        "end": "2025-03-03 15:30:00"
+      },
+      "note": "windows overlap almost entirely from one to the next, so they are far from independent: this is a description of the path, not a sample",
+      "file": "data/backtest/v2_verdict_windows_3y.csv"
+    }
+  },
+  "factor_indices": {
+    "definition": "excess CAGR = strategy CAGR minus the index's total-return CAGR (calendar days) on the run's clock (jobs/attribution.py); the live part starts at the close of the index's first live date (Clarification to A4). 'tie' where the reading with no overnight move at endpoints NSE printed no open for gives the other answer",
+    "no_overnight_sensitivity": {
+      "largest_change_in_excess": 0.00034673154740860745,
+      "ties": []
+    },
+    "rows": {
+      "nifty500": {
+        "name": "Nifty 500",
+        "factor_index": false,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.nifty500.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.1435963064485799,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.nifty500.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.06893122313849709,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.nifty500.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.46680963944778064,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.nifty500.whole_period.information_ratio"
+          },
+          "v2": "beat",
+          "v1_excess_cagr": {
+            "value": 0.16317516986479963,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.nifty500.whole_period.excess_cagr"
+          }
+        }
+      },
+      "midcap150": {
+        "name": "Nifty Midcap 150",
+        "factor_index": false,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.midcap150.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.20375421997673882,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.midcap150.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.008773309610338176,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.midcap150.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.0363407650148187,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.midcap150.whole_period.information_ratio"
+          },
+          "v2": "beat",
+          "v1_excess_cagr": {
+            "value": 0.10301725633664072,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.midcap150.whole_period.excess_cagr"
+          }
+        }
+      },
+      "smallcap250": {
+        "name": "Nifty Smallcap 250",
+        "factor_index": false,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.smallcap250.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.2014038673942702,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.smallcap250.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.011123662192806805,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.smallcap250.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.030527673464813818,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.smallcap250.whole_period.information_ratio"
+          },
+          "v2": "beat",
+          "v1_excess_cagr": {
+            "value": 0.10536760891910935,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.smallcap250.whole_period.excess_cagr"
+          }
+        }
+      },
+      "momentum30": {
+        "name": "Nifty200 Momentum 30",
+        "factor_index": true,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.15620723999441521,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.056320289592661776,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.2996624963786605,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.whole_period.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": 0.05597355804525317,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30_no_overnight.whole_period.excess_cagr"
+          },
+          "v2": "beat",
+          "v1_excess_cagr": {
+            "value": 0.15056423631896432,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.momentum30.whole_period.excess_cagr"
+          }
+        },
+        "live_part": {
+          "from": "2020-10-12 close",
+          "to": "2026-09-18 open",
+          "years": 5.932922655715264,
+          "v2_cagr": {
+            "value": 0.25095892730253655,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.live_part.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.17469510133889732,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.live_part.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.07626382596363923,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.live_part.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.4319118707144709,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30.live_part.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": 0.07626382596363923,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.momentum30_no_overnight.live_part.excess_cagr"
+          },
+          "v2": "beat",
+          "live_start": "2020-10-12",
+          "basis": "first date NSE printed an open (fallback)",
+          "too_short_to_judge": false,
+          "same_as_whole_period": false,
+          "v1_excess_cagr": {
+            "value": 0.18922563583335683,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.momentum30.live_part.excess_cagr"
+          }
+        }
+      },
+      "value50": {
+        "name": "Nifty500 Value 50",
+        "factor_index": true,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.22973743814597447,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": -0.01720990855889748,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": -0.176391954416882,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.whole_period.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": -0.017543024410864305,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50_no_overnight.whole_period.excess_cagr"
+          },
+          "v2": "did not beat",
+          "v1_excess_cagr": {
+            "value": 0.07703403816740506,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.value50.whole_period.excess_cagr"
+          }
+        },
+        "live_part": {
+          "from": "2024-12-16 close",
+          "to": "2026-09-18 open",
+          "years": 1.754962354551677,
+          "v2_cagr": {
+            "value": 0.05585096783582966,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.live_part.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.059010886767663084,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.live_part.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": -0.0031599189318334275,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.live_part.excess_cagr"
+          },
+          "information_ratio": {
+            "value": -0.0754243811111204,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50.live_part.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": -0.0031599189318334275,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.value50_no_overnight.live_part.excess_cagr"
+          },
+          "v2": "did not beat",
+          "live_start": "2024-12-16",
+          "basis": "first date NSE printed an open (fallback)",
+          "too_short_to_judge": true,
+          "same_as_whole_period": false,
+          "v1_excess_cagr": {
+            "value": 0.010973639497697363,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.value50.live_part.excess_cagr"
+          }
+        }
+      },
+      "quality30": {
+        "name": "Nifty200 Quality 30",
+        "factor_index": true,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.11908946806780718,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.09343806151926981,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.6150899689826366,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.whole_period.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": 0.09343806151926981,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30_no_overnight.whole_period.excess_cagr"
+          },
+          "v2": "beat",
+          "v1_excess_cagr": {
+            "value": 0.18768200824557235,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.quality30.whole_period.excess_cagr"
+          }
+        },
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.live_part.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.11908946806780718,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.live_part.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.09343806151926981,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.live_part.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.6150899689826366,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30.live_part.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": 0.09343806151926981,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.quality30_no_overnight.live_part.excess_cagr"
+          },
+          "v2": "beat",
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "too_short_to_judge": false,
+          "same_as_whole_period": true,
+          "v1_excess_cagr": {
+            "value": 0.18768200824557235,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.quality30.live_part.excess_cagr"
+          }
+        }
+      },
+      "lowvol30": {
+        "name": "Nifty100 Low Volatility 30",
+        "factor_index": true,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.1330856323314682,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.0794418972556088,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.5425736891521993,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.whole_period.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": 0.0794418972556088,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30_no_overnight.whole_period.excess_cagr"
+          },
+          "v2": "beat",
+          "v1_excess_cagr": {
+            "value": 0.17368584398191134,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.lowvol30.whole_period.excess_cagr"
+          }
+        },
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.live_part.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.1330856323314682,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.live_part.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": 0.0794418972556088,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.live_part.excess_cagr"
+          },
+          "information_ratio": {
+            "value": 0.5425736891521993,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30.live_part.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": 0.0794418972556088,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.lowvol30_no_overnight.live_part.excess_cagr"
+          },
+          "v2": "beat",
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "too_short_to_judge": false,
+          "same_as_whole_period": true,
+          "v1_excess_cagr": {
+            "value": 0.17368584398191134,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.lowvol30.live_part.excess_cagr"
+          }
+        }
+      },
+      "alpha50": {
+        "name": "Nifty Alpha 50",
+        "factor_index": true,
+        "whole_period": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.whole_period.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.23478006873123936,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.whole_period.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": -0.022252539144162364,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.whole_period.excess_cagr"
+          },
+          "information_ratio": {
+            "value": -0.20416532706739404,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.whole_period.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": -0.022252539144162364,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50_no_overnight.whole_period.excess_cagr"
+          },
+          "v2": "did not beat",
+          "v1_excess_cagr": {
+            "value": 0.07199140758214018,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.alpha50.whole_period.excess_cagr"
+          }
+        },
+        "live_part": {
+          "from": "2019-02-15 open",
+          "to": "2026-09-18 open",
+          "years": 7.5893223819301845,
+          "v2_cagr": {
+            "value": 0.212527529587077,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.live_part.strategy_cagr"
+          },
+          "index_cagr": {
+            "value": 0.23478006873123936,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.live_part.benchmark_cagr"
+          },
+          "excess_cagr": {
+            "value": -0.022252539144162364,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.live_part.excess_cagr"
+          },
+          "information_ratio": {
+            "value": -0.20416532706739404,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50.live_part.information_ratio"
+          },
+          "excess_cagr_no_overnight": {
+            "value": -0.022252539144162364,
+            "source": "data/backtest/v2a/attribution.json: benchmarks.alpha50_no_overnight.live_part.excess_cagr"
+          },
+          "v2": "did not beat",
+          "live_start": "on or before 2019-02-15",
+          "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+          "too_short_to_judge": false,
+          "same_as_whole_period": true,
+          "v1_excess_cagr": {
+            "value": 0.07199140758214018,
+            "source": "data/backtest/v1_final/attribution.json: benchmarks.alpha50.live_part.excess_cagr"
+          }
+        }
+      }
+    }
+  },
+  "quality_factor": {
+    "definition": "IIMA four-factor regression without and with the A5 quality factor, on identical months checked in code (jobs/attribution.py); margin and ROCE versions are the headline, '_no_r6' (loss-makers kept) robustness only",
+    "rows": {
+      "margin": {
+        "label": "headline: operating margin, whole period",
+        "months": 82,
+        "first": "2019-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "v2": {
+          "without_alpha": {
+            "value": 0.010697701687015782,
+            "source": "data/backtest/v2a/attribution.json: quality.margin.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 0.23200502278826882,
+            "source": "data/backtest/v2a/attribution.json: quality.margin.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.006873939496169212,
+            "source": "data/backtest/v2a/attribution.json: quality.margin.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 0.1526264782857985,
+            "source": "data/backtest/v2a/attribution.json: quality.margin.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.125,
+            "source": "data/backtest/v2a/attribution.json: quality.margin.with_quality.loadings.QUAL"
+          }
+        },
+        "v1": {
+          "without_alpha": {
+            "value": 0.057400092243896195,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 1.206375509599602,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.05035517370485976,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 1.1098752902410982,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.221,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin.with_quality.loadings.QUAL"
+          }
+        }
+      },
+      "roce": {
+        "label": "headline: ROCE, its months from March 2023",
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "v2": {
+          "without_alpha": {
+            "value": 0.07304044415657218,
+            "source": "data/backtest/v2a/attribution.json: quality.roce.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 1.3253335467603395,
+            "source": "data/backtest/v2a/attribution.json: quality.roce.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.001170634300283524,
+            "source": "data/backtest/v2a/attribution.json: quality.roce.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 0.02025736381479791,
+            "source": "data/backtest/v2a/attribution.json: quality.roce.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.759,
+            "source": "data/backtest/v2a/attribution.json: quality.roce.with_quality.loadings.QUAL"
+          }
+        },
+        "v1": {
+          "without_alpha": {
+            "value": 0.112727476763129,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 2.6133998964256464,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.03310121256493903,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 0.7355021723731365,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.815,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce.with_quality.loadings.QUAL"
+          }
+        }
+      },
+      "margin_no_r6": {
+        "label": "robustness only: margin, loss-makers kept",
+        "months": 82,
+        "first": "2019-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "v2": {
+          "without_alpha": {
+            "value": 0.010697701687015782,
+            "source": "data/backtest/v2a/attribution.json: quality.margin_no_r6.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 0.23200502278826882,
+            "source": "data/backtest/v2a/attribution.json: quality.margin_no_r6.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.003136328632936447,
+            "source": "data/backtest/v2a/attribution.json: quality.margin_no_r6.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 0.0703878417286057,
+            "source": "data/backtest/v2a/attribution.json: quality.margin_no_r6.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.238,
+            "source": "data/backtest/v2a/attribution.json: quality.margin_no_r6.with_quality.loadings.QUAL"
+          }
+        },
+        "v1": {
+          "without_alpha": {
+            "value": 0.057400092243896195,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin_no_r6.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 1.206375509599602,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin_no_r6.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.05181937915865431,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin_no_r6.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 1.1332168860664646,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin_no_r6.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.169,
+            "source": "data/backtest/v1_final/attribution.json: quality.margin_no_r6.with_quality.loadings.QUAL"
+          }
+        }
+      },
+      "roce_no_r6": {
+        "label": "robustness only: ROCE, loss-makers kept",
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "identical_months": true,
+        "v2": {
+          "without_alpha": {
+            "value": 0.07304044415657218,
+            "source": "data/backtest/v2a/attribution.json: quality.roce_no_r6.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 1.3253335467603395,
+            "source": "data/backtest/v2a/attribution.json: quality.roce_no_r6.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.023146013766454976,
+            "source": "data/backtest/v2a/attribution.json: quality.roce_no_r6.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 0.41446223303871604,
+            "source": "data/backtest/v2a/attribution.json: quality.roce_no_r6.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.904,
+            "source": "data/backtest/v2a/attribution.json: quality.roce_no_r6.with_quality.loadings.QUAL"
+          }
+        },
+        "v1": {
+          "without_alpha": {
+            "value": 0.112727476763129,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce_no_r6.without_quality.exact.alpha_annual"
+          },
+          "without_t": {
+            "value": 2.6133998964256464,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce_no_r6.without_quality.exact.alpha_t"
+          },
+          "with_alpha": {
+            "value": 0.06970243526554487,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce_no_r6.with_quality.exact.alpha_annual"
+          },
+          "with_t": {
+            "value": 1.5342289494846992,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce_no_r6.with_quality.exact.alpha_t"
+          },
+          "quality_loading": {
+            "value": 0.751,
+            "source": "data/backtest/v1_final/attribution.json: quality.roce_no_r6.with_quality.loadings.QUAL"
+          }
+        }
+      }
+    }
+  },
+  "after_tax": {
+    "definition": "jobs/after_tax.py (v2-spec A6): itemised Indian costs and slippage, capital gains tax by lot with advance tax; statistics from the value if everything were sold at each mark after exit costs and tax; benchmark: a growth-option Nifty 500 index fund held throughout",
+    "capital": {
+      "value": 500000.0,
+      "source": "data/backtest/v2a/after_tax/summary.json: strategy.capital"
+    },
+    "v2": {
+      "cagr": {
+        "value": 0.1779133883772157,
+        "source": "data/backtest/v2a/after_tax/summary.json: after_tax_stats.strategy.cagr"
+      },
+      "max_drawdown": {
+        "value": -0.24804184279678299,
+        "source": "data/backtest/v2a/after_tax/summary.json: after_tax_stats.strategy.max_drawdown"
+      },
+      "end_value_liquidated": {
+        "value": 1732495.8559368614,
+        "source": "data/backtest/v2a/after_tax/summary.json: strategy.after_tax_end_liquidated"
+      },
+      "tax_paid_during": {
+        "value": 244510.0,
+        "source": "data/backtest/v2a/after_tax/summary.json: strategy.tax_paid_during"
+      },
+      "excess_cagr_vs_fund": {
+        "value": 0.047106335872874494,
+        "source": "data/backtest/v2a/after_tax/summary.json: after_tax_stats.strategy_vs_benchmark_growth.cagr_diff"
+      },
+      "replay_check_worst_rel": {
+        "value": 1.1524113187793566e-15,
+        "source": "data/backtest/v2a/after_tax/summary.json: replay_check.worst_rel_error"
+      }
+    },
+    "v1": {
+      "cagr": {
+        "value": 0.2581459917974167,
+        "source": "data/backtest/v1_final/after_tax/summary.json: after_tax_stats.strategy.cagr"
+      },
+      "max_drawdown": {
+        "value": -0.3167294246435364,
+        "source": "data/backtest/v1_final/after_tax/summary.json: after_tax_stats.strategy.max_drawdown"
+      },
+      "end_value_liquidated": {
+        "value": 2856676.130720831,
+        "source": "data/backtest/v1_final/after_tax/summary.json: strategy.after_tax_end_liquidated"
+      },
+      "tax_paid_during": {
+        "value": 457950.0,
+        "source": "data/backtest/v1_final/after_tax/summary.json: strategy.tax_paid_during"
+      },
+      "excess_cagr_vs_fund": {
+        "value": 0.1273389392930755,
+        "source": "data/backtest/v1_final/after_tax/summary.json: after_tax_stats.strategy_vs_benchmark_growth.cagr_diff"
+      },
+      "replay_check_worst_rel": {
+        "value": 6.556434465765934e-16,
+        "source": "data/backtest/v1_final/after_tax/summary.json: replay_check.worst_rel_error"
+      }
+    },
+    "fund": {
+      "cagr": {
+        "value": 0.13080705250434121,
+        "source": "data/backtest/v2a/after_tax/summary.json: after_tax_stats.benchmark_growth.cagr"
+      },
+      "end_value_liquidated": {
+        "value": 1271020.6485363792,
+        "source": "data/backtest/v2a/after_tax/summary.json: benchmark.growth.after_tax_end_liquidated"
+      },
+      "max_drawdown": {
+        "value": -0.3723989218367586,
+        "source": "data/backtest/v2a/after_tax/summary.json: after_tax_stats.benchmark_growth.max_drawdown"
+      }
+    },
+    "v2_minus_v1_cagr": -0.080232603420201,
+    "v2_beats_fund": true,
+    "v2_beats_v1": false
+  },
+  "monkey_test": {
+    "replay_worst_rel": {
+      "value": 2.220446049250313e-16,
+      "source": "data/backtest/v2a/verify.json: monkey_test.replay_worst_rel"
+    },
+    "engine": "v2: zen.portfolio.engine_v2.Replay (the run's config, decision dates, ranks, trend-filter cash, panel and A1 table)",
+    "persistent": {
+      "draws": {
+        "value": 500,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.draws"
+      },
+      "random_median_pct": {
+        "value": 17.05,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.random_median_pct"
+      },
+      "random_p95_pct": {
+        "value": 24.41,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.random_p95_pct"
+      },
+      "random_best_pct": {
+        "value": 34.42,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.random_best_pct"
+      },
+      "random_median_turnover": {
+        "value": 0.65,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.random_median_turnover"
+      },
+      "strategy_percentile": {
+        "value": 83.8,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.strategy_percentile"
+      },
+      "beaten_by_n_random": {
+        "value": 81,
+        "source": "data/backtest/v2a/verify.json: monkey_test.persistent.beaten_by_n_random"
+      },
+      "v1": {
+        "strategy_percentile": {
+          "value": 96.0,
+          "source": "data/backtest/v1_final/verify.json: monkey_test.persistent.strategy_percentile"
+        },
+        "beaten_by_n_random": {
+          "value": 20,
+          "source": "data/backtest/v1_final/verify.json: monkey_test.persistent.beaten_by_n_random"
+        }
+      }
+    },
+    "fresh": {
+      "draws": {
+        "value": 500,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.draws"
+      },
+      "random_median_pct": {
+        "value": 10.61,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.random_median_pct"
+      },
+      "random_p95_pct": {
+        "value": 15.42,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.random_p95_pct"
+      },
+      "random_best_pct": {
+        "value": 18.99,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.random_best_pct"
+      },
+      "random_median_turnover": {
+        "value": 3.62,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.random_median_turnover"
+      },
+      "strategy_percentile": {
+        "value": 100.0,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.strategy_percentile"
+      },
+      "beaten_by_n_random": {
+        "value": 0,
+        "source": "data/backtest/v2a/verify.json: monkey_test.fresh.beaten_by_n_random"
+      },
+      "v1": {
+        "strategy_percentile": {
+          "value": 98.6,
+          "source": "data/backtest/v1_final/verify.json: monkey_test.fresh.strategy_percentile"
+        },
+        "beaten_by_n_random": {
+          "value": 7,
+          "source": "data/backtest/v1_final/verify.json: monkey_test.fresh.beaten_by_n_random"
+        }
+      }
+    },
+    "strategy_cagr_pct": {
+      "value": 21.25,
+      "source": "data/backtest/v2a/verify.json: monkey_test.strategy_cagr_pct"
+    },
+    "strategy_turnover": {
+      "value": 1.99,
+      "source": "data/backtest/v2a/verify.json: monkey_test.strategy_turnover"
+    }
+  },
+  "deflated_sharpe": {
+    "sharpe_annual": {
+      "value": 1.2608567395995613,
+      "source": "data/backtest/v2a/verify.json: deflated_sharpe.sharpe_annual"
+    },
+    "n_obs": {
+      "value": 1872,
+      "source": "data/backtest/v2a/verify.json: deflated_sharpe.n_obs"
+    },
+    "n_trials": {
+      "value": 197,
+      "source": "data/backtest/v2a/verify.json: deflated_sharpe.n_trials"
+    },
+    "prob_null_sampling_variance": {
+      "value": 0.7396706227843158,
+      "source": "data/backtest/v2a/verify.json: deflated_sharpe.prob_null_sampling_variance"
+    },
+    "prob_cross_trial_variance_36_grid": {
+      "value": 0.9879556295650235,
+      "source": "data/backtest/v2a/verify.json: deflated_sharpe.prob_cross_trial_variance_36_grid"
+    },
+    "prob_grid_trials_only": {
+      "value": 0.8905758615030426,
+      "source": "data/backtest/v2a/verify.json: deflated_sharpe.prob_grid_trials_only"
+    },
+    "v1": {
+      "sharpe_annual": {
+        "value": 1.3923969032307002,
+        "source": "data/backtest/v1_final/verify.json: deflated_sharpe.sharpe_annual"
+      },
+      "n_trials": {
+        "value": 195,
+        "source": "data/backtest/v1_final/verify.json: deflated_sharpe.n_trials"
+      },
+      "prob_null_sampling_variance": {
+        "value": 0.838148444046608,
+        "source": "data/backtest/v1_final/verify.json: deflated_sharpe.prob_null_sampling_variance"
+      },
+      "prob_cross_trial_variance_36_grid": {
+        "value": 0.9953138106738788,
+        "source": "data/backtest/v1_final/verify.json: deflated_sharpe.prob_cross_trial_variance_36_grid"
+      },
+      "prob_grid_trials_only": {
+        "value": 0.9418809695990067,
+        "source": "data/backtest/v1_final/verify.json: deflated_sharpe.prob_grid_trials_only"
+      }
+    },
+    "trials_file": {
+      "path": "state/trials.jsonl",
+      "records_now": 197,
+      "strategy_v2_records_at_lines": [
+        196,
+        197
+      ],
+      "both_v2_runs_counted": true,
+      "count_matches_the_file_now": true
+    }
+  },
+  "variants": {
+    "a": {
+      "max_drawdown": {
+        "value": -0.26337823329426624,
+        "source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.max_drawdown"
+      },
+      "sortino": {
+        "value": 1.7442326722661208,
+        "source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.sortino"
+      },
+      "calmar": {
+        "value": 0.8261671366906148,
+        "source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.calmar"
+      },
+      "iima_alpha_annual": {
+        "value": 0.010697701687015782,
+        "source": "data/backtest/v2a/libcheck.json: regression_full_period.strategy.exact.alpha_annual"
+      },
+      "iima_alpha_t": {
+        "value": 0.23200502278826882,
+        "source": "data/backtest/v2a/libcheck.json: regression_full_period.strategy.exact.alpha_t"
+      },
+      "turnover_annual_incl_initial": {
+        "value": 1.9857241403777202,
+        "source": "data/backtest/v2a/verify.json: turnover_annual_incl_initial"
+      },
+      "capacity_p95_share_of_turnover": {
+        "value": 0.004184507294789671,
+        "source": "data/backtest/v2a/verify.json: capacity_all_trades.p95"
+      },
+      "cagr": {
+        "value": 0.212527529587077,
+        "source": "data/backtest/v2a/libcheck.json: full_period.strategy.exact.cagr_calendar"
+      },
+      "a1_entry_ratio": {
+        "value": 1.0375862940041123,
+        "source": "data/backtest/v2a/a1.json: v_weighted_ratio"
+      },
+      "universe_ew_cagr": {
+        "value": 0.23821910788073075,
+        "source": "data/backtest/v2a/libcheck.json: full_period.universe_ew.exact.cagr_calendar"
+      }
+    },
+    "b": {
+      "max_drawdown": {
+        "value": -0.2634115692018453,
+        "source": "data/backtest/v2b/libcheck.json: full_period.strategy.exact.max_drawdown"
+      },
+      "sortino": {
+        "value": 1.6889068490734769,
+        "source": "data/backtest/v2b/libcheck.json: full_period.strategy.exact.sortino"
+      },
+      "calmar": {
+        "value": 0.7744616645413184,
+        "source": "data/backtest/v2b/libcheck.json: full_period.strategy.exact.calmar"
+      },
+      "iima_alpha_annual": {
+        "value": 0.007955704940711295,
+        "source": "data/backtest/v2b/libcheck.json: regression_full_period.strategy.exact.alpha_annual"
+      },
+      "iima_alpha_t": {
+        "value": 0.17282689684885444,
+        "source": "data/backtest/v2b/libcheck.json: regression_full_period.strategy.exact.alpha_t"
+      },
+      "turnover_annual_incl_initial": {
+        "value": 1.9493126706904227,
+        "source": "data/backtest/v2b/verify.json: turnover_annual_incl_initial"
+      },
+      "capacity_p95_share_of_turnover": {
+        "value": 0.003727581608585755,
+        "source": "data/backtest/v2b/verify.json: capacity_all_trades.p95"
+      },
+      "cagr": {
+        "value": 0.19927694446441957,
+        "source": "data/backtest/v2b/libcheck.json: full_period.strategy.exact.cagr_calendar"
+      },
+      "a1_entry_ratio": {
+        "value": 1.03319401900634,
+        "source": "data/backtest/v2b/a1.json: v_weighted_ratio"
+      },
+      "universe_ew_cagr": {
+        "value": 0.23821910788073075,
+        "source": "data/backtest/v2b/libcheck.json: full_period.universe_ew.exact.cagr_calendar"
+      }
+    },
+    "v1": {
+      "max_drawdown": {
+        "value": -0.33559777608094643,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.max_drawdown.value"
+      },
+      "sortino": {
+        "value": 1.9363344957714033,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.sortino.value"
+      },
+      "calmar": {
+        "value": 0.9367149608263851,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.calmar.value"
+      },
+      "iima_alpha_annual": {
+        "value": 0.057400092243896195,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.iima_alpha_annual.value"
+      },
+      "iima_alpha_t": {
+        "value": 1.206375509599602,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.iima_alpha_t.value"
+      },
+      "turnover_annual_incl_initial": {
+        "value": 1.957688967486525,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.turnover_annual_incl_initial.value"
+      },
+      "capacity_p95_share_of_turnover": {
+        "value": 0.011588713558527565,
+        "source": "data/backtest/v1_final/baseline_report.json: a2_acceptance_quantities.capacity_p95_share_of_turnover.value"
+      },
+      "cagr": {
+        "value": 0.30677147631337953,
+        "source": "data/backtest/v1_final/libcheck.json: full_period.strategy.exact.cagr_calendar"
+      },
+      "universe_ew_cagr": {
+        "value": 0.22029106529638498,
+        "source": "data/backtest/v1_final/libcheck.json: full_period.universe_ew.exact.cagr_calendar"
+      }
+    }
+  },
+  "sources": {
+    "data/backtest/v1_final/after_tax/summary.json": "c7554ad5e5b0cca7246bb4e925898512f231ab2e49e61c508b035d410cd97f0e",
+    "data/backtest/v1_final/attribution.json": "053f434b8627902fc0050fcdd1ce76c49627fbb2f85c79163595428d1b3dbd1f",
+    "data/backtest/v1_final/baseline_report.json": "8cc80149afaf1c63ca4b266746392b85f2cdddb0d9ae8f35773b0dd697ccb584",
+    "data/backtest/v1_final/libcheck.json": "b7fa7aad23578108c1e6117bfc3dcb0084c67f05605136b0c7108fec21cd2f08",
+    "data/backtest/v1_final/nav.csv": "2db03ba74bb45f6dae02e2626de9e51153325c1f7b685fdbe3a82391fb708c88",
+    "data/backtest/v1_final/verify.json": "c1380b25d8347cec8eba84b0a6b8558d465d619439c2c36c0e0c676f35932186",
+    "data/backtest/v2a/a1.json": "a3a701a551d98e553abbf4567e1bd21cfbfd3ced3ce6530cf6a0ca048d2f7134",
+    "data/backtest/v2a/after_tax/summary.json": "298c439038009015096ba6e67a578b1e71fd0c065d19e8fa60af7178c735d1e5",
+    "data/backtest/v2a/attribution.json": "26644f13d96d70a446c469a569158e263b1ff7f96d6769961136c35e91e96ebf",
+    "data/backtest/v2a/baseline_report.json": "67eaa40d5521a0424e6c4b2e50e1b94c782b10c12838637d97e1d0fcf6b60182",
+    "data/backtest/v2a/libcheck.json": "999f4272a0a9988b99dcef84ac7399ec2edb5911b2308d7993f4f4ded1fca28a",
+    "data/backtest/v2a/metrics.json": "d7644a3423de3dbbb90412fcdd9f6fbdca61278de5016a6d28a60f2854f677b9",
+    "data/backtest/v2a/nav.csv": "7ce321e2267b4a91e3ed57bf076a48492510747f9013a9fc1c440173ce79bf19",
+    "data/backtest/v2a/verify.json": "149e92271415afd3edafa71569245d7e20b04e3dca608ef630fa7fa55075a62b",
+    "data/backtest/v2b/a1.json": "00b586291154fbf8dc5e6c1f88ed4eed2cb10bbd48755f1e84f654fcc5140166",
+    "data/backtest/v2b/libcheck.json": "c3e61ff322a2c5da77c7e56f041ff546f8c6d4363dbe049587d9e40720c56e38",
+    "data/backtest/v2b/metrics.json": "0cae1b9ff903f6818d347927cc6c43f10f47fa5156047f93c17991260d84c1a6",
+    "data/backtest/v2b/nav.csv": "11e8d1c30c10b517186e5737356366aabf84c0760d863768f87fccf933b23702",
+    "data/backtest/v2b/verify.json": "839dca2e26906d393fa81dcb3dfa4cb3e58176695ea2d3141c6728a50ee9334f"
+  }
+}

@@ -203,10 +203,8 @@ def positions(episodes: pd.DataFrame, trades: pd.DataFrame) -> dict:
     }
 
 
-def exposure(holdings: pd.DataFrame) -> dict:
-    if holdings.empty or "sector" not in holdings:
-        return {}
-    h = holdings.copy()
+def _exposure_of(h: pd.DataFrame) -> dict:
+    h = h.copy()
     h["sector"] = h["sector"].fillna("(unlabelled)")
     share = h.groupby("sector").size() / len(h) * 100
     # An unlabelled company is its own sector under the rules, so counting the
@@ -219,6 +217,31 @@ def exposure(holdings: pd.DataFrame) -> dict:
             "max_names_in_one_labelled_sector": int(per_date.max()),
             "unlabelled_share_of_slots_pct": round(float((h["sector"] == "(unlabelled)").mean() * 100), 1),
             "distinct_stocks_ever_held": int(h["symbol"].nunique()) if "symbol" in h else None}
+
+
+# The row of a name sold at D, in each engine's holdings.csv: v1 writes an
+# 'action' column (buy / keep / sell), v2 a 'status' column (new / kept / sold).
+SOLD_ROW = {"action": "sell", "status": "sold"}
+
+
+def exposure(holdings: pd.DataFrame) -> dict:
+    """Sector exposure over every row of holdings.csv (the figures v1 has always
+    reported, sold names included), and the same over the names held after each
+    decision date's trades only, `held_after_decision`, which is what the sector
+    cap governs: with the sold rows in, a date whose sold names share a sector
+    with the new ones reads as a breach of the cap that never happened."""
+    if holdings.empty or "sector" not in holdings:
+        return {}
+    out = _exposure_of(holdings)
+    col = next((c for c in SOLD_ROW if c in holdings), None)
+    if col is not None:
+        held = holdings[holdings[col] != SOLD_ROW[col]]
+        if not held.empty:
+            out["held_after_decision"] = {
+                **_exposure_of(held),
+                "definition": f"rows of holdings.csv whose {col} is not '{SOLD_ROW[col]}': the "
+                              "book held after each decision date's trades"}
+    return out
 
 
 def benchmark(clock: pd.DataFrame, col: str = "nifty500") -> tuple[pd.Series, str]:

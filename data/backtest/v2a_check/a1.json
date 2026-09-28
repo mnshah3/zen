@@ -1,0 +1,6125 @@
+{
+  "definition": "The Clarification before the v2 build, \"A1's adoption test, made exact\":\nfor each new position, the unit-weighted average adjusted fill price over\nits tranches (sum of value / sum of adjusted units; costs not included),\ndivided by the adjusted close on the session before its D (EQ/BE, the last\nclose on or before that session, same adjustment basis); averaged over all\nnew positions weighted by V, the target value set at D's open. A position\nwith no filled tranche has no price and is counted, not averaged.",
+  "variant": "a",
+  "v_weighted_relative_price": 1.0375862940041127,
+  "n_new_positions": 186,
+  "n_with_a_fill": 186,
+  "n_with_no_fill": 0,
+  "n_all_three_filled": 180,
+  "positions": [
+    {
+      "D": "2019-02-15",
+      "symbol": "AARTIIND",
+      "V": 20358.541331118297,
+      "weight": 0.040717082662236594,
+      "ref_close_adjusted": 350.2875,
+      "avg_fill_price_adjusted": 371.91693012939527,
+      "relative_price": 1.0617476505139214,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 354.8,
+          "value": 6786.180443706099
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 357.0,
+          "value": 6786.180443706101
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 408.7125,
+          "value": 6786.1804437061
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "BRITANNIA",
+      "V": 27252.357673857572,
+      "weight": 0.054504715347715144,
+      "ref_close_adjusted": 2924.6,
+      "avg_fill_price_adjusted": 3018.6804336782607,
+      "relative_price": 1.0321686499617932,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2945.0,
+          "value": 9084.119224619191
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3128.0,
+          "value": 9084.119224619193
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2989.0,
+          "value": 9084.119224619191
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "COLPAL",
+      "V": 29564.17046603076,
+      "weight": 0.05912834093206152,
+      "ref_close_adjusted": 1248.05,
+      "avg_fill_price_adjusted": 1252.2578284530364,
+      "relative_price": 1.0033715223372752,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1255.0,
+          "value": 9854.72348867692
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1287.9,
+          "value": 9854.72348867692
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1215.95,
+          "value": 9854.723488676922
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "EXIDEIND",
+      "V": 22326.863109724964,
+      "weight": 0.04465372621944993,
+      "ref_close_adjusted": 208.7,
+      "avg_fill_price_adjusted": 218.3454014552704,
+      "relative_price": 1.0462165857943,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 208.5,
+          "value": 7442.287703241654
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 228.45,
+          "value": 7442.287703241653
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 219.0,
+          "value": 7442.287703241656
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "ITC",
+      "V": 29604.76734313663,
+      "weight": 0.05920953468627326,
+      "ref_close_adjusted": 277.9,
+      "avg_fill_price_adjusted": 292.1197740143392,
+      "relative_price": 1.0511686722358375,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 279.0,
+          "value": 9868.255781045544
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 294.6,
+          "value": 9868.255781045546
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 303.85,
+          "value": 9868.255781045542
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "LT",
+      "V": 27955.75261375195,
+      "weight": 0.0559115052275039,
+      "ref_close_adjusted": 1227.6,
+      "avg_fill_price_adjusted": 1323.061954140699,
+      "relative_price": 1.0777630776643037,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1244.0,
+          "value": 9318.584204583984
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1371.0,
+          "value": 9318.584204583984
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1362.0,
+          "value": 9318.584204583982
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "MGL",
+      "V": 23971.865764555714,
+      "weight": 0.04794373152911143,
+      "ref_close_adjusted": 864.25,
+      "avg_fill_price_adjusted": 940.9993849035072,
+      "relative_price": 1.088804610822687,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 868.9,
+          "value": 7990.621921518572
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 955.0,
+          "value": 7990.62192151857
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1010.0,
+          "value": 7990.62192151857
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "NRBBEARING",
+      "V": 16829.04629349508,
+      "weight": 0.033658092586990165,
+      "ref_close_adjusted": 187.5,
+      "avg_fill_price_adjusted": 190.6930951342808,
+      "relative_price": 1.0170298407161644,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 187.9,
+          "value": 5609.682097831694
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 191.25,
+          "value": 5609.682097831694
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 193.0,
+          "value": 5609.682097831695
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "NTPC",
+      "V": 30862.42458692435,
+      "weight": 0.0617248491738487,
+      "ref_close_adjusted": 109.375,
+      "avg_fill_price_adjusted": 125.21753529852766,
+      "relative_price": 1.1448460370151101,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 110.0,
+          "value": 10287.474862308116
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 133.95,
+          "value": 10287.474862308114
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 135.1,
+          "value": 10287.47486230812
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "POWERGRID",
+      "V": 29565.102297790396,
+      "weight": 0.05913020459558079,
+      "ref_close_adjusted": 98.409375,
+      "avg_fill_price_adjusted": 106.45645490369317,
+      "relative_price": 1.081771476586384,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 100.35000000000001,
+          "value": 9855.034099263465
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 110.3625,
+          "value": 9855.034099263465
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 109.2375,
+          "value": 9855.034099263465
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "RATNAMANI",
+      "V": 30287.614892035497,
+      "weight": 0.060575229784071,
+      "ref_close_adjusted": 570.7333333333333,
+      "avg_fill_price_adjusted": 585.6134054709545,
+      "relative_price": 1.0260718469880057,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 565.0333333333333,
+          "value": 10095.871630678499
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 594.4,
+          "value": 10095.871630678499
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 598.5666666666666,
+          "value": 10095.8716306785
+        }
+      }
+    },
+    {
+      "D": "2019-02-15",
+      "symbol": "SKFINDIA",
+      "V": 36421.493627578755,
+      "weight": 0.0728429872551575,
+      "ref_close_adjusted": 1966.0,
+      "avg_fill_price_adjusted": 1965.9884577169303,
+      "relative_price": 0.9999941290523552,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1970.0,
+          "value": 12140.497875859584
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1911.0,
+          "value": 12140.497875859583
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2020.0,
+          "value": 12140.497875859586
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "BRIGADE",
+      "V": 30531.196345729393,
+      "weight": 0.06027683293558778,
+      "ref_close_adjusted": 125.675,
+      "avg_fill_price_adjusted": 128.3609836701632,
+      "relative_price": 1.0213724580876324,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 124.0,
+          "value": 10177.065448576464
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 132.6,
+          "value": 10177.065448576463
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 128.775,
+          "value": 10131.918625914634
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "JBCHEPHARM",
+      "V": 40275.920192308884,
+      "weight": 0.07951555141397035,
+      "ref_close_adjusted": 187.5,
+      "avg_fill_price_adjusted": 187.15535023886315,
+      "relative_price": 0.9981618679406035,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 189.975,
+          "value": 13425.306730769627
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 186.525,
+          "value": 13425.306730769627
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 185.025,
+          "value": 13365.750275599195
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "MAHSEAMLES",
+      "V": 45152.931343426986,
+      "weight": 0.08914408948539329,
+      "ref_close_adjusted": 225.575,
+      "avg_fill_price_adjusted": 214.70684578364572,
+      "relative_price": 0.9518202184800875,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 231.975,
+          "value": 15050.977114475661
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 212.2,
+          "value": 15050.97711447566
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 202.0,
+          "value": 14984.20896818556
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "NHPC",
+      "V": 45261.63028905762,
+      "weight": 0.08935869058100246,
+      "ref_close_adjusted": 25.05,
+      "avg_fill_price_adjusted": 23.80816663659486,
+      "relative_price": 0.9504258138361221,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 25.0,
+          "value": 15087.210096352539
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 24.65,
+          "value": 15087.21009635254
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 22.0,
+          "value": 15020.2812157117
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "PIIND",
+      "V": 43625.6205007575,
+      "weight": 0.086128765111536,
+      "ref_close_adjusted": 1137.4,
+      "avg_fill_price_adjusted": 1152.3741766892906,
+      "relative_price": 1.0131652687614652,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1148.0,
+          "value": 14541.873500252499
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1215.0,
+          "value": 14541.8735002525
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1099.65,
+          "value": 14477.363805645153
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "RELIANCE",
+      "V": 40156.4963298322,
+      "weight": 0.07927977643399527,
+      "ref_close_adjusted": 665.075,
+      "avg_fill_price_adjusted": 628.1893539807394,
+      "relative_price": 0.94453911811561,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 667.5,
+          "value": 13385.498776610735
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 641.45,
+          "value": 13385.498776610739
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 581.7,
+          "value": 13326.11891484594
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "TATASTEEL",
+      "V": 34881.567575834466,
+      "weight": 0.06886564147343305,
+      "ref_close_adjusted": 48.830000000000005,
+      "avg_fill_price_adjusted": 47.22707805226458,
+      "relative_price": 0.9671734190510869,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 48.895,
+          "value": 11627.189191944823
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 50.79,
+          "value": 11627.189191944823
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 42.75,
+          "value": 11575.609426524557
+        }
+      }
+    },
+    {
+      "D": "2019-06-03",
+      "symbol": "TRIDENT",
+      "V": 26409.23305736758,
+      "weight": 0.05213896340418422,
+      "ref_close_adjusted": 6.765000000000001,
+      "avg_fill_price_adjusted": 6.027356927792442,
+      "relative_price": 0.8909618518540194,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 6.775,
+          "value": 8803.077685789192
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 6.19,
+          "value": 8803.077685789192
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5.300000000000001,
+          "value": 8764.026056499117
+        }
+      }
+    },
+    {
+      "D": "2019-08-16",
+      "symbol": "GSPL",
+      "V": 30220.723078754287,
+      "weight": 0.06280920889753473,
+      "ref_close_adjusted": 219.2,
+      "avg_fill_price_adjusted": 217.34605757196496,
+      "relative_price": 0.9915422334487454,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 222.0,
+          "value": 10073.574359584762
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-09-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 222.0,
+          "value": 10073.574359584762
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-10-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 208.6,
+          "value": 10073.574359584762
+        }
+      }
+    },
+    {
+      "D": "2019-08-16",
+      "symbol": "KNRCON",
+      "V": 24429.47995844642,
+      "weight": 0.050772984682385294,
+      "ref_close_adjusted": 119.475,
+      "avg_fill_price_adjusted": 115.10551917444916,
+      "relative_price": 0.9634276557811188,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 118.5,
+          "value": 8143.159986148806
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-09-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 112.0,
+          "value": 8143.159986148807
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-10-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 115.0,
+          "value": 8143.159986148807
+        }
+      }
+    },
+    {
+      "D": "2019-08-16",
+      "symbol": "NMDC",
+      "V": 26801.78433255853,
+      "weight": 0.055703461051658354,
+      "ref_close_adjusted": 34.88333333333333,
+      "avg_fill_price_adjusted": 32.506350550381036,
+      "relative_price": 0.9318590697672537,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 34.9,
+          "value": 8933.928110852843
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-09-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 27.5,
+          "value": 8933.928110852843
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-10-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 36.666666666666664,
+          "value": 8933.928110852847
+        }
+      }
+    },
+    {
+      "D": "2019-08-16",
+      "symbol": "PSPPROJECT",
+      "V": 30648.789841133053,
+      "weight": 0.06369888101524925,
+      "ref_close_adjusted": 527.55,
+      "avg_fill_price_adjusted": 525.5806174100063,
+      "relative_price": 0.9962669271348807,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 527.0,
+          "value": 10216.263280377685
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-09-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 496.45,
+          "value": 10216.263280377685
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-10-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 556.75,
+          "value": 10216.263280377685
+        }
+      }
+    },
+    {
+      "D": "2019-08-16",
+      "symbol": "VSTIND",
+      "V": 31705.362749370237,
+      "weight": 0.065894808238301,
+      "ref_close_adjusted": 312.1181818181818,
+      "avg_fill_price_adjusted": 327.1046735694627,
+      "relative_price": 1.0480154397413828,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 313.6363636363636,
+          "value": 10568.454249790078
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-09-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 320.90909090909093,
+          "value": 10568.454249790078
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2019-10-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 348.8181818181818,
+          "value": 10568.454249790082
+        }
+      }
+    },
+    {
+      "D": "2019-11-15",
+      "symbol": "ADANIENSOL",
+      "V": 29129.15115765439,
+      "weight": 0.05676534918189646,
+      "ref_close_adjusted": 271.15,
+      "avg_fill_price_adjusted": 310.03428225287774,
+      "relative_price": 1.1434050608625401,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 272.0,
+          "value": 9709.717052551463
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 334.0,
+          "value": 9709.717052551461
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-01-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 333.0,
+          "value": 9584.717612701263
+        }
+      }
+    },
+    {
+      "D": "2019-11-15",
+      "symbol": "DRREDDY",
+      "V": 49594.40140875501,
+      "weight": 0.09664694649694049,
+      "ref_close_adjusted": 546.8100000000001,
+      "avg_fill_price_adjusted": 568.0615527976893,
+      "relative_price": 1.0388646015941354,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 549.6,
+          "value": 16531.46713625167
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 567.0,
+          "value": 16531.46713625167
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-01-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 589.23,
+          "value": 16318.646914946617
+        }
+      }
+    },
+    {
+      "D": "2019-11-15",
+      "symbol": "IGL",
+      "V": 41938.9042727654,
+      "weight": 0.0817283185653035,
+      "ref_close_adjusted": 212.325,
+      "avg_fill_price_adjusted": 210.71963630662225,
+      "relative_price": 0.9924391207188143,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 212.5,
+          "value": 13979.634757588467
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 206.5,
+          "value": 13979.634757588465
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-01-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 213.325,
+          "value": 13799.665917657157
+        }
+      }
+    },
+    {
+      "D": "2019-11-15",
+      "symbol": "NESCO",
+      "V": 47622.69479686603,
+      "weight": 0.09280458893209531,
+      "ref_close_adjusted": 619.2,
+      "avg_fill_price_adjusted": 655.3244515978588,
+      "relative_price": 1.0583405226063611,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 619.0,
+          "value": 15874.231598955346
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 633.95,
+          "value": 15874.231598955348
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-01-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 723.0,
+          "value": 15669.872393925742
+        }
+      }
+    },
+    {
+      "D": "2019-11-15",
+      "symbol": "TORNTPOWER",
+      "V": 39909.35853768907,
+      "weight": 0.0777732471762094,
+      "ref_close_adjusted": 294.2,
+      "avg_fill_price_adjusted": 288.2299737462084,
+      "relative_price": 0.9797075926111773,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2019-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 293.0,
+          "value": 13303.119512563026
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2019-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 272.55,
+          "value": 13303.119512563022
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-01-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 300.8,
+          "value": 13131.85988899926
+        }
+      }
+    },
+    {
+      "D": "2020-02-17",
+      "symbol": "COCHINSHIP",
+      "V": 50449.79413753609,
+      "weight": 0.08719743145402815,
+      "ref_close_adjusted": 176.05,
+      "avg_fill_price_adjusted": 133.59546498508143,
+      "relative_price": 0.7588495596994117,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 176.625,
+          "value": 16816.598045845363
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 111.0,
+          "value": 16816.598045845363
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-04-23",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 128.45,
+          "value": 16816.59804584536
+        }
+      }
+    },
+    {
+      "D": "2020-02-17",
+      "symbol": "HCLTECH",
+      "V": 62395.29200510988,
+      "weight": 0.10784403168895383,
+      "ref_close_adjusted": 621.65,
+      "avg_fill_price_adjusted": 488.3703828061721,
+      "relative_price": 0.785603446965611,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 623.0,
+          "value": 20798.430668369958
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 418.9,
+          "value": 20798.430668369954
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-04-23",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 465.0,
+          "value": 20798.430668369954
+        }
+      }
+    },
+    {
+      "D": "2020-02-17",
+      "symbol": "INDRAMEDCO",
+      "V": 44649.1994431429,
+      "weight": 0.07717168274873022,
+      "ref_close_adjusted": 41.75,
+      "avg_fill_price_adjusted": 37.672142252473336,
+      "relative_price": 0.9023267605382835,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 42.55,
+          "value": 14883.066481047632
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-03-19",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 31.3,
+          "value": 14883.06648104763
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-04-23",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 41.35,
+          "value": 14883.066481047632
+        }
+      }
+    },
+    {
+      "D": "2020-06-01",
+      "symbol": "ALKEM",
+      "V": 33237.23074938101,
+      "weight": 0.06379137308779485,
+      "ref_close_adjusted": 2262.9,
+      "avg_fill_price_adjusted": 2369.467038598468,
+      "relative_price": 1.0470931276673596,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2290.0,
+          "value": 11079.076916460335
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2359.9,
+          "value": 11079.076916460335
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2465.0,
+          "value": 11079.076916460335
+        }
+      }
+    },
+    {
+      "D": "2020-06-01",
+      "symbol": "COROMANDEL",
+      "V": 32153.665429944223,
+      "weight": 0.06171171368179952,
+      "ref_close_adjusted": 644.3,
+      "avg_fill_price_adjusted": 725.6759165263395,
+      "relative_price": 1.1263012828284023,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 659.95,
+          "value": 10717.888476648077
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 749.0,
+          "value": 10717.888476648075
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 779.0,
+          "value": 10717.888476648073
+        }
+      }
+    },
+    {
+      "D": "2020-06-01",
+      "symbol": "MPHASIS",
+      "V": 30642.547165574466,
+      "weight": 0.058811462764114766,
+      "ref_close_adjusted": 860.95,
+      "avg_fill_price_adjusted": 968.5666409167814,
+      "relative_price": 1.1249975502837346,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 877.65,
+          "value": 10214.182388524821
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 909.8,
+          "value": 10214.182388524823
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1164.4,
+          "value": 10214.182388524821
+        }
+      }
+    },
+    {
+      "D": "2020-06-01",
+      "symbol": "NHPC",
+      "V": 27508.64578115827,
+      "weight": 0.052796645406402935,
+      "ref_close_adjusted": 19.6,
+      "avg_fill_price_adjusted": 20.12914626900041,
+      "relative_price": 1.0269972586224698,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 19.75,
+          "value": 9169.548593719423
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 20.45,
+          "value": 9169.548593719423
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 20.2,
+          "value": 9169.54859371942
+        }
+      }
+    },
+    {
+      "D": "2020-06-01",
+      "symbol": "SANOFI",
+      "V": 41066.59957768141,
+      "weight": 0.07881808189317159,
+      "ref_close_adjusted": 7732.6,
+      "avg_fill_price_adjusted": 7851.478576787718,
+      "relative_price": 1.0153736876067194,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 7825.0,
+          "value": 13688.866525893804
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 7999.0,
+          "value": 13688.866525893802
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 7735.0,
+          "value": 13688.866525893802
+        }
+      }
+    },
+    {
+      "D": "2020-06-01",
+      "symbol": "SYNGENE",
+      "V": 34801.568126042424,
+      "weight": 0.0667937660964738,
+      "ref_close_adjusted": 357.1,
+      "avg_fill_price_adjusted": 406.842347540428,
+      "relative_price": 1.139295288547824,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 362.0,
+          "value": 11600.522708680808
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 412.1,
+          "value": 11600.52270868081
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 457.7,
+          "value": 11600.522708680806
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "CHAMBLFERT",
+      "V": 33139.357422078756,
+      "weight": 0.05861736360913155,
+      "ref_close_adjusted": 153.05,
+      "avg_fill_price_adjusted": 155.71282258315856,
+      "relative_price": 1.0173983834247535,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 153.95,
+          "value": 11046.452474026251
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 149.4,
+          "value": 11046.452474026251
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 164.55,
+          "value": 11046.452474026251
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "EIDPARRY",
+      "V": 25070.364993311865,
+      "weight": 0.04434481580042726,
+      "ref_close_adjusted": 281.45,
+      "avg_fill_price_adjusted": 285.90685724993773,
+      "relative_price": 1.0158353428670732,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 283.4,
+          "value": 8356.788331103955
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 315.1,
+          "value": 8356.788331103957
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 263.8,
+          "value": 8356.788331103955
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "HCLTECH",
+      "V": 39664.12511987048,
+      "weight": 0.07015846489650172,
+      "ref_close_adjusted": 709.1,
+      "avg_fill_price_adjusted": 793.3176398617522,
+      "relative_price": 1.1187669438185759,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 711.1,
+          "value": 13221.375039956825
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 791.05,
+          "value": 13221.375039956823
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 899.95,
+          "value": 13221.375039956825
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "LTM",
+      "V": 38100.967528515954,
+      "weight": 0.06739352966424052,
+      "ref_close_adjusted": 2440.0,
+      "avg_fill_price_adjusted": 2758.219254147636,
+      "relative_price": 1.130417727109687,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2451.1,
+          "value": 12700.322509505319
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2651.0,
+          "value": 12700.32250950532
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3306.2,
+          "value": 12700.322509505319
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "PERSISTENT",
+      "V": 39261.43998425863,
+      "weight": 0.06944618973939726,
+      "ref_close_adjusted": 493.625,
+      "avg_fill_price_adjusted": 580.5036374643649,
+      "relative_price": 1.1760012913940034,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 499.0,
+          "value": 13087.146661419543
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 584.0,
+          "value": 13087.146661419543
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 688.9,
+          "value": 13087.14666141954
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "POLYPLEX",
+      "V": 30626.67387437501,
+      "weight": 0.05417289345014456,
+      "ref_close_adjusted": 758.6,
+      "avg_fill_price_adjusted": 756.6193475604024,
+      "relative_price": 0.9973890687587693,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 810.0,
+          "value": 10208.891291458336
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 729.0,
+          "value": 10208.891291458336
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 736.0,
+          "value": 10208.891291458336
+        }
+      }
+    },
+    {
+      "D": "2020-08-17",
+      "symbol": "ZYDUSLIFE",
+      "V": 37281.33676878595,
+      "weight": 0.06594375519648596,
+      "ref_close_adjusted": 395.45,
+      "avg_fill_price_adjusted": 398.6378401144869,
+      "relative_price": 1.0080612975458008,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 399.15,
+          "value": 12427.112256261984
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 370.65,
+          "value": 12427.11225626198
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2020-10-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 430.6,
+          "value": 12427.112256261984
+        }
+      }
+    },
+    {
+      "D": "2020-11-17",
+      "symbol": "EVEREADY",
+      "V": 46109.33189149392,
+      "weight": 0.07865504231667007,
+      "ref_close_adjusted": 154.2,
+      "avg_fill_price_adjusted": 184.13539842543213,
+      "relative_price": 1.1941335825255002,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 160.0,
+          "value": 15369.777297164641
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-12-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 197.25,
+          "value": 15369.777297164641
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-01-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 201.1,
+          "value": 15369.777297164643
+        }
+      }
+    },
+    {
+      "D": "2020-11-17",
+      "symbol": "JINDALPOLY",
+      "V": 35840.05924141006,
+      "weight": 0.061137328619266094,
+      "ref_close_adjusted": 500.45,
+      "avg_fill_price_adjusted": 473.6045374035289,
+      "relative_price": 0.9463573531891876,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 503.1,
+          "value": 11946.686413803354
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-12-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 465.35,
+          "value": 11946.686413803354
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-01-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 455.0,
+          "value": 11946.68641380335
+        }
+      }
+    },
+    {
+      "D": "2020-11-17",
+      "symbol": "JKCEMENT",
+      "V": 54927.55545182241,
+      "weight": 0.09369750159427774,
+      "ref_close_adjusted": 1874.7,
+      "avg_fill_price_adjusted": 2002.6184685930432,
+      "relative_price": 1.0682341007057359,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1893.0,
+          "value": 18309.18515060747
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-12-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1944.0,
+          "value": 18309.18515060747
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-01-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2196.0,
+          "value": 18309.18515060747
+        }
+      }
+    },
+    {
+      "D": "2020-11-17",
+      "symbol": "UFLEX",
+      "V": 44593.720571372854,
+      "weight": 0.07606965520240268,
+      "ref_close_adjusted": 332.4,
+      "avg_fill_price_adjusted": 366.04404097400834,
+      "relative_price": 1.1012155263959338,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 337.5,
+          "value": 14864.573523790952
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-12-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 391.0,
+          "value": 14864.573523790954
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-01-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 373.8,
+          "value": 14864.573523790952
+        }
+      }
+    },
+    {
+      "D": "2020-11-17",
+      "symbol": "VENUSREM",
+      "V": 36094.04563117504,
+      "weight": 0.06157058820936022,
+      "ref_close_adjusted": 135.75,
+      "avg_fill_price_adjusted": 150.0979097156873,
+      "relative_price": 1.105693625898249,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2020-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 136.1,
+          "value": 12031.348543725015
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2020-12-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 141.85,
+          "value": 12031.348543725013
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-01-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 178.9,
+          "value": 12031.348543725011
+        }
+      }
+    },
+    {
+      "D": "2021-02-15",
+      "symbol": "GPIL",
+      "V": 45435.92152378794,
+      "weight": 0.06457216856241478,
+      "ref_close_adjusted": 25.0725,
+      "avg_fill_price_adjusted": 30.805428255889918,
+      "relative_price": 1.2286540335383356,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 25.200000000000003,
+          "value": 15145.30717459598
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 31.247500000000002,
+          "value": 15145.30717459598
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 38.910000000000004,
+          "value": 15145.307174595988
+        }
+      }
+    },
+    {
+      "D": "2021-02-15",
+      "symbol": "INDSWFTLAB",
+      "V": 48709.32252078459,
+      "weight": 0.06922422785518782,
+      "ref_close_adjusted": 78.1,
+      "avg_fill_price_adjusted": 78.90841066214172,
+      "relative_price": 1.0103509687854255,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 81.95,
+          "value": 16236.440840261532
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 86.65,
+          "value": 16236.440840261528
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 70.05,
+          "value": 16236.440840261534
+        }
+      }
+    },
+    {
+      "D": "2021-02-15",
+      "symbol": "KNRCON",
+      "V": 59012.55314527162,
+      "weight": 0.08386687011508986,
+      "ref_close_adjusted": 221.85,
+      "avg_fill_price_adjusted": 211.92696569024466,
+      "relative_price": 0.9552714252433836,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 225.0,
+          "value": 19670.851048423872
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 208.5,
+          "value": 19670.85104842387
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 203.45,
+          "value": 19670.851048423872
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "APOLLOTYRE",
+      "V": 71844.88968602751,
+      "weight": 0.0799992450242103,
+      "ref_close_adjusted": 222.05,
+      "avg_fill_price_adjusted": 222.67107470136148,
+      "relative_price": 1.002797003834098,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 222.85,
+          "value": 23948.29656200917
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 228.55,
+          "value": 23948.296562009167
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 216.9,
+          "value": 23874.96741580371
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "COSMOFIRST",
+      "V": 73603.06148510962,
+      "weight": 0.08195696835239825,
+      "ref_close_adjusted": 525.8666666666666,
+      "avg_fill_price_adjusted": 617.6156714684354,
+      "relative_price": 1.1744719918897735,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 526.5333333333333,
+          "value": 24534.353828369873
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 599.3,
+          "value": 24534.35382836987
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 776.0666666666666,
+          "value": 24459.23018797738
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "DALBHARAT",
+      "V": 87853.35428789262,
+      "weight": 0.09782466152554664,
+      "ref_close_adjusted": 1765.0,
+      "avg_fill_price_adjusted": 1925.3358149422022,
+      "relative_price": 1.0908418214969984,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1778.4,
+          "value": 29284.451429297536
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1883.95,
+          "value": 29284.45142929754
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2151.0,
+          "value": 29194.78309673594
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "GULPOLY",
+      "V": 62684.60108950657,
+      "weight": 0.0697992687262708,
+      "ref_close_adjusted": 141.08333333333334,
+      "avg_fill_price_adjusted": 169.17737388621708,
+      "relative_price": 1.1991308249466066,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 141.50000000000003,
+          "value": 20894.867029835525
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 159.62500000000003,
+          "value": 20894.86702983552
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 227.45833333333334,
+          "value": 20830.887416278983
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "JSWSTEEL",
+      "V": 91592.67551314693,
+      "weight": 0.10198839364665709,
+      "ref_close_adjusted": 710.9,
+      "avg_fill_price_adjusted": 715.7241320965935,
+      "relative_price": 1.0067859503398418,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 716.5,
+          "value": 30530.891837715644
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 687.05,
+          "value": 30530.891837715648
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 746.15,
+          "value": 30437.406932617934
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "SPLPETRO",
+      "V": 69365.11965693852,
+      "weight": 0.07723802246505918,
+      "ref_close_adjusted": 389.4,
+      "avg_fill_price_adjusted": 376.10160223743566,
+      "relative_price": 0.9658490042050223,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 397.35,
+          "value": 23121.70655231284
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 375.5,
+          "value": 23121.706552312837
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 357.5,
+          "value": 23050.90840615224
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "TATASTEEL",
+      "V": 81229.76718835402,
+      "weight": 0.09044930094484498,
+      "ref_close_adjusted": 112.56500000000001,
+      "avg_fill_price_adjusted": 123.61381468582968,
+      "relative_price": 1.0981549743333157,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 112.0,
+          "value": 27076.58906278467
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 118.105,
+          "value": 27076.58906278467
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 145.56500000000003,
+          "value": 26993.681155201786
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "TATASTLBSL",
+      "V": 66158.21915760465,
+      "weight": 0.07366714052849233,
+      "ref_close_adjusted": 97.05,
+      "avg_fill_price_adjusted": 95.4099723865814,
+      "relative_price": 0.9831012095474643,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 98.3,
+          "value": 22052.73971920155
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 90.8,
+          "value": 22052.73971920155
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 97.5,
+          "value": 21985.214725475453
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "VEDL",
+      "V": 72673.62292808526,
+      "weight": 0.08092203903197923,
+      "ref_close_adjusted": 274.2,
+      "avg_fill_price_adjusted": 277.77694400138375,
+      "relative_price": 1.0130450182399116,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 276.5,
+          "value": 24224.54097602842
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 266.5,
+          "value": 24224.54097602842
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 291.5,
+          "value": 24150.365975631546
+        }
+      }
+    },
+    {
+      "D": "2021-06-01",
+      "symbol": "VISAKAIND",
+      "V": 73076.90169867288,
+      "weight": 0.0813710897205152,
+      "ref_close_adjusted": 133.39000000000001,
+      "avg_fill_price_adjusted": 144.6929728631921,
+      "relative_price": 1.0847362835534304,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 135.20000000000002,
+          "value": 24358.967232890962
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 140.39000000000001,
+          "value": 24358.96723289097
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 160.98000000000002,
+          "value": 24284.380622314726
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "DCMNVL",
+      "V": 69608.47637518184,
+      "weight": 0.06808097706813517,
+      "ref_close_adjusted": 241.5,
+      "avg_fill_price_adjusted": 231.89853758483613,
+      "relative_price": 0.9602423916556362,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 240.95,
+          "value": 23202.825458393945
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 218.0,
+          "value": 23202.82545839394
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 238.2,
+          "value": 22969.984471299802
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "GHCL",
+      "V": 87788.09333438953,
+      "weight": 0.08586165766565768,
+      "ref_close_adjusted": 359.2,
+      "avg_fill_price_adjusted": 399.79878111026744,
+      "relative_price": 1.1130255598838181,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 354.1,
+          "value": 29262.697778129845
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 395.65,
+          "value": 29262.697778129845
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 465.4,
+          "value": 28969.045806825114
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "GRASIM",
+      "V": 120534.64036985418,
+      "weight": 0.11788960934449881,
+      "ref_close_adjusted": 1496.9,
+      "avg_fill_price_adjusted": 1617.7778055543804,
+      "relative_price": 1.0807520913583941,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1498.9,
+          "value": 40178.21345661806
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1615.0,
+          "value": 40178.21345661806
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1762.0,
+          "value": 39775.02398740049
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "HGINFRA",
+      "V": 74791.91487268385,
+      "weight": 0.07315066937946327,
+      "ref_close_adjusted": 530.85,
+      "avg_fill_price_adjusted": 625.9763106718596,
+      "relative_price": 1.1791962148852964,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 539.9,
+          "value": 24930.638290894614
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 650.0,
+          "value": 24930.638290894614
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 714.35,
+          "value": 24680.458654843485
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "NITINSPIN",
+      "V": 68896.30080365884,
+      "weight": 0.06738442958888836,
+      "ref_close_adjusted": 223.05,
+      "avg_fill_price_adjusted": 221.94093104588364,
+      "relative_price": 0.9950277114812088,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 229.9,
+          "value": 22965.433601219615
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 214.0,
+          "value": 22965.433601219618
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 222.5,
+          "value": 22734.974847894882
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "OIL",
+      "V": 113092.08309271387,
+      "weight": 0.11061037270983619,
+      "ref_close_adjusted": 110.89999999999999,
+      "avg_fill_price_adjusted": 133.5282863120613,
+      "relative_price": 1.2040422570970362,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 110.66666666666666,
+          "value": 37697.36103090463
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 139.0,
+          "value": 37697.36103090463
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 160.66666666666666,
+          "value": 37319.06698352583
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "STYRENIX",
+      "V": 88122.69478539379,
+      "weight": 0.08618891657001874,
+      "ref_close_adjusted": 1414.8,
+      "avg_fill_price_adjusted": 1511.8814415915963,
+      "relative_price": 1.0686184913709331,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1416.2,
+          "value": 29374.231595131263
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1398.0,
+          "value": 29374.231595131263
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1779.8,
+          "value": 29079.46037892718
+        }
+      }
+    },
+    {
+      "D": "2021-08-16",
+      "symbol": "TATASTLLP",
+      "V": 65152.93780461504,
+      "weight": 0.0637232115337483,
+      "ref_close_adjusted": 1019.15,
+      "avg_fill_price_adjusted": 956.0250649534786,
+      "relative_price": 0.9380611931055082,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1019.15,
+          "value": 21717.645934871678
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 890.0,
+          "value": 21717.645934871674
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2021-10-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 968.0,
+          "value": 21499.708764853138
+        }
+      }
+    },
+    {
+      "D": "2021-11-15",
+      "symbol": "JAYNECOIND",
+      "V": 71053.80228374794,
+      "weight": 0.06622454982385079,
+      "ref_close_adjusted": 30.65,
+      "avg_fill_price_adjusted": 28.25232857014097,
+      "relative_price": 0.9217725471497871,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 31.3,
+          "value": 23684.600761249312
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 27.45,
+          "value": 23684.60076124931
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-01-13",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 26.45,
+          "value": 23684.60076124931
+        }
+      }
+    },
+    {
+      "D": "2021-11-15",
+      "symbol": "ONGC",
+      "V": 103985.21972141248,
+      "weight": 0.09691774603257039,
+      "ref_close_adjusted": 154.65,
+      "avg_fill_price_adjusted": 155.5247715458421,
+      "relative_price": 1.0056564600442424,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 156.45,
+          "value": 34661.73990713749
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 146.3,
+          "value": 34661.73990713749
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-01-13",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 164.95,
+          "value": 34661.73990713748
+        }
+      }
+    },
+    {
+      "D": "2021-11-15",
+      "symbol": "VEDL",
+      "V": 89640.7904851384,
+      "weight": 0.08354825223885659,
+      "ref_close_adjusted": 328.2,
+      "avg_fill_price_adjusted": 340.9403984945466,
+      "relative_price": 1.038819008210075,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2021-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 329.0,
+          "value": 29880.263495046132
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2021-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 359.95,
+          "value": 29880.263495046136
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-01-13",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 335.4,
+          "value": 29880.26349504614
+        }
+      }
+    },
+    {
+      "D": "2022-02-15",
+      "symbol": "ALLCARGO",
+      "V": 76846.70383445497,
+      "weight": 0.07399665297546414,
+      "ref_close_adjusted": 86.225,
+      "avg_fill_price_adjusted": 85.65733521274196,
+      "relative_price": 0.9934164710088949,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 86.0,
+          "value": 25615.567944818322
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 79.4625,
+          "value": 25615.567944818315
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 92.5,
+          "value": 25615.56794481832
+        }
+      }
+    },
+    {
+      "D": "2022-02-15",
+      "symbol": "MAHSEAMLES",
+      "V": 98160.58463214885,
+      "weight": 0.0945200555711683,
+      "ref_close_adjusted": 257.525,
+      "avg_fill_price_adjusted": 277.61307647664,
+      "relative_price": 1.0780043742418794,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 257.6,
+          "value": 32720.19487738295
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 282.05,
+          "value": 32720.19487738295
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 295.95,
+          "value": 32720.194877382954
+        }
+      }
+    },
+    {
+      "D": "2022-02-15",
+      "symbol": "PRECOT",
+      "V": 69611.97379912766,
+      "weight": 0.06703024087080788,
+      "ref_close_adjusted": 325.35,
+      "avg_fill_price_adjusted": 332.89528296999083,
+      "relative_price": 1.0231912800675913,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 328.15,
+          "value": 23203.991266375888
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 334.0,
+          "value": 23203.991266375884
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 336.65,
+          "value": 23203.99126637589
+        }
+      }
+    },
+    {
+      "D": "2022-02-15",
+      "symbol": "UFLEX",
+      "V": 87835.86458329366,
+      "weight": 0.08457825340656576,
+      "ref_close_adjusted": 551.5,
+      "avg_fill_price_adjusted": 594.4885177453026,
+      "relative_price": 1.0779483549325524,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 560.0,
+          "value": 29278.621527764553
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 560.0,
+          "value": 29278.621527764553
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 678.0,
+          "value": 29278.621527764546
+        }
+      }
+    },
+    {
+      "D": "2022-02-15",
+      "symbol": "VISHNU",
+      "V": 76802.86431708856,
+      "weight": 0.07395443935547384,
+      "ref_close_adjusted": 225.0,
+      "avg_fill_price_adjusted": 277.96533111882894,
+      "relative_price": 1.2354014716392396,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 236.25,
+          "value": 25600.954772362853
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 298.0,
+          "value": 25600.95477236285
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-04-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 312.09000000000003,
+          "value": 25600.95477236285
+        }
+      }
+    },
+    {
+      "D": "2022-06-01",
+      "symbol": "AURIONPRO",
+      "V": 49555.17514063946,
+      "weight": 0.05211111573369797,
+      "ref_close_adjusted": 156.65,
+      "avg_fill_price_adjusted": 147.6917534936662,
+      "relative_price": 0.9428136194935601,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 156.5,
+          "value": 16518.391713546487
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 130.9,
+          "value": 16518.391713546484
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 159.15,
+          "value": 16518.391713546487
+        }
+      }
+    },
+    {
+      "D": "2022-06-01",
+      "symbol": "GHCL",
+      "V": 50540.12361894547,
+      "weight": 0.053146865562027044,
+      "ref_close_adjusted": 647.75,
+      "avg_fill_price_adjusted": 635.1736636800586,
+      "relative_price": 0.9805845830645443,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 659.1,
+          "value": 16846.707872981824
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 575.55,
+          "value": 16846.70787298182
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 681.0,
+          "value": 16846.707872981824
+        }
+      }
+    },
+    {
+      "D": "2022-06-01",
+      "symbol": "NTPC",
+      "V": 86180.03441089937,
+      "weight": 0.090625,
+      "ref_close_adjusted": 156.0,
+      "avg_fill_price_adjusted": 149.671205826202,
+      "relative_price": 0.9594308065782179,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 156.45,
+          "value": 28726.678136966457
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 142.3,
+          "value": 28726.678136966457
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 150.95,
+          "value": 28726.67813696646
+        }
+      }
+    },
+    {
+      "D": "2022-06-01",
+      "symbol": "POLYPLEX",
+      "V": 59297.299584647655,
+      "weight": 0.06235571628153185,
+      "ref_close_adjusted": 2367.65,
+      "avg_fill_price_adjusted": 2335.0086922305377,
+      "relative_price": 0.9862136262667783,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2367.65,
+          "value": 19765.766528215885
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-06-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2317.0,
+          "value": 19765.766528215885
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-07-29",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2321.05,
+          "value": 19765.766528215885
+        }
+      }
+    },
+    {
+      "D": "2022-08-16",
+      "symbol": "EIDPARRY",
+      "V": 52025.509256370744,
+      "weight": 0.05303999013572687,
+      "ref_close_adjusted": 579.85,
+      "avg_fill_price_adjusted": 587.2586154272669,
+      "relative_price": 1.01277677921405,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 582.7,
+          "value": 17341.836418790248
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 567.0,
+          "value": 17341.836418790248
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 614.0,
+          "value": 17341.836418790244
+        }
+      }
+    },
+    {
+      "D": "2022-08-16",
+      "symbol": "GAIL",
+      "V": 69288.47691996048,
+      "weight": 0.07063958017679982,
+      "ref_close_adjusted": 87.66666666666666,
+      "avg_fill_price_adjusted": 88.3308319525688,
+      "relative_price": 1.0075760298772107,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 88.29999999999998,
+          "value": 23096.158973320158
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 91.85,
+          "value": 23096.158973320154
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 85.1,
+          "value": 23096.158973320154
+        }
+      }
+    },
+    {
+      "D": "2022-08-16",
+      "symbol": "GESHIP",
+      "V": 61137.422390413405,
+      "weight": 0.062329582677063525,
+      "ref_close_adjusted": 523.95,
+      "avg_fill_price_adjusted": 526.6636792666878,
+      "relative_price": 1.0051792714317926,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 525.0,
+          "value": 20379.14079680447
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 545.1,
+          "value": 20379.140796804466
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 511.0,
+          "value": 20379.14079680447
+        }
+      }
+    },
+    {
+      "D": "2022-08-16",
+      "symbol": "ITC",
+      "V": 90170.99559159373,
+      "weight": 0.09192930131906675,
+      "ref_close_adjusted": 308.55,
+      "avg_fill_price_adjusted": 324.89146218683726,
+      "relative_price": 1.0529621201971715,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 308.55,
+          "value": 30056.998530531244
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 336.4,
+          "value": 30056.99853053124
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 331.1,
+          "value": 30056.998530531244
+        }
+      }
+    },
+    {
+      "D": "2022-08-16",
+      "symbol": "POWERGRID",
+      "V": 83730.1613121892,
+      "weight": 0.0853628728202696,
+      "ref_close_adjusted": 171.03750000000002,
+      "avg_fill_price_adjusted": 168.35434874379234,
+      "relative_price": 0.9843124972230787,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 171.89999999999998,
+          "value": 27910.053770729734
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 175.08749999999998,
+          "value": 27910.053770729734
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 158.96249999999998,
+          "value": 27910.05377072973
+        }
+      }
+    },
+    {
+      "D": "2022-08-16",
+      "symbol": "RITES",
+      "V": 88593.50228562755,
+      "weight": 0.0903210473954903,
+      "ref_close_adjusted": 135.4,
+      "avg_fill_price_adjusted": 156.36198619844168,
+      "relative_price": 1.154815259958949,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 135.975,
+          "value": 29531.167428542514
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-09-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 150.0,
+          "value": 29531.167428542518
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2022-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 193.6,
+          "value": 29531.167428542518
+        }
+      }
+    },
+    {
+      "D": "2022-11-15",
+      "symbol": "ANDHRAPAP",
+      "V": 74027.11916349104,
+      "weight": 0.07424995768183527,
+      "ref_close_adjusted": 89.87,
+      "avg_fill_price_adjusted": 87.81847013516575,
+      "relative_price": 0.9771722503078418,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 91.0,
+          "value": 24675.706387830345
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-12-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 88.75,
+          "value": 24675.706387830345
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-01-12",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 84.0,
+          "value": 24675.70638783035
+        }
+      }
+    },
+    {
+      "D": "2022-11-15",
+      "symbol": "COALINDIA",
+      "V": 81578.85540814295,
+      "weight": 0.08182442637555046,
+      "ref_close_adjusted": 247.2,
+      "avg_fill_price_adjusted": 226.90182117849477,
+      "relative_price": 0.917887626126597,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2022-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 234.4,
+          "value": 27192.951802714317
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2022-12-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 231.75,
+          "value": 27192.951802714317
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-01-12",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 215.5,
+          "value": 27192.951802714313
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "COROMANDEL",
+      "V": 96638.57186509155,
+      "weight": 0.10351405816169501,
+      "ref_close_adjusted": 908.25,
+      "avg_fill_price_adjusted": 899.0877414297679,
+      "relative_price": 0.9899121843432622,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 908.25,
+          "value": 32212.857288363855
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 862.0,
+          "value": 32212.85728836386
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 929.95,
+          "value": 31970.58185897745
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "GODFRYPHLP",
+      "V": 67571.36666663126,
+      "weight": 0.07237882601327557,
+      "ref_close_adjusted": 557.5333333333333,
+      "avg_fill_price_adjusted": 589.33530491026,
+      "relative_price": 1.0570404847128902,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 559.9666666666667,
+          "value": 22523.788888877087
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 630.6833333333333,
+          "value": 22523.78888887709
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 581.65,
+          "value": 22354.385703819273
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "PETRONET",
+      "V": 114155.45676682652,
+      "weight": 0.12227720632846655,
+      "ref_close_adjusted": 221.55,
+      "avg_fill_price_adjusted": 230.90550900675592,
+      "relative_price": 1.0422275288050369,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 221.4,
+          "value": 38051.81892227551
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 238.0,
+          "value": 38051.8189222755
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 234.0,
+          "value": 37765.62820389866
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "REFEX",
+      "V": 51030.72545221252,
+      "weight": 0.05466137775574849,
+      "ref_close_adjusted": 56.21000000000001,
+      "avg_fill_price_adjusted": 53.22825156011655,
+      "relative_price": 0.9469534168318189,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 55.650000000000006,
+          "value": 17010.241817404174
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 46.580000000000005,
+          "value": 17010.241817404174
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 59.14,
+          "value": 16882.30645285746
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "SHRIPISTON",
+      "V": 74229.3531838955,
+      "weight": 0.07951050428921277,
+      "ref_close_adjusted": 618.75,
+      "avg_fill_price_adjusted": 574.941722432875,
+      "relative_price": 0.9291987433258587,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 646.5,
+          "value": 24743.117727965164
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 530.0,
+          "value": 24743.117727965167
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 560.325,
+          "value": 24557.022796421596
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "SWARAJENG",
+      "V": 108482.9327705652,
+      "weight": 0.11620110268227107,
+      "ref_close_adjusted": 1570.35,
+      "avg_fill_price_adjusted": 1546.6109413446834,
+      "relative_price": 0.984882950517199,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1561.0,
+          "value": 36160.9775901884
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1525.4,
+          "value": 36160.977590188406
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1553.95,
+          "value": 35889.00803796058
+        }
+      }
+    },
+    {
+      "D": "2023-02-15",
+      "symbol": "WSTCSTPAPR",
+      "V": 59134.309320185675,
+      "weight": 0.06334150242686395,
+      "ref_close_adjusted": 505.2,
+      "avg_fill_price_adjusted": 513.3095190971432,
+      "relative_price": 1.0160520963918114,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 501.0,
+          "value": 19711.43644006189
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-03-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 492.95,
+          "value": 19711.43644006189
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-04-21",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 549.8,
+          "value": 19563.185178629585
+        }
+      }
+    },
+    {
+      "D": "2023-06-01",
+      "symbol": "ANANDRATHI",
+      "V": 134668.56671315478,
+      "weight": 0.125,
+      "ref_close_adjusted": 215.0375,
+      "avg_fill_price_adjusted": 237.26069554053544,
+      "relative_price": 1.1033456747801451,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 215.0,
+          "value": 44889.52223771826
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 218.75,
+          "value": 44889.52223771826
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 292.25,
+          "value": 44889.522237718265
+        }
+      }
+    },
+    {
+      "D": "2023-06-01",
+      "symbol": "GNA",
+      "V": 80960.31123568716,
+      "weight": 0.07514774346723883,
+      "ref_close_adjusted": 366.425,
+      "avg_fill_price_adjusted": 425.5610280475326,
+      "relative_price": 1.16138644483191,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 367.5,
+          "value": 26986.77041189572
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 421.95,
+          "value": 26986.770411895726
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 510.6,
+          "value": 26986.77041189572
+        }
+      }
+    },
+    {
+      "D": "2023-06-01",
+      "symbol": "HGINFRA",
+      "V": 75944.06019601754,
+      "weight": 0.07049163554790318,
+      "ref_close_adjusted": 905.55,
+      "avg_fill_price_adjusted": 906.5115545790934,
+      "relative_price": 1.001061845926888,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 906.0,
+          "value": 25314.686732005848
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 855.95,
+          "value": 25314.686732005848
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 964.0,
+          "value": 25314.68673200584
+        }
+      }
+    },
+    {
+      "D": "2023-06-01",
+      "symbol": "INDRAMEDCO",
+      "V": 89595.42324186281,
+      "weight": 0.08316289523662734,
+      "ref_close_adjusted": 89.25,
+      "avg_fill_price_adjusted": 100.96438781020899,
+      "relative_price": 1.1312536449323136,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 89.25,
+          "value": 29865.14108062094
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 92.45,
+          "value": 29865.141080620935
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 130.0,
+          "value": 29865.14108062093
+        }
+      }
+    },
+    {
+      "D": "2023-06-01",
+      "symbol": "NCC",
+      "V": 73058.33771925847,
+      "weight": 0.06781309430848233,
+      "ref_close_adjusted": 119.25,
+      "avg_fill_price_adjusted": 132.0608177644669,
+      "relative_price": 1.1074282412114624,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 119.2,
+          "value": 24352.779239752825
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 123.8,
+          "value": 24352.779239752825
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-08-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 160.0,
+          "value": 24352.779239752825
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "CMSINFO",
+      "V": 109098.56250913475,
+      "weight": 0.08659086541179324,
+      "ref_close_adjusted": 360.9,
+      "avg_fill_price_adjusted": 366.081241083033,
+      "relative_price": 1.0143564452286866,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 365.0,
+          "value": 36366.187503044916
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 357.75,
+          "value": 36366.18750304492
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 375.95,
+          "value": 36366.1875030449
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "DSSL",
+      "V": 67452.6454221121,
+      "weight": 0.053536754353903385,
+      "ref_close_adjusted": 551.2,
+      "avg_fill_price_adjusted": 652.6116496722419,
+      "relative_price": 1.1839833992602355,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 578.75,
+          "value": 22484.215140704033
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 671.0,
+          "value": 22484.21514070403
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 725.3,
+          "value": 22484.215140704036
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "GULFOILLUB",
+      "V": 152429.92430960425,
+      "weight": 0.1209827036861061,
+      "ref_close_adjusted": 601.85,
+      "avg_fill_price_adjusted": 577.8193109447715,
+      "relative_price": 0.9600719630219681,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 600.0,
+          "value": 50809.97476986808
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 555.85,
+          "value": 50809.97476986808
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 579.3,
+          "value": 50809.97476986809
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "NDRAUTO",
+      "V": 73731.02966574131,
+      "weight": 0.058519869736364104,
+      "ref_close_adjusted": 228.0,
+      "avg_fill_price_adjusted": 266.87545242675367,
+      "relative_price": 1.1705063702927792,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 230.0,
+          "value": 24577.009888580436
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 264.175,
+          "value": 24577.009888580436
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 321.75,
+          "value": 24577.009888580433
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "NH",
+      "V": 133142.29244608147,
+      "weight": 0.10567422760360339,
+      "ref_close_adjusted": 989.95,
+      "avg_fill_price_adjusted": 1039.6469360283038,
+      "relative_price": 1.0502014607084234,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 995.25,
+          "value": 44380.76414869382
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1038.0,
+          "value": 44380.76414869382
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1090.0,
+          "value": 44380.764148693816
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "REDINGTON",
+      "V": 103816.02729098097,
+      "weight": 0.08239814934305575,
+      "ref_close_adjusted": 149.5,
+      "avg_fill_price_adjusted": 153.61460189916556,
+      "relative_price": 1.0275224207302045,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 149.4,
+          "value": 34605.34243032699
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 159.0,
+          "value": 34605.34243032699
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 152.75,
+          "value": 34605.342430326986
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "VENUSPIPES",
+      "V": 123049.98809776233,
+      "weight": 0.09766402703430636,
+      "ref_close_adjusted": 1390.5,
+      "avg_fill_price_adjusted": 1396.0157825132947,
+      "relative_price": 1.003966761965692,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1383.0,
+          "value": 41016.662699254106
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1554.9,
+          "value": 41016.66269925411
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1277.5,
+          "value": 41016.662699254106
+        }
+      }
+    },
+    {
+      "D": "2023-08-16",
+      "symbol": "ZYDUSLIFE",
+      "V": 151875.45477600113,
+      "weight": 0.12054262459014965,
+      "ref_close_adjusted": 641.65,
+      "avg_fill_price_adjusted": 626.241562137095,
+      "relative_price": 0.9759862263494039,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 640.0,
+          "value": 50625.15159200039
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-09-14",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 648.3,
+          "value": 50625.15159200037
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2023-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 593.3,
+          "value": 50625.15159200038
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "ANANDRATHI",
+      "V": 136059.36292553425,
+      "weight": 0.09988594704558261,
+      "ref_close_adjusted": 522.0625,
+      "avg_fill_price_adjusted": 608.8942049131927,
+      "relative_price": 1.1663243479721157,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 526.5125,
+          "value": 45353.120975178084
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 650.0,
+          "value": 45353.12097517809
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 672.35,
+          "value": 44799.519563942325
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "ASHOKA",
+      "V": 91437.98123417415,
+      "weight": 0.0671278268185808,
+      "ref_close_adjusted": 139.75,
+      "avg_fill_price_adjusted": 149.36310130046004,
+      "relative_price": 1.068787844726011,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 141.9,
+          "value": 30479.32707805805
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 150.0,
+          "value": 30479.327078058046
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 157.05,
+          "value": 30107.282153229964
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "CONTROLPR",
+      "V": 117493.35536752948,
+      "weight": 0.08625599018034494,
+      "ref_close_adjusted": 866.15,
+      "avg_fill_price_adjusted": 939.5170668761205,
+      "relative_price": 1.0847048050292911,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 875.0,
+          "value": 39164.45178917649
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 930.0,
+          "value": 39164.45178917649
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1026.8,
+          "value": 38686.3921691422
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "CYIENT",
+      "V": 102630.44805283406,
+      "weight": 0.07534460899306425,
+      "ref_close_adjusted": 1668.05,
+      "avg_fill_price_adjusted": 1998.452205275135,
+      "relative_price": 1.1980769193220437,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1684.75,
+          "value": 34210.14935094469
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2119.4,
+          "value": 34210.14935094469
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2299.0,
+          "value": 33792.56426414032
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "FOCUS",
+      "V": 70734.35098376733,
+      "weight": 0.05192856621366909,
+      "ref_close_adjusted": 186.85,
+      "avg_fill_price_adjusted": 191.4599006334607,
+      "relative_price": 1.0246716651509806,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 189.5,
+          "value": 23578.116994589112
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 180.35,
+          "value": 23578.116994589116
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 206.5,
+          "value": 23290.31146849026
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "IOC",
+      "V": 170268.39979732587,
+      "weight": 0.125,
+      "ref_close_adjusted": 99.0,
+      "avg_fill_price_adjusted": 117.36383156044622,
+      "relative_price": 1.1854932480853153,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 100.0,
+          "value": 56756.13326577528
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 120.3,
+          "value": 56756.133265775294
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 138.25,
+          "value": 56063.34135208507
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "MANGCHEFER",
+      "V": 98632.10818437669,
+      "weight": 0.07240928755848164,
+      "ref_close_adjusted": 112.4,
+      "avg_fill_price_adjusted": 121.77868429586263,
+      "relative_price": 1.08344025174255,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 114.1,
+          "value": 32877.36939479223
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 123.85,
+          "value": 32877.36939479223
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 128.35,
+          "value": 32476.05284361954
+        }
+      }
+    },
+    {
+      "D": "2023-11-15",
+      "symbol": "POLYCAB",
+      "V": 131124.93646155216,
+      "weight": 0.09626341163248214,
+      "ref_close_adjusted": 5132.05,
+      "avg_fill_price_adjusted": 4993.248517710449,
+      "relative_price": 0.9729539887005093,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2023-11-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5200.0,
+          "value": 43708.31215385072
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2023-12-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5688.15,
+          "value": 43708.31215385071
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4290.0,
+          "value": 43174.78804854498
+        }
+      }
+    },
+    {
+      "D": "2024-02-15",
+      "symbol": "BAJAJ-AUTO",
+      "V": 198860.48792370854,
+      "weight": 0.125,
+      "ref_close_adjusted": 8083.3,
+      "avg_fill_price_adjusted": 8436.212298999308,
+      "relative_price": 1.0436594335233516,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 8120.6,
+          "value": 66286.82930790285
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 8343.0,
+          "value": 66286.82930790284
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 8884.0,
+          "value": 65805.91181178855
+        }
+      }
+    },
+    {
+      "D": "2024-02-15",
+      "symbol": "GOODLUCK",
+      "V": 111266.06418827128,
+      "weight": 0.06993977621572425,
+      "ref_close_adjusted": 331.21666666666664,
+      "avg_fill_price_adjusted": 307.818916599698,
+      "relative_price": 0.9293581742052978,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 333.06666666666666,
+          "value": 37088.68806275709
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 281.5833333333333,
+          "value": 37088.688062757086
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 313.29999999999995,
+          "value": 36819.60596630542
+        }
+      }
+    },
+    {
+      "D": "2024-02-15",
+      "symbol": "GPTINFRA",
+      "V": 118260.41794085989,
+      "weight": 0.07433629675231769,
+      "ref_close_adjusted": 86.125,
+      "avg_fill_price_adjusted": 85.13601785386972,
+      "relative_price": 0.9885168981581389,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 86.175,
+          "value": 39420.13931361996
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 81.95,
+          "value": 39420.13931361996
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 87.5,
+          "value": 39134.1423079837
+        }
+      }
+    },
+    {
+      "D": "2024-02-15",
+      "symbol": "HEROMOTOCO",
+      "V": 181420.71156600016,
+      "weight": 0.11403768130373954,
+      "ref_close_adjusted": 4814.05,
+      "avg_fill_price_adjusted": 4531.364172828416,
+      "relative_price": 0.9412790005979197,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4830.2,
+          "value": 60473.57052200005
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4560.5,
+          "value": 60473.57052200006
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4239.85,
+          "value": 60034.82879275788
+        }
+      }
+    },
+    {
+      "D": "2024-02-15",
+      "symbol": "JSL",
+      "V": 112151.09308383404,
+      "weight": 0.07049608890056382,
+      "ref_close_adjusted": 568.6,
+      "avg_fill_price_adjusted": 641.246765891964,
+      "relative_price": 1.1277642734645865,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 574.0,
+          "value": 37383.69769461135
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 663.7,
+          "value": 37383.69769461135
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 700.0,
+          "value": 37112.47527413208
+        }
+      }
+    },
+    {
+      "D": "2024-02-15",
+      "symbol": "WELCORP",
+      "V": 117218.79549892727,
+      "weight": 0.07368155227994402,
+      "ref_close_adjusted": 560.65,
+      "avg_fill_price_adjusted": 537.8130087294908,
+      "relative_price": 0.9592669378926082,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-02-15",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 564.4,
+          "value": 39072.93183297576
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 512.1,
+          "value": 39072.93183297575
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 539.5,
+          "value": 38789.45385191748
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "CEMPRO",
+      "V": 113039.54217518764,
+      "weight": 0.06093788382070587,
+      "ref_close_adjusted": 401.55,
+      "avg_fill_price_adjusted": 495.08165937206303,
+      "relative_price": 1.2329265580178383,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 424.95,
+          "value": 37679.847391729214
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 578.0,
+          "value": 37679.84739172921
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 506.0,
+          "value": 37679.847391729214
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "GMBREW",
+      "V": 156669.05998665272,
+      "weight": 0.0844578878510483,
+      "ref_close_adjusted": 617.05,
+      "avg_fill_price_adjusted": 737.5049847534009,
+      "relative_price": 1.1952110602923602,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 629.0,
+          "value": 52223.01999555091
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 825.0,
+          "value": 52223.01999555092
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 790.0,
+          "value": 52223.019995550916
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "INDIGO",
+      "V": 188642.87093718167,
+      "weight": 0.10169447904308364,
+      "ref_close_adjusted": 4189.05,
+      "avg_fill_price_adjusted": 4317.7482841529745,
+      "relative_price": 1.0307225466759706,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4324.0,
+          "value": 62880.95697906055
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4275.0,
+          "value": 62880.95697906057
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4355.0,
+          "value": 62880.956979060546
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "NAM-INDIA",
+      "V": 150865.91034439887,
+      "weight": 0.0813294988653093,
+      "ref_close_adjusted": 598.3,
+      "avg_fill_price_adjusted": 645.1928181731761,
+      "relative_price": 1.0783767644545816,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 623.95,
+          "value": 50288.636781466295
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 653.95,
+          "value": 50288.63678146628
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 658.8,
+          "value": 50288.63678146628
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "RPPINFRA",
+      "V": 115724.99711923559,
+      "weight": 0.06238557140185793,
+      "ref_close_adjusted": 111.7,
+      "avg_fill_price_adjusted": 147.93471793953458,
+      "relative_price": 1.3243931776144546,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 117.2,
+          "value": 38574.9990397452
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 144.59,
+          "value": 38574.999039745206
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 207.01,
+          "value": 38574.999039745206
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "SMCGLOBAL",
+      "V": 129425.76048413505,
+      "weight": 0.06977144284223685,
+      "ref_close_adjusted": 80.5,
+      "avg_fill_price_adjusted": 78.76330845406427,
+      "relative_price": 0.9784261919759537,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 82.5,
+          "value": 43141.92016137835
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 80.295,
+          "value": 43141.92016137835
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 74.0,
+          "value": 43141.92016137836
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "TMPV",
+      "V": 209264.36294642373,
+      "weight": 0.1128112091720972,
+      "ref_close_adjusted": 923.0,
+      "avg_fill_price_adjusted": 1018.1368504297401,
+      "relative_price": 1.1030735107581149,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 963.0,
+          "value": 69754.7876488079
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 984.95,
+          "value": 69754.7876488079
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1120.0,
+          "value": 69754.7876488079
+        }
+      }
+    },
+    {
+      "D": "2024-06-03",
+      "symbol": "TVSHLTD",
+      "V": 143473.21166289735,
+      "weight": 0.07734420836690431,
+      "ref_close_adjusted": 11510.45,
+      "avg_fill_price_adjusted": 13142.239898250114,
+      "relative_price": 1.1417659516569825,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-06-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 11990.0,
+          "value": 47824.40388763245
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-07-03",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 14028.15,
+          "value": 47824.40388763245
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-08-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 13590.0,
+          "value": 47824.40388763245
+        }
+      }
+    },
+    {
+      "D": "2024-08-16",
+      "symbol": "ANANDRATHI",
+      "V": 167607.8318048626,
+      "weight": 0.08360641361923038,
+      "ref_close_adjusted": 899.6875,
+      "avg_fill_price_adjusted": 970.9057810233423,
+      "relative_price": 1.0791589090915927,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 909.0,
+          "value": 55869.27726828753
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 978.75,
+          "value": 55869.27726828754
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-10-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1033.75,
+          "value": 55222.44482566838
+        }
+      }
+    },
+    {
+      "D": "2024-08-16",
+      "symbol": "COALINDIA",
+      "V": 165772.41783546592,
+      "weight": 0.0826908694120447,
+      "ref_close_adjusted": 504.7,
+      "avg_fill_price_adjusted": 498.32480243031694,
+      "relative_price": 0.987368342441682,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 507.7,
+          "value": 55257.47261182198
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 492.5,
+          "value": 55257.472611821984
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-10-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 495.0,
+          "value": 54617.7234020581
+        }
+      }
+    },
+    {
+      "D": "2024-08-16",
+      "symbol": "GOKULAGRO",
+      "V": 143693.52372749618,
+      "weight": 0.07167743923298697,
+      "ref_close_adjusted": 101.285,
+      "avg_fill_price_adjusted": 125.07642843258682,
+      "relative_price": 1.2348958723659655,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 101.5,
+          "value": 47897.841242498725
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 148.475,
+          "value": 47897.84124249873
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-10-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 135.3,
+          "value": 47343.29894014722
+        }
+      }
+    },
+    {
+      "D": "2024-08-16",
+      "symbol": "PETRONET",
+      "V": 172660.04213535864,
+      "weight": 0.08612656546436954,
+      "ref_close_adjusted": 364.35,
+      "avg_fill_price_adjusted": 352.59004295780863,
+      "relative_price": 0.9677234608420712,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 367.5,
+          "value": 57553.34737845288
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 335.0,
+          "value": 57553.347378452876
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-10-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 356.9,
+          "value": 56887.01743674011
+        }
+      }
+    },
+    {
+      "D": "2024-08-16",
+      "symbol": "STYRENIX",
+      "V": 143124.42736894428,
+      "weight": 0.07139356165381941,
+      "ref_close_adjusted": 2492.7,
+      "avg_fill_price_adjusted": 2518.363117220795,
+      "relative_price": 1.0102953091911564,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-08-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2492.7,
+          "value": 47708.14245631476
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2445.35,
+          "value": 47708.14245631476
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2024-10-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2625.0,
+          "value": 47155.79641164244
+        }
+      }
+    },
+    {
+      "D": "2024-11-18",
+      "symbol": "NATCOPHARM",
+      "V": 133547.3093474443,
+      "weight": 0.07013117244750393,
+      "ref_close_adjusted": 1376.55,
+      "avg_fill_price_adjusted": 1352.7494760632821,
+      "relative_price": 0.9827100185705439,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-11-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1388.05,
+          "value": 44515.76978248144
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-12-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1440.0,
+          "value": 44515.76978248143
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-01-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1245.6,
+          "value": 44515.769782481424
+        }
+      }
+    },
+    {
+      "D": "2024-11-18",
+      "symbol": "POWERMECH",
+      "V": 112985.64579836724,
+      "weight": 0.05933339913994702,
+      "ref_close_adjusted": 2614.4,
+      "avg_fill_price_adjusted": 2580.074043258942,
+      "relative_price": 0.9868704265831325,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-11-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2620.0,
+          "value": 37661.88193278908
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-12-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2630.0,
+          "value": 37661.88193278908
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-01-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2494.7,
+          "value": 37661.88193278908
+        }
+      }
+    },
+    {
+      "D": "2024-11-18",
+      "symbol": "RAMRAT",
+      "V": 100116.04154222444,
+      "weight": 0.05257504182201313,
+      "ref_close_adjusted": 296.05,
+      "avg_fill_price_adjusted": 293.3656890237077,
+      "relative_price": 0.9909329134393099,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-11-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 297.5,
+          "value": 33372.01384740815
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-12-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 304.825,
+          "value": 33372.01384740815
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-01-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 279.0,
+          "value": 33372.01384740815
+        }
+      }
+    },
+    {
+      "D": "2024-11-18",
+      "symbol": "SWARAJENG",
+      "V": 146591.14211655513,
+      "weight": 0.07698102430731918,
+      "ref_close_adjusted": 2808.45,
+      "avg_fill_price_adjusted": 3014.702263138155,
+      "relative_price": 1.0734398914483632,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-11-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2836.0,
+          "value": 48863.71403885171
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-12-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3185.0,
+          "value": 48863.71403885171
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-01-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3043.75,
+          "value": 48863.714038851715
+        }
+      }
+    },
+    {
+      "D": "2024-11-18",
+      "symbol": "VIPULLTD",
+      "V": 87679.50215463754,
+      "weight": 0.046044104638008204,
+      "ref_close_adjusted": 26.74,
+      "avg_fill_price_adjusted": 23.70643681725135,
+      "relative_price": 0.8865533589099235,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2024-11-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 26.5,
+          "value": 29226.50071821251
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2024-12-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 26.95,
+          "value": 29226.500718212515
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-01-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 19.34,
+          "value": 29226.500718212512
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "COROMANDEL",
+      "V": 140564.28853430043,
+      "weight": 0.083548851955266,
+      "ref_close_adjusted": 1752.2,
+      "avg_fill_price_adjusted": 1961.6530715701185,
+      "relative_price": 1.1195371941388645,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1740.0,
+          "value": 46854.76284476681
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1983.5,
+          "value": 46854.76284476682
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2220.0,
+          "value": 46854.7628447668
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "DPABHUSHAN",
+      "V": 81377.22332113962,
+      "weight": 0.048369138809601926,
+      "ref_close_adjusted": 1628.1,
+      "avg_fill_price_adjusted": 1499.4012557558485,
+      "relative_price": 0.9209515728492406,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1669.0,
+          "value": 27125.741107046542
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1362.0,
+          "value": 27125.74110704654
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1498.3,
+          "value": 27125.741107046542
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "EIDPARRY",
+      "V": 108662.58714343193,
+      "weight": 0.06458706191300802,
+      "ref_close_adjusted": 749.85,
+      "avg_fill_price_adjusted": 784.200675835101,
+      "relative_price": 1.0458100631260931,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 748.0,
+          "value": 36220.862381143976
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 762.25,
+          "value": 36220.862381143976
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 849.8,
+          "value": 36220.86238114397
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "FIEMIND",
+      "V": 113083.57833514684,
+      "weight": 0.06721481852475931,
+      "ref_close_adjusted": 1373.65,
+      "avg_fill_price_adjusted": 1398.7018224192745,
+      "relative_price": 1.0182374130377276,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1370.0,
+          "value": 37694.52611171561
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1344.65,
+          "value": 37694.52611171562
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1489.8,
+          "value": 37694.52611171562
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "LUMAXTECH",
+      "V": 97143.02745676885,
+      "weight": 0.057740045527220896,
+      "ref_close_adjusted": 534.65,
+      "avg_fill_price_adjusted": 544.299802931728,
+      "relative_price": 1.0180488224665258,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 536.0,
+          "value": 32381.009152256283
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 543.2,
+          "value": 32381.009152256283
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 554.0,
+          "value": 32381.00915225628
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "PANAMAPET",
+      "V": 99989.01371640524,
+      "weight": 0.059431647904698584,
+      "ref_close_adjusted": 318.3,
+      "avg_fill_price_adjusted": 356.1472320348956,
+      "relative_price": 1.1189042790917234,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 318.35,
+          "value": 33329.67123880175
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 378.0,
+          "value": 33329.67123880175
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 379.25,
+          "value": 33329.67123880175
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "RKFORGE",
+      "V": 94601.2399924582,
+      "weight": 0.05622925337103522,
+      "ref_close_adjusted": 632.3,
+      "avg_fill_price_adjusted": 692.029246481822,
+      "relative_price": 1.0944634611447448,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 638.6,
+          "value": 31533.746664152728
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 771.95,
+          "value": 31533.74666415273
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 678.55,
+          "value": 31533.746664152728
+        }
+      }
+    },
+    {
+      "D": "2025-02-17",
+      "symbol": "TCPLPACK",
+      "V": 102406.01908111946,
+      "weight": 0.06086827185447453,
+      "ref_close_adjusted": 3484.75,
+      "avg_fill_price_adjusted": 3942.76062901361,
+      "relative_price": 1.1314328514279677,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-02-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3410.4,
+          "value": 34135.33969370649
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-03-20",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4570.0,
+          "value": 34135.33969370649
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-04-24",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4018.5,
+          "value": 34135.33969370649
+        }
+      }
+    },
+    {
+      "D": "2025-06-02",
+      "symbol": "BHARTIARTL",
+      "V": 177237.53236345772,
+      "weight": 0.09424624496928906,
+      "ref_close_adjusted": 1856.2,
+      "avg_fill_price_adjusted": 1926.630679101616,
+      "relative_price": 1.0379434754345522,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-06-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1844.0,
+          "value": 59079.1774544859
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2009.0,
+          "value": 59079.1774544859
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1934.0,
+          "value": 59079.17745448589
+        }
+      }
+    },
+    {
+      "D": "2025-06-02",
+      "symbol": "EICHERMOT",
+      "V": 158015.6693762381,
+      "weight": 0.08402499903056418,
+      "ref_close_adjusted": 5333.5,
+      "avg_fill_price_adjusted": 5484.096753786125,
+      "relative_price": 1.0282360089596185,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-06-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5340.0,
+          "value": 52671.88979207937
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5656.5,
+          "value": 52671.889792079375
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5465.0,
+          "value": 52671.88979207937
+        }
+      }
+    },
+    {
+      "D": "2025-06-02",
+      "symbol": "HINDALCO",
+      "V": 131287.78343188183,
+      "weight": 0.06981241745919957,
+      "ref_close_adjusted": 633.5,
+      "avg_fill_price_adjusted": 668.8566090947487,
+      "relative_price": 1.055811537639698,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-06-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 628.95,
+          "value": 43762.59447729395
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 692.4,
+          "value": 43762.594477293955
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 689.15,
+          "value": 43762.59447729394
+        }
+      }
+    },
+    {
+      "D": "2025-06-02",
+      "symbol": "INDIGO",
+      "V": 140184.81878844916,
+      "weight": 0.07454342540392737,
+      "ref_close_adjusted": 5330.0,
+      "avg_fill_price_adjusted": 5692.118267646889,
+      "relative_price": 1.0679396374572023,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-06-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5350.0,
+          "value": 46728.27292948306
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5962.5,
+          "value": 46728.272929483064
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5800.0,
+          "value": 46728.27292948305
+        }
+      }
+    },
+    {
+      "D": "2025-06-02",
+      "symbol": "KRISHANA",
+      "V": 111795.58487591789,
+      "weight": 0.05944742029636296,
+      "ref_close_adjusted": 74.96000000000001,
+      "avg_fill_price_adjusted": 92.4286330722932,
+      "relative_price": 1.2330393953080734,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-06-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 75.2,
+          "value": 37265.194958639295
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 99.01,
+          "value": 37265.19495863929
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 110.38,
+          "value": 37265.194958639295
+        }
+      }
+    },
+    {
+      "D": "2025-06-02",
+      "symbol": "PETRONET",
+      "V": 126400.91137006863,
+      "weight": 0.06721381808056039,
+      "ref_close_adjusted": 307.3,
+      "avg_fill_price_adjusted": 301.3393833656217,
+      "relative_price": 0.9806032651012746,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-06-02",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 307.0,
+          "value": 42133.63712335621
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 303.0,
+          "value": 42133.6371233562
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 294.3,
+          "value": 42133.637123356224
+        }
+      }
+    },
+    {
+      "D": "2025-08-18",
+      "symbol": "MAITHANALL",
+      "V": 160259.57726588252,
+      "weight": 0.08137942739857634,
+      "ref_close_adjusted": 1105.4,
+      "avg_fill_price_adjusted": 1126.5236305129813,
+      "relative_price": 1.0191094902415245,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-08-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1120.5,
+          "value": 53419.8590886275
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-09-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1159.4,
+          "value": 53419.859088627505
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1101.0,
+          "value": 52955.06706419655
+        }
+      }
+    },
+    {
+      "D": "2025-08-18",
+      "symbol": "SHRIPISTON",
+      "V": 147983.95498978873,
+      "weight": 0.07514589596892374,
+      "ref_close_adjusted": 2459.6,
+      "avg_fill_price_adjusted": 2605.0011558118467,
+      "relative_price": 1.0591157732199734,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-08-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2475.0,
+          "value": 49327.98499659624
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-09-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2666.3,
+          "value": 49327.98499659624
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2685.0,
+          "value": 48898.79528327954
+        }
+      }
+    },
+    {
+      "D": "2025-08-18",
+      "symbol": "SRM",
+      "V": 117429.2543621947,
+      "weight": 0.059630292572047196,
+      "ref_close_adjusted": 467.8,
+      "avg_fill_price_adjusted": 513.1077289218288,
+      "relative_price": 1.0968527766606002,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-08-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 476.5,
+          "value": 39143.084787398235
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-09-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 515.85,
+          "value": 39143.08478739823
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 553.0,
+          "value": 38802.51118927954
+        }
+      }
+    },
+    {
+      "D": "2025-08-18",
+      "symbol": "SSWL",
+      "V": 164924.59045523673,
+      "weight": 0.08374830986184784,
+      "ref_close_adjusted": 208.66,
+      "avg_fill_price_adjusted": 222.59556501811136,
+      "relative_price": 1.0667859916520241,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-08-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 211.0,
+          "value": 54974.86348507891
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-09-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 245.9,
+          "value": 54974.86348507891
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 214.0,
+          "value": 54496.5417798559
+        }
+      }
+    },
+    {
+      "D": "2025-08-18",
+      "symbol": "SUDARCOLOR",
+      "V": 172884.4391808775,
+      "weight": 0.08779030187582426,
+      "ref_close_adjusted": 592.15,
+      "avg_fill_price_adjusted": 572.9034986294772,
+      "relative_price": 0.9674972534484121,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-08-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 592.15,
+          "value": 57628.14639362582
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-09-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 595.55,
+          "value": 57628.14639362582
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2025-10-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 534.85,
+          "value": 57126.73917759297
+        }
+      }
+    },
+    {
+      "D": "2025-11-17",
+      "symbol": "BPCL",
+      "V": 200779.22725693628,
+      "weight": 0.09788467547299166,
+      "ref_close_adjusted": 371.15,
+      "avg_fill_price_adjusted": 365.7163016823766,
+      "relative_price": 0.9853598320958551,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 372.6,
+          "value": 66926.40908564543
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 366.75,
+          "value": 66926.40908564544
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 358.0,
+          "value": 66117.19283023642
+        }
+      }
+    },
+    {
+      "D": "2025-11-17",
+      "symbol": "GLENMARK",
+      "V": 165964.63716972602,
+      "weight": 0.08091173011918351,
+      "ref_close_adjusted": 1895.6,
+      "avg_fill_price_adjusted": 1952.3069965765953,
+      "relative_price": 1.0299150646637452,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1855.1,
+          "value": 55321.54572324201
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1988.8,
+          "value": 55321.545723242016
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2022.0,
+          "value": 54652.64543880703
+        }
+      }
+    },
+    {
+      "D": "2025-11-17",
+      "symbol": "GULFOILLUB",
+      "V": 156490.35761391063,
+      "weight": 0.07629279223237405,
+      "ref_close_adjusted": 1208.5,
+      "avg_fill_price_adjusted": 1171.9082345967913,
+      "relative_price": 0.9697213360337537,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1216.3,
+          "value": 52163.45253797021
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1184.0,
+          "value": 52163.45253797021
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1119.0,
+          "value": 51532.73718496266
+        }
+      }
+    },
+    {
+      "D": "2025-11-17",
+      "symbol": "HEROMOTOCO",
+      "V": 206572.09624238542,
+      "weight": 0.10070883765572891,
+      "ref_close_adjusted": 5538.5,
+      "avg_fill_price_adjusted": 5719.4052900387305,
+      "relative_price": 1.0326632283179076,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5589.0,
+          "value": 68857.36541412848
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5960.5,
+          "value": 68857.36541412848
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 5622.0,
+          "value": 68024.80170483928
+        }
+      }
+    },
+    {
+      "D": "2025-11-17",
+      "symbol": "HINDPETRO",
+      "V": 164554.79944488147,
+      "weight": 0.08022440050819048,
+      "ref_close_adjusted": 481.25,
+      "avg_fill_price_adjusted": 464.25832794802847,
+      "relative_price": 0.9646926295023968,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 483.0,
+          "value": 54851.59981496049
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 466.1,
+          "value": 54851.59981496049
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 445.0,
+          "value": 54188.381710002046
+        }
+      }
+    },
+    {
+      "D": "2025-11-17",
+      "symbol": "NAZARA",
+      "V": 153332.92945731856,
+      "weight": 0.07475347048749158,
+      "ref_close_adjusted": 273.65,
+      "avg_fill_price_adjusted": 255.06909375467177,
+      "relative_price": 0.9320997396479875,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2025-11-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 272.55,
+          "value": 51110.97648577285
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2025-12-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 228.7,
+          "value": 51110.97648577286
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-01-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 269.0,
+          "value": 50492.986762923894
+        }
+      }
+    },
+    {
+      "D": "2026-02-16",
+      "symbol": "IOC",
+      "V": 219179.3842935253,
+      "weight": 0.10629973057619105,
+      "ref_close_adjusted": 176.77,
+      "avg_fill_price_adjusted": 155.258682439633,
+      "relative_price": 0.8783090028830287,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-02-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 175.9,
+          "value": 73059.79476450844
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 146.8,
+          "value": 73059.79476450844
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 146.44,
+          "value": 72460.45529504748
+        }
+      }
+    },
+    {
+      "D": "2026-02-16",
+      "symbol": "PNGJL",
+      "V": 138735.86281683366,
+      "weight": 0.06728545609442371,
+      "ref_close_adjusted": 566.95,
+      "avg_fill_price_adjusted": 592.7452206093135,
+      "relative_price": 1.0454982284316314,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-02-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 567.95,
+          "value": 46245.28760561122
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 555.0,
+          "value": 46245.28760561122
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 667.95,
+          "value": 45865.918539109545
+        }
+      }
+    },
+    {
+      "D": "2026-02-16",
+      "symbol": "RPTECH",
+      "V": 147544.04370094312,
+      "weight": 0.07155733256613278,
+      "ref_close_adjusted": 365.6,
+      "avg_fill_price_adjusted": 388.08151969142784,
+      "relative_price": 1.0614921216942774,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-02-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 363.1,
+          "value": 49181.347900314366
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 350.95,
+          "value": 49181.34790031438
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 471.0,
+          "value": 48777.89312668739
+        }
+      }
+    },
+    {
+      "D": "2026-02-16",
+      "symbol": "SWARAJENG",
+      "V": 131919.8666153679,
+      "weight": 0.06397976855378418,
+      "ref_close_adjusted": 3591.7,
+      "avg_fill_price_adjusted": 3721.5306270013375,
+      "relative_price": 1.0361474029015056,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-02-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3589.9,
+          "value": 43973.2888717893
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 3552.5,
+          "value": 43973.28887178931
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4067.0,
+          "value": 43612.5579429957
+        }
+      }
+    },
+    {
+      "D": "2026-02-16",
+      "symbol": "TORNTPHARM",
+      "V": 239784.39492413518,
+      "weight": 0.11629294725399739,
+      "ref_close_adjusted": 4078.0,
+      "avg_fill_price_adjusted": 4195.141875454397,
+      "relative_price": 1.0287253250256,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-02-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4144.3,
+          "value": 79928.1316413784
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4306.0,
+          "value": 79928.13164137838
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 4138.9,
+          "value": 79272.44838675998
+        }
+      }
+    },
+    {
+      "D": "2026-02-16",
+      "symbol": "WHEELS",
+      "V": 150921.7201215601,
+      "weight": 0.07319547063574385,
+      "ref_close_adjusted": 866.35,
+      "avg_fill_price_adjusted": 952.6613806730172,
+      "relative_price": 1.099626456597238,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-02-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 860.0,
+          "value": 50307.24004052003
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-03-18",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 968.0,
+          "value": 50307.24004052003
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-04-22",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1049.95,
+          "value": 49894.54911176619
+        }
+      }
+    },
+    {
+      "D": "2026-06-01",
+      "symbol": "CEIGALL",
+      "V": 134445.53828743487,
+      "weight": 0.06267732698682833,
+      "ref_close_adjusted": 347.15,
+      "avg_fill_price_adjusted": 355.79294864355364,
+      "relative_price": 1.024896870642528,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 346.7,
+          "value": 44815.179429144955
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 393.0,
+          "value": 44815.179429144955
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 333.0,
+          "value": 44815.17942914495
+        }
+      }
+    },
+    {
+      "D": "2026-06-01",
+      "symbol": "COALINDIA",
+      "V": 187964.45903506683,
+      "weight": 0.08762737693575237,
+      "ref_close_adjusted": 457.9,
+      "avg_fill_price_adjusted": 435.42340023490607,
+      "relative_price": 0.9509137371367243,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 456.55,
+          "value": 62654.81967835562
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 439.0,
+          "value": 62654.819678355605
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 412.95,
+          "value": 62654.81967835562
+        }
+      }
+    },
+    {
+      "D": "2026-06-01",
+      "symbol": "LUPIN",
+      "V": 199265.87674074696,
+      "weight": 0.09289599843094293,
+      "ref_close_adjusted": 2267.7,
+      "avg_fill_price_adjusted": 2387.102476572293,
+      "relative_price": 1.0526535593651247,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2285.4,
+          "value": 66421.95891358232
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2428.0,
+          "value": 66421.95891358232
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 2455.0,
+          "value": 66421.95891358232
+        }
+      }
+    },
+    {
+      "D": "2026-06-01",
+      "symbol": "ONGC",
+      "V": 178957.29185829876,
+      "weight": 0.08342831485043153,
+      "ref_close_adjusted": 265.4,
+      "avg_fill_price_adjusted": 246.51412465716163,
+      "relative_price": 0.9288399572613476,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 266.55,
+          "value": 59652.43061943292
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 235.7,
+          "value": 59652.430619432926
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 239.5,
+          "value": 59652.43061943292
+        }
+      }
+    },
+    {
+      "D": "2026-06-01",
+      "symbol": "SRM",
+      "V": 86968.64854203619,
+      "weight": 0.040544018728371545,
+      "ref_close_adjusted": 516.0,
+      "avg_fill_price_adjusted": 517.4904431606234,
+      "relative_price": 1.0028884557376423,
+      "tranches_filled": 3,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-06-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 525.55,
+          "value": 28989.549514012062
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-07-01",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 522.4,
+          "value": 28989.549514012066
+        },
+        "tranche3": {
+          "status": "filled",
+          "date": "2026-07-30",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 505.0,
+          "value": 28989.54951401206
+        }
+      }
+    },
+    {
+      "D": "2026-08-17",
+      "symbol": "BAJAJ-AUTO",
+      "V": 224761.2458469128,
+      "weight": 0.10227946517507887,
+      "ref_close_adjusted": 11700.0,
+      "avg_fill_price_adjusted": 11560.864864864865,
+      "relative_price": 0.9881081081081081,
+      "tranches_filled": 2,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 11700.0,
+          "value": 74920.41528230427
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 11425.0,
+          "value": 74920.41528230428
+        },
+        "tranche3": {
+          "status": "pending_at_end"
+        }
+      }
+    },
+    {
+      "D": "2026-08-17",
+      "symbol": "BEPL",
+      "V": 158681.78572998295,
+      "weight": 0.07220945993751726,
+      "ref_close_adjusted": 123.7,
+      "avg_fill_price_adjusted": 123.58203827325323,
+      "relative_price": 0.9990463886277545,
+      "tranches_filled": 2,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 124.19,
+          "value": 52893.92857666098
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 122.98,
+          "value": 52893.92857666098
+        },
+        "tranche3": {
+          "status": "pending_at_end"
+        }
+      }
+    },
+    {
+      "D": "2026-08-17",
+      "symbol": "CHENNPETRO",
+      "V": 104811.16333095761,
+      "weight": 0.04769518735080204,
+      "ref_close_adjusted": 1321.9,
+      "avg_fill_price_adjusted": 1398.8759768967482,
+      "relative_price": 1.0582313162090538,
+      "tranches_filled": 2,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1332.1,
+          "value": 34937.05444365254
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1472.7,
+          "value": 34937.054443652545
+        },
+        "tranche3": {
+          "status": "pending_at_end"
+        }
+      }
+    },
+    {
+      "D": "2026-08-17",
+      "symbol": "EICHERMOT",
+      "V": 195344.37175518918,
+      "weight": 0.08889307314878885,
+      "ref_close_adjusted": 8066.5,
+      "avg_fill_price_adjusted": 7731.268078512397,
+      "relative_price": 0.958441465135114,
+      "tranches_filled": 2,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 8058.0,
+          "value": 65114.790585063056
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 7430.0,
+          "value": 65114.790585063056
+        },
+        "tranche3": {
+          "status": "pending_at_end"
+        }
+      }
+    },
+    {
+      "D": "2026-08-17",
+      "symbol": "GESHIP",
+      "V": 149326.40416386508,
+      "weight": 0.06795221612537423,
+      "ref_close_adjusted": 1284.5,
+      "avg_fill_price_adjusted": 1333.5140857196332,
+      "relative_price": 1.0381581048809911,
+      "tranches_filled": 2,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1281.1,
+          "value": 49775.468054621684
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1390.4,
+          "value": 49775.46805462168
+        },
+        "tranche3": {
+          "status": "pending_at_end"
+        }
+      }
+    },
+    {
+      "D": "2026-08-17",
+      "symbol": "GULFOILLUB",
+      "V": 179126.58924515953,
+      "weight": 0.08151303698996915,
+      "ref_close_adjusted": 1159.3,
+      "avg_fill_price_adjusted": 1109.3544714716065,
+      "relative_price": 0.9569175118361136,
+      "tranches_filled": 2,
+      "tranches": {
+        "tranche1": {
+          "status": "filled",
+          "date": "2026-08-17",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1166.8,
+          "value": 59708.86308171984
+        },
+        "tranche2": {
+          "status": "filled",
+          "date": "2026-09-16",
+          "sessions_after_scheduled": 0,
+          "price_adjusted": 1057.3,
+          "value": 59708.863081719835
+        },
+        "tranche3": {
+          "status": "pending_at_end"
+        }
+      }
+    }
+  ]
+}

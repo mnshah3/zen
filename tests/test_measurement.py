@@ -401,6 +401,108 @@ def test_reproduce_refuses_a_run_the_engine_does_not_reproduce():
         vf.reproduce(FakeEngine([1.0, 1.1]), None, None, None, None, None, True, s)
 
 
+# ---------------------------------------------------------------- verify: v2 runs
+def test_is_v2_reads_the_engine_field():
+    assert vf.is_v2({"engine": "v2"})
+    assert not vf.is_v2({"engine": "v1"}) and not vf.is_v2({}) and not vf.is_v2(None)
+
+
+class FakeReplay:
+    """engine_v2.Replay's interface as verify_v1 uses it: `ranks`, `reproduce(nav)`,
+    `chooser(ranks)` and `simulate(choose, log_trades)`. The chooser it hands out is
+    the ranks frame itself, recorded, and every simulation returns the same NAV."""
+
+    def __init__(self, ranks=None, worst=0.0):
+        self.ranks, self.worst, self.seen = ranks, worst, []
+
+    def reproduce(self, nav):
+        return self.worst
+
+    def chooser(self, ranks=None):
+        self.seen.append(ranks)
+        return ranks
+
+    def simulate(self, choose=None, log_trades=True):
+        nav = pd.DataFrame({"date": pd.to_datetime(["2020-01-01", "2020-01-01", "2022-01-01"]),
+                            "mark": ["open", "close", "open"], "nav": [1.0, 1.0, 1.21]})
+        trades = pd.DataFrame({"side": ["buy", "cancel"], "value": [0.6, 0.0]})
+        return type("R", (), {"nav": nav, "trades": trades})()
+
+
+def test_reproduce_v2_refuses_a_run_the_replay_does_not_reproduce():
+    s = pd.Series([1.0, 1.1, 1.2])
+    assert vf.reproduce_v2(FakeReplay(worst=0.0), s) == 0.0
+    assert vf.reproduce_v2(FakeReplay(worst=1e-9), s) == 1e-9          # the tolerance itself
+    for bad in (2e-9, 1e-3, float("nan"), float("inf")):
+        with pytest.raises(RuntimeError, match="not the same machinery"):
+            vf.reproduce_v2(FakeReplay(worst=bad), s)
+
+
+def _ranks_two_dates():
+    D1, D2 = pd.Timestamp("2020-01-01"), pd.Timestamp("2020-04-01")
+    return pd.DataFrame({"symbol": ["A", "B", "C", "D", "B", "C", "E"],
+                         "D": [D1] * 4 + [D2] * 3, "rank": [1, 2, 3, 4, 1, 2, 3],
+                         "sector": list("xyzxyzw"), "sigma": np.linspace(0.01, 0.02, 7)})
+
+
+@pytest.mark.parametrize("mode", ["persistent", "fresh"])
+def test_v2_monkeys_draw_the_same_orders_as_v1s(mode):
+    """Same seed and ranks: v1's monkey test hands select_top, date by date, exactly the
+    ranking shuffled_ranks_v2 hands the v2 replay, and nothing but the rank changes."""
+    ranks = _ranks_two_dates()
+    seen_v1 = []
+
+    class FakeV1Engine:
+        @staticmethod
+        def rebalance_dates(decisions, freq):
+            return decisions
+
+        @staticmethod
+        def select_top(r, held, cfg):
+            seen_v1.append(r["rank"].copy())
+            return []
+
+        @staticmethod
+        def simulate(panel, rebal, choose, cfg, is_end, run_final_test, log_trades):
+            for D in rebal:
+                choose(D, set())
+            return FakeReplay().simulate()
+
+    from types import SimpleNamespace
+    decisions = sorted(ranks["D"].unique())
+    vf.monkeys(FakeV1Engine, None, ranks, decisions, SimpleNamespace(rebalance="quarterly"),
+               None, 4, mode=mode)
+    rep = FakeReplay(ranks)
+    vf.monkeys_v2(rep, 4, mode=mode)
+    seen_v2 = [g.set_index("symbol")["rank"] for frame in rep.seen for _, g in frame.groupby("D")]
+    assert len(seen_v1) == len(seen_v2) == 8
+    for a, b in zip(seen_v1, seen_v2):
+        pd.testing.assert_series_equal(a, b, check_names=False, check_dtype=False)
+    for frame in rep.seen:
+        pd.testing.assert_frame_equal(frame.drop(columns="rank"), ranks.drop(columns="rank"))
+    assert any(not frame["rank"].equals(ranks["rank"]) for frame in rep.seen)
+
+
+def test_monkeys_v2_returns_each_draw_s_cagr_and_turnover():
+    mk, mt = vf.monkeys_v2(FakeReplay(_ranks_two_dates()), 3)
+    assert mk == pytest.approx([0.1, 0.1, 0.1], rel=1e-3)      # 1.21 over two calendar years
+    nav = pd.Series([1.0, 1.0, 1.21], index=pd.to_datetime(["2020-01-01", "2020-01-01",
+                                                             "2022-01-01"]))
+    assert mt == pytest.approx([0.6 / 2 / nav.mean() / lc.years_between(nav.index[0],
+                                                                         nav.index[-1])] * 3)
+    with pytest.raises(ValueError, match="mode"):
+        vf.monkeys_v2(FakeReplay(_ranks_two_dates()), 1, mode="other")
+
+
+def test_legacy_capacity_leaves_out_cancellations():
+    trades = pd.DataFrame({"date": ["2020-01-01"] * 2, "symbol": ["A", "B"],
+                           "side": ["buy", "cancel"], "value": [1e5, 0.0]})
+    ranks = pd.DataFrame({"symbol": ["A", "B"], "D": ["2020-01-01"] * 2,
+                          "median_turnover_60": [1e7, 1e7]})
+    out = vf.capacity(trades, ranks)
+    assert out["trades"] == 2 and out["matched"] == 1 and out["p95_pct"] == pytest.approx(1.0)
+
+
 def test_load_engine_refuses_a_config_that_is_not_v1s(tmp_path):
     r = vf.load_run(make_run(tmp_path))
     r["metrics"]["config"] = {"n": 12, "tranches": 3}
@@ -445,6 +547,25 @@ def test_stats_build_on_a_run_folder(tmp_path):
     assert rep["positions"]["median_return_pct"] == pytest.approx((1.2e5 - 240) / (1e5 + 200) * 100 - 100)
     assert list(rep["monthly_pct"])[0] == "2019-03-31"
     assert all(len(x["start"]) >= 10 for x in rep["worst_drawdowns"])
+
+
+@pytest.mark.parametrize("col,sold,others", [("action", "sell", ["buy", "keep", "keep", "buy"]),
+                                             ("status", "sold", ["new", "kept", "kept", "new"])])
+def test_exposure_adds_the_book_held_after_each_date_leaving_every_row_figures_alone(
+        col, sold, others):
+    """v1's figures count every row of holdings.csv, sold names included, and stay as they
+    were; held_after_decision counts the book after the date's trades, which is what
+    the sector cap governs (v1 writes an 'action' column, v2 a 'status' column)."""
+    h = pd.DataFrame({"D": ["2020-01-01"] * 5, "symbol": list("ABCDE"),
+                      col: others[:3] + [sold] + others[3:], "sector": ["X", "X", "X", "X", None]})
+    out = st.exposure(h)
+    assert out["max_names_in_one_labelled_sector"] == 4                 # every row, as always
+    assert out["unlabelled_share_of_slots_pct"] == 20.0
+    held = out["held_after_decision"]
+    assert held["max_names_in_one_labelled_sector"] == 3
+    assert held["unlabelled_share_of_slots_pct"] == 25.0 and held["distinct_stocks_ever_held"] == 4
+    assert {k: v for k, v in out.items() if k != "held_after_decision"} == st._exposure_of(h)
+    assert "held_after_decision" not in st.exposure(h.drop(columns=col))
 
 
 # ---------------------------------------------------------------- attribution
@@ -576,6 +697,26 @@ def test_a2_quantities_carry_value_source_and_bar():
 def test_load_refuses_a_run_without_its_measurements(tmp_path):
     with pytest.raises(FileNotFoundError, match="run the measurement job"):
         br.load(make_run(tmp_path))
+
+
+def test_load_lets_only_the_after_tax_source_be_missing(tmp_path):
+    run = make_run(tmp_path)
+    for f in ("libcheck.json", "verify.json", "stats.json", "attribution.json"):
+        (run / f).write_text("{}")
+    docs, files = br.load(run, ("after_tax",))
+    assert docs["after_tax"] is None and files["after_tax"]["missing"]
+    assert files["verify"]["sha256"] == br.sha256(run / "verify.json")
+    with pytest.raises(ValueError, match="may be missing"):
+        br.load(run, ("verify",))
+    with pytest.raises(FileNotFoundError, match="run the measurement job"):
+        br.load(run)
+    s = br.after_tax_section(None)
+    assert s["not_measured"] and "after_tax/summary.json" in s["reason"]
+
+
+def test_a_v2_run_is_recognised_by_its_metrics_json():
+    assert br.is_v2_run({"metrics": {"engine": "v2"}})
+    assert not br.is_v2_run({"metrics": {"cagr": 0.3}}) and not br.is_v2_run({})
 
 
 @pytest.mark.skipif(not (V1_FINAL / "baseline_report.json").exists(),

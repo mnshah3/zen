@@ -1,0 +1,2478 @@
+{
+  "variant": "a",
+  "end_open": "2026-09-18",
+  "in_sample_only": false,
+  "decision_dates": [
+    "2019-02-15",
+    "2019-06-03",
+    "2019-08-16",
+    "2019-11-15",
+    "2020-02-17",
+    "2020-06-01",
+    "2020-08-17",
+    "2020-11-17",
+    "2021-02-15",
+    "2021-06-01",
+    "2021-08-16",
+    "2021-11-15",
+    "2022-02-15",
+    "2022-06-01",
+    "2022-08-16",
+    "2022-11-15",
+    "2023-02-15",
+    "2023-06-01",
+    "2023-08-16",
+    "2023-11-15",
+    "2024-02-15",
+    "2024-06-03",
+    "2024-08-16",
+    "2024-11-18",
+    "2025-02-17",
+    "2025-06-02",
+    "2025-08-18",
+    "2025-11-17",
+    "2026-02-16",
+    "2026-06-01",
+    "2026-08-17"
+  ],
+  "roce_from": "2023-02-15",
+  "strategy": {
+    "cagr": 0.212527529587077,
+    "vol": 0.167384081544047,
+    "sharpe_rf0": 1.26085673959956,
+    "max_dd": -0.26337823329426646,
+    "total_return": 3.3168065979706025,
+    "years": 7.5893223819301845,
+    "start_rupees": 500000.0,
+    "end_rupees": 2158403.298985301,
+    "turnover_one_sided_annual_incl_initial": 1.9857241403777202,
+    "dividends_credited": 161948.09002941108,
+    "costs_paid": 73673.29256462556,
+    "min_cash": -6.184563972055912e-11,
+    "forced_exits": [
+      [
+        "2021-12-13",
+        "TATASTLBSL"
+      ]
+    ],
+    "buys_scaled_down": [
+      [
+        "2019-08-01",
+        0.9955638663335762
+      ],
+      [
+        "2020-01-15",
+        0.9871263560849743
+      ],
+      [
+        "2021-07-30",
+        0.9969380224595267
+      ],
+      [
+        "2021-10-18",
+        0.9899649726921554
+      ],
+      [
+        "2023-04-21",
+        0.9924789214686051
+      ],
+      [
+        "2024-01-16",
+        0.9877935321906789
+      ],
+      [
+        "2024-04-22",
+        0.9927449011947694
+      ],
+      [
+        "2024-10-16",
+        0.9884223946640114
+      ],
+      [
+        "2025-10-17",
+        0.9912992652477831
+      ],
+      [
+        "2026-01-16",
+        0.9879088648791324
+      ],
+      [
+        "2026-04-22",
+        0.9917965897468947
+      ]
+    ],
+    "orders_pending_at_end": [
+      {
+        "symbol": "BAJAJ-AUTO",
+        "kind": "tranche3",
+        "scheduled": "2026-09-18",
+        "D": "2026-08-17",
+        "value": 74920.41528230427
+      },
+      {
+        "symbol": "GESHIP",
+        "kind": "tranche3",
+        "scheduled": "2026-09-18",
+        "D": "2026-08-17",
+        "value": 49775.46805462169
+      },
+      {
+        "symbol": "CHENNPETRO",
+        "kind": "tranche3",
+        "scheduled": "2026-09-18",
+        "D": "2026-08-17",
+        "value": 34937.05444365254
+      },
+      {
+        "symbol": "BEPL",
+        "kind": "tranche3",
+        "scheduled": "2026-09-18",
+        "D": "2026-08-17",
+        "value": 52893.92857666098
+      },
+      {
+        "symbol": "GULFOILLUB",
+        "kind": "tranche3",
+        "scheduled": "2026-09-18",
+        "D": "2026-08-17",
+        "value": 59708.86308171984
+      },
+      {
+        "symbol": "EICHERMOT",
+        "kind": "tranche3",
+        "scheduled": "2026-09-18",
+        "D": "2026-08-17",
+        "value": 65114.790585063056
+      }
+    ]
+  },
+  "universe_ew": {
+    "cagr": 0.23821910788073208,
+    "vol": 0.2021402780883581,
+    "sharpe_rf0": 1.1825235258800022,
+    "max_dd": -0.48156177708073933,
+    "total_return": 4.061394120537867,
+    "years": 7.5893223819301845,
+    "dividends_credited": 114304.12206178614,
+    "costs_paid": 32417.658529265984,
+    "forced_exits": [
+      [
+        "2019-09-27",
+        "EXCELCROP"
+      ],
+      [
+        "2019-10-30",
+        "MONSANTO"
+      ],
+      [
+        "2020-05-14",
+        "GSKCONS"
+      ],
+      [
+        "2020-12-01",
+        "HEXAWARE"
+      ],
+      [
+        "2021-05-11",
+        "HARITASEAT"
+      ],
+      [
+        "2021-06-14",
+        "MEGH"
+      ],
+      [
+        "2021-12-13",
+        "TATASTLBSL"
+      ],
+      [
+        "2022-02-02",
+        "GDL"
+      ],
+      [
+        "2022-02-10",
+        "SRIPIPES"
+      ],
+      [
+        "2022-05-09",
+        "SPLPETRO"
+      ],
+      [
+        "2022-07-01",
+        "GALLISPAT"
+      ],
+      [
+        "2022-12-20",
+        "MINDTREE"
+      ],
+      [
+        "2023-02-08",
+        "JMCPROJECT"
+      ],
+      [
+        "2024-02-13",
+        "TATACOFFEE"
+      ],
+      [
+        "2024-02-19",
+        "TINPLATE"
+      ],
+      [
+        "2024-03-04",
+        "TATAMETALI"
+      ],
+      [
+        "2024-09-03",
+        "ISMTLTD"
+      ],
+      [
+        "2024-11-26",
+        "JUBLINDS"
+      ],
+      [
+        "2025-05-20",
+        "RBL"
+      ],
+      [
+        "2025-11-28",
+        "MANGCHEFER"
+      ],
+      [
+        "2026-06-09",
+        "GSPL"
+      ],
+      [
+        "2026-06-12",
+        "CIGNITITEC"
+      ],
+      [
+        "2026-08-13",
+        "JBCHEPHARM"
+      ]
+    ]
+  },
+  "benchmarks_how": {
+    "nifty500": {
+      "tri_name": "NIFTY 500",
+      "price_or_parent": "Nifty 500",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "own open (data/indices)",
+          "overnight_ratio": 1.0020576595672714,
+          "tri_prev_close": 13167.36
+        },
+        "2026-09-18": {
+          "source": "own open (data/indices)",
+          "overnight_ratio": 1.0024299647092318,
+          "tri_prev_close": 36440.81
+        }
+      }
+    },
+    "midcap150": {
+      "tri_name": "NIFTY MIDCAP 150",
+      "price_or_parent": "Nifty Midcap 150",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "own open (data/indices)",
+          "overnight_ratio": 0.9998722904285933,
+          "tri_prev_close": 7077.67
+        },
+        "2026-09-18": {
+          "source": "own open (data/indices)",
+          "overnight_ratio": 1.002179995879276,
+          "tri_prev_close": 28848.06
+        }
+      }
+    },
+    "smallcap250": {
+      "tri_name": "NIFTY SMALLCAP 250",
+      "price_or_parent": "Nifty Smallcap 250",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "own open (data/indices)",
+          "overnight_ratio": 0.9996125857284958,
+          "tri_prev_close": 5726.9
+        },
+        "2026-09-18": {
+          "source": "own open (data/indices)",
+          "overnight_ratio": 1.0017268903480154,
+          "tri_prev_close": 23003.17
+        }
+      }
+    },
+    "momentum30": {
+      "tri_name": "NIFTY200 MOMENTUM 30",
+      "price_or_parent": "Nifty 200",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "parent Nifty 200 overnight move",
+          "overnight_ratio": 1.0022781892415864,
+          "tri_prev_close": 12602.72
+        },
+        "2026-09-18": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.0026302251871029,
+          "tri_prev_close": 37906.17
+        }
+      }
+    },
+    "value50": {
+      "tri_name": "NIFTY500 VALUE 50",
+      "price_or_parent": "Nifty 500",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "parent Nifty 500 overnight move",
+          "overnight_ratio": 1.0020576595672714,
+          "tri_prev_close": 5549.49
+        },
+        "2026-09-18": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.0015118390099211,
+          "tri_prev_close": 26675.03
+        }
+      }
+    },
+    "quality30": {
+      "tri_name": "NIFTY200 QUALITY 30",
+      "price_or_parent": "Nifty 200",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.002394405653546,
+          "tri_prev_close": 12058.56
+        },
+        "2026-09-18": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.0013435229931444,
+          "tri_prev_close": 28353.18
+        }
+      }
+    },
+    "lowvol30": {
+      "tri_name": "NIFTY100 LOW VOLATILITY 30",
+      "price_or_parent": "Nifty 100",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.00260017809439,
+          "tri_prev_close": 10573.05
+        },
+        "2026-09-18": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.0014526145772324,
+          "tri_prev_close": 27322.16
+        }
+      }
+    },
+    "alpha50": {
+      "tri_name": "NIFTY ALPHA 50",
+      "price_or_parent": "Nifty 500",
+      "endpoints": {
+        "2019-02-15": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.0008937276568084,
+          "tri_prev_close": 13622.82
+        },
+        "2026-09-18": {
+          "source": "own open (endpoints csv)",
+          "overnight_ratio": 1.003971653863468,
+          "tri_prev_close": 67303.34
+        }
+      }
+    }
+  },
+  "fills_by_kind": {
+    "rebalance": 358,
+    "tranche1": 186,
+    "tranche2": 186,
+    "tranche3": 180,
+    "cancelled": 1,
+    "forced_exit": 1
+  },
+  "cancelled_by_kind_and_reason": {
+    "rebalance|no_trade_within_5_sessions": 1
+  },
+  "cash_fraction_by_D": {
+    "2019-02-15": 0.35,
+    "2019-06-03": 0.0,
+    "2019-08-16": 0.2,
+    "2019-11-15": 0.0,
+    "2020-02-17": 0.0,
+    "2020-06-01": 0.275,
+    "2020-08-17": 0.2,
+    "2020-11-17": 0.0,
+    "2021-02-15": 0.0,
+    "2021-06-01": 0.0,
+    "2021-08-16": 0.0,
+    "2021-11-15": 0.0,
+    "2022-02-15": 0.0,
+    "2022-06-01": 0.275,
+    "2022-08-16": 0.2,
+    "2022-11-15": 0.0,
+    "2023-02-15": 0.0,
+    "2023-06-01": 0.0,
+    "2023-08-16": 0.0,
+    "2023-11-15": 0.0,
+    "2024-02-15": 0.0,
+    "2024-06-03": 0.0,
+    "2024-08-16": 0.0,
+    "2024-11-18": 0.2,
+    "2025-02-17": 0.275,
+    "2025-06-02": 0.2,
+    "2025-08-18": 0.0,
+    "2025-11-17": 0.0,
+    "2026-02-16": 0.0,
+    "2026-06-01": 0.2,
+    "2026-08-17": 0.0
+  },
+  "share_universe_rows_ranked_on_roce": 0.547797293406277,
+  "share_holdings_ranked_on_roce": 0.4838709677419355,
+  "share_held_slots_unlabelled_sector": 0.0,
+  "n_held_slots": 372,
+  "sizing": {
+    "2019-02-15": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2019-06-03": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2019-08-16": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 1.1102230246251565e-16
+    },
+    "2019-11-15": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2020-02-17": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -2.220446049250313e-16
+    },
+    "2020-06-01": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2020-08-17": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -1.1102230246251565e-16
+    },
+    "2020-11-17": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2021-02-15": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 1.1102230246251565e-16
+    },
+    "2021-06-01": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2021-08-16": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2021-11-15": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -2.220446049250313e-16
+    },
+    "2022-02-15": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 2.220446049250313e-16
+    },
+    "2022-06-01": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": 0.0
+    },
+    "2022-08-16": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -1.1102230246251565e-16
+    },
+    "2022-11-15": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": -2.220446049250313e-16
+    },
+    "2023-02-15": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -2.220446049250313e-16
+    },
+    "2023-06-01": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": 0.0
+    },
+    "2023-08-16": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": 0.0
+    },
+    "2023-11-15": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": 0.0
+    },
+    "2024-02-15": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": 1.1102230246251565e-16
+    },
+    "2024-06-03": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 1.1102230246251565e-16
+    },
+    "2024-08-16": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -4.440892098500626e-16
+    },
+    "2024-11-18": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2025-02-17": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2025-06-02": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 1.1102230246251565e-16
+    },
+    "2025-08-18": {
+      "no_sigma": 0,
+      "iterations": 2,
+      "left_as_cash": 0.0
+    },
+    "2025-11-17": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2026-02-16": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 0.0
+    },
+    "2026-06-01": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": -1.1102230246251565e-16
+    },
+    "2026-08-17": {
+      "no_sigma": 0,
+      "iterations": 1,
+      "left_as_cash": 1.1102230246251565e-16
+    }
+  },
+  "nse_sectors": {
+    "rows_labelled": 2877,
+    "by_symbol_isin": 2877,
+    "by_isin": 0,
+    "by_symbol": 0,
+    "unmapped_symbols": [],
+    "stock_ids_labelled": 2871,
+    "stock_ids_with_conflicting_labels": {
+      "3IINFOLTD": [
+        "IT",
+        "Information Technology"
+      ],
+      "SUBEXLTD": [
+        "IT",
+        "Information Technology"
+      ]
+    },
+    "legacy_scheme_stock_ids": [
+      "ARIHANT",
+      "BIMETAL",
+      "EXCELCROP",
+      "GDL",
+      "GSKCONS",
+      "HARITASEAT",
+      "HEXAWARE",
+      "IPRINGLTD",
+      "KOVAI",
+      "KSE#1",
+      "LAKSHMIMIL",
+      "MEGH",
+      "MONSANTO",
+      "PRABHAT",
+      "SAMBANDAM",
+      "SAYAJIHOTL",
+      "SICAGEN",
+      "SRIPIPES",
+      "TATASTLBSL"
+    ]
+  },
+  "a1_summary": {
+    "definition": "The Clarification before the v2 build, \"A1's adoption test, made exact\":\nfor each new position, the unit-weighted average adjusted fill price over\nits tranches (sum of value / sum of adjusted units; costs not included),\ndivided by the adjusted close on the session before its D (EQ/BE, the last\nclose on or before that session, same adjustment basis); averaged over all\nnew positions weighted by V, the target value set at D's open. A position\nwith no filled tranche has no price and is counted, not averaged.",
+    "variant": "a",
+    "v_weighted_relative_price": 1.0375862940041127,
+    "n_new_positions": 186,
+    "n_with_a_fill": 186,
+    "n_with_no_fill": 0,
+    "n_all_three_filled": 180
+  },
+  "a1_ok_share_of_universe_rows_at_D_minus_1": {
+    "2019-02-15": 0.9863636363636363,
+    "2019-06-03": 0.8714596949891068,
+    "2019-08-16": 0.9803921568627451,
+    "2019-11-15": 0.8051044083526682,
+    "2020-02-17": 0.8100686498855835,
+    "2020-06-01": 0.6690647482014388,
+    "2020-08-17": 0.6026615969581749,
+    "2020-11-17": 0.7985611510791367,
+    "2021-02-15": 0.7131410256410257,
+    "2021-06-01": 0.518348623853211,
+    "2021-08-16": 0.7535483870967742,
+    "2021-11-15": 0.8141935483870968,
+    "2022-02-15": 0.9257907542579076,
+    "2022-06-01": 0.9241466498103666,
+    "2022-08-16": 0.695364238410596,
+    "2022-11-15": 0.8601108033240997,
+    "2023-02-15": 0.9046849757673667,
+    "2023-06-01": 0.6365217391304347,
+    "2023-08-16": 0.706140350877193,
+    "2023-11-15": 0.776551724137931,
+    "2024-02-15": 0.7670157068062827,
+    "2024-06-03": 0.8437086092715231,
+    "2024-08-16": 0.8221649484536082,
+    "2024-11-18": 0.9555837563451777,
+    "2025-02-17": 0.9903846153846154,
+    "2025-06-02": 0.6569250317662008,
+    "2025-08-18": 0.9385964912280702,
+    "2025-11-17": 0.9043367346938775,
+    "2026-02-16": 0.9202453987730062,
+    "2026-06-01": 0.7386634844868735,
+    "2026-08-17": 0.8114285714285714
+  },
+  "by_decision_date": {
+    "2019-02-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2019-06-03": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2019-08-16": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2019-11-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2020-02-17": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2020-06-01": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2020-08-17": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2020-11-17": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2021-02-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2021-06-01": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2021-08-16": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2021-11-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2022-02-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2022-06-01": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2022-08-16": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 0,
+      "bs_off_scale": []
+    },
+    "2022-11-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 2,
+      "bs_off_scale": []
+    },
+    "2023-02-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 3,
+      "bs_off_scale": []
+    },
+    "2023-06-01": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 8,
+      "bs_off_scale": [
+        [
+          "PURVA",
+          "True",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_839266_5517_04112022193357_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_93564_858134_30052023045704.xml"
+        ]
+      ]
+    },
+    "2023-08-16": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 8,
+      "bs_off_scale": [
+        [
+          "PURVA",
+          "True",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_839266_5517_04112022193357_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_93564_858134_30052023045704.xml"
+        ]
+      ]
+    },
+    "2023-11-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_99868_982792_09112023042455.xml"
+        ]
+      ]
+    },
+    "2024-02-15": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_99868_982792_09112023042455.xml"
+        ]
+      ]
+    },
+    "2024-06-03": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_99868_982792_09112023042455.xml"
+        ]
+      ]
+    },
+    "2024-08-16": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_99868_982792_09112023042455.xml"
+        ]
+      ]
+    },
+    "2024-11-18": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ]
+      ]
+    },
+    "2025-02-17": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 0,
+      "c38_cases": [],
+      "c39_quarters_not_known": 0,
+      "c39_stocks_latest_quarter_has_no_income_statement": 0,
+      "c39_stocks_with_no_quarter_left": 0,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ]
+      ]
+    },
+    "2025-06-02": {
+      "c38_income_from_earlier_revision": 0,
+      "c38_quarters_without_income_statement": 159,
+      "c38_cases": [],
+      "c39_quarters_not_known": 159,
+      "c39_stocks_latest_quarter_has_no_income_statement": 85,
+      "c39_stocks_with_no_quarter_left": 18,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1448717_23052025043536_WEB.xml"
+        ]
+      ]
+    },
+    "2025-08-18": {
+      "c38_income_from_earlier_revision": 5,
+      "c38_quarters_without_income_statement": 151,
+      "c38_cases": [
+        [
+          "INVENTURE",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1465924_12062025035838_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1446336_21052025091922_WEB.xml"
+        ],
+        [
+          "MWL",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479572_09072025060954_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429560_30042025065954_WEB.xml"
+        ],
+        [
+          "MWL",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479578_09072025061158_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429567_30042025070148_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1491997_24072025120703_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451352_26052025064809_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1492000_24072025121116_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451358_26052025064932_WEB.xml"
+        ]
+      ],
+      "c39_quarters_not_known": 151,
+      "c39_stocks_latest_quarter_has_no_income_statement": 15,
+      "c39_stocks_with_no_quarter_left": 10,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 12,
+      "bs_off_scale": [
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1448717_23052025043536_WEB.xml"
+        ]
+      ]
+    },
+    "2025-11-17": {
+      "c38_income_from_earlier_revision": 9,
+      "c38_quarters_without_income_statement": 462,
+      "c38_cases": [
+        [
+          "INVENTURE",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1465924_12062025035838_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1446336_21052025091922_WEB.xml"
+        ],
+        [
+          "MWL",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479572_09072025060954_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429560_30042025065954_WEB.xml"
+        ],
+        [
+          "MWL",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479578_09072025061158_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429567_30042025070148_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1491997_24072025120703_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451352_26052025064809_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1492000_24072025121116_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451358_26052025064932_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571792_11112025092531_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571790_11112025092352_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571793_11112025092626_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571784_11112025092107_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572905_12112025082817_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572886_12112025082158_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572906_12112025082835_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572888_12112025082220_WEB.xml"
+        ]
+      ],
+      "c39_quarters_not_known": 462,
+      "c39_stocks_latest_quarter_has_no_income_statement": 187,
+      "c39_stocks_with_no_quarter_left": 12,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 13,
+      "bs_off_scale": [
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1448717_23052025043536_WEB.xml"
+        ]
+      ]
+    },
+    "2026-02-16": {
+      "c38_income_from_earlier_revision": 11,
+      "c38_quarters_without_income_statement": 244,
+      "c38_cases": [
+        [
+          "INVENTURE",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1465924_12062025035838_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1446336_21052025091922_WEB.xml"
+        ],
+        [
+          "MWL",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479572_09072025060954_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429560_30042025065954_WEB.xml"
+        ],
+        [
+          "MWL",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479578_09072025061158_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429567_30042025070148_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1491997_24072025120703_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451352_26052025064809_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1492000_24072025121116_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451358_26052025064932_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571792_11112025092531_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571790_11112025092352_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571793_11112025092626_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571784_11112025092107_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572905_12112025082817_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572886_12112025082158_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572906_12112025082835_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572888_12112025082220_WEB.xml"
+        ],
+        [
+          "VIDYAWIRES",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588581_22122025092620_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588580_22122025092525_WEB.xml"
+        ],
+        [
+          "VIDYAWIRES",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588582_22122025092640_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588578_22122025092439_WEB.xml"
+        ]
+      ],
+      "c39_quarters_not_known": 244,
+      "c39_stocks_latest_quarter_has_no_income_statement": 4,
+      "c39_stocks_with_no_quarter_left": 3,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 13,
+      "bs_off_scale": [
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1448717_23052025043536_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1577080_17112025053708_WEB.xml"
+        ]
+      ]
+    },
+    "2026-06-01": {
+      "c38_income_from_earlier_revision": 11,
+      "c38_quarters_without_income_statement": 287,
+      "c38_cases": [
+        [
+          "INVENTURE",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1465924_12062025035838_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1446336_21052025091922_WEB.xml"
+        ],
+        [
+          "MWL",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479572_09072025060954_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429560_30042025065954_WEB.xml"
+        ],
+        [
+          "MWL",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479578_09072025061158_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429567_30042025070148_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1491997_24072025120703_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451352_26052025064809_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1492000_24072025121116_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451358_26052025064932_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571792_11112025092531_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571790_11112025092352_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571793_11112025092626_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571784_11112025092107_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572905_12112025082817_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572886_12112025082158_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572906_12112025082835_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572888_12112025082220_WEB.xml"
+        ],
+        [
+          "VIDYAWIRES",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588581_22122025092620_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588580_22122025092525_WEB.xml"
+        ],
+        [
+          "VIDYAWIRES",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588582_22122025092640_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588578_22122025092439_WEB.xml"
+        ]
+      ],
+      "c39_quarters_not_known": 287,
+      "c39_stocks_latest_quarter_has_no_income_statement": 25,
+      "c39_stocks_with_no_quarter_left": 1,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 15,
+      "bs_off_scale": [
+        [
+          "GANGOTRI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_797649_5351_27102022130010_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91586_841362_12052023034119.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2023-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_99338_980002_08112023121016.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_107794_1144182_29052024035540.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1448717_23052025043536_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1577080_17112025053708_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2026-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1667678_15052026040348_WEB.xml"
+        ],
+        [
+          "TNTELE",
+          "False",
+          "2026-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1677994_30052026092122_WEB.xml"
+        ]
+      ]
+    },
+    "2026-08-17": {
+      "c38_income_from_earlier_revision": 12,
+      "c38_quarters_without_income_statement": 259,
+      "c38_cases": [
+        [
+          "INVENTURE",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1465924_12062025035838_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_NBFC_INDAS_1446336_21052025091922_WEB.xml"
+        ],
+        [
+          "MWL",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479572_09072025060954_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429560_30042025065954_WEB.xml"
+        ],
+        [
+          "MWL",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1479578_09072025061158_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1429567_30042025070148_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1491997_24072025120703_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451352_26052025064809_WEB.xml"
+        ],
+        [
+          "ABCOTS",
+          "True",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1492000_24072025121116_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1451358_26052025064932_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571792_11112025092531_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571790_11112025092352_WEB.xml"
+        ],
+        [
+          "ATLANTAELE",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571793_11112025092626_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1571784_11112025092107_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572905_12112025082817_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572886_12112025082158_WEB.xml"
+        ],
+        [
+          "ARIHANTSUP",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572906_12112025082835_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1572888_12112025082220_WEB.xml"
+        ],
+        [
+          "VIDYAWIRES",
+          "True",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588581_22122025092620_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588580_22122025092525_WEB.xml"
+        ],
+        [
+          "VIDYAWIRES",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588582_22122025092640_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1588578_22122025092439_WEB.xml"
+        ],
+        [
+          "TITAGARH",
+          "False",
+          "2026-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1692715_14072026090341_WEB.xml",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1678278_31052026065408_WEB.xml"
+        ]
+      ],
+      "c39_quarters_not_known": 259,
+      "c39_stocks_latest_quarter_has_no_income_statement": 3,
+      "c39_stocks_with_no_quarter_left": 1,
+      "c38_screened_earlier_revision": 0,
+      "bs_filings_set_aside_by_income_screen": 15,
+      "bs_off_scale": [
+        [
+          "GANGOTRI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_797649_5351_27102022130010_WEB.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_858062_6230_11112022131629_WEB.xml"
+        ],
+        [
+          "UNIVAFOODS",
+          "False",
+          "2022-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_872378_4985_14112022193623_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91586_841362_12052023034119.xml"
+        ],
+        [
+          "AJOONI",
+          "False",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_91962_845539_18052023031100.xml"
+        ],
+        [
+          "PURVA",
+          "True",
+          "2023-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_92921_853807_26052023063119.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2023-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_99338_980002_08112023121016.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_107794_1144182_29052024035540.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2024-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_114690_1302621_09112024122038.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1448717_23052025043536_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2025-09-30",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1577080_17112025053708_WEB.xml"
+        ],
+        [
+          "GANGOTRI",
+          "False",
+          "2026-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1667678_15052026040348_WEB.xml"
+        ],
+        [
+          "TNTELE",
+          "False",
+          "2026-03-31",
+          "https://nsearchives.nseindia.com/corporate/xbrl/INTEGRATED_FILING_INDAS_1677994_30052026092122_WEB.xml"
+        ]
+      ]
+    }
+  },
+  "trend_tri_special_sessions_ignored": [
+    "2015-02-28",
+    "2016-10-30",
+    "2019-10-27",
+    "2020-02-01",
+    "2020-11-14",
+    "2023-11-12",
+    "2024-01-20",
+    "2024-03-02",
+    "2024-05-18",
+    "2025-02-01",
+    "2026-02-01"
+  ],
+  "trend_by_D": {
+    "2019-02-15": {
+      "D": "2019-02-15",
+      "tri_date": "2019-02-14",
+      "tri_last": 13167.36,
+      "tri_sma200": 13622.1434,
+      "tri_high252": 14782.95,
+      "tri_below_sma_sessions_of_126": 96,
+      "c1": true,
+      "c2": true,
+      "c3": true,
+      "n_true": 3,
+      "cash_fraction": 0.35
+    },
+    "2019-06-03": {
+      "D": "2019-06-03",
+      "tri_date": "2019-05-31",
+      "tri_last": 14591.01,
+      "tri_sma200": 13730.53585,
+      "tri_high252": 14782.95,
+      "tri_below_sma_sessions_of_126": 68,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2019-08-16": {
+      "D": "2019-08-16",
+      "tri_date": "2019-08-14",
+      "tri_last": 13429.64,
+      "tri_sma200": 13763.72015,
+      "tri_high252": 14782.95,
+      "tri_below_sma_sessions_of_126": 34,
+      "c1": true,
+      "c2": false,
+      "c3": false,
+      "n_true": 1,
+      "cash_fraction": 0.2
+    },
+    "2019-11-15": {
+      "D": "2019-11-15",
+      "tri_date": "2019-11-14",
+      "tri_last": 14482.84,
+      "tri_sma200": 13916.235899999998,
+      "tri_high252": 14766.71,
+      "tri_below_sma_sessions_of_126": 48,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2020-02-17": {
+      "D": "2020-02-17",
+      "tri_date": "2020-02-14",
+      "tri_last": 14956.99,
+      "tri_sma200": 14259.85455,
+      "tri_high252": 15188.79,
+      "tri_below_sma_sessions_of_126": 33,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2020-06-01": {
+      "D": "2020-06-01",
+      "tri_date": "2020-05-29",
+      "tri_last": 11793.53,
+      "tri_sma200": 13460.9148,
+      "tri_high252": 15188.79,
+      "tri_below_sma_sessions_of_126": 59,
+      "c1": true,
+      "c2": true,
+      "c3": false,
+      "n_true": 2,
+      "cash_fraction": 0.275
+    },
+    "2020-08-17": {
+      "D": "2020-08-17",
+      "tri_date": "2020-08-14",
+      "tri_last": 13935.92,
+      "tri_sma200": 13338.42135,
+      "tri_high252": 15188.79,
+      "tri_below_sma_sessions_of_126": 92,
+      "c1": false,
+      "c2": false,
+      "c3": true,
+      "n_true": 1,
+      "cash_fraction": 0.2
+    },
+    "2020-11-17": {
+      "D": "2020-11-17",
+      "tri_date": "2020-11-13",
+      "tri_last": 15749.74,
+      "tri_sma200": 13272.629100000002,
+      "tri_high252": 15749.74,
+      "tri_below_sma_sessions_of_126": 40,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2021-02-15": {
+      "D": "2021-02-15",
+      "tri_date": "2021-02-12",
+      "tri_last": 18984.95,
+      "tri_sma200": 14717.602250000002,
+      "tri_high252": 18993.38,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2021-06-01": {
+      "D": "2021-06-01",
+      "tri_date": "2021-05-31",
+      "tri_last": 20138.1,
+      "tri_sma200": 16957.967149999997,
+      "tri_high252": 20138.1,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2021-08-16": {
+      "D": "2021-08-16",
+      "tri_date": "2021-08-13",
+      "tri_last": 21498.96,
+      "tri_sma200": 18662.84895,
+      "tri_high252": 21498.96,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2021-11-15": {
+      "D": "2021-11-15",
+      "tri_date": "2021-11-12",
+      "tri_last": 23865.63,
+      "tri_sma200": 20618.4613,
+      "tri_high252": 24305.72,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2022-02-15": {
+      "D": "2022-02-15",
+      "tri_date": "2022-02-14",
+      "tri_last": 22103.72,
+      "tri_sma200": 22021.319799999994,
+      "tri_high252": 24305.72,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2022-06-01": {
+      "D": "2022-06-01",
+      "tri_date": "2022-05-31",
+      "tri_last": 21765.82,
+      "tri_sma200": 22697.716650000002,
+      "tri_high252": 24305.72,
+      "tri_below_sma_sessions_of_126": 36,
+      "c1": true,
+      "c2": true,
+      "c3": false,
+      "n_true": 2,
+      "cash_fraction": 0.275
+    },
+    "2022-08-16": {
+      "D": "2022-08-16",
+      "tri_date": "2022-08-12",
+      "tri_last": 23440.39,
+      "tri_sma200": 22394.82005,
+      "tri_high252": 24305.72,
+      "tri_below_sma_sessions_of_126": 78,
+      "c1": false,
+      "c2": false,
+      "c3": true,
+      "n_true": 1,
+      "cash_fraction": 0.2
+    },
+    "2022-11-15": {
+      "D": "2022-11-15",
+      "tri_date": "2022-11-14",
+      "tri_last": 24277.12,
+      "tri_sma200": 22496.9276,
+      "tri_high252": 24277.12,
+      "tri_below_sma_sessions_of_126": 55,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2023-02-15": {
+      "D": "2023-02-15",
+      "tri_date": "2023-02-14",
+      "tri_last": 23231.75,
+      "tri_sma200": 22934.83825,
+      "tri_high252": 24828.21,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2023-06-01": {
+      "D": "2023-06-01",
+      "tri_date": "2023-05-31",
+      "tri_last": 24538.09,
+      "tri_sma200": 23568.57585,
+      "tri_high252": 24828.21,
+      "tri_below_sma_sessions_of_126": 37,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2023-08-16": {
+      "D": "2023-08-16",
+      "tri_date": "2023-08-14",
+      "tri_last": 26285.2,
+      "tri_sma200": 24170.100500000004,
+      "tri_high252": 26612.52,
+      "tri_below_sma_sessions_of_126": 37,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2023-11-15": {
+      "D": "2023-11-15",
+      "tri_date": "2023-11-13",
+      "tri_last": 27105.14,
+      "tri_sma200": 24989.30315,
+      "tri_high252": 27612.99,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2024-02-15": {
+      "D": "2024-02-15",
+      "tri_date": "2024-02-14",
+      "tri_last": 31219.36,
+      "tri_sma200": 27132.598149999998,
+      "tri_high252": 31497.14,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2024-06-03": {
+      "D": "2024-06-03",
+      "tri_date": "2024-05-31",
+      "tri_last": 33168.2,
+      "tri_sma200": 29635.7258,
+      "tri_high252": 33759.03,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2024-08-16": {
+      "D": "2024-08-16",
+      "tri_date": "2024-08-14",
+      "tri_last": 35754.3,
+      "tri_sma200": 31865.0936,
+      "tri_high252": 37066.08,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2024-11-18": {
+      "D": "2024-11-18",
+      "tri_date": "2024-11-14",
+      "tri_last": 34699.38,
+      "tri_sma200": 34502.07445,
+      "tri_high252": 38658.58,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": true,
+      "c3": false,
+      "n_true": 1,
+      "cash_fraction": 0.2
+    },
+    "2025-02-17": {
+      "D": "2025-02-17",
+      "tri_date": "2025-02-14",
+      "tri_last": 32659.9,
+      "tri_sma200": 35548.4243,
+      "tri_high252": 38658.58,
+      "tri_below_sma_sessions_of_126": 30,
+      "c1": true,
+      "c2": true,
+      "c3": false,
+      "n_true": 2,
+      "cash_fraction": 0.275
+    },
+    "2025-06-02": {
+      "D": "2025-06-02",
+      "tri_date": "2025-05-30",
+      "tri_last": 36160.26,
+      "tri_sma200": 35284.5718,
+      "tri_high252": 38658.58,
+      "tri_below_sma_sessions_of_126": 82,
+      "c1": false,
+      "c2": false,
+      "c3": true,
+      "n_true": 1,
+      "cash_fraction": 0.2
+    },
+    "2025-08-18": {
+      "D": "2025-08-18",
+      "tri_date": "2025-08-14",
+      "tri_last": 36135.65,
+      "tri_sma200": 35158.900200000004,
+      "tri_high252": 38658.58,
+      "tri_below_sma_sessions_of_126": 57,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2025-11-17": {
+      "D": "2025-11-17",
+      "tri_date": "2025-11-14",
+      "tri_last": 38041.15,
+      "tri_sma200": 35641.31065,
+      "tri_high252": 38208.18,
+      "tri_below_sma_sessions_of_126": 0,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2026-02-16": {
+      "D": "2026-02-16",
+      "tri_date": "2026-02-13",
+      "tri_last": 37245.02,
+      "tri_sma200": 37010.941699999996,
+      "tri_high252": 38464.1,
+      "tri_below_sma_sessions_of_126": 7,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    },
+    "2026-06-01": {
+      "D": "2026-06-01",
+      "tri_date": "2026-05-29",
+      "tri_last": 36261.8,
+      "tri_sma200": 36811.24515,
+      "tri_high252": 38464.1,
+      "tri_below_sma_sessions_of_126": 63,
+      "c1": true,
+      "c2": false,
+      "c3": false,
+      "n_true": 1,
+      "cash_fraction": 0.2
+    },
+    "2026-08-17": {
+      "D": "2026-08-17",
+      "tri_date": "2026-08-14",
+      "tri_last": 37939.51,
+      "tri_sma200": 36918.89835,
+      "tri_high252": 38464.1,
+      "tri_below_sma_sessions_of_126": 69,
+      "c1": false,
+      "c2": false,
+      "c3": false,
+      "n_true": 0,
+      "cash_fraction": 0.0
+    }
+  },
+  "reparsed_null_factor_actions": [
+    [
+      "2015-01-22",
+      "CORPBANK",
+      "Face Valus Split (Sub-Division) - From Rs 10/- Per To Rs 2/- Per Share",
+      "0.2"
+    ],
+    [
+      "2015-03-23",
+      "GRANULES",
+      "Face Value Split Rs 10 To Rs 1",
+      "0.1"
+    ],
+    [
+      "2015-07-23",
+      "MOTHERSON",
+      "Annual General Meeting / Dividend - Rs 3/- Per Share / Bonus - 1:2",
+      "0.6666666666666666"
+    ],
+    [
+      "2015-09-16",
+      "AEGISLOG",
+      "Face Value Split From Rs 10 To Rs 1",
+      "0.1"
+    ],
+    [
+      "2015-10-15",
+      "LAMBODHARA",
+      "Face Value Split From Rs 10 To Rs 5",
+      "0.5"
+    ],
+    [
+      "2015-10-29",
+      "SARLAPOLY",
+      "Face Value Split From Rs 10 To Re 1 (Record Date Revised)",
+      "0.1"
+    ],
+    [
+      "2016-06-06",
+      "LUXIND",
+      "Face Value Split From Rs 10 To Rs 2",
+      "0.2"
+    ],
+    [
+      "2016-08-12",
+      "PNCINFRA",
+      "Face Value Split From Rs 10 To Rs 2",
+      "0.2"
+    ],
+    [
+      "2016-08-30",
+      "VGUARD",
+      "Face Value Split From Rs 10 To Re 1",
+      "0.1"
+    ],
+    [
+      "2016-09-12",
+      "UNOMINDA",
+      "Face Value Split From Rs 10 To Rs 2",
+      "0.2"
+    ],
+    [
+      "2016-09-12",
+      "TRENT",
+      "Face Value Split From Rs 10 To Re 1",
+      "0.1"
+    ],
+    [
+      "2016-09-21",
+      "JMTAUTOLTD",
+      "Face Value Split From Rs 2 To Re 1",
+      "0.5"
+    ],
+    [
+      "2016-10-04",
+      "KAJARIACER",
+      "Face Value Split From Rs 2 To Re 1",
+      "0.5"
+    ],
+    [
+      "2016-10-06",
+      "GRASIM",
+      "Face Value Split From Rs 10 To Re 2",
+      "0.2"
+    ],
+    [
+      "2016-10-13",
+      "SHAH",
+      "Face Value Split From Rs 10 To Re 1",
+      "0.1"
+    ],
+    [
+      "2022-06-22",
+      "AJANTPHARM",
+      "Bonus- 1:2",
+      "0.6666666666666666"
+    ]
+  ],
+  "bz_mapping": {
+    "bz_rows": 63876,
+    "by_symbol_isin": 61978,
+    "by_isin": 0,
+    "by_symbol_date": 0,
+    "unmapped": 1898
+  },
+  "bz_panel": {
+    "bz_sessions": 59081,
+    "bz_rows_same_session_as_eq": 0,
+    "bz_stocks": 234
+  },
+  "invariants": "ok: cash never negative; <= 12 names; <= 3 per labelled sector; weights in bounds",
+  "holdout_guard_selftest": "not applicable: unlocked by --run-final-test",
+  "leak_test": {
+    "2022-11-15": {
+      "D": "2022-11-15",
+      "n_universe": 722,
+      "same_universe": true,
+      "same_v1_rules_set": true,
+      "same_rank": true,
+      "same_balance_sheet_choice": true,
+      "n_with_usable_balance_sheet": 728,
+      "same_hard_filter_flags": true,
+      "same_trend": true,
+      "same_a1_decisions": true,
+      "max_diff": {
+        "margin": 0.0,
+        "roce": 0.0,
+        "stability": 0.0,
+        "rev_growth": 0.0,
+        "profit_growth": 0.0,
+        "earnings_yield": 2.8830538766668694e-16,
+        "sales_yield": 1.892554717430957e-16,
+        "mom_12_1": 4.4670554938094925e-14,
+        "low_vol": 4.458135010109189e-15,
+        "composite": 0.0,
+        "mcap": 2.6261195749906306e-16,
+        "pe": 2.3521363682341315e-16,
+        "ttm_ebit": 0.0,
+        "bs:roce_value": 0.0,
+        "bs:de_value": 0.0,
+        "bs:equity": 0.0,
+        "bs:debt": 0.0,
+        "a1:above_abs": 6.661338147750939e-16,
+        "a1:rsi_abs": 4.263256414560601e-14
+      },
+      "passed": true
+    },
+    "2024-02-15": {
+      "D": "2024-02-15",
+      "n_universe": 764,
+      "same_universe": true,
+      "same_v1_rules_set": true,
+      "same_rank": true,
+      "same_balance_sheet_choice": true,
+      "n_with_usable_balance_sheet": 1164,
+      "same_hard_filter_flags": true,
+      "same_trend": true,
+      "same_a1_decisions": true,
+      "max_diff": {
+        "margin": 0.0,
+        "roce": 0.0,
+        "stability": 0.0,
+        "rev_growth": 0.0,
+        "profit_growth": 0.0,
+        "earnings_yield": 2.0261603342375025e-16,
+        "sales_yield": 3.542572722367072e-16,
+        "mom_12_1": 1.0508026373916957e-14,
+        "low_vol": 3.7739026961665544e-15,
+        "composite": 0.0,
+        "mcap": 2.797720185815983e-16,
+        "pe": 3.650042329562301e-16,
+        "ttm_ebit": 0.0,
+        "bs:roce_value": 0.0,
+        "bs:de_value": 0.0,
+        "bs:equity": 0.0,
+        "bs:debt": 0.0,
+        "a1:above_abs": 1.1102230246251565e-15,
+        "a1:rsi_abs": 5.684341886080802e-14
+      },
+      "passed": true
+    }
+  },
+  "leak_test_passed": true,
+  "readings": [
+    "Hard filters (item 3, Clarification before the v2 build) are universe rules ANDed with v1 rules 1-7 at every D: market cap (v1's definition, rupees) > Rs 100 crore = 1e9, strictly above; trailing P/E = market cap / TTM normalised profit (the chosen basis, the same TTM as earnings yield), 0 < P/E <= 70. From the first decision date on or after 15 Feb 2023: ROCE >= 10% and debt / equity < 1.5, equity > 0, from the balance sheet the Clarification to A5 picks; no usable balance sheet (none known in the basis, older than 400 days, equity <= 0, or equity + debt <= 0) fails both. In-sample (Feb 2019 to Nov 2022) no D is on or after that date, so ROCE is neither a filter nor a measure in-sample; it is computed and written to bs_diag.csv for checking only.",
+    "n_excluded_hard_filters = stocks passing v1 rules 1-7 that fail at least one hard filter. n_excluded_no_balance_sheet = stocks passing v1 rules 1-7 with no usable balance sheet at D (0 before the ROCE date), whether or not another hard filter also removes them. n_ranked_on_roce = universe rows whose quality group used ROCE.",
+    "EBIT (Clarification to A5): per quarter, pbt_before_exceptional + finance_costs; where pbt_before_exceptional is missing, pbt - exceptional_items (missing exceptional = 0) + finance_costs. A quarter with no finance-cost line has no EBIT (missing, not 0: Clarification after the in-sample engine comparison), nor has one with neither profit line; either way the TTM EBIT and ROCE are missing and the stock fails the ROCE floor from Feb 2023. TTM = the same four consecutive quarters as v1's TTM (the chosen basis), each from the income-statement revision of Clarification 38/39.",
+    "Balance sheet (Clarification to A5): a filing has one when it reports equity and total assets (equals the archive's has_balance_sheet flag, asserted). Candidates: filings broadcast before D with a balance sheet, excluding the filings whose income statement the income scale screen (30a) set aside at D, matched by (stock, basis, period end, broadcast time), not by URL. A balance-sheet period is its exact period end, not the calendar quarter (both: Clarification after the in-sample engine comparison). Per (stock, basis, period end) the latest revision (broadcast time, then document URL) is that period's balance sheet. The balance-sheet screen then drops a period whose total assets AND paid-up share capital (equity_capital) both differ 30x or more in the same direction from more than half of its up-to-8 nearest other balance sheets of the same stock and basis (nearest by days between period ends, ties to the earlier), counting only balance sheets with positive assets and capital; 30a's 'a basis's only quarter is compared with the other basis' provision is not part of 'the same band and majority rule' and is not applied. THE balance sheet is the latest remaining period in the stock's basis as chosen at D (v1 Clarification 4). Age = D minus the balance sheet's period_end in days; > 400 is not used. Debt = debt_long + debt_short, each missing line 0. Usable only with equity > 0 AND equity + debt > 0 (reason capital_not_positive otherwise). Capital = equity + debt; ROCE = TTM EBIT / capital; D/E = debt / equity.",
+    "Sector (item 7): the `sector` column of data/reference/industry_nse.parquet, every non-empty value including the 21 rows NSE labels in its old (legacy) scheme, joined to the stock id by (symbol, ISIN) spell, else a unique ISIN, else the symbol's latest spell. When two rows map to one id, a current-scheme row wins over a legacy one. Unlabelled = own sector. decisions.csv also reports held slots with a legacy label. The lender rule (v1 rule 4) still uses v1's announcement labels.",
+    "Positions (item 1): kept = held at D's open (units > 0) AND in the v2 universe AND rank <= 24; vacancies to 12 in rank order, cap 3 per sector counting kept names; held names not kept are sold at D's open (v1 rules: sells first, may wait 5 sessions, a sale may fill at the BZ open). A new position whose first tranche has not filled by the next D is not 'held' there.",
+    "Trend (item 4): Nifty 500 gross TRI closes (nifty_tri.parquet `tri`) on the archive's market sessions before D (v1 Clarification 1: a session is a market session in the archive's calendar). The TRI file also has closes on NSE special sessions the archive lacks (2019-10-27, 2020-02-01 and 2020-11-14 in-sample; 2023-11-12, 2024-01-20, 2024-03-02, 2024-05-18, 2025-02-01 and 2026-02-01 later); they are not sessions here and are skipped. The last close must be the archive session before D, else the run refuses. (1) last < mean(last 200); (2) last <= 0.9 x max(last 252); (3) count over the last 126 sessions j of close_j < mean(close_{j-199..j}) >= 0.6 x 126 (i.e. >= 76). Cash fraction by count: 0, 0.20, 0.275, 0.35 of NAV at D's open.",
+    "Sizing (item 6): sigma = v1's low-vol standard deviation at D (sample sd of daily adjusted log returns between traded closes in the last 252 sessions). A name with no sigma gets (1-cash)/12 before scaling and the others are scaled around it: w_i = (1/sigma_i) / sum(1/sigma) x ((1-cash) - m x (1-cash)/12) over the names with a sigma, m the names without (Clarification after the in-sample engine comparison; never occurs, every universe member has a sigma); with every sigma known, w = (1/sigma) / sum(1/sigma) x (1-cash). Then repeat, over all names alike: every name not yet at a bound and above 1.5e or below 0.5e (e = (1-cash)/12) is set to that bound and fixed; the net excess (over-bound minus under-bound amounts) is added to the unfixed names pro rata to their current weights; stop when none is out of bounds or all are fixed (then the rest is cash).",
+    "Targets: NAV = cash + holdings valued at D's open (EQ/BE open, else BZ open, else last close). Kept holding target = w x NAV, traded in full at D's open (pending tranche cancelled). New position: V = w x NAV; three 'add' orders of V/3 rupees scheduled at session indices t_D, t_D + 21 and t_D + 42 (market sessions). Each tranche's rupee amount is fixed at D; costs (0.20% of traded value) come out of cash. Buys in one session are scaled down pro rata only if cash after that session's sells cannot cover them plus costs (v1 Clarification 11 applied to every fill session).",
+    "Variant (a): a tranche fills at the open of its scheduled session if the stock has an EQ/BE trade there, else at the first such session within the next 5, else it is cancelled (v1 Clarification 10). The other tranches are unaffected by one cancelled tranche.",
+    "Variant (b), A1: from the scheduled session s, the tranche fills at the open of the first session u in s .. s+29 (the 30 sessions 'within 30 sessions of the scheduled session') on which the stock has an EQ/BE trade and, at the close of session u-1, adjusted close <= 1.10 x its 50-session simple mean and 14-session Wilder RSI < 70. If none, it fills at the open of s+30 (the 31st session) regardless; if the stock has no EQ/BE trade there, v1's buying rule lets it wait up to 5 more sessions, then it is cancelled. Indicators use EQ/BE adjusted closes carried forward over market sessions without a trade (C1: sessions are market sessions), SMA over the last 50 market sessions including u-1, RSI started at the stock's first EQ/BE close in the archive (from 1 Jan 2015; the closes before the 2017-06-01 panel are read for this only, adjusted into the panel's basis), seeded with the simple mean of its first 14 changes, then Wilder's recursion; where the average gain and loss are both 0 the RSI is undefined and the condition fails (Clarification after the in-sample engine comparison). The scheduled session is the first of the 30.",
+    "Pending orders are all cancelled at the next D (logged in fills.csv as kind=cancelled, reason next_decision_date); a sale to zero, including a forced exit, cancels that stock's pending orders (reason position_left_book). Orders scheduled after the END open never execute and are listed in metrics.json, not fills.csv.",
+    "Forced exit: v1 Clarification 15 with the trade-for-trade rule (BZ sessions count as trading), sold at the holding's last close with the 0.20% cost; kind=forced_exit, D = the latest decision date.",
+    "fills.csv: symbol = stock id, ticker = the stock's last EQ/BE symbol on or before the fill date; units and prices are adjusted by the split/bonus factors with ex-session after the fill date up to the run's END (the share basis at END), so units_adjusted x price_adjusted = value (rupees, always positive; side gives the direction). Cancelled rows: units 0, price empty, value = the rupee amount not traded.",
+    "A1 metric (a1.json): per new position, sum(value) / sum(units_adjusted) over its FILLED tranches (costs excluded), divided by the adjusted EQ/BE close of the session before its D (last close on or before, same basis); V-weighted mean over positions with at least one fill. A new position means a status=new row in holdings.csv (a stock re-entering after being sold is a new position).",
+    "nav.csv: strategy and universe_ew in rupees from Rs 5,00,000 at the first open (Clarification after the in-sample engine comparison: the equal-weight benchmark starts at Rs 5 lakh, as in v1); the index columns from 1.0. The universe equal-weight benchmark holds every v2-universe name at D equally (V/|U|), with v1's rules: no trend cash, no tranches, same costs, dividends, 5-session waits, forced exit and BZ rule.",
+    "Outputs name the stock id 'symbol' and the ticker traded at D 'ticker' in every file.",
+    "Leak test: at the last in-sample date (2022-11-15), where balance sheets exist, everything is rebuilt from inputs cut to before D and compared (universe, measures, balance-sheet choice, ROCE, D/E, hard-filter flags, trend, A1 indicators)."
+  ],
+  "v1_readings_kept": [
+    "(v1 checker readings, kept for v2 where v2 does not change them; see jobs/crosscheck_v1.py for the full text.) Sessions = distinct bhavcopy dates; D = first session on/after the anchor; the final mark is END's OPEN. Stock identity by linked (symbol, ISIN) spells. Rule 1 on the last trade row before D; rule 2 median over 60 market sessions with untraded = 0; rule 3 trading days in [D-365d, D). Rule 4 by v1 labels, the latest-name net for unlabelled stocks, and the XBRL taxonomy vote with its static backfill. Basis: consolidated when consolidated income statements cover the 4 quarters ending at the latest known quarter. Clarifications 22, 30, 38 and 39 as in the v1 checker. Percentiles rank(pct, average), missing 0.5, ties by the symbol traded at D then the id. Dividends and splits as Clarifications 13, 14, 24; trade-for-trade as the Clarification to A2; benchmarks as the Clarification to A4."
+  ],
+  "runtime_seconds": 1399.3
+}

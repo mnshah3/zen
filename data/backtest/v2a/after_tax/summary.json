@@ -1,0 +1,467 @@
+{
+  "input": "data\\backtest\\v2a",
+  "suffix": "",
+  "nav_col": "strategy",
+  "bench_col": "nifty500",
+  "input_provenance": {
+    "dividends": "database",
+    "close_px": "database",
+    "end_px": "database",
+    "bench": "database",
+    "bonuses": "database",
+    "corp_unmodelled": "database"
+  },
+  "input_fingerprint": {
+    "trades": {
+      "path": "data\\backtest\\v2a\\trades.csv",
+      "sha256": "1a55e7943903742a6ccbf6bbcb52f4fa8801373251f3b467c31ea4129dce50a1"
+    },
+    "nav": {
+      "path": "data\\backtest\\v2a\\nav.csv",
+      "sha256": "f81864c311a5aa70be5a04f712b11465b715c1bf993588db408c090a591ec88b"
+    },
+    "dividends": {
+      "path": "data\\backtest\\v2a\\after_tax\\dividends.csv",
+      "sha256": "f9ffcf523c2d01c9972da1608a629455782bd5c1aa68ad1708f832181b41f15a"
+    },
+    "close_px": {
+      "path": "data\\backtest\\v2a\\after_tax\\close_px.csv",
+      "sha256": "964dfeb19e590731f6dc7888d82695c9174d514e0acce015734de027a473f5de"
+    },
+    "end_px": {
+      "path": "data\\backtest\\v2a\\after_tax\\end_px.csv",
+      "sha256": "69ce0d0ac4cc5c5ddb56d4460c5602e1a035e99b17984dcac446d1fa715dc340"
+    },
+    "bench": {
+      "path": "data\\backtest\\v2a\\after_tax\\bench.csv",
+      "sha256": "6891acdbcdb8b4d1b8f2d554d5fd49a06dff8a44bf199c7cd30920423c1ae8c0"
+    },
+    "bonuses": {
+      "path": "data\\backtest\\v2a\\after_tax\\bonuses.csv",
+      "sha256": "0f28105e1321942a53da90362c07bdea2291f8a38156536a93a1772b628d6844"
+    },
+    "corp_unmodelled": {
+      "path": "data\\backtest\\v2a\\after_tax\\corp_unmodelled.csv",
+      "sha256": "829d12f42bb32b618e2771c06a1259a4aaee1614d6d52f35c7f4c38bf2ae7c52"
+    }
+  },
+  "rebuilt_inputs_provenance": {
+    "database": {
+      "path": "C:\\Users\\mnsha\\projects\\zen\\data\\zen.duckdb",
+      "used_for_rebuild": true,
+      "size_bytes": 1934897152,
+      "mtime_utc": "2026-09-27T18:45:33.165085+00:00"
+    },
+    "files": {
+      "dividends": {
+        "path": "data\\backtest\\v2a\\after_tax\\dividends.csv",
+        "sha256": "f9ffcf523c2d01c9972da1608a629455782bd5c1aa68ad1708f832181b41f15a"
+      },
+      "close_px": {
+        "path": "data\\backtest\\v2a\\after_tax\\close_px.csv",
+        "sha256": "964dfeb19e590731f6dc7888d82695c9174d514e0acce015734de027a473f5de"
+      },
+      "end_px": {
+        "path": "data\\backtest\\v2a\\after_tax\\end_px.csv",
+        "sha256": "69ce0d0ac4cc5c5ddb56d4460c5602e1a035e99b17984dcac446d1fa715dc340"
+      },
+      "bench": {
+        "path": "data\\backtest\\v2a\\after_tax\\bench.csv",
+        "sha256": "6891acdbcdb8b4d1b8f2d554d5fd49a06dff8a44bf199c7cd30920423c1ae8c0"
+      },
+      "bonuses": {
+        "path": "data\\backtest\\v2a\\after_tax\\bonuses.csv",
+        "sha256": "0f28105e1321942a53da90362c07bdea2291f8a38156536a93a1772b628d6844"
+      },
+      "corp_unmodelled": {
+        "path": "data\\backtest\\v2a\\after_tax\\corp_unmodelled.csv",
+        "sha256": "829d12f42bb32b618e2771c06a1259a4aaee1614d6d52f35c7f4c38bf2ae7c52"
+      }
+    },
+    "hashes_match_this_run": true
+  },
+  "database": {
+    "path": "C:\\Users\\mnsha\\projects\\zen\\data\\zen.duckdb",
+    "used_for_rebuild": true,
+    "size_bytes": 1934897152,
+    "mtime_utc": "2026-09-27T18:45:33.165085+00:00"
+  },
+  "replay_check": {
+    "worst_rel_error": 1.1524113187793566e-15,
+    "at": "2022-07-07 close",
+    "marks": 1872,
+    "trade_value_worst_rel": 7.768949641437283e-16,
+    "trade_value_at": "2020-02-17 PIIND",
+    "trades": 911,
+    "bench": {
+      "tri_vs_nav_worst_rel": 0.0,
+      "marks": 1873,
+      "implied_dividend_yield_a_year": 0.010616014221035721,
+      "negative_residue_marks": 386,
+      "negative_residue_sum": 0.0004763910192706611
+    }
+  },
+  "params": {
+    "slippage": 0.001,
+    "brokerage": 0.0,
+    "slab": 0.3,
+    "cess": 0.04,
+    "stamp_pre_2020": 0.0001,
+    "dp_gst": true,
+    "tax_timing": "advance",
+    "stripping": true,
+    "statutory_rounding": true,
+    "fund_ter": 0.0016,
+    "fund_stamp": true,
+    "s115r": true
+  },
+  "conventions": {
+    "statistics": "every after-tax statistic is computed from liquidation_value",
+    "after_tax_end_held": "end book less the tax already owed on income realised in the open year, net of advance tax paid",
+    "after_tax_end_liquidated": "everything sold at the end mark, exit costs and all tax due deducted",
+    "tax_timing": "advance",
+    "advance_tax": "instalments at the close of the last session whose sale settles by 15 Jun, 15 Sep, 15 Dec and 15 Mar (T+2 before 27 Jan 2023, T+1 after): 100% of the tax on income realised before that session less tax paid, when that is Rs 10,000 or more; true-up at the first session of the next year with s.234C and s.234B interest (base rounded down to Rs 100, Rule 119A) when the year's tax is Rs 10,000 or more; overpayments refunded then, without s.244A interest and earlier than a real refund, which can favour the strategy",
+    "bonus_shares": "on the ex-date (allotment-date proxy, slightly taxpayer-favourable): originals keep full cost and date, bonus lot nil cost dated the ex-date; s.94(8) and s.94(7) with the ex-date as the record-date proxy",
+    "rounding": "s.288A/288B to the nearest Rs 10"
+  },
+  "strategy": {
+    "start": "2019-02-15",
+    "end": "2026-09-18",
+    "capital": 500000.0,
+    "tax_timing": "advance",
+    "pre_tax_end": 2158403.2989853024,
+    "k_end_over_k0": 0.8038306319000466,
+    "after_tax_end_book": 1734990.6877185008,
+    "after_tax_end_held": 1735020.6877185008,
+    "after_tax_end_liquidated": 1732495.8559368614,
+    "liquidation_charges": 3164.8317816395643,
+    "tax_owed_realised_at_end": -30.0,
+    "tax_due_at_end": -670.0,
+    "tax_paid_during": 244510.0,
+    "interest_paid": 0.0,
+    "refunds": 39480.0,
+    "advance_tax_paid": 271340.0,
+    "tax_funding_charges": 4298.647400549674,
+    "cash_end_after_tax": 271977.53195103793,
+    "itemised_costs_total": 72401.91802157354,
+    "flat_costs_total": 64338.08373417924,
+    "cost_rebook_abs": 8063.834287394297,
+    "cost_rebook_share_of_turnover": 0.000250670639203711,
+    "lot_book_check_worst_rel": 2.33262454581685e-16,
+    "bonus_events_applied": [
+      {
+        "symbol": "NTPC",
+        "ex_date": "2019-03-19",
+        "factor": 0.8333333333333334,
+        "bonus_units": 15.58661154421763
+      },
+      {
+        "symbol": "GAIL",
+        "ex_date": "2022-09-06",
+        "factor": 0.6666666666666666,
+        "bonus_units": 78.928448960333
+      },
+      {
+        "symbol": "MAHSEAMLES",
+        "ex_date": "2022-11-25",
+        "factor": 0.5,
+        "bonus_units": 87.79585811557719
+      }
+    ],
+    "s94_loss_ignored": {
+      "94(7)": 2560.2360988543924,
+      "94(8)": 1.494362548384523
+    },
+    "s94_pieces": 27,
+    "losses_carried_out": []
+  },
+  "benchmark": {
+    "growth": {
+      "mode": "growth",
+      "ter": 0.0016,
+      "stamp_duty_on_units": true,
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "capital": 500000.0,
+      "pre_tax_end": 1384269.4830926545,
+      "fund_value_end": 1367550.6485363792,
+      "after_tax_end_held": 1367550.6485363792,
+      "after_tax_end_liquidated": 1271020.6485363792,
+      "tax_paid_during": 0.0,
+      "interest_paid": 0.0,
+      "refunds": 0.0,
+      "tax_due_at_end": 96530.0,
+      "s115r_distribution_tax": 0.0,
+      "stamp_duty_paid": 0.0,
+      "negative_dividend_residue_clipped": 0.0,
+      "hypothetical_before": "2019-09-06",
+      "losses_carried_out": []
+    },
+    "gross_tri": {
+      "mode": "growth",
+      "ter": 0.0,
+      "stamp_duty_on_units": true,
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "capital": 500000.0,
+      "pre_tax_end": 1384269.4830926545,
+      "fund_value_end": 1384269.4830926545,
+      "after_tax_end_held": 1384269.4830926545,
+      "after_tax_end_liquidated": 1285559.4830926545,
+      "tax_paid_during": 0.0,
+      "interest_paid": 0.0,
+      "refunds": 0.0,
+      "tax_due_at_end": 98710.0,
+      "s115r_distribution_tax": 0.0,
+      "stamp_duty_paid": 0.0,
+      "negative_dividend_residue_clipped": 0.0,
+      "hypothetical_before": "2019-09-06",
+      "losses_carried_out": []
+    },
+    "distributed": {
+      "mode": "distributed",
+      "ter": 0.0016,
+      "stamp_duty_on_units": true,
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "capital": 500000.0,
+      "pre_tax_end": 1384269.4830926545,
+      "fund_value_end": 1341978.1463425383,
+      "after_tax_end_held": 1339308.1463425383,
+      "after_tax_end_liquidated": 1254098.1463425383,
+      "tax_paid_during": 18060.0,
+      "interest_paid": 0.0,
+      "refunds": 0.0,
+      "tax_due_at_end": 87880.0,
+      "s115r_distribution_tax": 875.5235236227168,
+      "stamp_duty_paid": 3.2895765488263478,
+      "negative_dividend_residue_clipped": 374.5608964912578,
+      "hypothetical_before": "2019-09-06",
+      "losses_carried_out": []
+    },
+    "headline": "growth",
+    "labels": {
+      "growth": "HEADLINE. Growth-option Nifty 500 index fund, bought at the first mark, held throughout and sold at the end (A6), NAV = TRI less the expense ratio accrued daily; files bench_after_tax_nav.csv, bench_tax_by_year.csv",
+      "gross_tri": "The same fund at TER 0: the gross TRI; files bench_gross_tri_*",
+      "distributed": "Sensitivity, close to a direct holding of the index: the index's dividends paid out and reinvested at each mark, s.115R distribution tax on payouts before 1 Apr 2020, slab tax with advance tax from 1 Apr 2020; files bench_distributed_*"
+    },
+    "notes": {
+      "first_nifty500_index_fund": "Motilal Oswal Nifty 500 Index Fund (launched as Motilal Oswal Nifty 500 Fund): date of inception 6 Sep 2019, NFO from 18 Aug 2019 (the AMC page above, read 25 Sep 2026). That it was the first Nifty 500 index fund is the A6 law checker's statement (A6 findings, 25 Sep 2026), not confirmed independently here. Before 6 Sep 2019 the benchmark is a hypothetical fund.",
+      "hypothetical_before": "2019-09-06",
+      "ter": "Motilal Oswal Nifty 500 Index Fund, Direct plan: total expense ratio 0.16%, data as on 31 Aug 2026 (AMC scheme page https://www.motilaloswalmf.com/mutual-funds/motilal-oswal-nifty-500-index-fund, read 25 Sep 2026). Today's TER is applied to the whole period; the scheme's earlier TERs were not checked. Accrued daily over calendar days.",
+      "stamp_duty": "Stamp duty of 0.005% on mutual fund unit issues since July 2020, 'applicable on purchase, SIP instalments, switch-ins, and IDCW reinvestments', 'not applicable on redemption' (Bajaj Finserv AMC, 'Stamp Duty on Mutual Funds', published 29 May 2025, https://www.bajajamc.com/knowledge-centre/stamp-duty-on-mutual-funds, read 25 Sep 2026). Applied from 1 Jul 2020.",
+      "ignored": "redemption STT, exit loads, tracking error beyond the TER, and s.94 on the fund's units"
+    }
+  },
+  "after_tax_stats": {
+    "basis": "liquidation_value at every mark: the value after exit costs and the tax due if everything were sold at that mark",
+    "strategy": {
+      "cagr": 0.1779133883772157,
+      "volatility": 0.14958668903855393,
+      "sharpe_rf0": 1.193972813279326,
+      "max_drawdown": -0.24804184279678299,
+      "calendar_years": {
+        "2019": 0.03165572163442909,
+        "2020": 0.19607858961964886,
+        "2021": 0.4650729083190821,
+        "2022": -0.057660214199143356,
+        "2023": 0.4113775866468614,
+        "2024": 0.29544672478887724,
+        "2025": 0.0907185026254611,
+        "2026": 0.0199185093594747
+      },
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "n_returns": 1872,
+      "final_multiple": 3.4649917118737226
+    },
+    "benchmark_growth": {
+      "cagr": 0.13080705250434121,
+      "volatility": 0.16398105901950635,
+      "sharpe_rf0": 0.8489672294757669,
+      "max_drawdown": -0.3723989218367586,
+      "calendar_years": {
+        "2019": 0.10261591770631351,
+        "2020": 0.18593521873375907,
+        "2021": 0.2839124134697373,
+        "2022": 0.03776684013937359,
+        "2023": 0.24798371095732352,
+        "2024": 0.1369212738486678,
+        "2025": 0.07087298613213755,
+        "2026": -0.03974867085836398
+      },
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "n_returns": 1872,
+      "final_multiple": 2.5420412970727586
+    },
+    "benchmark_gross_tri": {
+      "cagr": 0.13250301341861626,
+      "volatility": 0.16400917409425317,
+      "sharpe_rf0": 0.8581894608725891,
+      "max_drawdown": -0.3723081278464423,
+      "calendar_years": {
+        "2019": 0.10394538082303284,
+        "2020": 0.18774085057868728,
+        "2021": 0.28587867706830106,
+        "2022": 0.039316059305819495,
+        "2023": 0.2499827455464887,
+        "2024": 0.1385633018045196,
+        "2025": 0.07252210880660681,
+        "2026": -0.03874678372645579
+      },
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "n_returns": 1872,
+      "final_multiple": 2.571118966185309
+    },
+    "benchmark_distributed": {
+      "cagr": 0.12881169223247801,
+      "volatility": 0.16395550381141344,
+      "sharpe_rf0": 0.8380623053964654,
+      "max_drawdown": -0.3725235533092366,
+      "calendar_years": {
+        "2019": 0.10307849232132593,
+        "2020": 0.18357961997333505,
+        "2021": 0.28091567878329604,
+        "2022": 0.03532193862989508,
+        "2023": 0.24492900415730112,
+        "2024": 0.13569500422737701,
+        "2025": 0.06846354685292022,
+        "2026": -0.0410506756517528
+      },
+      "start": "2019-02-15",
+      "end": "2026-09-18",
+      "n_returns": 1872,
+      "final_multiple": 2.5081962926850765
+    },
+    "strategy_vs_benchmark_growth": {
+      "tracking_error": 0.11539600656975971,
+      "information_ratio": 0.3413280558751272,
+      "cagr_diff": 0.047106335872874494
+    }
+  },
+  "sensitivities": {
+    "tax_timing": [
+      {
+        "tax_timing": "advance_minimum",
+        "label": "SENSITIVITY: advance tax at the cumulative statutory share (15/45/75/100%) of the year-to-date tax, the least that meets the s.234C proviso",
+        "after_tax_end_held": 1743129.0129177156,
+        "after_tax_end_liquidated": 1740550.648228364,
+        "tax_paid_during": 234500.0,
+        "interest_paid": 10.0,
+        "refunds": 17990.0,
+        "tax_due_at_end": 10760.0
+      },
+      {
+        "tax_timing": "april",
+        "label": "SENSITIVITY: each year's whole tax paid at the first session of the next year, no advance tax and no interest (the pre-fix convention)",
+        "after_tax_end_held": 1750375.1132233653,
+        "after_tax_end_liquidated": 1747768.9576414474,
+        "tax_paid_during": 226870.0,
+        "interest_paid": 0.0,
+        "refunds": 0.0,
+        "tax_due_at_end": 19690.0
+      }
+    ],
+    "slippage": [
+      {
+        "slippage": 0.0,
+        "after_tax_end_held": 1780032.8648501826,
+        "after_tax_end_liquidated": 1778361.6703819206,
+        "tax_paid_during": 253390.0,
+        "interest_paid": 0.0,
+        "tax_due_at_end": -100.0,
+        "itemised_costs_total": 40800.64266498063,
+        "flat_costs_total": 65356.9572511502
+      },
+      {
+        "slippage": 0.0005,
+        "after_tax_end_held": 1757424.1223784839,
+        "after_tax_end_liquidated": 1755321.7403557114,
+        "tax_paid_during": 248880.0,
+        "interest_paid": 0.0,
+        "tax_due_at_end": -380.0,
+        "itemised_costs_total": 56727.26064391893,
+        "flat_costs_total": 64845.811892661164
+      },
+      {
+        "slippage": 0.001,
+        "after_tax_end_held": 1735020.6877185008,
+        "after_tax_end_liquidated": 1732495.8559368614,
+        "tax_paid_during": 244510.0,
+        "interest_paid": 0.0,
+        "tax_due_at_end": -670.0,
+        "itemised_costs_total": 72401.91802157354,
+        "flat_costs_total": 64338.08373417924
+      },
+      {
+        "slippage": 0.002,
+        "after_tax_end_held": 1690884.4556582922,
+        "after_tax_end_liquidated": 1687549.655155006,
+        "tax_paid_during": 236040.0,
+        "interest_paid": 0.0,
+        "tax_due_at_end": -1210.0,
+        "itemised_costs_total": 103005.5405280149,
+        "flat_costs_total": 63332.83756642831
+      }
+    ]
+  },
+  "short_term_within_5_sessions_of_long_term": {
+    "within_sessions": 5,
+    "pieces": 8,
+    "gain": 7733.4083178227775,
+    "st_tax_first_order": 1561.3194410298995,
+    "lt_tax_first_order": 981.7283367783419,
+    "by_sessions": {
+      "1": 2,
+      "2": 2,
+      "3": 3,
+      "4": 1
+    },
+    "by_reason": {
+      "advance_tax": 18.0038441113771,
+      "cost_rebook": 1.3645450903187923,
+      "rebalance": 1541.9510518282036
+    }
+  },
+  "corporate_actions_not_modelled": {
+    "limitation": "Demergers, amalgamations, schemes of arrangement and bonus debentures or preference shares are not reflected in the lot book: the engine shows a demerger's price drop as a loss and force-sells an absorbed company, so the layer books a larger loss on the parent and no cost for the new shares.",
+    "events_in_window": 18,
+    "events_held_through": 0,
+    "engine_sales_affected": 0,
+    "internal_sale_pieces_affected": 0,
+    "final_liquidation_positions_affected": 0,
+    "by_kind": {},
+    "events": []
+  },
+  "cost_sources": {
+    "stt": "0.1% on buy and on sell for equity delivery. Zerodha charges page archived 17 Nov 2019 (web.archive.org/web/20191117030325/https://zerodha.com/charges) and live page https://zerodha.com/charges (read 24 Sep 2026); unchanged by Budget 2024 (F&O only, Zerodha Z-Connect 'Revision in exchange transaction charges and STT from October 1, 2024') and Budget 2026 (F&O only).",
+    "stamp": "From 1 Jul 2020: 0.015% on the buy side only, Indian Stamp Act as amended by the Finance Act 2019 (PwC news alert 3 Jul 2020; Zerodha charges page). Before 1 Jul 2020 stamp duty was set by the client's state of residence and charged on both sides: Zerodha's archived calculator (Nov 2019) lists 0.002% to 0.018% by state. ASSUMED 0.01% on both sides before 1 Jul 2020.",
+    "exchange": "NSE cash market transaction charge, the top slab retail brokers passed on (Rs per lakh, each side): 3.25 to 31 Dec 2020 (NSE/FA/46730, 18 Dec 2020, 'existing'; Zerodha archive Nov 2019 and Aug 2020 show 0.00325%); 3.45 from 1 Jan 2021 (NSE/FA/46730); 3.25 from 1 Apr 2023 (NSE/FA/56129, 24 Mar 2023); 3.22 from 1 Apr 2024 (NSE/FA/61137, 14 Mar 2024); 2.97 flat from 1 Oct 2024 (NSE/FA/64232, 27 Sep 2024); 3.0699 from 1 Mar 2026 (NSE/FA/73061, 27 Feb 2026). Zerodha's live page (read 24 Sep 2026) shows NSE 0.00307%, i.e. 306.99 + 0.01 IPFT per crore. The rate before Feb 2019 was not checked.",
+    "ipft": "NSE Investor Protection Fund Trust contribution, passed through by Zerodha: Rs 0.01 per crore before 1 Apr 2023, Rs 10 per crore from 1 Apr 2023 (NSE/FA/56129), Rs 0.01 per crore from 1 Mar 2026 (NSE/FA/73061).",
+    "sebi": "SEBI turnover fee Rs 10 per crore (Zerodha archive Nov 2019 and May 2023; SEBI board memo Jul 2020); halved to Rs 5 per crore for June 2020 to March 2021 (SEBI press release 24/2020, 27 Apr 2020; Zerodha archive Aug 2020 shows Rs 5).",
+    "gst": "18% on brokerage, exchange transaction charges, IPFT and the SEBI fee, and on DP charges (Zerodha charges page; GST in force since 1 Jul 2017).",
+    "dp": "Depository charge per scrip per day on which it is sold, before GST: Rs 13.5 (Zerodha archive Nov 2019, Aug 2020, May 2023); Rs 13 from 1 Jun 2024 (Zerodha on tradingqna.com, 13 May 2024; the live charges page shows Rs 15.34 with GST, i.e. Rs 13 + 18%). Only these totals and dates are taken from the sources; how the charge divides between the depository and the broker is not.",
+    "brokerage": "Zero on equity delivery at Zerodha (charges page, 2019 and 2026). ASSUMPTION: the owner uses a zero-delivery-brokerage discount broker.",
+    "slippage": "ASSUMPTION, not sourced: 0.10% of traded value per side for Rs 50,000 to Rs 5 lakh orders in liquid mid and small caps (half the quoted spread plus impact). Varied in the job's sensitivity table."
+  },
+  "tax_sources": {
+    "rates_2024": "Memorandum explaining the Finance (No. 2) Bill, 2024: s.111A 15% -> 20%, s.112A 10% -> 12.5%, exemption 'upto 1.25 lakh (aggregate)', effective 23 July 2024; holding period 12 months for all listed securities.",
+    "exemption_fy2425": "CBDT FAQs, PIB press release PRID 2036604 (24 Jul 2024): 'This increased exemption limit will apply for FY 2024-25 and subsequent years.'",
+    "stt_not_deductible": "Section 48 proviso (Finance (No. 2) Act, 2004): no deduction for securities transaction tax in computing capital gains.",
+    "set_off": "Sections 70 and 74 (incometaxindia.gov.in, 'Set off and carry forward of losses'): short-term capital loss against short- or long-term gains, long-term loss against long-term gains only, carried forward 8 years.",
+    "dividends": "Finance Act, 2020: dividend distribution tax abolished and dividends taxable in the shareholder's hands from 1 April 2020 (s.10(34) no longer applies), KPMG 'Taxation of dividend' (Oct 2020).",
+    "cess": "Health and Education Cess 4% on income tax including surcharge (Finance Act 2018 onwards; Finance Bill 2026 memorandum repeats it for 2026-27).",
+    "advance_tax": "Sections 208 (advance tax due when the year's tax is Rs 10,000 or more), 211 (individuals: 15% by 15 Jun, 45% by 15 Sep, 75% by 15 Dec, 100% by 15 Mar), 234C and its proviso (a shortfall caused by capital gains or dividends is excused if the tax on them is paid in the remaining instalments or, when none remain, by 31 March) and 234B (1% a month or part month from 1 April when advance tax paid is below 90% of the assessed tax), as read from Indian Kanoon and taxguru extracts by the A6 law checker (A6 findings, 25 Sep 2026); not re-read here.",
+    "bonus": "Section 55(2)(aa)(iiia): cost of bonus shares nil; section 2(42A) Explanation 1(i)(f): holding period from the date of allotment (A6 law checker, as above).",
+    "stripping": "Section 94(8) (bonus stripping; extended from units to securities by the Finance Act 2022 from AY 2023-24) and section 94(7) (dividend stripping, exempt dividends), as read by the A6 law and model checkers (A6 findings, 25 Sep 2026); not re-read here.",
+    "rounding": "Sections 288A (total income) and 288B (tax, interest, refunds): nearest multiple of Rs 10.",
+    "s115R": "From 1 Apr 2018 to 31 Mar 2020 an equity-oriented fund's distributions bore additional income tax under s.115R(2) at 10%, '11.648 percent including surcharge and cess' (cleartax.in/s/dividend-distribution-tax, read 25 Sep 2026), payable 'on gross basis' (R. Sarda, 'Finance Bill 2018 - Deemed Dividend and Distribution Tax', itatonline.org, 6 Mar 2018, read 25 Sep 2026). Distributions were exempt in the unit-holder's hands until 31 Mar 2020."
+  },
+  "fund_sources": {
+    "ter": "Motilal Oswal Nifty 500 Index Fund, Direct plan: total expense ratio 0.16%, data as on 31 Aug 2026 (AMC scheme page https://www.motilaloswalmf.com/mutual-funds/motilal-oswal-nifty-500-index-fund, read 25 Sep 2026). Today's TER is applied to the whole period; the scheme's earlier TERs were not checked. Accrued daily over calendar days.",
+    "stamp": "Stamp duty of 0.005% on mutual fund unit issues since July 2020, 'applicable on purchase, SIP instalments, switch-ins, and IDCW reinvestments', 'not applicable on redemption' (Bajaj Finserv AMC, 'Stamp Duty on Mutual Funds', published 29 May 2025, https://www.bajajamc.com/knowledge-centre/stamp-duty-on-mutual-funds, read 25 Sep 2026). Applied from 1 Jul 2020.",
+    "first_fund": "Motilal Oswal Nifty 500 Index Fund (launched as Motilal Oswal Nifty 500 Fund): date of inception 6 Sep 2019, NFO from 18 Aug 2019 (the AMC page above, read 25 Sep 2026). That it was the first Nifty 500 index fund is the A6 law checker's statement (A6 findings, 25 Sep 2026), not confirmed independently here. Before 6 Sep 2019 the benchmark is a hypothetical fund."
+  }
+}
