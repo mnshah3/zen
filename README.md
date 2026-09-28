@@ -1,5 +1,7 @@
 # Zen: automated research infrastructure for Indian equities
 
+[![tests](https://github.com/mnshah3/zen/actions/workflows/tests.yml/badge.svg)](https://github.com/mnshah3/zen/actions/workflows/tests.yml)
+
 I built this to answer one question properly: if I screen Indian stocks on
 fundamentals, does it actually work? Most retail backtests can't answer that
 honestly, because they test against the companies that are still listed today.
