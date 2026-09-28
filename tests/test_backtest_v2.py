@@ -505,6 +505,21 @@ def test_new_position_is_bought_in_three_tranches_at_d_21_and_42():
     assert h["status"].tolist() == ["new"] and h["target_weight"].iloc[0] == pytest.approx(0.125)
 
 
+def test_a_tranche_scheduled_after_the_end_is_pending_not_a_crash():
+    """The last decision date's third tranche falls 42 sessions later, after the
+    run's end (17 Aug 2026 against an 18 Sep 2026 end). It is reported as pending
+    at the end, dated 'after the end', and its cash stays in the NAV as cash."""
+    p = _panel(np.full((30, 1), 100.0))                # sessions 0..29: t=43 is past the end
+    res = _run(p, {1: ["S0"]})
+    buys = _fills(res)
+    assert buys["kind"].tolist() == ["tranche1", "tranche2"]
+    pend = res.pending_at_end
+    assert len(pend) == 1 and int(pend["tranche"].iloc[0]) == 3
+    assert pend["scheduled_date"].iloc[0] is None and bool(pend["scheduled_after_end"].iloc[0])
+    assert pend["D"].iloc[0] == p.dates[1].date()
+    assert res.nav["nav"].to_numpy() == pytest.approx(np.full(len(res.nav), 1.2e5))
+
+
 def test_trend_cash_reduces_every_target():
     p = _panel(np.full((80, 12), 100.0))
     res = _run(p, {1: [f"S{i}" for i in range(12)]}, cash=0.275)

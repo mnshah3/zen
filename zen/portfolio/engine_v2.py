@@ -810,7 +810,10 @@ def simulate_v2(panel: engine.Panel, decisions, choose, cash_by_D: dict, cfg: Co
     cur_D = -1
 
     def d_of(t):
-        return dates[t].date() if t >= 0 else None
+        """The date of session t; None past the run's last session (a tranche
+        scheduled after the end, e.g. the last decision date's third tranche, is
+        pending at the end and has no session in the panel)."""
+        return dates[t].date() if 0 <= t < len(dates) else None
 
     def record(t, s, side, du, px, val, kind, sched_t, D_t, reason):
         if not log_trades:
@@ -1031,9 +1034,11 @@ def simulate_v2(panel: engine.Panel, decisions, choose, cash_by_D: dict, cfg: Co
         cash_out[t] = cash
 
     pending = [{"symbol": syms[o["s"]], "tranche": o["k"], "amount": o["amount"],
-                "scheduled_date": d_of(o["t_sched"]), "D": d_of(o["D_t"])} for o in tranches]
+                "scheduled_date": d_of(o["t_sched"]), "D": d_of(o["D_t"]),
+                "scheduled_after_end": bool(o["t_sched"] >= len(dates))} for o in tranches]
     pending += [{"symbol": syms[s], "tranche": None, "amount": float(tgt_val[s]),
-                 "scheduled_date": d_of(tgt_D[s]), "D": d_of(tgt_D[s])}
+                 "scheduled_date": d_of(tgt_D[s]), "D": d_of(tgt_D[s]),
+                 "scheduled_after_end": False}
                 for s in np.flatnonzero(~np.isnan(tgt_val))]
 
     for s in np.flatnonzero(entry_t >= 0):

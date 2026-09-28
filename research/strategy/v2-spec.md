@@ -593,3 +593,12 @@ Record formats may differ between the engines (column names, labels, the value
 written on a cancelled order); the comparison maps them and they change no
 figure. The equal-weight benchmark's NAV starts at Rs 5 lakh, like the
 strategy's, as in v1.
+
+**Disclosure, 2026-09-28.** The first full-period run of the production engine
+stopped with an error while writing its record files, before any result was
+written, printed or recorded as a trial: the last decision date's third tranche
+is scheduled 42 sessions after 17 Aug 2026, beyond the run's 18 Sep 2026 end,
+and the code looked its date up in a calendar that ends there. Such a tranche
+is now reported as pending at the end ("scheduled after the end"), with its cash
+held in the NAV as cash, which is what the simulation already did. No rule or
+figure changed; a test reproduces the case. The run was then made once.
