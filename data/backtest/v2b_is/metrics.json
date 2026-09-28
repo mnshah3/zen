@@ -1,0 +1,525 @@
+{
+  "cagr": 0.16030990812077817,
+  "volatility": 0.17445135939136416,
+  "sharpe_rf0": 0.9569577101473656,
+  "max_drawdown": -0.2634115692018455,
+  "calendar_years": {
+    "2019": 0.04384832258467575,
+    "2020": 0.2237035352983514,
+    "2021": 0.5240215672997963,
+    "2022": -0.054190394773791506,
+    "2023": -0.015563840280550911
+  },
+  "start": "2019-02-15",
+  "end": "2023-02-15",
+  "n_returns": 989,
+  "final_multiple": 1.812575072935592,
+  "turnover_annual": 1.7021856477100301,
+  "turnover_annual_incl_initial": 1.7204193790120246,
+  "episodes": 92,
+  "avg_holding_days": 183.77173913043478,
+  "doubled": 4,
+  "open_at_end": 12,
+  "no_trade_exits": 1,
+  "vs": {
+    "universe_ew": {
+      "cagr": 0.24445440580915734,
+      "volatility": 0.2183241277909611,
+      "sharpe_rf0": 1.132052182467802,
+      "max_drawdown": -0.48156177708073866,
+      "calendar_years": {
+        "2019": -0.027080339112088625,
+        "2020": 0.3274826819883574,
+        "2021": 0.772196549890485,
+        "2022": 0.0882631215291203,
+        "2023": -0.03713740536867849
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.3983687587344495,
+      "tracking_error": 0.13449493639272952,
+      "information_ratio": -0.5963922069278579,
+      "cagr_diff": -0.08414449768837917
+    },
+    "nifty500": {
+      "cagr": 0.15134515050554054,
+      "volatility": 0.1998458619318855,
+      "sharpe_rf0": 0.8201013449770318,
+      "max_drawdown": -0.3810593207227173,
+      "calendar_years": {
+        "2019": 0.12314538082303295,
+        "2020": 0.1789222020758081,
+        "2021": 0.3159610984964043,
+        "2022": 0.04246205451900931,
+        "2023": -0.0326186389669082
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.7572038421260439,
+      "tracking_error": 0.1398738368021068,
+      "information_ratio": 0.0217961652194814,
+      "cagr_diff": 0.008964757615237628
+    },
+    "midcap150": {
+      "cagr": 0.19447165703566727,
+      "volatility": 0.2023734876669792,
+      "sharpe_rf0": 0.9979563576020448,
+      "max_drawdown": -0.3845224051604903,
+      "calendar_years": {
+        "2019": 0.0856879931385548,
+        "2020": 0.255642209715794,
+        "2021": 0.481597960050999,
+        "2022": 0.03913339144865269,
+        "2023": -0.03009146100007576
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.035651344010722,
+      "tracking_error": 0.12913612976025096,
+      "information_ratio": -0.27116605768747837,
+      "cagr_diff": -0.0341617489148891
+    },
+    "smallcap250": {
+      "cagr": 0.1860129003953348,
+      "volatility": 0.21168792756627366,
+      "sharpe_rf0": 0.9290828571286803,
+      "max_drawdown": -0.45488022800787176,
+      "calendar_years": {
+        "2019": 0.027748039408582503,
+        "2020": 0.26459455462961845,
+        "2021": 0.6333592284161349,
+        "2022": -0.026363797196496286,
+        "2023": -0.042714980366348576
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.978598391557922,
+      "tracking_error": 0.1347320963998459,
+      "information_ratio": -0.22068276188198363,
+      "cagr_diff": -0.025702992274556635
+    },
+    "momentum30": {
+      "cagr": 0.15351123561303326,
+      "volatility": 0.22136442459189987,
+      "sharpe_rf0": 0.7693324221972132,
+      "max_drawdown": -0.3395765137433585,
+      "calendar_years": {
+        "2019": 0.07734346087978738,
+        "2020": 0.19952984886529546,
+        "2021": 0.5381228608517572,
+        "2022": -0.05447070055094427,
+        "2023": -0.057988816255361564
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.7704648799682026,
+      "tracking_error": 0.1441555422655607,
+      "information_ratio": -0.023309929618477585,
+      "cagr_diff": 0.006798672507744907
+    },
+    "value50": {
+      "cagr": 0.1921958261092267,
+      "volatility": 0.25776445175022755,
+      "sharpe_rf0": 0.8253865128081864,
+      "max_drawdown": -0.5340239652595944,
+      "calendar_years": {
+        "2019": -0.014398538395567151,
+        "2020": 0.08470781850957154,
+        "2021": 0.5636598818188392,
+        "2022": 0.23156087533199288,
+        "2023": -0.018753543802518813
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.0201814925923376,
+      "tracking_error": 0.17255323725589133,
+      "information_ratio": -0.265499096217131,
+      "cagr_diff": -0.03188591798844853
+    },
+    "quality30": {
+      "cagr": 0.12419659025883867,
+      "volatility": 0.17658152775407107,
+      "sharpe_rf0": 0.7646303181591688,
+      "max_drawdown": -0.290758852518861,
+      "calendar_years": {
+        "2019": 0.05423375758888205,
+        "2020": 0.2631558709187334,
+        "2021": 0.26180188452427466,
+        "2022": -0.04404781188778395,
+        "2023": -0.005630378269420033
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.597235870267015,
+      "tracking_error": 0.145221991285996,
+      "information_ratio": 0.21982196625275108,
+      "cagr_diff": 0.0361133178619395
+    },
+    "lowvol30": {
+      "cagr": 0.13813201003009667,
+      "volatility": 0.17110406479091603,
+      "sharpe_rf0": 0.8570084247609056,
+      "max_drawdown": -0.3063245934887915,
+      "calendar_years": {
+        "2019": 0.06995474383107836,
+        "2020": 0.24310753740488966,
+        "2021": 0.24224703800502856,
+        "2022": 0.019919497573508416,
+        "2023": -0.0043135892289195565
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.6779173018019682,
+      "tracking_error": 0.14131187381399057,
+      "information_ratio": 0.14368890476487223,
+      "cagr_diff": 0.02217789809068149
+    },
+    "alpha50": {
+      "cagr": 0.22609431147482528,
+      "volatility": 0.22420192845632947,
+      "sharpe_rf0": 1.040446504444041,
+      "max_drawdown": -0.38282677393922226,
+      "calendar_years": {
+        "2019": 0.12264653546566917,
+        "2020": 0.5270472611724617,
+        "2021": 0.753521934173949,
+        "2022": -0.1347371590108144,
+        "2023": -0.13115814273600546
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.2599327198656582,
+      "tracking_error": 0.13952592067499692,
+      "information_ratio": -0.47537790122342366,
+      "cagr_diff": -0.06578440335404712
+    },
+    "momentum30_no_overnight": {
+      "cagr": 0.15416765430839718,
+      "volatility": 0.22132939587355663,
+      "sharpe_rf0": 0.7720402563485417,
+      "max_drawdown": -0.3395765137433586,
+      "calendar_years": {
+        "2019": 0.07979785316185706,
+        "2020": 0.19952984886529568,
+        "2021": 0.5381228608517572,
+        "2022": -0.05447070055094427,
+        "2023": -0.05798881625536145
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.7744983340103528,
+      "tracking_error": 0.14410737867861376,
+      "information_ratio": -0.027289581897149168,
+      "cagr_diff": 0.006142253812380982
+    },
+    "value50_no_overnight": {
+      "cagr": 0.19340503276775833,
+      "volatility": 0.25775299464914786,
+      "sharpe_rf0": 0.8294237247491366,
+      "max_drawdown": -0.5340239652595944,
+      "calendar_years": {
+        "2019": -0.012370506118580149,
+        "2020": 0.08470781850957132,
+        "2021": 0.5636598818188392,
+        "2022": 0.23156087533199332,
+        "2023": -0.016789605852167377
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.028389996197849,
+      "tracking_error": 0.17254954696181615,
+      "information_ratio": -0.27148072131566753,
+      "cagr_diff": -0.03309512464698017
+    },
+    "quality30_no_overnight": {
+      "cagr": 0.12419659025883867,
+      "volatility": 0.17658152775407107,
+      "sharpe_rf0": 0.7646303181591688,
+      "max_drawdown": -0.290758852518861,
+      "calendar_years": {
+        "2019": 0.05423375758888205,
+        "2020": 0.2631558709187334,
+        "2021": 0.26180188452427466,
+        "2022": -0.04404781188778395,
+        "2023": -0.005630378269420033
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.597235870267015,
+      "tracking_error": 0.145221991285996,
+      "information_ratio": 0.21982196625275108,
+      "cagr_diff": 0.0361133178619395
+    },
+    "lowvol30_no_overnight": {
+      "cagr": 0.13813201003009667,
+      "volatility": 0.17110406479091603,
+      "sharpe_rf0": 0.8570084247609056,
+      "max_drawdown": -0.3063245934887915,
+      "calendar_years": {
+        "2019": 0.06995474383107836,
+        "2020": 0.24310753740488966,
+        "2021": 0.24224703800502856,
+        "2022": 0.019919497573508416,
+        "2023": -0.0043135892289195565
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 1.6779173018019682,
+      "tracking_error": 0.14131187381399057,
+      "information_ratio": 0.14368890476487223,
+      "cagr_diff": 0.02217789809068149
+    },
+    "alpha50_no_overnight": {
+      "cagr": 0.22609431147482528,
+      "volatility": 0.22420192845632947,
+      "sharpe_rf0": 1.040446504444041,
+      "max_drawdown": -0.38282677393922226,
+      "calendar_years": {
+        "2019": 0.12264653546566917,
+        "2020": 0.5270472611724617,
+        "2021": 0.753521934173949,
+        "2022": -0.1347371590108144,
+        "2023": -0.13115814273600546
+      },
+      "start": "2019-02-15",
+      "end": "2023-02-15",
+      "n_returns": 989,
+      "final_multiple": 2.2599327198656582,
+      "tracking_error": 0.13952592067499692,
+      "information_ratio": -0.47537790122342366,
+      "cagr_diff": -0.06578440335404712
+    }
+  },
+  "bootstrap_vs_universe_ew": {
+    "point": -0.08606488943288015,
+    "lo": -0.3214327729600565,
+    "hi": 0.09669798110995087,
+    "level": 0.9,
+    "block": 21,
+    "n_boot": 5000,
+    "p_le_0": 0.7726
+  },
+  "engine": "v2",
+  "variant": "b",
+  "config": {
+    "variant": "b",
+    "n": 12,
+    "buffer_mult": 2,
+    "sector_cap": 3,
+    "cost": 0.002,
+    "delist_haircut": 1.0,
+    "wait_sessions": 5,
+    "no_trade_exit": 20,
+    "initial_capital": 500000.0,
+    "n_tranches": 3,
+    "tranche_gap": 21,
+    "a1_window": 30
+  },
+  "label": "v2b_N12_buf2x_cap3_c0.002_h1",
+  "decision_dates": [
+    "2019-02-15",
+    "2019-06-03",
+    "2019-08-16",
+    "2019-11-15",
+    "2020-02-17",
+    "2020-06-01",
+    "2020-08-17",
+    "2020-11-17",
+    "2021-02-15",
+    "2021-06-01",
+    "2021-08-16",
+    "2021-11-15",
+    "2022-02-15",
+    "2022-06-01",
+    "2022-08-16",
+    "2022-11-15"
+  ],
+  "in_sample_end": "2023-02-15",
+  "end_open": "2023-02-15",
+  "readings": {
+    "hard_filter_order": "rules 1-7 exactly as v1 (pit.universe), then the hard filters; percentiles, groups and ranks are computed within the v2 universe (rules 1-7 plus hard filters), since the hard filters are universe rules",
+    "mcap_floor": "market cap strictly above Rs 100 crore (1e9 rupees)",
+    "pe": "market cap / TTM normalised profit (v1's market cap and profit), > 0 and <= 70",
+    "roce_switch": "(year, month) of D >= (2023, 2): the February 2023 decision date onward",
+    "balance_sheet_usable": "zen.validation.factors.signals gives a capital figure: the latest balance sheet known before D in the income statement's basis, at most 400 days old, equity > 0 (and equity + debt > 0)",
+    "roce_unknown": "a usable balance sheet but no TTM EBIT (a missing EBIT line) has no ROCE and fails the ROCE floor",
+    "de": "debt_total (0 when the balance sheet has no borrowings line) / equity, strictly below 1.5",
+    "no_balance_sheet_count": "n_excluded_no_balance_sheet counts rule-1-7 members with no usable balance sheet at D, whether or not another hard filter also fails them (0 before February 2023)",
+    "measures_after_switch": "from February 2023 the quality group is ROCE and stability; margin is not a measure then (its column is empty in ranks.csv), and before it ROCE is not computed",
+    "sector_join": "every labelled row of industry_nse.parquet is mapped to a stock id through its (symbol, ISIN) spell; a stock with several labelled rows takes the row of its own latest symbol, else the row whose spell ended last. The sector column is used as it is, including NSE's legacy-scheme labels of suspended companies",
+    "trend_sessions": "the NIFTY 500 total-return closes (nifty_tri.parquet) on the archive's market sessions (v1 Clarification 1) with date strictly before D; the index's special sessions the archive does not hold (Muhurat and budget-day trading) are not counted, and an archive session without a close is a missing close (Clarification after the in-sample engine comparison)",
+    "trend_c2": "last close <= 0.9 x the highest of the last 252 closes (the last close included)",
+    "trend_c3": "count of the last 126 closes below the mean of the 200 closes ending at each >= 0.6 x 126, i.e. at least 76",
+    "sigma": "-low_vol of the ranks at D (sample sd of daily adjusted log returns between consecutive traded closes within the last 252 sessions)",
+    "no_sigma": "a name without a positive finite sigma gets (1 - cash)/12 before scaling, the names with a sigma get (1 - cash)/12 x (1/sigma) / mean(1/sigma) before scaling, then all are scaled to sum to (1 - cash); cannot arise for a universe member (rule 3 gives every member 200 sessions)",
+    "bounds": "all weights outside [0.5, 1.5] x (1 - cash)/12 are set to the bound together, the net excess or shortfall is spread over the names not at a bound in proportion to their weights, and this repeats until none is outside; a name set to a bound stays there; what cannot be placed is cash",
+    "held": "a name is held at D when it has units at D's open (v1); kept = held and selected, new = selected and not held, sold = held and not selected",
+    "tranche_amount": "each tranche buys V/3 rupees of stock (cost on top, as v1's buys), V = target weight x NAV at D's open; buys that session are scaled down pro rata when cash is short (v1 Clarification 11)",
+    "tranche_sessions": "tranches 2 and 3 are scheduled 21 and 42 market sessions after D (D is session 0)",
+    "variant_a_wait": "a tranche fills at the open of the first session from its scheduled one with an EQ/BE trade, up to 5 sessions after it, else it is cancelled",
+    "a1_window": "the scheduled session is the first of the 30: a tranche is bought at the open of session k after its scheduled session (k = 0 is the scheduled session) for the first k in 0..29 whose previous session's close qualifies and on which the stock has an EQ/BE trade; if none, at the open of session 30 (the 31st session), or, if the stock has no EQ/BE trade then, at the first such trade within 5 more sessions (v1's execution rule), else cancelled",
+    "a1_closes": "EQ/BE closes only (not BZ), adjusted, on the market calendar, a session without an EQ/BE trade carrying the last EQ/BE close (a1_closes); the SMA is the mean of the last 50 such closes; Wilder's RSI is seeded with the simple mean of the first 14 changes after the stock's first EQ/BE close in the archive, then smoothed as (previous x 13 + current) / 14; RSI = 100 when only the average loss is 0, and undefined (the condition fails) when the average gain and loss are both 0",
+    "a1_metric": "per new position: sum of tranche fill values / sum of tranche fill units, over the adjusted EQ/BE close on the session before D (a1_closes, carried over sessions without an EQ/BE trade); positions with no tranche filled are left out; the average is weighted by V",
+    "pending_orders_at_D": "every order still pending at a decision date is cancelled there: a kept holding is resized in full, a position that leaves the book is sold",
+    "end_of_run": "no fills at the final open mark; orders still pending then are listed in metrics.json, not as cancellations"
+  },
+  "quality_on_roce": {
+    "universe_rows": 9423,
+    "universe_rows_on_roce": 0,
+    "universe_share_on_roce": 0.0,
+    "held_slots": 192,
+    "held_slots_on_roce": 0,
+    "held_share_on_roce": 0.0
+  },
+  "sectors": {
+    "held_slots": 192,
+    "held_slots_unlabelled": 0,
+    "held_share_unlabelled": 0.0,
+    "held_slots_legacy_scheme_label": 3,
+    "unlabelled_ids_held": [],
+    "legacy_label_ids_held": [
+      "TATASTLBSL"
+    ],
+    "note": "NSE's four-level classification as fetched in September 2026, applied to the past (today's labels, disclosed); a company NSE no longer labels is its own sector"
+  },
+  "trend": {
+    "cash_fraction_by_D": {
+      "2019-02-15": 0.35,
+      "2019-06-03": 0.0,
+      "2019-08-16": 0.2,
+      "2019-11-15": 0.0,
+      "2020-02-17": 0.0,
+      "2020-06-01": 0.275,
+      "2020-08-17": 0.2,
+      "2020-11-17": 0.0,
+      "2021-02-15": 0.0,
+      "2021-06-01": 0.0,
+      "2021-08-16": 0.0,
+      "2021-11-15": 0.0,
+      "2022-02-15": 0.0,
+      "2022-06-01": 0.275,
+      "2022-08-16": 0.2,
+      "2022-11-15": 0.0
+    },
+    "n_dates_with_cash": 6
+  },
+  "universe_size": {
+    "2019-02-15": 220,
+    "2019-06-03": 459,
+    "2019-08-16": 459,
+    "2019-11-15": 431,
+    "2020-02-17": 437,
+    "2020-06-01": 417,
+    "2020-08-17": 526,
+    "2020-11-17": 556,
+    "2021-02-15": 624,
+    "2021-06-01": 654,
+    "2021-08-16": 775,
+    "2021-11-15": 775,
+    "2022-02-15": 822,
+    "2022-06-01": 791,
+    "2022-08-16": 755,
+    "2022-11-15": 722
+  },
+  "hard_filters": {
+    "excluded_rows": 1197,
+    "by_filter": {
+      "pass_mcap": 116,
+      "pass_pe": 1087,
+      "pass_roce": 0,
+      "pass_de": 0
+    },
+    "no_balance_sheet": 0
+  },
+  "sizing": {
+    "names_without_sigma": 0,
+    "mean_book_weight": 0.90625
+  },
+  "fills_by_kind": {
+    "rebalance": 178,
+    "tranche1": 92,
+    "tranche2": 92,
+    "tranche3": 87,
+    "cancelled": 6,
+    "forced_exit": 1
+  },
+  "pending_at_end": 0,
+  "a1": {
+    "v_weighted_ratio": 1.0397128128181674,
+    "unweighted_mean_ratio": 1.0351576409058796,
+    "n_positions": 92,
+    "n_with_fills": 92,
+    "n_without_fills": 0
+  },
+  "benchmark_notes": {
+    "universe_ew": "every stock in the v2 universe at D (rules 1-7 and the hard filters), equal weight, v1's rules: bought in full at D, dividends and the same costs, no trend cash, no tranches",
+    "nifty_and_factor_indices": "as v1 (jobs/backtest_v1.py index_navs): NSE's TRI; factor indices with the Clarification to A4's open rule and the *_no_overnight sensitivity"
+  },
+  "trade_for_trade_episodes": {
+    "universe_ew": 4
+  },
+  "fingerprint": {
+    "code_and_labels_sha256": "21d4dfbbb16a80d4548494cb65c580d3ad5964e69277551179d75d8e264e0b84",
+    "prices_rows": 5366415,
+    "prices_last": "2026-09-25",
+    "financials_rows": 105818,
+    "financials_last": "2026-09-23 14:50:05"
+  },
+  "sanity": {
+    "mcap_check": {
+      "D": "2021-02-15",
+      "caps": {
+        "RELIANCE": {
+          "model_cr": 1315528,
+          "reference_cr": 1300000,
+          "ratio": 1.012,
+          "within_20pct": true
+        },
+        "TCS": {
+          "model_cr": 1197295,
+          "reference_cr": 1200000,
+          "ratio": 0.998,
+          "within_20pct": true
+        },
+        "INFY": {
+          "model_cr": 558065,
+          "reference_cr": 560000,
+          "ratio": 0.997,
+          "within_20pct": true
+        }
+      }
+    },
+    "universe_size": {
+      "2019-02-15": 220,
+      "2019-06-03": 459,
+      "2019-08-16": 459,
+      "2019-11-15": 431,
+      "2020-02-17": 437,
+      "2020-06-01": 417,
+      "2020-08-17": 526,
+      "2020-11-17": 556,
+      "2021-02-15": 624,
+      "2021-06-01": 654,
+      "2021-08-16": 775,
+      "2021-11-15": 775,
+      "2022-02-15": 822,
+      "2022-06-01": 791,
+      "2022-08-16": 755,
+      "2022-11-15": 722
+    },
+    "n_extreme_daily_returns": 29
+  }
+}

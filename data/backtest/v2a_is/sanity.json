@@ -1,0 +1,389 @@
+{
+  "mcap_check": {
+    "D": "2021-02-15",
+    "caps": {
+      "RELIANCE": {
+        "model_cr": 1315528,
+        "reference_cr": 1300000,
+        "ratio": 1.012,
+        "within_20pct": true
+      },
+      "TCS": {
+        "model_cr": 1197295,
+        "reference_cr": 1200000,
+        "ratio": 0.998,
+        "within_20pct": true
+      },
+      "INFY": {
+        "model_cr": 558065,
+        "reference_cr": 560000,
+        "ratio": 0.997,
+        "within_20pct": true
+      }
+    }
+  },
+  "universe_size": {
+    "2019-02-15": 220,
+    "2019-06-03": 459,
+    "2019-08-16": 459,
+    "2019-11-15": 431,
+    "2020-02-17": 437,
+    "2020-06-01": 417,
+    "2020-08-17": 526,
+    "2020-11-17": 556,
+    "2021-02-15": 624,
+    "2021-06-01": 654,
+    "2021-08-16": 775,
+    "2021-11-15": 775,
+    "2022-02-15": 822,
+    "2022-06-01": 791,
+    "2022-08-16": 755,
+    "2022-11-15": 722
+  },
+  "extreme_daily_returns": [
+    {
+      "date": "2015-06-03",
+      "symbol": "ADANIENT",
+      "ret": -0.8277080062794349,
+      "prev_adj_close": 637.0,
+      "adj_close": 109.75
+    },
+    {
+      "date": "2015-06-12",
+      "symbol": "MASTEK",
+      "ret": -0.659970323022486,
+      "prev_adj_close": 438.05,
+      "adj_close": 148.95
+    },
+    {
+      "date": "2015-11-19",
+      "symbol": "JSL",
+      "ret": -0.6086956521739131,
+      "prev_adj_close": 56.35,
+      "adj_close": 22.05
+    },
+    {
+      "date": "2016-03-14",
+      "symbol": "RAMASTEEL",
+      "ret": -0.7973507655255462,
+      "prev_adj_close": 17.439000000000004,
+      "adj_close": 3.5340000000000003
+    },
+    {
+      "date": "2016-03-15",
+      "symbol": "CGPOWER",
+      "ret": -0.716677398583387,
+      "prev_adj_close": 155.3,
+      "adj_close": 44.0
+    },
+    {
+      "date": "2016-05-09",
+      "symbol": "PALREDTEC",
+      "ret": 0.9089417555373256,
+      "prev_adj_close": 60.95,
+      "adj_close": 116.35
+    },
+    {
+      "date": "2016-05-11",
+      "symbol": "FEL",
+      "ret": -0.8742138364779874,
+      "prev_adj_close": 151.05,
+      "adj_close": 19.0
+    },
+    {
+      "date": "2016-07-13",
+      "symbol": "SOLARINDS",
+      "ret": -0.7998798447224105,
+      "prev_adj_close": 3245.8,
+      "adj_close": 649.55
+    },
+    {
+      "date": "2016-10-19",
+      "symbol": "CAPLIPOINT",
+      "ret": -0.7986941580756014,
+      "prev_adj_close": 1455.0,
+      "adj_close": 292.9
+    },
+    {
+      "date": "2016-11-11",
+      "symbol": "ICIL",
+      "ret": -0.8123905976494123,
+      "prev_adj_close": 799.8,
+      "adj_close": 150.05
+    },
+    {
+      "date": "2016-12-13",
+      "symbol": "KNRCON",
+      "ret": -0.7882857675806753,
+      "prev_adj_close": 402.075,
+      "adj_close": 85.125
+    },
+    {
+      "date": "2016-12-27",
+      "symbol": "GULPOLY",
+      "ret": -0.8004040404040405,
+      "prev_adj_close": 371.25,
+      "adj_close": 74.1
+    },
+    {
+      "date": "2017-01-04",
+      "symbol": "JSWSTEEL",
+      "ret": -0.9008543370526891,
+      "prev_adj_close": 1644.55,
+      "adj_close": 163.05
+    },
+    {
+      "date": "2017-01-09",
+      "symbol": "STERTOOLS",
+      "ret": -0.7940990516332982,
+      "prev_adj_close": 949.0,
+      "adj_close": 195.4
+    },
+    {
+      "date": "2017-02-07",
+      "symbol": "LTFOODS",
+      "ret": -0.8921620759332128,
+      "prev_adj_close": 470.15,
+      "adj_close": 50.7
+    },
+    {
+      "date": "2017-03-27",
+      "symbol": "PTL",
+      "ret": -0.628129117259552,
+      "prev_adj_close": 75.9,
+      "adj_close": 28.225
+    },
+    {
+      "date": "2017-05-25",
+      "symbol": "SINTEX",
+      "ret": -0.7516810758885687,
+      "prev_adj_close": 104.1,
+      "adj_close": 25.85
+    },
+    {
+      "date": "2018-01-11",
+      "symbol": "ORIENTPPR",
+      "ret": -0.6956648239743963,
+      "prev_adj_close": 171.85,
+      "adj_close": 52.3
+    },
+    {
+      "date": "2018-08-29",
+      "symbol": "SIGIND",
+      "ret": 9.0,
+      "prev_adj_close": 6.5,
+      "adj_close": 65.0
+    },
+    {
+      "date": "2018-09-28",
+      "symbol": "CCAVENUE",
+      "ret": -0.7082605440479162,
+      "prev_adj_close": 50.0875,
+      "adj_close": 14.6125
+    },
+    {
+      "date": "2018-11-28",
+      "symbol": "ARVIND",
+      "ret": -0.6508599903552483,
+      "prev_adj_close": 311.05,
+      "adj_close": 108.6
+    },
+    {
+      "date": "2019-08-06",
+      "symbol": "GFLLIMITED",
+      "ret": -0.8910711244820344,
+      "prev_adj_close": 880.85,
+      "adj_close": 95.95
+    },
+    {
+      "date": "2019-08-19",
+      "symbol": "AGI",
+      "ret": -0.7370662124760485,
+      "prev_adj_close": 234.85,
+      "adj_close": 61.75
+    },
+    {
+      "date": "2020-01-21",
+      "symbol": "SUVEN",
+      "ret": -0.9470890694974291,
+      "prev_adj_close": 301.45,
+      "adj_close": 15.95
+    },
+    {
+      "date": "2020-01-27",
+      "symbol": "PATANJALI",
+      "ret": 4.074626865671641,
+      "prev_adj_close": 3.35,
+      "adj_close": 17.0
+    },
+    {
+      "date": "2020-03-06",
+      "symbol": "BORORENEW",
+      "ret": -0.7359639830508475,
+      "prev_adj_close": 188.8,
+      "adj_close": 49.85
+    },
+    {
+      "date": "2020-12-23",
+      "symbol": "AURUM",
+      "ret": -0.9876223811697864,
+      "prev_adj_close": 985.65,
+      "adj_close": 12.2
+    },
+    {
+      "date": "2021-04-26",
+      "symbol": "COFFEEDAY",
+      "ret": 0.7495256166982922,
+      "prev_adj_close": 26.35,
+      "adj_close": 46.1
+    },
+    {
+      "date": "2021-10-22",
+      "symbol": "3IINFOLTD",
+      "ret": 2.6686390532544384,
+      "prev_adj_close": 8.45,
+      "adj_close": 31.0
+    }
+  ],
+  "tcs_dividends": [
+    {
+      "date": "2015-01-27",
+      "cash_per_unit": 2.5
+    },
+    {
+      "date": "2015-06-05",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2015-07-20",
+      "cash_per_unit": 2.75
+    },
+    {
+      "date": "2015-10-23",
+      "cash_per_unit": 2.75
+    },
+    {
+      "date": "2016-01-21",
+      "cash_per_unit": 2.75
+    },
+    {
+      "date": "2016-06-06",
+      "cash_per_unit": 13.5
+    },
+    {
+      "date": "2016-07-25",
+      "cash_per_unit": 3.25
+    },
+    {
+      "date": "2016-10-24",
+      "cash_per_unit": 3.25
+    },
+    {
+      "date": "2017-01-23",
+      "cash_per_unit": 3.25
+    },
+    {
+      "date": "2017-06-13",
+      "cash_per_unit": 13.75
+    },
+    {
+      "date": "2017-07-24",
+      "cash_per_unit": 3.5
+    },
+    {
+      "date": "2017-10-25",
+      "cash_per_unit": 3.5
+    },
+    {
+      "date": "2018-01-22",
+      "cash_per_unit": 3.5
+    },
+    {
+      "date": "2018-05-31",
+      "cash_per_unit": 29.0
+    },
+    {
+      "date": "2018-07-17",
+      "cash_per_unit": 4.0
+    },
+    {
+      "date": "2019-01-17",
+      "cash_per_unit": 4.0
+    },
+    {
+      "date": "2019-06-04",
+      "cash_per_unit": 18.0
+    },
+    {
+      "date": "2019-07-16",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2019-10-17",
+      "cash_per_unit": 45.0
+    },
+    {
+      "date": "2020-01-23",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2020-03-19",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2020-06-03",
+      "cash_per_unit": 6.0
+    },
+    {
+      "date": "2020-07-16",
+      "cash_per_unit": 5.0
+    },
+    {
+      "date": "2020-10-14",
+      "cash_per_unit": 12.0
+    },
+    {
+      "date": "2021-01-14",
+      "cash_per_unit": 6.0
+    },
+    {
+      "date": "2021-05-25",
+      "cash_per_unit": 15.0
+    },
+    {
+      "date": "2021-07-15",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2021-10-14",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2022-01-19",
+      "cash_per_unit": 7.0
+    },
+    {
+      "date": "2022-05-25",
+      "cash_per_unit": 22.0
+    },
+    {
+      "date": "2022-07-14",
+      "cash_per_unit": 8.0
+    },
+    {
+      "date": "2022-10-17",
+      "cash_per_unit": 8.0
+    },
+    {
+      "date": "2023-01-16",
+      "cash_per_unit": 75.0
+    }
+  ],
+  "dividends_dropped_as_implausible": [
+    {
+      "symbol": "AURUM",
+      "ex_date": "2020-12-23",
+      "dps": 974.0
+    }
+  ]
+}

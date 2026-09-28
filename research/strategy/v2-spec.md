@@ -550,3 +550,46 @@ v1's five A2 figures, the bar v2 must clear (data/backtest/v1_final/
 baseline_report.json): maximum drawdown -33.56% (v2 must be at -28.56% or
 shallower), Sortino 1.936 and Calmar 0.937 (quantstats), alpha 5.74% a year at
 t 1.21, turnover 1.958 a year, capacity 1.159%.
+
+## Clarification after the in-sample engine comparison (2026-09-28)
+
+The production engine and the independent checker built v2 from this text and
+ran it on the in-sample period only. Variant (a) agreed exactly; variant (b)
+differed in one place, and the comparison listed twenty readings the in-sample
+data did not test. Each is fixed here, before any full-period v2 run, by
+consistency with v1's rules and never by a result.
+
+**A1's wait.** The scheduled session counts as the first of the 30: a tranche
+can be bought at the open of the scheduled session or any of the next 29 when
+the close before that open qualifies, and otherwise at the open of the 31st
+session, 30 sessions after the scheduled one. (The production engine had
+counted the scheduled session as the zeroth and bought the fallback one
+session later; this moved 10 tranche fills in-sample.)
+
+**A1's closes.** The 50-session average, the 14-session RSI and the reference
+close of the adoption test use EQ and BE closes only, adjusted for corporate
+actions and carried forward over sessions without an EQ or BE trade, since a
+stock can only be bought in EQ or BE. Wilder's RSI starts at the stock's first
+EQ or BE close in the archive; where the average gain and the average loss are
+both zero the RSI is undefined and the condition fails.
+
+**Trend filter calendar.** "Sessions" and "closes" are the archive's market
+sessions (v1 Clarification 1): the Nifty 500 total-return closes on those
+sessions only. Special sessions the archive does not hold (Muhurat and
+budget-day trading, e.g. 12 Nov 2023, 1 Feb 2025) are not counted.
+
+**ROCE inputs, restating the Clarification to A5 where the engines differed.**
+A quarter with no finance-costs line has no EBIT, so the TTM EBIT and ROCE are
+missing and the stock fails the ROCE floor from February 2023. A usable
+balance sheet has equity above zero and equity plus debt above zero. Filings
+the income scale screen set aside are matched by (stock, basis, period end,
+broadcast time), and a balance-sheet period is its exact period end.
+
+**Sizing a name with no sigma** (it cannot arise, since universe rule 3 gives
+every member a price history): its weight before scaling is (1 - cash)/12 and
+the others are scaled around it, as written.
+
+Record formats may differ between the engines (column names, labels, the value
+written on a cancelled order); the comparison maps them and they change no
+figure. The equal-weight benchmark's NAV starts at Rs 5 lakh, like the
+strategy's, as in v1.

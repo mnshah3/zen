@@ -1,0 +1,17 @@
+D,trend_c1,trend_c2,trend_c3,cash_fraction,n_universe,n_excluded_hard_filters,n_excluded_no_balance_sheet,n_ranked_on_roce,n_held,n_held_unlabelled_sector
+2019-02-15,True,True,True,0.35,220,17,0,0,12,0
+2019-06-03,False,False,False,0.0,459,42,0,0,12,0
+2019-08-16,True,False,False,0.2,459,24,0,0,12,0
+2019-11-15,False,False,False,0.0,431,27,0,0,12,0
+2020-02-17,False,False,False,0.0,437,36,0,0,12,0
+2020-06-01,True,True,False,0.275,417,28,0,0,12,0
+2020-08-17,False,False,True,0.2,526,70,0,0,12,0
+2020-11-17,False,False,False,0.0,556,67,0,0,12,0
+2021-02-15,False,False,False,0.0,624,104,0,0,12,0
+2021-06-01,False,False,False,0.0,654,113,0,0,12,0
+2021-08-16,False,False,False,0.0,775,112,0,0,12,0
+2021-11-15,False,False,False,0.0,775,112,0,0,12,0
+2022-02-15,False,False,False,0.0,822,116,0,0,12,0
+2022-06-01,True,True,False,0.275,791,119,0,0,12,0
+2022-08-16,False,False,True,0.2,755,104,0,0,12,0
+2022-11-15,False,False,False,0.0,722,106,0,0,12,0

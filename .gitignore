@@ -67,3 +67,4 @@ data/raw_xbrl/
 # Re-parse working copies and the pre-swap backup (2026-09-24): kept locally, not in git.
 data/financials_staging/
 data/financials_backup_*/
+data/backtest/v2*/ranks.parquet
