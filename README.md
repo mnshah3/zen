@@ -418,8 +418,9 @@ date it was resolved, are in the specification.
 - **Selection by rule.** 36 portfolio variants were run in-sample, and the
   plateau rule picked one before the held-back data was unlocked. It picked the
   configuration that was written down first.
-- **195 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
-  including every failure below.
+- **197 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
+  including every failure below: 195 when v1 was measured, and v2's two runs
+  since.
 
 ### What came before, and failed
 
