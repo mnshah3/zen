@@ -9,18 +9,22 @@ So the first job was building an archive that doesn't cheat, and a test harness
 that tries to break its own results.
 
 <!-- numbers:headline:start -->
-The answer, on 3.6 years the design had never seen: **34.3% a year against
-13.5% for the Nifty 500 including dividends**, and 21.0% for the same universe
-equally weighted. That is the held-back test as re-run on 25-26 Sep 2026 on a
-repaired archive, with the rules for picking stocks unchanged; the first run
-stays on record [below](#the-result). Over the whole 7.6 years from Feb 2019
-it made 30.7% a year, and its worst fall was -33.6% against -38.1% for the
-Nifty 500 and -47.9% for the same universe.
+The answer, in a backtest over the whole 7.6 years from Feb 2019: **30.7% a
+year against 14.4% for the Nifty 500 including dividends**, and 22.0% for
+every stock that passed its filters, bought in equal amounts. It beat 96% of
+500 random portfolios picked from that same list under the same rules, whose
+median made 20.7% a year, and its worst fall was -33.6% against -38.1% for the
+Nifty 500 and -47.9% for that list. On the last 3.6 years, which the design
+had never seen, it made 34.3% a year against 13.5% for the Nifty 500 and 21.0%
+for that list equally weighted; the run on record from 22 Sep 2026, measured
+from the close of 15 Feb 2023 rather than the open, and before two data faults
+were fixed with no stock-picking rule changed, gave 29.4%
+([below](#the-result)).
 <!-- numbers:headline:end -->
 
-The rules were public before the test. It beats random picks from the same
-list, but most of the return is the market and two well-known factors. [What
-that does and does not prove](#the-result) is below.
+The rules were public before the test. Most of the return is the market and
+two well-known factors, and what is left after them is not yet statistically
+significant. [What that does and does not prove](#the-result) is below.
 
 It runs unattended on GitHub Actions and emails me two briefs. It places no
 orders. It produces evidence, and I make the decisions.
@@ -196,8 +200,9 @@ strategy this time.
 
 ## The result
 
-**A fundamental screen, committed to this repo before it was tested, beat the
-market on data it had never seen, and beat random picks from the same list.
+**A fundamentals-led screen, committed to this repo before it was tested, beat
+the market on data it had never seen, and over the whole period beat random
+picks from the same list.
 Most of its return is the market and two well-known factors, and what is left
 after them is not yet statistically significant.**
 

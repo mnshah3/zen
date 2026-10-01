@@ -225,17 +225,26 @@ def run_blocks(root: Path) -> dict[str, str]:
     out = {}
 
     # ---- headline
+    mk_p = rep["monkey_test"]["value"]["persistent"]
+    first = load_json(root, f"{ONE_SHOT}/libcheck.json")["final_test"]
+    first_clock = (f"measured from the close of {day(split)} rather than the open, and "
+                   if first["clock"].startswith("close of") else "")
     out["headline"] = wrap(
-        f"The answer, on {ft['years']:.1f} years the design had never seen: "
-        f"**{one_dp(ft['strategy_cagr_pct'])}% a year against {one_dp(idx['nifty500'])}% for "
-        f"the Nifty 500 including dividends**, and {one_dp(ft['universe_ew_cagr_pct'])}% for "
-        f"the same universe equally weighted. That is the held-back test as re-run on "
-        f"{RUNS[-1][1]} on a repaired archive, with the rules for picking stocks unchanged; "
-        f"the first run stays on record [below](#the-result). Over the whole "
-        f"{whole_years:.1f} years from {month(start)} it made "
-        f"{pct(head['strategy_cagr']['value'])} a year, and its worst fall was "
-        f"{pct(whole_dd['strategy'])} against {pct(whole_dd['nifty500'])} for the Nifty 500 "
-        f"and {pct(whole_dd['universe_ew'])} for the same universe.")
+        f"The answer, in a backtest over the whole {whole_years:.1f} years from "
+        f"{month(start)}: **{pct(head['strategy_cagr']['value'])} a year against "
+        f"{pct(rows['nifty500']['whole_period']['benchmark_cagr'])} for the Nifty 500 "
+        f"including dividends**, and {pct(head['universe_ew_cagr']['value'])} for every stock "
+        f"that passed its filters, bought in equal amounts. It beat "
+        f"{mk_p['strategy_percentile']:g}% of {mk_p['draws']} random portfolios picked from that "
+        f"same list under the same rules, whose median made {mk_p['random_median_pct']:.1f}% a "
+        f"year, and its worst fall was {pct(whole_dd['strategy'])} against "
+        f"{pct(whole_dd['nifty500'])} for the Nifty 500 and {pct(whole_dd['universe_ew'])} for "
+        f"that list. On the last {ft['years']:.1f} years, which the design had never seen, it "
+        f"made {one_dp(ft['strategy_cagr_pct'])}% a year against {one_dp(idx['nifty500'])}% for "
+        f"the Nifty 500 and {one_dp(ft['universe_ew_cagr_pct'])}% for that list equally "
+        f"weighted; the run on record from {RUNS[0][1]}, {first_clock}before two data faults "
+        f"were fixed with no stock-picking rule changed, gave "
+        f"{one_dp(first['strategy_cagr_pct'])}% ([below](#the-result)).")
 
     # ---- history: three runs of the same rules
     lines = ["| Run | What changed | Held back, a year | Same universe, equal weight, "
