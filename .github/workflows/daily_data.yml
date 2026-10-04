@@ -1,0 +1,65 @@
+name: 5. daily filings, results and corporate actions
+
+on:
+  schedule:
+    # 14:45 UTC = 20:15 IST, after the prices (13:30 UTC cron) and indices
+    # (14:15 UTC cron) jobs have pushed, so filings made today can be given
+    # today's session.
+    - cron: "45 14 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+      - run: python -m jobs.rebuild_db
+
+      # Each source is refreshed even if another fails; the last step fails the
+      # run if any of them did, after whatever succeeded has been committed.
+      - id: announcements
+        continue-on-error: true
+        # The whole window is refetched every run: on a Monday that includes
+        # Friday, whose evening filings Friday's own run could not yet see.
+        run: python -m jobs.update_announcements --days 3 --refresh-days 4
+      - id: financials
+        continue-on-error: true
+        run: python -m jobs.update_financials --days 7
+      - id: corpactions
+        continue-on-error: true
+        # end defaults to today + 60 (ex-dates are announced ahead), so 120 days
+        # covers the last two months as well as the next two.
+        run: python -m jobs.update_corpactions --days 120
+
+      - name: commit new data
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          git add data/announcements data/financials data/corpactions
+          [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
+          git diff --staged --quiet || git commit -m "data: filings, results, corporate actions $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do            # another job may have pushed meanwhile
+            git pull --rebase origin main && git push && exit 0
+            sleep $((i * 15))
+          done
+          exit 1
+
+      - name: data health
+        run: python -m jobs.data_health
+
+      - name: fail if any refresh failed
+        if: steps.announcements.outcome == 'failure' || steps.financials.outcome == 'failure' || steps.corpactions.outcome == 'failure'
+        run: |
+          echo "announcements: ${{ steps.announcements.outcome }}"
+          echo "financials:    ${{ steps.financials.outcome }}"
+          echo "corpactions:   ${{ steps.corpactions.outcome }}"
+          exit 1

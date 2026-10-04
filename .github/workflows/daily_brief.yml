@@ -15,9 +15,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
           cache: pip
-      - run: pip install -r requirements.txt
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
       - run: python -m jobs.rebuild_db
 
       - name: build and send
@@ -31,14 +32,22 @@ jobs:
           MARKETAUX_KEY: ${{ secrets.MARKETAUX_KEY }}
         run: python -m jobs.daily_brief
 
-      - name: commit story memory
+      # The filings the brief fetched are part of the archive. Until 2026-10-04
+      # only the story memory was committed, so they vanished with the runner.
+      - name: commit story memory and filings
         run: |
           git config user.name  "zen-bot"
           git config user.email "actions@github.com"
-          git add state/seen.json
+          git add state/seen.json data/announcements
+          [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
           git diff --staged --quiet || git commit -m "state: brief memory $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile
             git pull --rebase origin main && git push && exit 0
             sleep $((i * 15))
           done
           exit 1
+
+      # Last, so the email has already gone out: a stale source turns the run
+      # red instead of hiding behind a brief that degraded quietly.
+      - name: data health
+        run: python -m jobs.data_health

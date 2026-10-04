@@ -6,6 +6,11 @@
 Fetched a day at a time against a rate-limited exchange API, so this is
 deliberately sequential. Parallelising it across processes gets the IP
 blocked, which costs far more than the time it saves.
+
+Days already stored are skipped, except the last --refresh-days up to --end,
+which are always fetched again: the evening run at 20:15 IST stores a day
+before its last filings are made, and skipping that day later would lose
+them for good. Duplicates are ignored on the table's key.
 """
 
 from __future__ import annotations
@@ -16,7 +21,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from zen.data import announcements as ann, store
+from zen.data import announcements as ann, freshness, store
 from zen.data.bhavcopy import _session
 
 log = logging.getLogger(__name__)
@@ -32,6 +37,8 @@ def main() -> int:
     p.add_argument("--parquet-only", action="store_true",
                    help="write parquet without touching DuckDB, so this can run "
                         "alongside another backfill (DuckDB allows one writer)")
+    p.add_argument("--refresh-days", type=int, default=3,
+                   help="always refetch this many days up to --end, stored or not")
     args = p.parse_args()
 
     end = args.end or date.today()
@@ -62,23 +69,28 @@ def main() -> int:
             mem.close()
         log.info("parquet-only mode; %d days already on disk", len(have))
 
+    refresh_from = end - timedelta(days=max(args.refresh_days - 1, 0))
     session = _session()
     buf, added, days, d = [], 0, 0, start
+    failed = 0
 
     def flush():
         nonlocal buf
         if buf:
-            ann.write_parquet(pd.concat(buf, ignore_index=True))
+            # With the database open, its copy of each row (carrying the
+            # session_date fill_session_dates() set) is written to parquet too.
+            ann.write_parquet(pd.concat(buf, ignore_index=True), con=con)
             buf = []
 
     while d <= end:
         # Weekends carry occasional filings, so they are not skipped here the
         # way they are for price data.
-        if d not in have:
+        if d not in have or d >= refresh_from:
             try:
-                df = ann.fetch(d, d, session=session)
+                df = ann.fetch(d, d, session=session, strict=True)
             except Exception as e:
                 log.warning("%s failed (%s)", d, e)
+                failed += 1
                 d += timedelta(days=1)
                 continue
             if not df.empty:
@@ -98,6 +110,8 @@ def main() -> int:
         con.close()
         print(f"added {added:,} | total {stats[0]:,} filings, {stats[1]:,} companies | "
               f"{stats[2]} to {stats[3]}")
+        if days and not failed:
+            freshness.record("announcements")
     else:
         import duckdb
         mem = duckdb.connect()
@@ -108,6 +122,10 @@ def main() -> int:
         mem.close()
         print(f"fetched {added:,} | parquet holds {stats[0]:,} filings, "
               f"{stats[1]:,} companies | {stats[2]} to {stats[3]}")
+    if failed:
+        print(f"{failed} day(s) failed to fetch; a later run retries them only while "
+              f"they are inside its --refresh-days window, or if they were never stored")
+        return 1
     return 0
 
 

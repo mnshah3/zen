@@ -309,15 +309,17 @@ def _verdict(market: dict, insights: dict) -> str:
 
 
 FILING_LABELS = {
-    "volume_query": "Exchange query on the move",
+    "exchange_query": "Exchange query on the move",
     "results": "Results",
     "guidance": "Guidance / investor update",
     "expansion": "Capacity / expansion",
+    "contraction": "Closure / disruption",
     "orders": "Order win",
     "mna": "M&A / restructuring",
     "capital": "Fund raising",
     "ratings": "Credit rating",
-    "litigation": "Legal / regulatory",
+    "regulatory": "Legal / regulatory",
+    "licenses": "Licence / approval",
 }
 
 

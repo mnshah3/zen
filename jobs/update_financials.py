@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from zen.data import financials as fin, store, xbrl_cache
+from zen.data import financials as fin, freshness, store, xbrl_cache
 
 log = logging.getLogger(__name__)
 CHUNK_DAYS = 30          # one results-season slice at a time
@@ -120,6 +120,7 @@ def main() -> int:
     if failed_windows:
         print(f"LISTING FAILED for {len(failed_windows)} window(s): {', '.join(failed_windows)}")
         return 1
+    freshness.record("financials")
     return 0
 
 

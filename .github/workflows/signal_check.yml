@@ -21,9 +21,10 @@ jobs:
           ref: main            # pick up the data the previous workflow pushed
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
           cache: pip
-      - run: pip install -r requirements.txt
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
       - run: python -m jobs.rebuild_db
 
       - name: evaluate strategies

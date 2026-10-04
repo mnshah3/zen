@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 # Categories worth testing as standalone signals. Governance, corporate actions
 # and routine compliance are excluded: they are either noise or mechanical.
 CATEGORIES = ["expansion", "orders", "guidance", "ratings", "results",
-              "mna", "capital", "volume_query"]
+              "mna", "capital", "exchange_query"]
 
 
 def open_readonly() -> duckdb.DuckDBPyConnection:

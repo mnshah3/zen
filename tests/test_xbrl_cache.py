@@ -256,6 +256,8 @@ def run_update(monkeypatch, docs, calls):
     monkeypatch.setattr(uf.fin, "listing", lambda start, end: listing)
     monkeypatch.setattr(uf.fin, "_session", lambda: StubSession(docs, calls))
     monkeypatch.setattr(uf.fin, "write_parquet", lambda df: written.append(df.copy()))
+    # A stubbed run must not stamp the real state/data_freshness.json as fresh.
+    monkeypatch.setattr(uf.freshness, "record", lambda *a, **k: None)
     monkeypatch.setattr(sys, "argv", ["update_financials", "--start", "2025-11-01",
                                       "--end", "2025-11-02"])
     uf.main()

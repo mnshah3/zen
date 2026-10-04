@@ -1,6 +1,7 @@
 # Exact versions the published results were produced with (pip freeze of the project .venv).
 # Python 3.14.4. Install with: pip install -r requirements-lock.txt
-# requirements.txt and requirements-research.txt keep the looser bounds the daily CI jobs use.
+# every workflow (the daily jobs and the tests) installs this file; requirements.txt and
+# requirements-research.txt keep looser bounds for ad-hoc installs only.
 arch==8.0.0
 beautifulsoup4==4.15.0
 certifi==2026.7.22

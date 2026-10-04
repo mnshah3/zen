@@ -24,6 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from zen.data import filing_types
 from zen.data.bhavcopy import _session
 
 log = logging.getLogger(__name__)
@@ -32,61 +33,16 @@ API = ("https://www.nseindia.com/api/corporate-announcements"
        "?index=equities&from_date={frm}&to_date={to}")
 
 COLUMNS = ["an_dt", "trade_date", "symbol", "isin", "company", "industry",
-           "category", "subject", "url", "has_xbrl"]
-
-# Statutory filings every listed company makes regardless of what is happening
-# to it. Two thirds of the feed by volume; matched first so they can never be
-# mistaken for news. "Copy of Newspaper Publication" alone was 409 of 1,943
-# filings over four sessions.
-ROUTINE = re.compile(
-    r"copy of newspaper|newspaper (publication|advertisement)|trading window|"
-    r"address change|certificate under|compliance certificate|"
-    r"reconciliation of share capital|investor complaint|"
-    r"corrigendum|change in company secretary|"
-    r"regulation 74|regulation 40|depositor(y|ies) and participants",
-    re.I)
-
-# Coarse buckets over NSE's free-text description and body. Ordered: the first
-# match wins, so the more consequential categories come first.
-CATEGORIES: list[tuple[str, str]] = [
-    # The exchange formally asking a company to explain an unusual move. Rare,
-    # and by construction always attached to a stock the archive has flagged.
-    ("volume_query", r"spurt in volume|price (movement|volume)|clarification"
-                     r".{0,30}(volume|price)|unusual (movement|volume)"),
-    ("results",     r"financial result|quarterly result|audited result|unaudited|"
-                    r"earnings release|statement of (profit|accounts)"),
-    ("guidance",    r"guidance|outlook|investor (presentation|meet|day)|"
-                    r"earnings call|analyst meet|conference call|business update"),
-    # Stems, not whole words. "expansion" does not match "expands", which is
-    # how the single most consequential filing in the Sterlite Technologies
-    # case study -- "STL expands Data Centre portfolio ... for AI data centres",
-    # eight months before a sevenfold re-rating -- was binned as "other".
-    ("expansion",   r"expan(d|si)|capacity|new plant|commission|capex|greenfield|"
-                    r"brownfield|acquisition of land|new facility|debottleneck|"
-                    r"foray|enter(s|ing)? (into )?(the )?\w+ (market|segment|business)|"
-                    r"diversif|scal(e|ing) up|ramp[- ]up"),
-    ("orders",      r"\border(s|ed|ing)?\b|contract|letter of (award|intent)|\bloa\b|"
-                    r"work order|tender|purchase order|bagg?(s|ing|ed)?\b|"
-                    r"win(s|ning)? (a |an )?(order|contract|project|mandate)"),
-    ("mna",         r"amalgamation|merger|demerger|scheme of arrangement|"
-                    r"acquisition|divest|stake sale|slump sale|joint venture"),
-    ("capital",     r"fund rais|\bqip\b|preferential|allotment|debenture|\bncd\b|"
-                    r"issue of (shares|securities)|warrant|rights issue"),
-    ("ratings",     r"credit rating|rating action|outlook revis|rating upgrade|"
-                    r"rating downgrade"),
-    ("litigation",  r"litigation|penalty|show cause|insolvency|\bnclt\b|"
-                    r"sebi order|adjudicat|search and seizure|tax demand"),
-    ("pledge",      r"pledge|encumbr|promoter (holding|group)|shareholding pattern"),
-    ("corp_action", r"dividend|bonus issue|stock split|buyback|record date"),
-    ("governance",  r"resignation|appointment|cessation|auditor|director|"
-                    r"key managerial|board meeting|shareholders meeting|"
-                    r"annual general meeting|\bagm\b|change in management"),
-]
+           "category", "subject", "url", "has_xbrl", "session_date"]
 
 # Categories that plausibly move a share price on the day. The rest is stored
-# but never surfaced in the brief.
-MATERIAL = {"volume_query", "results", "guidance", "expansion", "orders",
-            "mna", "capital", "ratings", "litigation"}
+# but never surfaced in the brief. These are zen.data.filing_types' names, the
+# ones the stored archive carries since jobs/rederive_announcements.py. Until
+# 2026-10-04 this set used the old regex vocabulary ("volume_query",
+# "litigation"), which no longer occurs in the data, so exchange queries and
+# regulatory filings silently never reached the brief.
+MATERIAL = {"exchange_query", "results", "guidance", "expansion", "contraction",
+            "orders", "mna", "capital", "ratings", "regulatory", "licenses"}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS announcements (
@@ -110,22 +66,6 @@ CREATE TABLE IF NOT EXISTS announcements (
     PRIMARY KEY (an_dt, symbol, subject)
 );
 """
-
-
-def categorise(text: str) -> str:
-    """Bucket a filing. Routine compliance is rejected before anything else.
-
-    Order matters: a newspaper advertisement announcing quarterly results is
-    still an advertisement, and letting it match "results" would put statutory
-    noise in front of the reader every single day.
-    """
-    low = (text or "").lower()
-    if ROUTINE.search(low):
-        return "routine"
-    for name, pattern in CATEGORIES:
-        if re.search(pattern, low):
-            return name
-    return "other"
 
 
 def _parse_dt(raw: str) -> datetime | None:
@@ -159,11 +99,13 @@ def _trade_date(an_dt: datetime) -> date:
     return d
 
 
-def fetch(start: date, end: date, session=None) -> pd.DataFrame:
+def fetch(start: date, end: date, session=None, strict: bool = False) -> pd.DataFrame:
     """Announcements published between start and end, inclusive.
 
     Fetched a day at a time: the endpoint truncates long ranges without
     saying so, and a silently short result here would look like "no news".
+    With strict=True a failed day raises instead of being skipped, so a
+    scheduled job can tell "nothing filed" from "the request failed".
     """
     s = session or _session()
     frames, d = [], start
@@ -175,6 +117,8 @@ def fetch(start: date, end: date, session=None) -> pd.DataFrame:
             r.raise_for_status()
             payload = r.json()
         except Exception as e:
+            if strict:
+                raise
             log.warning("%s: announcements failed (%s)", d, e)
             d += timedelta(days=1)
             continue
@@ -188,6 +132,7 @@ def fetch(start: date, end: date, session=None) -> pd.DataFrame:
                 continue
             subject = re.sub(r"\s+", " ", (row.get("desc") or "")).strip()
             body = re.sub(r"\s+", " ", (row.get("attchmntText") or "")).strip()
+            stored = (f"{subject}: {body}" if body else subject)[:500]
             parsed.append({
                 "an_dt": an_dt,
                 "trade_date": _trade_date(an_dt),
@@ -195,10 +140,16 @@ def fetch(start: date, end: date, session=None) -> pd.DataFrame:
                 "isin": (row.get("sm_isin") or "").strip() or None,
                 "company": (row.get("sm_name") or "").strip() or None,
                 "industry": (row.get("smIndustry") or "").strip() or None,
-                "category": categorise(f"{subject} {body}"),
-                "subject": (f"{subject}: {body}" if body else subject)[:500],
+                # NSE's own label decides the bucket, exactly as for the stored
+                # archive (jobs/rederive_announcements.py). The regex this used
+                # to run over free text put penalties in "orders".
+                "category": filing_types.categorise(stored),
+                "subject": stored,
                 "url": (row.get("attchmntFile") or "").strip() or None,
                 "has_xbrl": bool(row.get("hasXbrl")),
+                # Filled by upsert() from the prices table, once the session
+                # the symbol next trades on exists.
+                "session_date": None,
             })
 
         if parsed:
@@ -216,28 +167,81 @@ def ensure_schema(con) -> None:
     con.execute(SCHEMA)
 
 
+KEY = ["an_dt", "symbol", "subject"]
+
+
 def upsert(con, df: pd.DataFrame) -> int:
+    """Insert new filings, then give every recent filing its session.
+
+    Columns are named, not positional. The table gained session_date on
+    2026-09-23 and this function kept inserting `SELECT *` from a ten-column
+    frame into an eleven-column table: every daily refresh from 10 September
+    failed with a Binder Error that the brief caught and logged, so the archive
+    silently stopped at 9 September.
+    """
     if df.empty:
         return 0
     ensure_schema(con)
+    df = df.reindex(columns=COLUMNS)
+    cols = ", ".join(COLUMNS)
     con.register("incoming_ann", df)
     before = con.execute("SELECT count(*) FROM announcements").fetchone()[0]
-    con.execute("INSERT OR IGNORE INTO announcements SELECT * FROM incoming_ann")
+    con.execute(f"INSERT OR IGNORE INTO announcements ({cols}) "
+                f"SELECT {cols} FROM incoming_ann")
     after = con.execute("SELECT count(*) FROM announcements").fetchone()[0]
     con.unregister("incoming_ann")
+    fill_session_dates(con)
     return after - before
 
 
-def for_session(con, trade_date: date, symbols: list[str] | None = None,
+def fill_session_dates(con) -> int:
+    """Set session_date where the symbol has since traded.
+
+    The same rule as jobs/rederive_announcements.py: the first EQ or BE session
+    of that symbol on or after trade_date. A filing made today has no such
+    session until tomorrow's prices arrive, so it stays null until a later run.
+    Every null is re-checked, not just recent ones: a stock suspended for months
+    gets its session when it resumes. The permanent nulls are symbols that never
+    traded again, a few thousand rows, so the join stays cheap.
+    """
+    ensure_schema(con)
+    has_prices = con.execute(
+        "SELECT count(*) FROM information_schema.tables WHERE table_name = 'prices'"
+    ).fetchone()[0]
+    if not has_prices:
+        return 0
+    before = con.execute(
+        "SELECT count(*) FROM announcements WHERE session_date IS NULL").fetchone()[0]
+    con.execute("""
+        UPDATE announcements AS a SET session_date = s.session
+        FROM (
+            SELECT a2.an_dt, a2.symbol, a2.subject, min(p.date) AS session
+            FROM announcements a2
+            JOIN prices p
+              ON p.symbol = a2.symbol AND p.series IN ('EQ', 'BE')
+             AND p.isin_code LIKE 'INE%' AND p.date >= a2.trade_date
+            WHERE a2.session_date IS NULL
+            GROUP BY 1, 2, 3
+        ) AS s
+        WHERE a.an_dt = s.an_dt AND a.symbol = s.symbol AND a.subject = s.subject
+    """)
+    after = con.execute(
+        "SELECT count(*) FROM announcements WHERE session_date IS NULL").fetchone()[0]
+    return before - after
+
+
+def for_session(con, session: date, symbols: list[str] | None = None,
                 material_only: bool = True) -> pd.DataFrame:
     """Filings that could have moved a given session, optionally for a subset.
 
-    Filtering is on trade_date, which already accounts for after-hours filings
-    landing on the next session.
+    Filtering is on session_date: the first session the symbol actually traded
+    at or after the filing. trade_date rolls after-hours filings forward by
+    the clock alone and can land on a holiday, or on a day the stock did not
+    trade, where no move exists to explain.
     """
     ensure_schema(con)
-    sql = ["SELECT * FROM announcements WHERE trade_date = ?"]
-    params: list = [trade_date]
+    sql = ["SELECT * FROM announcements WHERE session_date = ?"]
+    params: list = [session]
 
     if material_only:
         placeholders = ", ".join("?" * len(MATERIAL))
@@ -255,20 +259,59 @@ def for_session(con, trade_date: date, symbols: list[str] | None = None,
 PARQUET_DIR = Path("data/announcements")
 
 
-def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
-    """One parquet per calendar month, mirroring how prices are stored."""
+def _typed(df: pd.DataFrame) -> pd.DataFrame:
+    """The column types the committed parquet uses (microsecond timestamps)."""
+    out = df.reindex(columns=COLUMNS).copy()
+    for c in ("an_dt", "trade_date", "session_date"):
+        out[c] = pd.to_datetime(out[c]).astype("datetime64[us]")
+    out["has_xbrl"] = out["has_xbrl"].fillna(False).astype(bool)
+    return out
+
+
+def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR, con=None) -> list[Path]:
+    """One parquet per calendar month of trade_date, mirroring how prices are stored.
+
+    Rows are merged into the month's file and never removed. A row already in
+    the file wins over a refetched copy of it, so a stored session_date is not
+    replaced by a fresh row's null. With `con`, the database is used for one
+    thing only: the session_date of rows already in the file or in `df`. It
+    never adds rows. An earlier version copied every database row of the month
+    into the file, and since some old rows sit in the file of the month before
+    their trade_date (it was recomputed in place after the 15:30 fix), that
+    duplicated a key across two files and broke rebuild_from_parquet. For the
+    same reason a fetched row already held by the previous month's file is not
+    written again.
+    """
     if df.empty:
         return []
     written = []
-    months = df["trade_date"].map(lambda d: f"{d:%Y-%m}")
+    months = pd.to_datetime(df["trade_date"]).map(lambda d: f"{d:%Y-%m}")
     for month, chunk in df.groupby(months):
         p = out_dir / month[:4] / f"{month}.parquet"
         p.parent.mkdir(parents=True, exist_ok=True)
-        if p.exists():
-            chunk = pd.concat([pd.read_parquet(p), chunk], ignore_index=True)
-        chunk = (chunk.drop_duplicates(subset=["an_dt", "symbol", "subject"])
-                      .sort_values(["an_dt", "symbol"]))
-        chunk.to_parquet(p, index=False, compression="zstd")
+        # 70 rows from before the 15:30 boundary fix sit in the file of the month
+        # BEFORE their trade_date (their trade_date was recomputed in place).
+        # A refetch of one of them must not add a second copy here.
+        prev = (pd.Period(month, "M") - 1).strftime("%Y-%m")
+        prev_p = out_dir / prev[:4] / f"{prev}.parquet"
+        if prev_p.exists():
+            held = _typed(pd.read_parquet(prev_p, columns=KEY + ["trade_date"]).assign(
+                **{c: None for c in COLUMNS if c not in KEY + ["trade_date"]}))[KEY]
+            chunk = _typed(chunk).merge(held, on=KEY, how="left", indicator=True)
+            chunk = chunk[chunk["_merge"] == "left_only"].drop(columns="_merge")
+        parts = [chunk] + ([pd.read_parquet(p)] if p.exists() else [])
+        merged = pd.concat([_typed(x) for x in parts if len(x)], ignore_index=True)
+        merged = merged.drop_duplicates(subset=KEY, keep="last")
+        if con is not None:
+            db = _typed(con.execute(
+                f"SELECT {', '.join(COLUMNS)} FROM announcements "
+                "WHERE strftime(trade_date, '%Y-%m') = ?", [month]).df())
+            db = db[KEY + ["session_date"]].rename(columns={"session_date": "_db"})
+            merged = merged.merge(db, on=KEY, how="left")
+            merged["session_date"] = merged["_db"].combine_first(merged["session_date"])
+            merged = merged.drop(columns="_db")
+        merged = merged.reindex(columns=COLUMNS).sort_values(["an_dt", "symbol"])
+        merged.to_parquet(p, index=False, compression="zstd")
         written.append(p)
     return written
 

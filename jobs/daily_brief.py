@@ -22,7 +22,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from zen.data import announcements, store
+from zen.data import announcements, freshness, store
 from zen.monitor import bridge, explain, extract, insights, market, news
 from zen.notify import charts, mailer, render
 
@@ -68,10 +68,15 @@ def main() -> int:
     # Filings for the session being reported. Refreshed here rather than in the
     # price job so a manually triggered brief is never reading stale filings.
     if asof:
+        # A failure here still sends the brief, but jobs.data_health runs after
+        # it in the workflow and turns the run red when the archive is stale,
+        # so a broken refresh can no longer hide behind a green badge.
         try:
-            fresh_ann = announcements.fetch(asof - timedelta(days=1), asof)
+            fresh_ann = announcements.fetch(asof - timedelta(days=1), asof, strict=True)
             announcements.upsert(con, fresh_ann)
-            announcements.write_parquet(fresh_ann)
+            announcements.write_parquet(fresh_ann, con=con)
+            if not args.dry_run and not fresh_ann.empty:
+                freshness.record("announcements")
         except Exception as e:
             log.warning("announcement refresh failed (%s); using what is stored", e)
         filings = announcements.for_session(con, asof, material_only=True)

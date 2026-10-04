@@ -10,7 +10,7 @@ import argparse
 import logging
 from datetime import date, timedelta
 
-from zen.data import corpactions, store
+from zen.data import corpactions, freshness, store
 
 
 def main() -> int:
@@ -25,6 +25,11 @@ def main() -> int:
     start = args.start or (end - timedelta(days=args.days))
 
     df = corpactions.fetch(start, end)
+    if df.empty:
+        # A window of weeks with no corporate action at all means the fetch
+        # failed, and recording success would hide it from jobs.data_health.
+        print(f"no corporate actions returned for {start} to {end}")
+        return 1
     con = store.connect()
     added = corpactions.upsert(con, df)
     corpactions.write_parquet(df)
@@ -35,6 +40,7 @@ def main() -> int:
     con.close()
     print(f"added {added:,} | total {stats[0]:,} "
           f"({stats[1]:,} splits, {stats[2]:,} bonuses) | {stats[3]} to {stats[4]}")
+    freshness.record("corpactions")
     return 0
 
 

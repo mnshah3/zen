@@ -27,17 +27,20 @@ _SUFFIX = re.compile(
     r"Economic Times|ET Now|NDTV Profit|CNBC ?TV18)\s*$", re.I)
 
 
-# Readable names for the filing buckets.
+# Readable names for the filing buckets, keyed by zen.data.filing_types'
+# categories (announcements.MATERIAL); a test keeps the two in step.
 LABELS = {
-    "volume_query": "the exchange asked them to explain the move",
+    "exchange_query": "the exchange asked them to explain the move",
     "results": "quarterly results",
     "guidance": "guidance or investor update",
     "expansion": "capacity or expansion",
+    "contraction": "a closure, halt or disruption",
     "orders": "an order win",
     "mna": "M&A or restructuring",
     "capital": "fund raising",
     "ratings": "a credit rating action",
-    "litigation": "a legal or regulatory matter",
+    "regulatory": "a legal or regulatory matter",
+    "licenses": "a licence or approval",
 }
 
 
@@ -159,7 +162,7 @@ def _exchange_queried(con, insights: dict, asof, names: dict) -> str | None:
         rows = con.execute(
             f"""
             SELECT DISTINCT symbol FROM announcements
-            WHERE category = 'volume_query'
+            WHERE category = 'exchange_query'
               AND CAST(an_dt AS DATE) = ?
               AND symbol IN ({placeholders})
             """,
