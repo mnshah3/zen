@@ -32,8 +32,8 @@ orders. It produces evidence, and I make the decisions.
 <!-- numbers:archive:start -->
 ```
 prices        5,360,616 rows · 2,895 sessions · 4,066 ticker symbols · Jan 2015 to Sep 2026
-filings         783,510 announcements · 2,539 symbols · Jan 2022 to Sep 2026
-fundamentals    105,818 quarterly results filings · 2,642 symbols · quarters ending Mar 2018 to Jun 2026
+filings         788,772 announcements · 2,555 symbols · Jan 2022 to Sep 2026
+fundamentals    105,870 quarterly results filings · 2,642 symbols · quarters ending Mar 2018 to Jun 2026
 indices              23 NSE index series · Jan 2015 to Sep 2026
 ```
 
