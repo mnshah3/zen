@@ -44,6 +44,13 @@ indices, 14-15 Feb 2019, 14-15 Feb 2023, 17-18 Sep 2026, 22-23 Sep 2026) were
 read from the same site's "Index Values" table. The same table for Nifty 500 on
 13-15 Feb 2019 equals `data/indices` exactly on open, high, low and close.
 
+On 6 Oct 2026, ten rows were added for v3's window (v3 spec 15.2.1): the five indices on
+14 and 17 Feb 2020, read from the same site's historical-data form. The day-on-day price
+change from 13 to 14 Feb 2020 equals the change in `nifty_tri.parquet` to within 0.0001%
+for all five. On 17 Feb, Quality 30, Value 50 and Low Volatility 30 move 5-9 basis points
+less than their total return indices, as the price index drops on dividend ex-dates;
+Alpha 50 and Momentum 30 match exactly.
+
 NSE prints "-" for the open, high and low before it calculates an index live:
 Momentum 30 has opens from 12 Oct 2020 and Value 50 from 16 Dec 2024. How a
 missing open is handled is fixed in the v2 spec, clarification to A4.
