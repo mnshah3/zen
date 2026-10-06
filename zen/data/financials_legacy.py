@@ -157,10 +157,18 @@ def listing(session, start: date, end: date, window_days: int = 7) -> pd.DataFra
     keep = ["symbol", "company", "isin", "period_end", "broadcast_dt", "consolidated",
             "audited", "xbrl_url", "has_xbrl", "seqNumber"]
     df = df[[c for c in keep if c in df.columns]]
-    # Adjacent windows overlap on filings announced near a boundary; seqNumber
-    # is NSE's own filing id and is the only reliable key for de-duplication.
-    if "seqNumber" in df.columns:
-        df = df.drop_duplicates(subset=["seqNumber"])
+    # Only an exact repeat of a filing is dropped. This used to drop on seqNumber
+    # alone, on the belief that it is NSE's own filing id. It is not unique:
+    # a running number that restarts, so two different companies' filings carry
+    # the same value (on 19 and 22 July 2022, AGASTYAEN and ISEC both had 142,
+    # TV18BRDCST and ARIHANTCAP both 144). Keeping the first of each pair lost a
+    # filing in every collision, worst in the weeks with the most filings, which is
+    # why the June quarters of 2018, 2019 and 2022 looked like gaps at NSE. The
+    # windows are whole days and do not overlap, so a true repeat is rare; when
+    # it happens every field below agrees.
+    ident = [c for c in ("symbol", "period_end", "consolidated", "broadcast_dt", "audited",
+                         "xbrl_url", "seqNumber") if c in df.columns]
+    df = df.drop_duplicates(subset=ident)
     return df.reset_index(drop=True)
 
 

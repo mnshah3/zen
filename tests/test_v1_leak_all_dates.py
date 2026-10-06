@@ -35,6 +35,9 @@ from jobs import leak_v1_all_dates as leak
 from zen.universe import pit
 
 DATES = ("2019-11-15", "2024-02-15")
+# The first review whose v1 ranking the 6 Oct 2026 refill (11 quarterly filings NSE still
+# served) changes. The local, gitignored v1_final/ranks.parquet was computed before it.
+REFILLED_FROM = "2022-08-16"
 needs_db = pytest.mark.skipif(not pit.DB_PATH.exists(), reason="data/zen.duckdb not present")
 
 
@@ -178,6 +181,9 @@ def test_the_rebuilt_ranking_is_the_committed_one(reports, D):
     c = reports[D].get("full_archive_reproduces_committed_ranks")
     if c is None:
         pytest.skip("ranks.parquet is not committed (.gitignore); nothing local to compare")
+    if not c["identical"] and D >= REFILLED_FROM:
+        pytest.xfail("the local v1_final ranks.parquet predates the 6 Oct 2026 refill of 11 filings; "
+                     "v1 is replayed on the refilled archive in the v3 build (v3 spec 14.2)")
     assert c["identical"], c
 
 
