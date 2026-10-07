@@ -1,12 +1,12 @@
-# Zen: automated research infrastructure for Indian equities
+# Zen: investment research infrastructure for Indian equities
 
 [![tests](https://github.com/mnshah3/zen/actions/workflows/tests.yml/badge.svg)](https://github.com/mnshah3/zen/actions/workflows/tests.yml)
 
-I built this to answer one question properly: if I screen Indian stocks on
-fundamentals, does it actually work? Most retail backtests can't answer that
-honestly, because they test against the companies that are still listed today.
-So the first job was building an archive that doesn't cheat, and a test harness
-that tries to break its own results.
+I built Zen as research infrastructure for my own Indian equity process. It brings point-in-time market data, financial results and company filings into one archive, then uses that archive for two jobs: a weekday market brief and a research harness for testing stock-selection rules without hindsight.
+
+I designed the investment process, data requirements, rules and validation framework and used AI-assisted coding tools to implement it. My focus was deciding what the system should test, what information was available at each point in time, how the results should be challenged, and how the output should support investment research. I was not trying to demonstrate software engineering.
+
+The first question I wanted to answer properly was simple: if I screen Indian stocks on fundamentals and market factors, does the process actually add value beyond the market and beyond simply owning the same eligible universe? Most retail backtests cannot answer that honestly because they test against the companies that survive today. So the first job was building an archive that does not cheat, and a test harness that tries to break its own results.
 
 <!-- numbers:headline:start -->
 The answer, in a backtest over the whole 7.6 years from Feb 2019: **30.7% a
@@ -58,6 +58,15 @@ clarification they come from.
 | Every hypothesis I've formally tested, including the failures | [`state/trials.jsonl`](state/trials.jsonl) |
 | The look-ahead detector | [`zen/validation/leak.py`](zen/validation/leak.py) |
 | What I got wrong | [Mistakes](#mistakes) below |
+
+
+### How I use it
+
+**Morning brief.** I wanted the data to lead the research rather than the headlines. The brief reads the market first, identifies breadth, unusual volume, 52-week extremes and other moves, then promotes the filings and stories most relevant to what actually happened and to the themes I follow.
+
+**Strategy research.** I wanted to know whether a process actually added value, so I tried to falsify it rather than optimise a backtest until it looked good. The rules are fixed before held-back testing, the universe is point-in-time, and the result is checked against the same eligible universe, random portfolios and factor attribution.
+
+**Paper portfolios.** A separate private project keeps prospective paper records for Zen v1, a newer fundamental-rules strategy and my discretionary ideas. Decisions are recorded before execution and the historical backtest is kept separate from the live paper record. I keep that repository private because it contains my ongoing research and decision log, but I share screenshots in applications and work samples.
 
 ---
 
