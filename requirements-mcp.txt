@@ -1,0 +1,3 @@
+# Local tools only, never installed by a scheduled job.
+# zen/mcp_server.py: zen as an MCP server for Claude and other MCP clients.
+mcp>=1.10,<2
