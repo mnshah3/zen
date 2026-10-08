@@ -228,13 +228,14 @@ def _breadth_vs_headlines(insights: dict, market: dict) -> str | None:
 
     gap = div["gap"]
     if gap > 0:
-        return (f"The index flatters the session. The median stock moved "
-                f"{div['median_stock']:+.2f}% against {div['large_cap_proxy']:+.2f}% "
-                f"for the heavyweights, a gap of {abs(gap):.1f} percentage points, so "
-                f"the market was narrower than the headline number suggests.")
-    return (f"The broader market outpaced the heavyweights by {abs(gap):.1f} "
-            f"percentage points, with the median stock at {div['median_stock']:+.2f}% "
-            f"against {div['large_cap_proxy']:+.2f}%. Participation was wide.")
+        return (f"The biggest names carried the session. The fifty most traded stocks "
+                f"returned {div['large_cap_proxy']:+.2f}% weighted by turnover, against "
+                f"{div['median_stock']:+.2f}% for the median stock, a gap of {abs(gap):.1f} "
+                f"percentage points, so most stocks did worse than the busiest names suggest.")
+    return (f"The broader market did better than the busiest names. The median stock "
+            f"moved {div['median_stock']:+.2f}% against {div['large_cap_proxy']:+.2f}% for "
+            f"the fifty most traded stocks, a gap of {abs(gap):.1f} percentage points. "
+            f"Participation was wide.")
 
 
 def _extremes_context(insights: dict) -> str | None:

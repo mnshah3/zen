@@ -283,10 +283,10 @@ def _data_section(market: dict, insights: dict, charts: dict) -> str:
     div = insights.get("divergence")
     if div and div.get("diverging"):
         body += viz.gauge(
-            "Heavyweights", _pct(div["large_cap_proxy"]),
+            "50 most traded", _pct(div["large_cap_proxy"]),
             "Median stock", _pct(div["median_stock"]),
-            caption=f'{div["direction"]}. A gap this wide means the index is '
-                    f'not describing what most stocks did.')
+            caption=f'{div["direction"]}. The 50 most traded stocks are weighted by turnover. '
+                    f'A gap this wide means the biggest names are not describing what most stocks did.')
 
     ext = insights.get("extremes") or {}
     if ext:
