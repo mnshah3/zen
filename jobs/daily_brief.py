@@ -37,7 +37,8 @@ IRRELEVANT = re.compile(
     "|broader |material |significant )?"
     "(?:impact|bearing|relevance|effect|implication)"
     "|is (?:trivial|not relevant|irrelevant)"
-    "|does not (?:affect|matter|impact|reach)"
+    "|does not (?:affect|matter|impact)"
+    "|does not (?:directly )?reach India"
     "|little (?:direct )?(?:impact|bearing|relevance)",
     re.I)
 

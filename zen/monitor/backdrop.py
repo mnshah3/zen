@@ -29,7 +29,7 @@ HEADLINE = ["Nifty 50", "Nifty Bank", "Nifty Midcap 150", "Nifty Smallcap 250"]
 SECTORS = ["Nifty Auto", "Nifty Bank", "Nifty Energy", "Nifty FMCG", "Nifty IT", "Nifty Infrastructure",
            "Nifty Metal", "Nifty Pharma", "Nifty PSU Bank", "Nifty Realty"]
 MAX_AGE = 5          # calendar days
-TIMEOUT = 12
+TIMEOUT = 8
 FRED = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}"
 FX = "https://api.frankfurter.dev/v1/{start}..?base=USD&symbols=INR"
 

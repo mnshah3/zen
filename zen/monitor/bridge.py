@@ -51,6 +51,8 @@ def _clean(title: str) -> str:
 
 def _moved(ret: float, vol_x: float) -> str:
     """'rose 14.8% on 194 times its usual volume' (ret in percent)."""
+    if ret != ret:                       # NaN: say only what is known
+        return f"traded {vol_x:,.0f} times its usual volume"
     verb = "rose" if ret > 0 else "fell" if ret < 0 else "closed flat"
     size = f" {abs(ret):.1f}%" if ret else ""
     return f"{verb}{size} on {vol_x:,.0f} times its usual volume"

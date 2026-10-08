@@ -64,6 +64,8 @@ def test_verdict_reads_the_index_and_breadth_together():
     assert render._verdict(_market(1800, 700), {}, _bd(-0.2)) == \
         "Nifty 50 fell 0.20% to 22,132 but advancers led 1,800 to 700"
     assert render._verdict(_market(1200, 1150), {}, None) == "1,200 up, 1,150 down. A mixed session"
+    assert render._verdict(_market(1200, 1150), {}, _bd(0.01)) ==         "Nifty 50 was flat at 22,132 on mixed breadth, 1,200 advancers to 1,150 decliners"
+    assert render._verdict(_market(1600, 1500), narrow, _bd(-0.4)) ==         "Nifty 50 fell 0.40% to 22,132 on mixed breadth, 1,600 advancers to 1,500 decliners"
     for v in (render._verdict(_market(928, 1579), narrow, None), render._verdict(_market(1, 2), {}, _bd(0))):
         assert "—" not in v
 
@@ -71,7 +73,8 @@ def test_verdict_reads_the_index_and_breadth_together():
 def test_publisher_suffix_is_cleaned_from_headlines():
     assert render._clean_title("S&P 500 ends down as yields rise - Reuters", "Reuters Business") == \
         "S&P 500 ends down as yields rise"
-    assert render._clean_title("Tata Motors | Q2 preview", "Mint") == "Tata Motors"
+    assert render._clean_title("Markets rally | Mint", "Mint") == "Markets rally"
+    assert render._clean_title("Nifty ends higher - banks lead gains", "ET Markets") ==         "Nifty ends higher - banks lead gains"
     assert render._clean_title("Oil surges 5% on tanker attacks", "ET Markets") == "Oil surges 5% on tanker attacks"
 
 
@@ -103,6 +106,7 @@ def test_filing_gist_drops_the_exchange_boilerplate():
 def test_dismissal_filter_catches_does_not_reach():
     from jobs.daily_brief import IRRELEVANT
     assert IRRELEVANT.search("This development does not reach Indian equities.")
+    assert not IRRELEVANT.search("Higher crude does not reach pump prices yet because of state pricing.")
 
 
 def test_no_control_characters_in_the_changed_sources():

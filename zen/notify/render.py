@@ -312,9 +312,9 @@ def _clean_title(title: str, source: str = "") -> str:
     t = (title or "").strip()
     for sep in (" - ", " | ", " – ", " — "):
         head, found, tail = t.rpartition(sep)
-        if found and head and len(tail) <= 40 and (not source or tail.lower() in source.lower()
-                                                     or source.lower() in tail.lower()
-                                                     or len(tail.split()) <= 5):
+        # Only a tail that names the publisher: "Nifty ends higher - banks lead gains" keeps its half.
+        if found and head and source and len(tail) <= 40 and (
+                tail.lower() in source.lower() or source.lower() in tail.lower()):
             return head.strip()
     return t
 
@@ -428,9 +428,10 @@ def _verdict(market: dict, insights: dict, bd: dict | None = None) -> str:
 
     pct = n50.get("pct") if n50 else None
     up, down = pct is not None and pct >= 0.05, pct is not None and pct <= -0.05
-    if div.get("diverging") and div.get("gap", 0) > 0:
-        tone = (f"{'but' if up else 'and'} decliners led {dec:,} to {adv:,}" if dec > adv
-                else "on narrow participation")
+    if div.get("diverging") and div.get("gap", 0) > 0 and dec > adv:
+        tone = f"{'but' if up else 'and'} decliners led {dec:,} to {adv:,}"
+    elif div.get("diverging") and div.get("gap", 0) > 0 and up:
+        tone = "on narrow participation"
     elif adv > dec * 1.3:
         tone = (f"but advancers led {adv:,} to {dec:,}" if down
                 else f"with broad buying, {adv:,} advancers to {dec:,} decliners")
@@ -442,9 +443,9 @@ def _verdict(market: dict, insights: dict, bd: dict | None = None) -> str:
 
     if n50 and n50.get("pct") is not None:
         p = n50["pct"]
-        move = (f"rose {abs(p):.2f}%" if p >= 0.05 else f"fell {abs(p):.2f}%" if p <= -0.05
-                else "was flat")
-        return f"Nifty 50 {move} to {n50['close']:,.0f} {tone}"
+        move = (f"rose {abs(p):.2f}% to" if p >= 0.05 else f"fell {abs(p):.2f}% to" if p <= -0.05
+                else "was flat at")
+        return f"Nifty 50 {move} {n50['close']:,.0f} {tone}"
     # No index print in the archive: breadth alone, said plainly.
     if div.get("diverging") and div.get("gap", 0) > 0:
         return f"{adv:,} up, {dec:,} down. The index flattered a narrow market"
