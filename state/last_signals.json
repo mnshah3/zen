@@ -1,7 +1,8 @@
 {
-"asof": "2026-10-01",
+"asof": "2026-10-08",
 "keys": [
 "momentum_12_1:buy:AEROFLEX",
+"momentum_12_1:buy:ARFIN",
 "momentum_12_1:buy:ATHERENERG",
 "momentum_12_1:buy:BHAGYANGR",
 "momentum_12_1:buy:BLISSGVS",
@@ -9,7 +10,6 @@
 "momentum_12_1:buy:HFCL",
 "momentum_12_1:buy:INDSWFTLAB",
 "momentum_12_1:buy:MTARTECH",
-"momentum_12_1:buy:RPEL",
 "momentum_12_1:buy:RPTECH",
 "momentum_12_1:buy:SAKAR",
 "momentum_12_1:buy:SANSERA",
