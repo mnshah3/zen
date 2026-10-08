@@ -31,7 +31,7 @@ CACHE = Path("state/symbol_names.json")
 
 # Words that carry no identifying information when matching a headline.
 _STOP = {"limited", "ltd", "the", "india", "indian", "company", "corporation",
-         "corp", "industries", "enterprises", "and", "of", "co"}
+         "corp", "industries", "enterprises", "enterprise", "and", "of", "co"}
 
 # Sector and industry words that appear in hundreds of company names and in
 # unrelated headlines. Matching on one of these alone produced false hits --
@@ -49,6 +49,16 @@ _GENERIC = {
     "investments", "securities", "insurance", "healthcare", "hospitals",
     "media", "communications", "telecom", "logistics", "transport", "group",
 }
+
+# "Goa Carbon Limited" leaves one token, "carbon", once the three-letter "goa" is
+# dropped, and on 10 Sep 2026 it matched a story about carbon pricing. A name whose
+# words are nearly all filler is better identified by the name itself, as a phrase.
+_SUFFIX = re.compile(r"\s*\b(?:limited|ltd)\.?\s*$", re.I)
+
+
+def phrase(name: str) -> str:
+    """The name as a headline writes it: lower case, without the legal suffix."""
+    return _SUFFIX.sub("", name).strip(" .,").lower()
 
 
 def refresh() -> dict[str, str]:
@@ -104,6 +114,11 @@ def find_in_text(text: str, names: dict[str, str],
 
     Without that rule "RIR Power Electronics" matched any headline containing
     the word power, which is most of them.
+
+    The whole name, as a phrase of two or more words, is always enough ("Goa
+    Carbon"); and a name that leaves a single token from several words ("rain"
+    from "Rain Industries") needs that phrase, since the lone word is usually
+    an ordinary one.
     """
     low = f" {text.lower()} "
     hits = []
@@ -111,8 +126,14 @@ def find_in_text(text: str, names: dict[str, str],
         name = names.get(sym)
         if not name:
             continue
+        ph = phrase(name)
+        if " " in ph and re.search(rf"\b{re.escape(ph)}\b", low):
+            hits.append(sym)
+            continue
         toks = tokens(name)
         if not toks:
+            continue
+        if len(toks) == 1 and toks[0] != ph:
             continue
 
         present = [t for t in toks if re.search(rf"\b{re.escape(t)}\b", low)]

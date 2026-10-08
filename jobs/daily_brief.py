@@ -41,6 +41,9 @@ IRRELEVANT = re.compile(
     "|little (?:direct )?(?:impact|bearing|relevance)",
     re.I)
 
+EMPLOYEE_SCHEME = re.compile(
+    r"\b(?:ESOP|ESOS|ESPS|SBEB|RSU)s?\b|restricted stock unit|employee stock", re.I)
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
@@ -80,6 +83,13 @@ def main() -> int:
         except Exception as e:
             log.warning("announcement refresh failed (%s); using what is stored", e)
         filings = announcements.for_session(con, asof, material_only=True)
+        # Employee share-scheme allotments (ESOP, RSU) carry NSE's "Allotment of
+        # Securities" label, so they sit in the capital bucket beside real fund
+        # raises; they were 471 of 1,660 capital filings in 2026 and crowded the
+        # eight slots. Hidden from the email only; the category is unchanged.
+        if not filings.empty:
+            scheme = filings["subject"].fillna("").str.contains(EMPLOYEE_SCHEME)
+            filings = filings[~((filings["category"] == "capital") & scheme)]
     else:
         filings = None
 
