@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import logging
 
-from zen.data import announcements, corpactions, financials, indices, store
+from zen.data import announcements, corpactions, financials, indices, shareholding, store
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +50,9 @@ def main() -> int:
         ("corpactions", lambda: corpactions.rebuild_from_parquet(con)),
         ("indices", lambda: indices.rebuild_from_parquet(con)),
         ("financials", lambda: financials.rebuild_from_parquet(con)),
+        # Optional (not in REQUIRED): research data for the dashboard, used by no strategy.
+        ("shareholding", lambda: shareholding.rebuild_shareholding(con)),
+        ("pledges", lambda: shareholding.rebuild_pledges(con)),
     ]
 
     try:

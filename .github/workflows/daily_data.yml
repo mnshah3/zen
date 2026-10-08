@@ -40,11 +40,20 @@ jobs:
         # covers the last two months as well as the next two.
         run: python -m jobs.update_corpactions --days 120
 
+      # Shareholding patterns and promoter pledges for the dashboard's company pages.
+      # Optional data, used by no strategy: a failure is shown but never stops the commit.
+      - name: shareholding and pledges
+        continue-on-error: true
+        timeout-minutes: 10
+        run: python -m jobs.update_shareholding --days 10
+
       - name: commit new data
         run: |
           git config user.name  "zen-bot"
           git config user.email "actions@github.com"
           git add data/announcements data/financials data/corpactions
+          [ ! -d data/shareholding ] || git add data/shareholding
+          [ ! -d data/pledges ] || git add data/pledges
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
           git diff --staged --quiet || git commit -m "data: filings, results, corporate actions $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile
