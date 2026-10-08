@@ -209,7 +209,42 @@ def main() -> int:
                  "yes" if bridge_text else "no")
         return 0
 
+    # Kept for the dashboard's Brief page (zen-portfolios reads state/briefs). Written
+    # before sending, so a mail failure still leaves the day's brief on record.
+    try:
+        save_brief(subject, html, sections, bd, summary, derived, datetime.now())
+    except Exception as e:
+        log.warning("could not save the brief for the dashboard (%s)", e)
+
     return 0 if mailer.send(subject, html, text, images=images) else 1
+
+
+BRIEFS = Path("state/briefs")
+
+
+def save_brief(subject: str, html: str, sections: dict, bd: dict | None, summary: dict,
+               derived: dict | None, when: datetime, folder: Path = BRIEFS) -> Path:
+    """state/briefs/<date>.json: the email exactly as sent, with the few fields the dashboard
+    lists it by. One file per calendar day; a re-run on the same day replaces it."""
+    import json
+    n50 = next((r for r in (bd or {}).get("headline") or [] if r["name"] == "Nifty 50"), None)
+    b = (summary or {}).get("breadth") or {}
+    rec = {
+        "date": when.strftime("%Y-%m-%d"),
+        "session": str((summary or {}).get("session") or "")[:10] or None,
+        "subject": subject,
+        "verdict": render._verdict(summary or {}, derived or {}, bd) if b.get("advancers") else "",
+        "stories": sum(len(v) for v in sections.values()),
+        "nifty50": n50,
+        "advancers": b.get("advancers"),
+        "decliners": b.get("decliners"),
+        "generated_at": when.strftime("%Y-%m-%dT%H:%M:%S"),
+        "html": html,
+    }
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{rec['date']}.json"
+    path.write_text(json.dumps(rec, ensure_ascii=False, indent=0), encoding="utf-8")
+    return path
 
 
 if __name__ == "__main__":

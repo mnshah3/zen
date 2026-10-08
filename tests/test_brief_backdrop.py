@@ -116,3 +116,24 @@ def test_no_control_characters_in_the_changed_sources():
                 "zen/notify/render.py", "zen/monitor/explain.py", "jobs/daily_brief.py"):
         text = (root / rel).read_text(encoding="utf-8")
         assert not any(ord(c) < 32 and c not in "\n\t\r" for c in text), rel
+
+
+def test_brief_is_saved_for_the_dashboard(tmp_path):
+    import json
+    from jobs.daily_brief import save_brief
+    bd = {"headline": [{"name": "Nifty 50", "close": 22132.0, "pct": 0.6, "pe": 19.3}]}
+    p = save_brief("Zen morning brief 08 Oct", "<div>brief</div>", {"Breaking": [1, 2]}, bd,
+                   _market(928, 1579), {}, datetime(2026, 10, 8, 7, 5), folder=tmp_path)
+    rec = json.loads(p.read_text(encoding="utf-8"))
+    assert p.name == "2026-10-08.json" and rec["stories"] == 2 and rec["html"] == "<div>brief</div>"
+    assert rec["verdict"].startswith("Nifty 50 rose 0.60%") and rec["nifty50"]["close"] == 22132.0
+
+
+def test_bridge_escapes_feed_text():
+    import pandas as pd
+    from types import SimpleNamespace
+    from zen.monitor import bridge
+    uv = pd.DataFrame([{"symbol": "ABC", "ret": 5.0, "vol_x": 40.0}])
+    art = SimpleNamespace(title="<script>x</script> ABC Industries & Co wins", summary="")
+    lines = bridge._volume_explained_by_news({"unusual_volume": uv}, [art], {"ABC": "ABC Industries & Co"})
+    assert lines and "<script>" not in lines[0] and "&amp;" in lines[0]

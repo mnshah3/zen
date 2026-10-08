@@ -11,6 +11,7 @@ wrong one is obvious rather than persuasive.
 
 from __future__ import annotations
 
+import html
 import logging
 import re
 
@@ -47,6 +48,11 @@ LABELS = {
 
 def _clean(title: str) -> str:
     return _SUFFIX.sub("", (title or "").strip()).strip()
+
+
+def _h(s) -> str:
+    """Text from feeds, filings and the NSE list, escaped for the HTML it is written into."""
+    return html.escape(str(s), quote=False)
 
 
 def _moved(ret: float, vol_x: float) -> str:
@@ -102,8 +108,8 @@ def _volume_explained_by_news(insights: dict, articles: list,
             claimed.add(sym)
             row = uv[uv["symbol"] == sym].iloc[0]
             out.append(
-                f"<b>{names.get(sym, sym)}</b> {_moved(row.ret, row.vol_x)}, and it "
-                f"was in the news with &ldquo;{_clean(a.title)}&rdquo;."
+                f"<b>{_h(names.get(sym, sym))}</b> {_moved(row.ret, row.vol_x)}, and it "
+                f"was in the news with &ldquo;{_h(_clean(a.title))}&rdquo;."
             )
             if len(out) >= 3:
                 return out
@@ -145,8 +151,8 @@ def _filings_explain_volume(con, insights: dict, asof, names: dict) -> tuple[lis
         said = ("NSE asked the company to explain the move" if r.category == "exchange_query"
                 else f"Its exchange filing that session was about {label}")
         lines.append(
-            f"<b>{names.get(r.symbol, r.symbol)}</b> {_moved(row.ret, row.vol_x)}. "
-            f"{said}, &ldquo;{subject}&rdquo;."
+            f"<b>{_h(names.get(r.symbol, r.symbol))}</b> {_moved(row.ret, row.vol_x)}. "
+            f"{said}, &ldquo;{_h(subject)}&rdquo;."
         )
         if len(lines) >= 3:
             break
@@ -184,7 +190,7 @@ def _exchange_queried(con, insights: dict, asof, names: dict) -> str | None:
     if not rows:
         return None
 
-    listed = ", ".join(names.get(r[0], r[0]) for r in rows[:3])
+    listed = ", ".join(_h(names.get(r[0], r[0])) for r in rows[:3])
     plural = "companies" if len(rows) > 1 else "company"
     return (f"The exchange has formally asked {len(rows)} {plural} to explain "
             f"today's move: {listed}. Those queries were filed after the close, "
@@ -209,11 +215,11 @@ def _unexplained_volume(insights: dict, explained: list[str], names: dict,
     named = {n.split("</b>")[0].replace("<b>", "") for n in explained}
     filed = filed_syms or set()
     rest = [r for r in uv.itertuples()
-            if names.get(r.symbol, r.symbol) not in named and r.symbol not in filed]
+            if _h(names.get(r.symbol, r.symbol)) not in named and r.symbol not in filed]
     if len(rest) < 2:
         return None
 
-    listed = ", ".join(f"{names.get(r.symbol, r.symbol)} ({r.vol_x:,.0f}x)"
+    listed = ", ".join(f"{_h(names.get(r.symbol, r.symbol))} ({r.vol_x:,.0f}x)"
                        for r in rest[:3])
     return (f"Nothing in the news or in exchange filings explains the volume in "
             f"{listed}. That usually points to a sector story rather than a "
