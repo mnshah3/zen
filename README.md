@@ -51,6 +51,7 @@ clarification they come from.
 
 | If you want | Go to |
 |---|---|
+| The live paper record (Zen v1, from 5 Oct 2026) | [zen-research.pages.dev](https://zen-research.pages.dev), a read-only dashboard rebuilt every weekday evening |
 | What the emails look like | [sample brief](https://htmlpreview.github.io/?https://github.com/mnshah3/zen/blob/main/docs/sample-brief.html) |
 | **The result, and what it does not prove** | [The result](#the-result) below |
 | The headline and acceptance figures, each with the file and key it comes from | [`data/backtest/v1_final/baseline_report.md`](data/backtest/v1_final/baseline_report.md) and its `.json`; the rest are in `stats.json`, `verify.json`, `libcheck.json` and `nav.csv` beside it |
@@ -66,7 +67,7 @@ clarification they come from.
 
 **Strategy research.** I wanted to know whether a process actually added value, so I tried to falsify it rather than optimise a backtest until it looked good. The rules are fixed before held-back testing, the universe is point-in-time, and the result is checked against the same eligible universe, random portfolios and factor attribution.
 
-**Paper portfolios.** A separate private project keeps prospective paper records for Zen v1, a newer fundamental-rules strategy and my discretionary ideas. Decisions are recorded before execution and the historical backtest is kept separate from the live paper record. I keep that repository private because it contains my ongoing research and decision log, but I share screenshots in applications and work samples.
+**Paper portfolios.** A separate private project keeps prospective paper records for Zen v1, a newer fundamental-rules strategy and my discretionary ideas. Decisions are recorded before execution and the historical backtest is kept separate from the live paper record. I keep that repository private because it contains my ongoing research and decision log; a read-only copy of its dashboard, with Zen v1's live record since 5 Oct 2026 beside its backtest, is public at **[zen-research.pages.dev](https://zen-research.pages.dev)**.
 
 ---
 
