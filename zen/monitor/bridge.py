@@ -15,6 +15,7 @@ import logging
 import re
 
 from zen.data import announcements
+from zen.data import filing_types
 from zen.data import names as names_mod
 
 log = logging.getLogger(__name__)
@@ -46,6 +47,13 @@ LABELS = {
 
 def _clean(title: str) -> str:
     return _SUFFIX.sub("", (title or "").strip()).strip()
+
+
+def _moved(ret: float, vol_x: float) -> str:
+    """'rose 14.8% on 194 times its usual volume' (ret in percent)."""
+    verb = "rose" if ret > 0 else "fell" if ret < 0 else "closed flat"
+    size = f" {abs(ret):.1f}%" if ret else ""
+    return f"{verb}{size} on {vol_x:,.0f} times its usual volume"
 
 
 def matched_articles(insights: dict, articles: list, names: dict | None = None) -> list:
@@ -92,9 +100,8 @@ def _volume_explained_by_news(insights: dict, articles: list,
             claimed.add(sym)
             row = uv[uv["symbol"] == sym].iloc[0]
             out.append(
-                f"<b>{names.get(sym, sym)}</b> traded at {row.vol_x:,.0f} times its "
-                f"normal volume and moved {row.ret:+.1f}% &mdash; and there is a story "
-                f"today: &ldquo;{_clean(a.title)}&rdquo;."
+                f"<b>{names.get(sym, sym)}</b> {_moved(row.ret, row.vol_x)}, and it "
+                f"was in the news with &ldquo;{_clean(a.title)}&rdquo;."
             )
             if len(out) >= 3:
                 return out
@@ -132,11 +139,12 @@ def _filings_explain_volume(con, insights: dict, asof, names: dict) -> tuple[lis
         seen.add(r.symbol)
         row = uv[uv["symbol"] == r.symbol].iloc[0]
         label = LABELS.get(r.category, r.category.replace("_", " "))
-        subject = _clean(str(r.subject))[:190]
+        subject = filing_types.gist(str(r.subject), 170)
+        said = ("NSE asked the company to explain the move" if r.category == "exchange_query"
+                else f"Its exchange filing that session was about {label}")
         lines.append(
-            f"<b>{names.get(r.symbol, r.symbol)}</b> traded at "
-            f"{row.vol_x:,.0f} times normal volume and moved {row.ret:+.1f}%. "
-            f"It filed with the exchange &mdash; {label}: &ldquo;{subject}&rdquo;"
+            f"<b>{names.get(r.symbol, r.symbol)}</b> {_moved(row.ret, row.vol_x)}. "
+            f"{said}, &ldquo;{subject}&rdquo;."
         )
         if len(lines) >= 3:
             break
@@ -178,7 +186,7 @@ def _exchange_queried(con, insights: dict, asof, names: dict) -> str | None:
     plural = "companies" if len(rows) > 1 else "company"
     return (f"The exchange has formally asked {len(rows)} {plural} to explain "
             f"today's move: {listed}. Those queries were filed after the close, "
-            f"so they confirm the move rather than explain it &mdash; NSE's own "
+            f"so they confirm the move rather than explain it. NSE's own "
             f"surveillance flagged the same names.")
 
 
@@ -205,9 +213,9 @@ def _unexplained_volume(insights: dict, explained: list[str], names: dict,
 
     listed = ", ".join(f"{names.get(r.symbol, r.symbol)} ({r.vol_x:,.0f}x)"
                        for r in rest[:3])
-    return (f"No explanation found for: {listed}. Neither the news feeds nor "
-            f"the company's own exchange filings account for these moves, which "
-            f"often means a sector story rather than a company one.")
+    return (f"Nothing in the news or in exchange filings explains the volume in "
+            f"{listed}. That usually points to a sector story rather than a "
+            f"company one.")
 
 
 def _breadth_vs_headlines(insights: dict, market: dict) -> str | None:
@@ -218,13 +226,13 @@ def _breadth_vs_headlines(insights: dict, market: dict) -> str | None:
 
     gap = div["gap"]
     if gap > 0:
-        return (f"Headlines will read off the index, but the median stock moved "
+        return (f"The index flatters the session. The median stock moved "
                 f"{div['median_stock']:+.2f}% against {div['large_cap_proxy']:+.2f}% "
-                f"for the heavyweights. A {abs(gap):.1f} point gap &mdash; the market "
-                f"was narrower than it will sound.")
-    return (f"The broader market outpaced the heavyweights by {abs(gap):.1f} points "
-            f"({div['median_stock']:+.2f}% median against "
-            f"{div['large_cap_proxy']:+.2f}%). Participation was wide.")
+                f"for the heavyweights, a gap of {abs(gap):.1f} percentage points, so "
+                f"the market was narrower than the headline number suggests.")
+    return (f"The broader market outpaced the heavyweights by {abs(gap):.1f} "
+            f"percentage points, with the median stock at {div['median_stock']:+.2f}% "
+            f"against {div['large_cap_proxy']:+.2f}%. Participation was wide.")
 
 
 def _extremes_context(insights: dict) -> str | None:
@@ -240,8 +248,8 @@ def _extremes_context(insights: dict) -> str | None:
                 f"outnumbering new highs this clearly is usually a late signal, "
                 f"not an early one.")
     if net >= 10:
-        return (f"{hi} stocks at 52-week highs against {lo} at lows &mdash; "
-                f"broad participation on the upside.")
+        return (f"{hi} stocks at 52-week highs against {lo} at lows. Participation "
+                f"on the upside was broad.")
     return None
 
 

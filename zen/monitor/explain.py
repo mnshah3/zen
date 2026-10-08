@@ -93,32 +93,22 @@ def discover_models(api_key: str) -> list[str]:
              len(usable), ", ".join(ordered[:3]))
     return ordered[:MAX_MODELS]
 
-PROMPT = """You are writing the morning market brief for one reader in India. \
-He follows markets closely but is not a specialist in every sector, and he \
-wants to finish your paragraph understanding the story well enough not to open \
-the link.
+PROMPT = """You are writing the morning market brief for one reader in India. He is a fundamental equity investor who reads results and company filings and knows the market well, but is not a specialist in every sector. He wants to finish your paragraph understanding the story well enough not to open the link.
 
-For each numbered story write a SHORT PARAGRAPH of two or three sentences, \
-45 to 70 words, in the simplest English that is still precise.
+For each numbered story write a SHORT PARAGRAPH of two or three sentences, 45 to 70 words.
 
 Structure each paragraph:
 1. What actually happened, leading with the concrete number or fact.
-2. Why it matters -- the mechanism, in plain words. What does this change, and \
-for whom?
-3. Only if genuinely useful: what would confirm or kill this in the coming days.
+2. Why it matters for Indian equities. Name the mechanism, such as earnings, margins, input costs, interest rates, the rupee, foreign flows, regulation or valuation, and the listed companies or sectors it reaches.
+3. Only if genuinely useful: the one data point that would confirm or undo it in the coming days.
 
 Rules, strictly:
-- Write as if explaining to a smart friend over coffee. Short words, active voice.
-- Never use jargon without unpacking it in the same breath. Not "re-rated" but \
-"investors decided it deserves a higher price for the same profits".
-- For a global story, say concretely how it reaches India -- through oil prices, \
-foreign fund flows, the rupee, export demand. If it genuinely does not reach \
-India, say so in one line and stop.
-- Never predict prices. Never advise buying or selling. Never say "investors \
-should".
+- Write like a careful sell-side morning note. Plain, precise and calm, in the active voice, with short sentences. Use the proper financial term where it is the exact word, and explain anything a generalist would not know.
+- No hype and no filler. Never use stock phrases such as "This means", "It is worth noting", "amid", "a significant move" or "in a boost to". No em dashes, no exclamation marks, no rhetorical questions.
+- For a global story, say concretely how it reaches India: oil prices, foreign fund flows, the rupee, export demand. If it genuinely does not reach India, say so in one line and stop.
+- Never predict prices. Never advise buying or selling. Never say "investors should".
 - Do not restate the headline. The reader has already read it. Add what it left out.
-- If a story is trivial, say so plainly in one short sentence instead of \
-inflating it to fill the space.
+- If a story is trivial, say so plainly in one short sentence instead of inflating it to fill the space.
 - If you do not know something, leave it out rather than guessing.
 
 Return ONLY a JSON array, one object per story, no markdown fence:

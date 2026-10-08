@@ -447,6 +447,24 @@ def body(subject: str | None) -> str:
     return rest if sep else ""
 
 
+# "Acme Limited has informed the Exchange about ..." -- NSE's boilerplate before the substance.
+_INFORMED = re.compile(r"^.{0,140}?\bhas\s+(?:informed|intimated)\s+the\s+exchange\s+"
+                       r"(?:about|regarding|that|of|with regard to)?\s*", re.I)
+
+
+def gist(subject: str | None, limit: int = 170) -> str:
+    """What a filing says, for display: the text after NSE's label, without the company's
+    "has informed the Exchange about" preamble, cut at a word boundary. Falls back to the label."""
+    text = body(subject) or subtype(subject) or (subject or "")
+    g = _INFORMED.sub("", text).strip() or text.strip()
+    if not g:
+        return ""
+    g = g[0].upper() + g[1:]
+    if len(g) > limit:
+        g = g[:limit].rsplit(" ", 1)[0].rstrip(",;:-") + "…"
+    return g
+
+
 def categorise(subject: str | None) -> str:
     st = _norm(subtype(subject))
     if not st:

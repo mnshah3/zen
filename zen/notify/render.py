@@ -22,6 +22,7 @@ UP = "#0f7b3f"
 DOWN = "#b42318"
 
 
+from zen.data import filing_types
 from zen.notify import viz
 
 
@@ -114,6 +115,107 @@ def _stat_row(b: dict) -> str:
             f'<tr>{tds}</tr></table>')
 
 
+def _signed(v, dp: int = 2, unit: str = "%") -> str:
+    """'+0.60%' in the up colour, '-1.20%' in the down colour, a true minus sign."""
+    if v is None:
+        return f'<span style="color:{FAINT};">-</span>'
+    colour = UP if v > 0 else DOWN if v < 0 else MUTED
+    text = f"{abs(v):,.{dp}f}{unit}"
+    sign = "+" if v > 0 else "&minus;" if v < 0 else ""
+    return f'<span style="color:{colour};font-weight:600;">{sign}{text}</span>'
+
+
+def _index_strip(bd: dict) -> str:
+    """The headline indices at the close, from our own archive."""
+    rows = (bd or {}).get("headline") or []
+    if not rows:
+        return ""
+    tds = ""
+    for i, r in enumerate(rows):
+        divider = "" if i == len(rows) - 1 else f"border-right:1px solid {RULE};"
+        name = r["name"].replace("Nifty ", "") if r["name"] != "Nifty 50" else "Nifty 50"
+        tds += (f'<td style="padding:11px 10px;vertical-align:top;width:{100 // len(rows)}%;{divider}">'
+                f'<div style="font-size:9px;color:{FAINT};text-transform:uppercase;letter-spacing:0.07em;'
+                f'font-weight:600;">{_esc(name)}</div>'
+                f'<div style="font-size:17px;font-weight:700;color:{INK};margin-top:3px;'
+                f'letter-spacing:-0.02em;">{r["close"]:,.2f}</div>'
+                f'<div style="font-size:12px;margin-top:1px;">{_signed(r["pct"])}</div></td>')
+    pe = bd.get("nifty_pe")
+    note = (f'<div style="font-size:10px;color:{FAINT};margin:5px 0 14px;">Closing levels from NSE. '
+            f'Nifty 50 trailing P/E {pe:.1f}.</div>' if pe else
+            f'<div style="font-size:10px;color:{FAINT};margin:5px 0 14px;">Closing levels from NSE.</div>')
+    return (f'<table style="width:100%;border-collapse:collapse;background:{TINT};border:1px solid {RULE};'
+            f'border-radius:4px;"><tr>{tds}</tr></table>{note}')
+
+
+def _sector_board(bd: dict) -> str:
+    """Sector indices ranked by the day's move, as a diverging bar chart in plain HTML so it
+    survives blocked images."""
+    rows = (bd or {}).get("sectors") or []
+    if not rows:
+        return ""
+    cap = max(abs(r["pct"]) for r in rows) or 1.0
+    out = ""
+    for r in rows:
+        w = max(2, round(abs(r["pct"]) / cap * 100))
+        colour = UP if r["pct"] > 0 else DOWN if r["pct"] < 0 else MUTED
+        bar = (f'<div style="height:9px;width:{w}%;background:{colour};opacity:0.78;border-radius:2px;'
+               f'{"margin-left:auto;" if r["pct"] < 0 else ""}"></div>')
+        left = bar if r["pct"] < 0 else ""
+        right = bar if r["pct"] >= 0 else ""
+        out += (f'<tr><td style="padding:3px 10px 3px 0;font-size:12px;color:{INK};white-space:nowrap;'
+                f'width:30%;">{_esc(r["name"].replace("Nifty ", ""))}</td>'
+                f'<td style="padding:3px 0;width:27%;border-right:1px solid {RULE};">{left}</td>'
+                f'<td style="padding:3px 0;width:27%;">{right}</td>'
+                f'<td style="padding:3px 0 3px 10px;font-size:12px;text-align:right;white-space:nowrap;">'
+                f'{_signed(r["pct"])}</td></tr>')
+    return (f'<div style="font-size:12px;color:{MUTED};margin:4px 0 6px;"><b style="color:{INK};">'
+            f'Sectors</b> &middot; NSE sector indices, ranked by the day&rsquo;s move</div>'
+            f'<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">{out}</table>')
+
+
+def _global_strip(items: list) -> str:
+    """Overnight markets abroad, each with the date it is from."""
+    if not items:
+        return ""
+
+    def value(it):
+        v = it["value"]
+        if it["kind"] == "yield":
+            return f"{v:.2f}%"
+        if it["label"] == "Brent":
+            return f"${v:,.2f}"
+        return f"{v:,.2f}"
+
+    def change(it):
+        if it["kind"] == "yield":
+            return _signed(it["change"], 0, " bp")
+        return _signed(it["change"])
+
+    cells = [(f'<div style="font-size:9px;color:{FAINT};text-transform:uppercase;letter-spacing:0.07em;'
+              f'font-weight:600;">{_esc(it["label"])}</div>'
+              f'<div style="font-size:14px;font-weight:700;color:{INK};margin-top:2px;">{value(it)}</div>'
+              f'<div style="font-size:11px;">{change(it)} <span style="color:{FAINT};">'
+              f'{it["date"]:%d %b}</span></div>') for it in items]
+    trs = ""
+    for i in range(0, len(cells), 3):
+        row = cells[i:i + 3] + [""] * (3 - len(cells[i:i + 3]))
+        trs += "<tr>" + "".join(f'<td style="padding:8px 10px 8px 0;vertical-align:top;width:33%;">{c}</td>'
+                                for c in row) + "</tr>"
+    return (f'<div style="font-size:12px;color:{MUTED};margin:2px 0 2px;"><b style="color:{INK};">'
+            f'Overnight</b> &middot; last close abroad, with the date of each figure</div>'
+            f'<table style="width:100%;border-collapse:collapse;margin-bottom:6px;">{trs}</table>'
+            f'<div style="font-size:10px;color:{FAINT};margin-bottom:14px;">FRED, Federal Reserve Bank of '
+            f'St. Louis, and ECB reference rates. Yield changes in basis points.</div>')
+
+
+def _backdrop_section(bd: dict, global_items: list) -> str:
+    body = _index_strip(bd) + _sector_board(bd) + _global_strip(global_items)
+    if not body:
+        return ""
+    return f'<div style="margin-bottom:26px;">{_heading("Markets")}{body}</div>'
+
+
 def _chart(cid: str, alt: str) -> str:
     return (f'<div style="margin:10px 0 14px;">'
             f'<img src="cid:{cid}" alt="{_esc(alt)}" '
@@ -136,7 +238,7 @@ def _volume_table(df) -> str:
     )
     return f"""
 <div style="font-size:12px;color:{MUTED};margin:14px 0 4px;">
-  <b style="color:{INK};">Unusual volume</b> &mdash; versus each stock's own 60-day median
+  <b style="color:{INK};">Unusual volume</b> &middot; against each stock's own 60-day median
 </div>
 <table style="width:100%;border-collapse:collapse;">
   <tr style="color:{FAINT};font-size:10px;text-transform:uppercase;letter-spacing:0.05em;">
@@ -150,9 +252,18 @@ def _volume_table(df) -> str:
 </table>"""
 
 
+def _session_label(d) -> str:
+    """'Wed 9 Sep 2026' from a date or an ISO string."""
+    try:
+        d = datetime.fromisoformat(str(d)[:10])
+        return f"{d:%a} {d.day} {d:%b %Y}"
+    except ValueError:
+        return str(d or "")
+
+
 def _data_section(market: dict, insights: dict, charts: dict) -> str:
     b = market.get("breadth", {})
-    body = _heading(f"What the data says — {market.get('session', '')}")
+    body = _heading(f"The session in numbers · {_session_label(market.get('session'))}")
     body += _stat_row(b)
 
     # The proportional bar carries the day's shape even with images blocked,
@@ -195,14 +306,28 @@ def _data_section(market: dict, insights: dict, charts: dict) -> str:
     return f'<div style="margin-bottom:26px;">{body}</div>'
 
 
+def _clean_title(title: str, source: str = "") -> str:
+    """A headline without the publisher tacked on the end ('... - Reuters', '... | Mint'),
+    which the source line already shows."""
+    t = (title or "").strip()
+    for sep in (" - ", " | ", " – ", " — "):
+        head, found, tail = t.rpartition(sep)
+        if found and head and len(tail) <= 40 and (not source or tail.lower() in source.lower()
+                                                     or source.lower() in tail.lower()
+                                                     or len(tail.split()) <= 5):
+            return head.strip()
+    return t
+
+
 def _story(a, explanation: str | None, facts: list[str]) -> str:
     src = _esc(a.source)
     if a.also:
         src += f" &middot; +{len(a.also)} other{'s' if len(a.also) > 1 else ''}"
 
+    title = _clean_title(a.title, a.source)
     out = (f'<div style="margin-bottom:15px;">'
            f'<a href="{_esc(a.link)}" style="color:{INK};text-decoration:none;'
-           f'font-size:14px;font-weight:600;line-height:1.4;">{_esc(a.title)}</a>')
+           f'font-size:14px;font-weight:600;line-height:1.4;">{_esc(title)}</a>')
 
     if explanation:
         # A paragraph needs more air than a caption; this is the part actually
@@ -291,21 +416,43 @@ def _bridge(text: str) -> str:
             f'{text}</div></div>')
 
 
-def _verdict(market: dict, insights: dict) -> str:
-    """One line under the masthead summarising the session."""
+def _verdict(market: dict, insights: dict, bd: dict | None = None) -> str:
+    """One line under the masthead: where the Nifty 50 closed and whether the rest of the
+    market went with it."""
     b = market.get("breadth") or {}
     if not b.get("advancers"):
         return ""
     adv, dec = b["advancers"], b["decliners"]
     div = insights.get("divergence") or {}
+    n50 = next((r for r in (bd or {}).get("headline") or [] if r["name"] == "Nifty 50"), None)
 
+    pct = n50.get("pct") if n50 else None
+    up, down = pct is not None and pct >= 0.05, pct is not None and pct <= -0.05
     if div.get("diverging") and div.get("gap", 0) > 0:
-        return f"{adv:,} up, {dec:,} down — the index flattered a narrow market"
+        tone = (f"{'but' if up else 'and'} decliners led {dec:,} to {adv:,}" if dec > adv
+                else "on narrow participation")
+    elif adv > dec * 1.3:
+        tone = (f"but advancers led {adv:,} to {dec:,}" if down
+                else f"with broad buying, {adv:,} advancers to {dec:,} decliners")
+    elif dec > adv * 1.3:
+        tone = (f"but decliners led {dec:,} to {adv:,}" if up
+                else f"with broad selling, {dec:,} decliners to {adv:,} advancers")
+    else:
+        tone = f"on mixed breadth, {adv:,} advancers to {dec:,} decliners"
+
+    if n50 and n50.get("pct") is not None:
+        p = n50["pct"]
+        move = (f"rose {abs(p):.2f}%" if p >= 0.05 else f"fell {abs(p):.2f}%" if p <= -0.05
+                else "was flat")
+        return f"Nifty 50 {move} to {n50['close']:,.0f} {tone}"
+    # No index print in the archive: breadth alone, said plainly.
+    if div.get("diverging") and div.get("gap", 0) > 0:
+        return f"{adv:,} up, {dec:,} down. The index flattered a narrow market"
     if adv > dec * 1.3:
-        return f"{adv:,} up, {dec:,} down — broad advance"
+        return f"{adv:,} up, {dec:,} down. A broad advance"
     if dec > adv * 1.3:
-        return f"{adv:,} up, {dec:,} down — broad decline"
-    return f"{adv:,} up, {dec:,} down — mixed session"
+        return f"{adv:,} up, {dec:,} down. A broad decline"
+    return f"{adv:,} up, {dec:,} down. A mixed session"
 
 
 FILING_LABELS = {
@@ -336,9 +483,7 @@ def _filings_section(filings) -> str:
     rows = ""
     for r in filings.head(8).itertuples():
         label = FILING_LABELS.get(r.category, str(r.category).replace("_", " ").title())
-        subject = str(r.subject or "")
-        if ": " in subject:
-            subject = subject.split(": ", 1)[1]
+        subject = filing_types.gist(str(r.subject or ""), 190)
         company = (r.company or r.symbol or "")[:44]
         link = str(r.url or "")
         title = _esc(subject[:190])
@@ -366,9 +511,11 @@ def _filings_section(filings) -> str:
 
 def daily_brief(sections: dict, market: dict, insights: dict, charts: dict,
                 explanations: dict, facts_map: dict, bridge_text: str,
-                filings, when: datetime) -> tuple[str, str, str]:
+                filings, when: datetime, backdrop: dict | None = None,
+                global_items: list | None = None) -> tuple[str, str, str]:
     """Returns (subject, html, plain text)."""
     body = _bridge(bridge_text)
+    body += _backdrop_section(backdrop or {}, global_items or [])
     body += _data_section(market, insights, charts)
     body += _filings_section(filings)
     body += _news_section(sections, explanations, facts_map)
@@ -376,17 +523,20 @@ def daily_brief(sections: dict, market: dict, insights: dict, charts: dict,
     n = sum(len(v) for v in sections.values())
     b = market.get("breadth", {})
     tone = ""
+    n50 = next((r for r in (backdrop or {}).get("headline") or [] if r["name"] == "Nifty 50"), None)
+    if n50 and n50.get("pct") is not None:
+        tone += f" | Nifty 50 {n50['pct']:+.2f}%"
     if b.get("advancers") is not None:
-        tone = f" | {b['advancers']:,} up / {b['decliners']:,} down"
-    subject = f"Zen brief {when:%d %b}{tone}"
+        tone += f" | {b['advancers']:,} up, {b['decliners']:,} down"
+    subject = f"Zen morning brief {when:%d %b}{tone}"
     subtitle = f"{when:%A %d %B %Y} · {n} stories"
 
     text = "\n".join(
         f"[{name}] {a.title} ({a.source})\n  {a.link}"
         for name, arts in sections.items() for a in arts
     )
-    html_out = _shell("Market Brief", subtitle, body,
-                      verdict=_verdict(market, insights))
+    html_out = _shell("Morning Brief", subtitle, body,
+                      verdict=_verdict(market, insights, backdrop))
     return subject, html_out, text
 
 

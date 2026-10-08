@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from zen.data import announcements, freshness, store
-from zen.monitor import bridge, explain, extract, insights, market, news
+from zen.monitor import backdrop, bridge, explain, extract, insights, market, news
 from zen.notify import charts, mailer, render
 
 log = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ IRRELEVANT = re.compile(
     "|broader |material |significant )?"
     "(?:impact|bearing|relevance|effect|implication)"
     "|is (?:trivial|not relevant|irrelevant)"
-    "|does not (?:affect|matter|impact)"
+    "|does not (?:affect|matter|impact|reach)"
     "|little (?:direct )?(?:impact|bearing|relevance)",
     re.I)
 
@@ -168,6 +168,14 @@ def main() -> int:
 
     images = charts.build_all(derived)
     bridge_text = bridge.build(derived, summary, pool, con=con)
+    # Index closes from the archive; the overnight strip from FRED and the ECB. Both degrade
+    # to nothing rather than stop the email.
+    try:
+        bd = backdrop.indices(con, asof)
+    except Exception as e:
+        log.warning("index backdrop failed (%s)", e)
+        bd = {}
+    global_items = backdrop.global_backdrop()
     con.close()
 
     # --- render -----------------------------------------------------------
@@ -181,6 +189,8 @@ def main() -> int:
         bridge_text=bridge_text,
         filings=filings,
         when=datetime.now(),
+        backdrop=bd,
+        global_items=global_items,
     )
 
     if args.dry_run:
