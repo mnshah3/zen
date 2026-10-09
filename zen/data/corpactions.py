@@ -118,7 +118,12 @@ def fetch(start: date, end: date, session=None, chunk_days: int = 365) -> pd.Dat
     short result would look like "no splits happened".
     """
     s = session or _session()
-    s.get(WARMUP, timeout=25)
+    try:
+        s.get(WARMUP, timeout=25)
+    except Exception as e:                                           # noqa: BLE001
+        # the section page is at times too slow from cloud machines; the API answers with the home
+        # page's cookies, and a chunk that fails is still reported below
+        log.warning("NSE corporate actions page did not answer (%s); going on with the home page's cookies", e)
 
     frames, cur = [], start
     while cur <= end:

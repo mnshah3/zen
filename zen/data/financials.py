@@ -167,17 +167,22 @@ def _rows(payload) -> list:
     return payload if isinstance(payload, list) else (payload or {}).get("data", [])
 
 
-def _warm(s, tries: int = 3) -> None:
-    """Open NSE's filings page for its cookies before the API is asked anything. The page is slow
-    at times in the evening, so a timeout is retried, as the listing's own pages are, before the
-    run is given up; a page that never answers still raises."""
+def _warm(s, tries: int = 2) -> None:
+    """Open NSE's filings page for its cookies before the API is asked anything.
+
+    From cloud machines that page is at times too slow to answer while the API itself still works
+    with the home page's cookies (the session already holds them, and the announcements job uses
+    nothing else). So a page that never answers is retried, then passed over with a warning. The
+    listing's own pages are what must not fail: they retry and then raise, so a window can never
+    come back short."""
     for attempt in range(tries):
         try:
             s.get(WARMUP, timeout=25)
             return
-        except Exception:                                            # noqa: BLE001
+        except Exception as e:                                       # noqa: BLE001
             if attempt == tries - 1:
-                raise
+                log.warning("NSE filings page did not answer (%s); going on with the home page's cookies", e)
+                return
             log.warning("NSE warm-up attempt %d timed out, retrying", attempt + 1)
             time.sleep(5 * (attempt + 1))
 

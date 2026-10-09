@@ -19,14 +19,23 @@ class Flaky:
 
 def test_a_slow_home_page_is_retried(monkeypatch):
     monkeypatch.setattr(fin.time, "sleep", lambda s: None)
-    s = Flaky(fails=2)
+    s = Flaky(fails=1)
     fin._warm(s)
-    assert s.calls == 3
+    assert s.calls == 2
 
 
-def test_a_page_that_never_answers_still_fails_the_run(monkeypatch):
+def test_a_page_that_never_answers_is_passed_over(monkeypatch):
     monkeypatch.setattr(fin.time, "sleep", lambda s: None)
     s = Flaky(fails=99)
-    with pytest.raises(TimeoutError):
-        fin._warm(s)
-    assert s.calls == 3
+    fin._warm(s)                         # the listing goes on with the home page's cookies
+    assert s.calls == 2
+
+
+def test_the_listing_itself_still_refuses_to_come_back_short(monkeypatch):
+    monkeypatch.setattr(fin.time, "sleep", lambda s: None)
+
+    class Down:
+        def get(self, url, timeout):
+            raise TimeoutError("read timed out")
+    with pytest.raises(RuntimeError, match="refusing to return a partial window"):
+        fin.listing(start=fin.date(2026, 10, 2), end=fin.date(2026, 10, 9), session=Down())
