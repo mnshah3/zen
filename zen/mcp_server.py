@@ -33,7 +33,8 @@ mcp = FastMCP(
         "delisted companies, quarterly results and filings as broadcast, shareholding and pledges. "
         "Pass as_of (YYYY-MM-DD) to see only what was public by the end of that day; this is how "
         "to avoid look-ahead. Prices from price_history are as traded, not split-adjusted. "
-        "Lenders filing in the banking format have only total income in the results."),
+        "Lenders filing in the banking format have only total income in quarterly_results; "
+        "bank_results has their net interest income, provisions, profit and NPAs."),
 )
 
 
@@ -53,6 +54,12 @@ def fundamentals(symbol: str, as_of: str | None = None) -> dict:
 def quarterly_results(symbol: str, as_of: str | None = None, quarters: int = 8) -> dict:
     """Quarterly results as filed and known by as_of, latest revision of each quarter, Rs crore."""
     return api.quarterly_results(symbol, as_of, quarters)
+
+
+@mcp.tool()
+def bank_results(symbol: str, as_of: str | None = None, quarters: int = 8) -> dict:
+    """A lender's quarters from its banking-format filings: net interest income, provisions, net profit, EPS, NPAs."""
+    return api.bank_results(symbol, as_of, quarters)
 
 
 @mcp.tool()

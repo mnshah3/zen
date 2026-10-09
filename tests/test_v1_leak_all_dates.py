@@ -74,7 +74,10 @@ def _mini_archive(path, extra_table: bool = False):
     for t, (col, typ) in {"prices": ("date", "DATE"), "prices_other": ("date", "DATE"),
                           "indices": ("date", "DATE"), "corpactions": ("ex_date", "DATE"),
                           "financials": ("broadcast_dt", "TIMESTAMP"),
-                          "announcements": ("an_dt", "TIMESTAMP")}.items():
+                          "announcements": ("an_dt", "TIMESTAMP"),
+                          # research tables for the dashboard (read by no strategy, cut all the same)
+                          "shareholding": ("broadcast_dt", "TIMESTAMP"), "pledges": ("observed_dt", "TIMESTAMP"),
+                          "bank_results": ("broadcast_dt", "TIMESTAMP")}.items():
         con.execute(f"CREATE TABLE {t} ({col} {typ}, tag VARCHAR)")
         if typ == "DATE":
             rows = [("2024-05-31", "before"), ("2024-06-03", "on"), ("2024-06-04", "after")]
@@ -83,7 +86,7 @@ def _mini_archive(path, extra_table: bool = False):
                     ("2024-06-03 09:15:00", "on"), ("2024-06-04 10:00:00", "after")]
         con.executemany(f"INSERT INTO {t} VALUES (?, ?)", rows)
     if extra_table:
-        con.execute("CREATE TABLE shareholding (as_of DATE)")
+        con.execute("CREATE TABLE some_future_table (as_of DATE)")
     con.close()
 
 
@@ -105,7 +108,7 @@ def test_truncation_keeps_only_rows_dated_before_D(tmp_path):
 def test_truncation_refuses_a_table_it_does_not_cut(tmp_path):
     src = tmp_path / "src.duckdb"
     _mini_archive(src, extra_table=True)
-    with pytest.raises(RuntimeError, match="shareholding"):
+    with pytest.raises(RuntimeError, match="some_future_table"):
         leak.truncated_archive(src, "2024-06-03", tmp_path / "cut.duckdb")
 
 

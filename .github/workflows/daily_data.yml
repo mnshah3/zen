@@ -47,6 +47,17 @@ jobs:
         timeout-minutes: 10
         run: python -m jobs.update_shareholding --days 10
 
+      # Lenders' quarterly results from their banking-format filings, and NSE industry labels
+      # for newly listed symbols. Research data for the dashboard, read by no live strategy.
+      - name: bank results
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python -m jobs.update_bank_results
+      - name: industry labels for new listings
+        continue-on-error: true
+        timeout-minutes: 10
+        run: python -m jobs.update_industry_new --limit 60
+
       - name: commit new data
         run: |
           git config user.name  "zen-bot"
@@ -54,6 +65,8 @@ jobs:
           git add data/announcements data/financials data/corpactions
           [ ! -d data/shareholding ] || git add data/shareholding
           [ ! -d data/pledges ] || git add data/pledges
+          [ ! -d data/bank_results ] || git add data/bank_results
+          git add data/reference/industry_nse.parquet
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
           git diff --staged --quiet || git commit -m "data: filings, results, corporate actions $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile

@@ -94,8 +94,13 @@ CUTS = {
     "financials": ("broadcast_dt", "broadcast_dt < ?", "filings broadcast before D 00:00"),
     "announcements": ("an_dt", "an_dt < ?", "announcements disseminated before D 00:00"),
     "corpactions": ("ex_date", "ex_date < ?", "corporate actions with ex-date strictly before D"),
+    # Research tables for the dashboard. v1 reads none of them; they are cut by when each row
+    # became public all the same, so the truncated archive holds nothing from D onwards.
+    "shareholding": ("broadcast_dt", "broadcast_dt < ?", "shareholding filings broadcast before D 00:00"),
+    "pledges": ("observed_dt", "observed_dt < ?", "pledge disclosures observed before D 00:00"),
+    "bank_results": ("broadcast_dt", "broadcast_dt < ?", "lenders' filings broadcast before D 00:00"),
 }
-TIMESTAMP_CUTS = {"financials", "announcements"}
+TIMESTAMP_CUTS = {"financials", "announcements", "shareholding", "pledges", "bank_results"}
 
 STATIC_NOTE = ("pit.StaticLabels is loaded once from the full archive and given to both runs, "
                "as jobs/backtest_v1.py does: the first-ever NSE industry label (v1 "

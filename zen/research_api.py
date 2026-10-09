@@ -133,7 +133,7 @@ def quarterly_results(symbol: str, as_of: str | None = None, quarters: int = 8,
     """Quarterly results as filed with NSE and known by the end of `as_of`: for each quarter the
     latest revision broadcast by then. Rupee figures in crore. Consolidated where the company
     files it, unless `consolidated` says otherwise. Lenders filing in the banking format carry
-    only total income in zen's archive."""
+    only total income here; their full figures are in bank_results()."""
     d = _day(as_of)
     con = _con()
     try:
@@ -157,6 +157,49 @@ def quarterly_results(symbol: str, as_of: str | None = None, quarters: int = 8,
         "revenue_cr": (df["revenue"].fillna(df["total_income"]) / 1e7).round(2),
         "ebitda_cr": (df["ebitda"] / 1e7).round(2), "net_profit_cr": (df["profit_reported"] / 1e7).round(2),
         "profit_ex_exceptional_cr": (df["profit_normalised"] / 1e7).round(2), "eps": df["eps_basic"]})
+    return {"symbol": symbol.upper(), "as_of": _clean(d), "basis": "consolidated" if consolidated else "standalone",
+            "quarters": _records(out)}
+
+
+def bank_results(symbol: str, as_of: str | None = None, quarters: int = 8, consolidated: bool | None = None) -> dict:
+    """A lender's quarterly results from its banking-format filings, known by the end of `as_of`:
+    total income, net interest income, operating profit before provisions, provisions, net
+    profit (the shareholders' share where consolidated), EPS, and the gross and net NPA ratios
+    (standalone, as the bank discloses them). Rupee figures in crore; NPA ratios in percent."""
+    d = _day(as_of)
+    con = _con()
+    try:
+        tabs = set(con.execute("SELECT table_name FROM information_schema.tables").df()["table_name"])
+        if "bank_results" not in tabs:
+            return {"symbol": symbol.upper(), "as_of": _clean(d), "basis": None, "quarters": [],
+                    "note": "bank_results is not built in this archive (python -m jobs.update_bank_results)"}
+        cutoff = datetime.combine(d + timedelta(days=1), datetime.min.time()) if d else datetime(9999, 1, 1)
+        df = con.execute(
+            """
+            SELECT period_end, consolidated, broadcast_dt, total_income, interest_earned, interest_expended,
+                   operating_profit, provisions, profit_reported, profit_owners, eps_basic, gross_npa_pct, net_npa_pct
+            FROM bank_results WHERE symbol = ? AND broadcast_dt < ? AND has_figures
+            """, [symbol.upper(), cutoff]).df()
+    finally:
+        con.close()
+    if df.empty:
+        return {"symbol": symbol.upper(), "as_of": _clean(d), "basis": None, "quarters": []}
+    df = df.sort_values("broadcast_dt").drop_duplicates(["consolidated", "period_end"], keep="last")
+    npa = df[~df["consolidated"]].set_index("period_end")[["gross_npa_pct", "net_npa_pct"]]
+    if consolidated is None:
+        consolidated = bool(df["consolidated"].any())
+    df = df[df["consolidated"] == consolidated].sort_values("period_end", ascending=False).head(int(quarters))
+    profit = df["profit_owners"].where(df["consolidated"] & df["profit_owners"].notna(), df["profit_reported"])
+    g = npa.reindex(df["period_end"])
+    out = pd.DataFrame({
+        "period_end": df["period_end"].to_numpy(), "filed": df["broadcast_dt"].to_numpy(),
+        "total_income_cr": (df["total_income"] / 1e7).round(2).to_numpy(),
+        "net_interest_income_cr": ((df["interest_earned"] - df["interest_expended"]) / 1e7).round(2).to_numpy(),
+        "operating_profit_cr": (df["operating_profit"] / 1e7).round(2).to_numpy(),
+        "provisions_cr": (df["provisions"] / 1e7).round(2).to_numpy(),
+        "net_profit_cr": (profit / 1e7).round(2).to_numpy(), "eps": df["eps_basic"].to_numpy(),
+        "gross_npa_pct": (g["gross_npa_pct"].where(g["gross_npa_pct"] > 0) * 100).round(2).to_numpy(),
+        "net_npa_pct": (g["net_npa_pct"].where(g["gross_npa_pct"] > 0) * 100).round(2).to_numpy()})
     return {"symbol": symbol.upper(), "as_of": _clean(d), "basis": "consolidated" if consolidated else "standalone",
             "quarters": _records(out)}
 

@@ -257,7 +257,7 @@ def listing(symbol: str | None = None, start: date | None = None,
 QUARTER_MAX_DAYS = 100
 
 
-def parse_xbrl(content: bytes, detail: dict | None = None) -> dict:
+def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = None) -> dict:
     """Extract tagged figures for the period being reported.
 
     A filing carries several contexts: the quarter just ended, the year-ago
@@ -282,12 +282,17 @@ def parse_xbrl(content: bytes, detail: dict | None = None) -> dict:
     `quarter_span_days` is returned with the figures: the length in days of the
     span the duration facts came from, absent when none were taken.
 
+    `tags` maps XBRL element names to output columns; it defaults to TAGS (the Ind-AS
+    statement). Another taxonomy (banks' results, zen/data/bank_results.py) passes its own map
+    and gets exactly the same period rules.
+
     `detail`, when a dict is passed, is filled with why: duration_source
     ("declared", "OneD", "audit_fallback" or None), rejected_span_days (the
     length of a refused period; an undated OneD is accepted as the quarter, see
     below, so it is never refused), and dropped_columns
     -- figures present in the document that this rule refused.
     """
+    tagmap = TAGS if tags is None else tags
     try:
         root = ET.fromstring(content)
     except ET.ParseError as e:
@@ -469,7 +474,7 @@ def parse_xbrl(content: bytes, detail: dict | None = None) -> dict:
     def collect(refs: set) -> None:
         # The first value in document order wins, as setdefault did.
         for node in root.iter():
-            col = TAGS.get(node.tag.split("}")[-1])
+            col = tagmap.get(node.tag.split("}")[-1])
             ref = node.get("contextRef")
             if not col or col in facts or ref not in refs or not node.text:
                 continue
@@ -507,7 +512,7 @@ def parse_xbrl(content: bytes, detail: dict | None = None) -> dict:
         dropped = set()
         if rejected:
             for node in root.iter():
-                col = TAGS.get(node.tag.split("}")[-1])
+                col = tagmap.get(node.tag.split("}")[-1])
                 if (col and col not in facts and node.get("contextRef") in rejected
                         and (node.text or "").strip()):
                     dropped.add(col)

@@ -60,3 +60,23 @@ def test_missing_archive_says_how_to_build_it(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "DB", tmp_path / "none.duckdb")
     with pytest.raises(FileNotFoundError, match="rebuild_db"):
         api.price_history("ABC")
+
+
+def test_bank_results_are_point_in_time(tmp_path, monkeypatch):
+    import duckdb
+    from zen.data import bank_results as br
+    db = tmp_path / "bank.duckdb"
+    con = duckdb.connect(str(db))
+    br.ensure_schema(con)
+    rows = [("XB", "2026-03-31", "2026-05-01 18:00", False, 100e7, 40e7, 30e7, 1.0, 0.02, 0.005, "u1"),
+            ("XB", "2026-06-30", "2026-07-20 18:00", False, 110e7, 44e7, 33e7, 1.1, 0.018, 0.004, "u2")]
+    for sym, pe, bd, cons, ie, ix, np_, eps, g, n, url in rows:
+        con.execute("INSERT INTO bank_results (symbol, period_end, broadcast_dt, consolidated, interest_earned, "
+                    "interest_expended, profit_reported, eps_basic, gross_npa_pct, net_npa_pct, has_figures, xbrl_url) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true, ?)", [sym, pe, bd, cons, ie, ix, np_, eps, g, n, url])
+    con.close()
+    monkeypatch.setattr(api, "DB", db)
+    early = api.bank_results("xb", "2026-07-01")
+    assert [q["period_end"] for q in early["quarters"]] == ["2026-03-31"]
+    late = api.bank_results("XB")["quarters"][0]
+    assert late["net_interest_income_cr"] == 66.0 and late["net_profit_cr"] == 33.0 and late["gross_npa_pct"] == 1.8
