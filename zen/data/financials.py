@@ -167,6 +167,21 @@ def _rows(payload) -> list:
     return payload if isinstance(payload, list) else (payload or {}).get("data", [])
 
 
+def _warm(s, tries: int = 3) -> None:
+    """Open NSE's filings page for its cookies before the API is asked anything. The page is slow
+    at times in the evening, so a timeout is retried, as the listing's own pages are, before the
+    run is given up; a page that never answers still raises."""
+    for attempt in range(tries):
+        try:
+            s.get(WARMUP, timeout=25)
+            return
+        except Exception:                                            # noqa: BLE001
+            if attempt == tries - 1:
+                raise
+            log.warning("NSE warm-up attempt %d timed out, retrying", attempt + 1)
+            time.sleep(5 * (attempt + 1))
+
+
 def listing(symbol: str | None = None, start: date | None = None,
             end: date | None = None, session=None, page_size: int = 100,
             max_pages: int = 200) -> pd.DataFrame:
@@ -177,7 +192,7 @@ def listing(symbol: str | None = None, start: date | None = None,
     silently producing empty XBRL parses downstream.
     """
     s = session or _session()
-    s.get(WARMUP, timeout=25)
+    _warm(s)
 
     raw = []
     if symbol:
