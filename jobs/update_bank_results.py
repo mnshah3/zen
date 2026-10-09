@@ -2,6 +2,7 @@
 
     python -m jobs.update_bank_results              # every lender filing not yet read
     python -m jobs.update_bank_results --limit 50   # at most 50 documents this run
+    python -m jobs.update_bank_results --reparse    # read every stored document again (new fields)
 
 The documents are the ones `financials` already lists for lenders, so run this after the
 financials update. Optional research data: nothing in zen's strategies reads it, and a
@@ -21,13 +22,15 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     p = argparse.ArgumentParser()
     p.add_argument("--limit", type=int)
+    p.add_argument("--reparse", action="store_true",
+                   help="read every document again, from the local cache where it is there")
     a = p.parse_args(argv)
 
     con = store.connect()
     try:
         docs = bank_results.documents(con)
         have = bank_results.stored_urls()
-        todo = docs[~docs["xbrl_url"].isin(have)]
+        todo = docs if a.reparse else docs[~docs["xbrl_url"].isin(have)]
         if a.limit:
             todo = todo.tail(a.limit)                 # the newest first when limited
         rows, failed = bank_results.fetch(todo, _session() if len(todo) else None)

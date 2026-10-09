@@ -20,6 +20,12 @@ Insurers share the "total income only" pattern in `financials` but file a third 
 documents carry none of these fields. They are kept with `has_figures` false, so they are not
 fetched again, and the research pages ignore them.
 
+BALANCE SHEET
+
+The half-year filings (September and March) also carry the balance sheet at the period end:
+capital, reserves and surplus (together the shareholders' equity), deposits, advances,
+borrowings and total assets. They are empty in June and December filings.
+
 UNITS
 
 Amounts are in rupees, as in `financials`. The NPA ratios are fractions as filed (0.0117 is
@@ -59,6 +65,13 @@ BANK_TAGS = {
     "PercentageOfNpa": "net_npa_pct",
     "PaidUpValueOfEquityShareCapital": "equity_capital",
     "FaceValueOfEquityShareCapital": "face_value",
+    # balance sheet: in the half-year filings (September and March), at the balance-sheet date
+    "Capital": "capital",
+    "ReservesAndSurplus": "reserves",
+    "Deposits": "deposits",
+    "Advances": "advances",
+    "Borrowings": "borrowings",
+    "Assets": "total_assets",
 }
 FIGURES = list(dict.fromkeys(BANK_TAGS.values()))
 COLUMNS = ["symbol", "company", "period_end", "broadcast_dt", "consolidated", *FIGURES,
@@ -71,6 +84,7 @@ CREATE TABLE IF NOT EXISTS bank_results (
     expenses_ex_provisions DOUBLE, operating_profit DOUBLE, provisions DOUBLE, pbt DOUBLE, tax DOUBLE,
     profit_reported DOUBLE, profit_owners DOUBLE, eps_basic DOUBLE, eps_diluted DOUBLE,
     gross_npa_pct DOUBLE, net_npa_pct DOUBLE, equity_capital DOUBLE, face_value DOUBLE,
+    capital DOUBLE, reserves DOUBLE, deposits DOUBLE, advances DOUBLE, borrowings DOUBLE, total_assets DOUBLE,
     quarter_span_days INTEGER, has_figures BOOLEAN, xbrl_url VARCHAR PRIMARY KEY
 )
 """
@@ -159,6 +173,12 @@ def write(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> list[Path]:
 
 
 def rebuild(con, out_dir: Path = OUT_DIR) -> int:
+    # a table built before a column was added is replaced, not altered: it is rebuilt from the
+    # parquet files every time anyway
+    cols = [r[0] for r in con.execute("SELECT column_name FROM information_schema.columns "
+                                      "WHERE table_name = 'bank_results'").fetchall()]
+    if cols and set(cols) != set(COLUMNS):
+        con.execute("DROP TABLE bank_results")
     ensure_schema(con)
     if not out_dir.exists() or not any(out_dir.glob("*.parquet")):
         return 0

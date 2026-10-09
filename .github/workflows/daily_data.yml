@@ -57,6 +57,10 @@ jobs:
         continue-on-error: true
         timeout-minutes: 10
         run: python -m jobs.update_industry_new --limit 60
+      - name: event calendar
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python -m jobs.update_events
 
       - name: commit new data
         run: |
@@ -66,6 +70,7 @@ jobs:
           [ ! -d data/shareholding ] || git add data/shareholding
           [ ! -d data/pledges ] || git add data/pledges
           [ ! -d data/bank_results ] || git add data/bank_results
+          [ ! -d data/events ] || git add data/events
           git add data/reference/industry_nse.parquet
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
           git diff --staged --quiet || git commit -m "data: filings, results, corporate actions $(date -u +%Y-%m-%d)"

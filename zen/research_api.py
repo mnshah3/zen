@@ -204,6 +204,77 @@ def bank_results(symbol: str, as_of: str | None = None, quarters: int = 8, conso
             "quarters": _records(out)}
 
 
+def upcoming_results(symbol: str | None = None, as_of: str | None = None, days: int = 14,
+                     results_only: bool = True) -> list[dict]:
+    """Board meetings NSE listed as coming up (by default only those for financial results), dated
+    from `as_of` (today if not given) to `days` later, as known by the end of `as_of`."""
+    from zen.data import events
+    d = _day(as_of) or date.today()
+    con = _con()
+    try:
+        df = events.upcoming(con, d, days=int(days), results_only=results_only, symbol=symbol)
+    finally:
+        con.close()
+    return _records(df[["event_date", "symbol", "company", "purpose", "description", "observed_dt"]]) if len(df) else []
+
+
+def pe_history(symbol: str, as_of: str | None = None, years: int = 5) -> dict:
+    """The trailing P/E at each month-end, point in time (zen/valuation.py): the month-end close
+    over the last four quarters' basic EPS as filed by that date, restated for later splits and
+    bonuses; a month that fails a guard has no value. With the median, range and where the
+    latest sits. Lenders filing in the banking format use their bank results."""
+    from zen import valuation
+    from zen.universe import pit
+    d = _day(as_of)
+    sym = symbol.upper()
+    con = _con()
+    try:
+        last = _last_session(con, d)
+        cutoff = datetime.combine(last + timedelta(days=1), datetime.min.time())
+        start = last - timedelta(days=366 * int(years) + 40)
+        fil = con.execute(
+            "SELECT consolidated, period_end, broadcast_dt, eps_basic AS eps, profit_reported AS profit FROM financials "
+            "WHERE symbol = ? AND broadcast_dt < ? AND eps_basic IS NOT NULL "
+            "AND (quarter_span_days IS NULL OR quarter_span_days <= 100)", [sym, cutoff]).df()
+        tabs = set(con.execute("SELECT table_name FROM information_schema.tables").df()["table_name"])
+        if fil.empty and "bank_results" in tabs:
+            fil = con.execute(
+                "SELECT consolidated, period_end, broadcast_dt, eps_basic AS eps, CASE WHEN consolidated AND "
+                "profit_owners IS NOT NULL THEN profit_owners ELSE profit_reported END AS profit FROM bank_results "
+                "WHERE symbol = ? AND broadcast_dt < ? AND has_figures AND eps_basic IS NOT NULL", [sym, cutoff]).df()
+        px = con.execute("SELECT symbol, date, close FROM prices WHERE symbol = ? AND series IN ('EQ', 'BE') "
+                         "AND close > 0 AND date >= ? AND date <= ? ORDER BY date", [sym, start, last]).df()
+        fac = pit.split_factors(con, before=last + timedelta(days=1))
+    finally:
+        con.close()
+    if px.empty:
+        return {"symbol": sym, "as_of": _clean(last), "months": [], "summary": None}
+    f = fac[fac["symbol"] == sym][["ex_date", "factor"]] if len(fac) else fac
+    px["date"] = pd.to_datetime(px["date"])
+    px["adj"] = px["close"] * pit.cumulative_factor(px, fac[fac["symbol"] == sym] if len(fac) else fac)
+    if len(fil) and fil["consolidated"].any():
+        fil = fil[fil["consolidated"]]
+    series = valuation.pe_series(fil, f, px[["date", "adj"]], valuation.price_breaks(px[["date", "adj"]]),
+                                 months=int(years) * 12, asof=pd.Timestamp(last))
+    return {"symbol": sym, "as_of": _clean(last), "basis": "consolidated" if len(fil) and fil["consolidated"].all() else "standalone",
+            "months": series, "summary": valuation.summary(series)}
+
+
+def company_news(symbol: str, days: int = 7, limit: int = 8) -> dict:
+    """Recent news headlines naming the company (Google News search, matched on the company's own
+    name or its symbol in capitals): headline, outlet, link and time. Live, not point in time."""
+    from zen.data import company_news as cn
+    sym = symbol.upper()
+    con = _con()
+    try:
+        row = con.execute("SELECT company FROM financials WHERE symbol = ? AND company IS NOT NULL "
+                          "ORDER BY broadcast_dt DESC LIMIT 1", [sym]).fetchone()
+    finally:
+        con.close()
+    name = row[0] if row and row[0] else sym
+    return {"symbol": sym, "name": name, "headlines": cn.headlines(name, sym, days=int(days), limit=int(limit))}
+
+
 def filings(symbol: str, since: str | None = None, until: str | None = None, material_only: bool = True,
             limit: int = 30) -> list[dict]:
     """The company's filings with NSE broadcast between `since` and the end of `until`, newest

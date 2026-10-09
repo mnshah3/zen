@@ -63,6 +63,24 @@ def bank_results(symbol: str, as_of: str | None = None, quarters: int = 8) -> di
 
 
 @mcp.tool()
+def upcoming_results(symbol: str | None = None, as_of: str | None = None, days: int = 14) -> list[dict]:
+    """Results board meetings NSE lists as coming up in the next `days` days (one company or all)."""
+    return api.upcoming_results(symbol, as_of, days)
+
+
+@mcp.tool()
+def pe_history(symbol: str, as_of: str | None = None, years: int = 5) -> dict:
+    """Month-end trailing P/E over the last `years` years, point in time, with median and range."""
+    return api.pe_history(symbol, as_of, years)
+
+
+@mcp.tool()
+def company_news(symbol: str, days: int = 7) -> dict:
+    """Recent news headlines naming the company, newest first, with links (live, not point in time)."""
+    return api.company_news(symbol, days)
+
+
+@mcp.tool()
 def filings(symbol: str, since: str | None = None, until: str | None = None, material_only: bool = True,
             limit: int = 30) -> list[dict]:
     """A company's NSE filings between two dates, newest first, with links to the documents."""
