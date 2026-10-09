@@ -233,14 +233,14 @@ def pe_history(symbol: str, as_of: str | None = None, years: int = 5) -> dict:
         cutoff = datetime.combine(last + timedelta(days=1), datetime.min.time())
         start = last - timedelta(days=366 * int(years) + 40)
         fil = con.execute(
-            "SELECT consolidated, period_end, broadcast_dt, eps_basic AS eps, profit_reported AS profit FROM financials "
+            "SELECT consolidated, period_end, broadcast_dt, eps_basic AS eps, profit_reported AS profit, xbrl_url FROM financials "
             "WHERE symbol = ? AND broadcast_dt < ? AND eps_basic IS NOT NULL "
             "AND (quarter_span_days IS NULL OR quarter_span_days <= 100)", [sym, cutoff]).df()
         tabs = set(con.execute("SELECT table_name FROM information_schema.tables").df()["table_name"])
         if fil.empty and "bank_results" in tabs:
             fil = con.execute(
                 "SELECT consolidated, period_end, broadcast_dt, eps_basic AS eps, CASE WHEN consolidated AND "
-                "profit_owners IS NOT NULL THEN profit_owners ELSE profit_reported END AS profit FROM bank_results "
+                "profit_owners IS NOT NULL THEN profit_owners ELSE profit_reported END AS profit, xbrl_url FROM bank_results "
                 "WHERE symbol = ? AND broadcast_dt < ? AND has_figures AND eps_basic IS NOT NULL", [sym, cutoff]).df()
         px = con.execute("SELECT symbol, date, close FROM prices WHERE symbol = ? AND series IN ('EQ', 'BE') "
                          "AND close > 0 AND date >= ? AND date <= ? ORDER BY date", [sym, start, last]).df()

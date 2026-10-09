@@ -45,20 +45,27 @@ def price_breaks(px: pd.DataFrame) -> list[pd.Timestamp]:
     return out
 
 
-def _restate(eps: float, filed: pd.Timestamp, fac: pd.DataFrame) -> float:
+def _later_factors(filed: np.ndarray, fac: pd.DataFrame | None) -> np.ndarray:
+    """For each filing time, the product of the split and bonus factors that went ex after it."""
     if fac is None or not len(fac):
-        return eps
-    later = fac.loc[fac["ex_date"] > filed, "factor"]
-    return eps * (float(np.prod(later.to_numpy(dtype=float))) if len(later) else 1.0)
+        return np.ones(len(filed))
+    f = fac.assign(ex_date=pd.to_datetime(fac["ex_date"])).sort_values("ex_date")
+    ex = f["ex_date"].to_numpy(dtype="datetime64[ns]")
+    suffix = np.append(np.cumprod(f["factor"].to_numpy(dtype=float)[::-1])[::-1], 1.0)   # product from i to the end
+    return suffix[np.searchsorted(ex, filed, side="right")]
 
 
 def pe_series(fil: pd.DataFrame, fac: pd.DataFrame | None, px: pd.DataFrame, brk=(), months: int = 60,
               asof=None) -> list[dict]:
     """[{d, pe}] oldest first, one per month-end session in the last `months` months.
 
-    fil: one basis' quarterly filings, every revision: period_end, broadcast_dt, eps, profit.
+    fil: one basis' quarterly filings, every revision: period_end, broadcast_dt, eps, profit, and
+    xbrl_url where known (it orders revisions broadcast at the same instant).
     fac: ex_date, factor (price multipliers of splits and bonuses). px: date, adj (closes on
-    today's share basis), ascending. brk: dates of unexplained price jumps."""
+    today's share basis), ascending. brk: dates of unexplained price jumps.
+
+    The filings are walked once in the order they were broadcast, keeping the latest revision of
+    each quarter, so each month-end sees exactly what had been filed by the end of that day."""
     if px is None or not len(px):
         return []
     px = px.assign(date=pd.to_datetime(px["date"])).sort_values("date")
@@ -68,32 +75,36 @@ def pe_series(fil: pd.DataFrame, fac: pd.DataFrame | None, px: pd.DataFrame, brk
     if not len(p):
         return []
     me = p.groupby(p["date"].dt.to_period("M")).tail(1)
-    f = fil.dropna(subset=["eps"]).copy()
-    if fac is not None and len(fac):
-        fac = fac.assign(ex_date=pd.to_datetime(fac["ex_date"]))
-    if len(f):
-        f["period_end"] = pd.to_datetime(f["period_end"])
-        f["broadcast_dt"] = pd.to_datetime(f["broadcast_dt"])
-        f = f.sort_values("broadcast_dt")
-        f["eps_r"] = [_restate(float(e), b, fac) for e, b in zip(f["eps"], f["broadcast_dt"])]
+    f = fil.dropna(subset=["eps"])
+    f = f.assign(period_end=pd.to_datetime(f["period_end"]), broadcast_dt=pd.to_datetime(f["broadcast_dt"]))
+    # revisions broadcast at the same instant: NSE's document link, whose filing number rises with
+    # each upload, decides which is the later one (the database returns rows in no fixed order)
+    keys = ["broadcast_dt", "xbrl_url"] if "xbrl_url" in f else ["broadcast_dt"]
+    f = f.sort_values(keys, kind="stable")
+    filed = f["broadcast_dt"].to_numpy(dtype="datetime64[ns]")
+    eps_r = f["eps"].to_numpy(dtype=float) * _later_factors(filed, fac)
+    pend = list(f["period_end"])
+    prof = f["profit"].to_numpy(dtype=float) if "profit" in f else np.full(len(f), np.nan)
     brk = sorted(pd.Timestamp(b) for b in brk)
-    out = []
+    latest: dict = {}                       # period_end -> (restated eps, profit), latest revision so far
+    k, out = 0, []
     for d, price in zip(me["date"], me["adj"]):
+        cutoff = np.datetime64(d + pd.Timedelta(days=1), "ns")
+        while k < len(filed) and filed[k] < cutoff:
+            latest[pend[k]] = (eps_r[k], prof[k])
+            k += 1
         pe = None
-        known = f[f["broadcast_dt"] < d + pd.Timedelta(days=1)] if len(f) else f
-        if len(known):
-            latest = known.drop_duplicates("period_end", keep="last").sort_values("period_end")
-            last4 = latest.tail(4)
-            qn = (last4["period_end"].dt.year * 4 + (last4["period_end"].dt.month - 1) // 3).tolist()
-            ok = (len(last4) == 4 and qn == list(range(qn[0], qn[0] + 4))
-                  and (d - last4["period_end"].max()).days <= STALE_DAYS)
+        if len(latest) >= 4:
+            q4 = sorted(latest)[-4:]
+            qn = [x.year * 4 + (x.month - 1) // 3 for x in q4]
+            ok = qn == list(range(qn[0], qn[0] + 4)) and (d - q4[-1]).days <= STALE_DAYS
             if ok:
-                ttm = float(last4["eps_r"].sum())
-                implied = [pr / e for pr, e in zip(last4["profit"], last4["eps_r"])
-                           if pd.notna(pr) and abs(e) >= 0.2 and (pr > 0) == (e > 0)]
+                vals = [latest[x] for x in q4]
+                ttm = float(sum(v[0] for v in vals))
+                implied = [pr / e for e, pr in vals if not np.isnan(pr) and abs(e) >= 0.2 and (pr > 0) == (e > 0)]
                 if len(implied) >= 2 and max(implied) / min(implied) > SHARE_BAND:
                     ok = False
-                window_start = last4["period_end"].min() - pd.DateOffset(months=3)
+                window_start = q4[0] - pd.DateOffset(months=3)
                 if any(window_start < b <= d for b in brk):
                     ok = False
                 if ok and ttm >= MIN_EPS and price > 0:

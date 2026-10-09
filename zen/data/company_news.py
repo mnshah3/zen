@@ -6,7 +6,7 @@ different company with a similar name. So a headline is kept only when it names 
 itself, as one phrase: the name without its legal suffix ("Tata Consultancy Services"), a short
 form that stays distinctive (its first two words, when the name is three or more and the two
 are not generic), or the NSE symbol in capitals as a whole word ("TCS", never "oil" for OIL).
-Stock-quote listing pages are not news and are dropped. Headlines are de-duplicated (outlets
+Stock-quote listing pages and photo galleries are not news and are dropped. Headlines are de-duplicated (outlets
 re-publish the same story), newest first.
 
 Only the headline, the outlet, the link and the time are kept: the dashboard links out, it
@@ -56,7 +56,8 @@ def _short_form(core: str) -> str | None:
     return None
 
 
-NOT_NEWS = re.compile(r"stock price, news, quote|share price (today|live)|share price update|stock quote", re.I)
+NOT_NEWS = re.compile(r"stock price, news, quote|share price (today|live)|share price update|stock quote"
+                      r"|\bphotos in india\b|\bimage gallery\b|\bwallpapers?\b", re.I)
 
 
 def mentions(title: str, name: str, symbol: str) -> bool:
