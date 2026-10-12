@@ -305,7 +305,10 @@ REPLAY = REPO / "data" / "backtest" / "v1_replay_v3"
 WINDOW = REPO / "data" / "backtest" / "v1_window_2020"
 
 
-@pytest.mark.skipif(not (FROZEN / "freeze.json").exists(), reason="v3 inputs not frozen here")
+# freeze.json is committed; the frozen copies themselves are not (large, and NSE's files),
+# so a fresh clone has the hash list and nothing to hash
+@pytest.mark.skipif(not (FROZEN / "data" / "zen.duckdb").exists(),
+                    reason="the frozen copies are not on this machine (only freeze.json is committed)")
 def test_the_frozen_directory_matches_its_hash_list():
     assert freeze_v3.verify(FROZEN) == []
 
