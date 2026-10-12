@@ -2015,3 +2015,18 @@ for v3 (which starts from cash), for the Nifty 500 index fund over v3's window,
 and for v1 over its replay's whole period from 15 February 2019, labelled as
 that longer period. This is a reported figure only: it is not among the A2 bars
 or the five statements of section 14.7.
+
+### 12 October 2026, after the full run
+
+**C10. The full run, and the one difference found in it (section 15.6).**
+Production ran the full window once on the frozen inputs and recorded one trial
+(`state/trials.jsonl`, the 198th). The checker ran the same window. Their
+universe, eligibility, ranks, all 157 fills and all 1,629 NAV marks agreed.
+One record field differed, for one holding at one review: 63MOONS at
+17 February 2025, a holding sold in full under E1, E2 and E4 whose market cap
+was unknown. The checker listed `trim` in its `untested`; production did not.
+C8 had settled this before the run: for a holding with a full-sale order under
+section 8 the trim is neither computed nor left untested. The checker's record
+was corrected to follow C8 and the checker was run again. Production was not
+changed and was not run again, so the one trial stands. The two full runs are
+now identical in all seven files (`jobs/compare_runs.py --profile v3`).

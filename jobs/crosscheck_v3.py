@@ -1689,6 +1689,10 @@ class BookV3:
             if _isn(r["mcap"]) or _isn(ttm_p):
                 untested.append("trim")
             full = bool(codes)
+            if full:
+                # Clarification C8 (12 October 2026): for a holding with a full-sale order
+                # under section 8 the trim is neither computed nor left untested
+                untested = [u for u in untested if u != "trim"]
             uV = uC = None
             excess = None
             n_sell = 0.0

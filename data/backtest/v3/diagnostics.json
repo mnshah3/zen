@@ -1,0 +1,900 @@
+{
+ "run": "data\\backtest\\v3",
+ "frozen": "data/frozen/v3",
+ "end_open": "2026-09-18",
+ "score_signal": {
+  "ic": {
+   "T": {
+    "reviews": 26,
+    "mean": 0.05242545025409927,
+    "t": 3.047813333265172,
+    "share_positive": 0.7307692307692307
+   },
+   "R1": {
+    "reviews": 26,
+    "mean": 0.06624956704327976,
+    "t": 3.7937255572584294,
+    "share_positive": 0.6923076923076923
+   },
+   "R2": {
+    "reviews": 26,
+    "mean": 0.022423902925780816,
+    "t": 2.0604770322975607,
+    "share_positive": 0.6923076923076923
+   },
+   "R3": {
+    "reviews": 26,
+    "mean": 0.0280393082860788,
+    "t": 1.5897969323509207,
+    "share_positive": 0.6153846153846154
+   }
+  },
+  "by_review": [
+   {
+    "D": "2020-02-17",
+    "to": "2020-06-01",
+    "eligible": 221,
+    "without_a_forward_return": 0,
+    "ic_T": -0.03658571836862276,
+    "ic_R1": 0.01275000681270963,
+    "ic_R2": 0.001533125062536827,
+    "ic_R3": -0.061334231741205614
+   },
+   {
+    "D": "2020-06-01",
+    "to": "2020-08-17",
+    "eligible": 219,
+    "without_a_forward_return": 0,
+    "ic_T": 0.1104385809889086,
+    "ic_R1": 0.1940535157338983,
+    "ic_R2": -0.026366721126052532,
+    "ic_R3": 0.08167693166898475
+   },
+   {
+    "D": "2020-08-17",
+    "to": "2020-11-17",
+    "eligible": 217,
+    "without_a_forward_return": 0,
+    "ic_T": -0.015201956307567167,
+    "ic_R1": -0.037638616905386606,
+    "ic_R2": 0.046201562404581044,
+    "ic_R3": -0.06617533683299631
+   },
+   {
+    "D": "2020-11-17",
+    "to": "2021-02-15",
+    "eligible": 180,
+    "without_a_forward_return": 0,
+    "ic_T": -0.10945340175492911,
+    "ic_R1": -0.0356296614239332,
+    "ic_R2": -0.05481444900562774,
+    "ic_R3": -0.15197219635217687
+   },
+   {
+    "D": "2021-02-15",
+    "to": "2021-06-01",
+    "eligible": 202,
+    "without_a_forward_return": 0,
+    "ic_T": 0.21216665490596517,
+    "ic_R1": 0.10959178350056129,
+    "ic_R2": 0.11293942422696059,
+    "ic_R3": 0.25214144371136316
+   },
+   {
+    "D": "2021-06-01",
+    "to": "2021-08-16",
+    "eligible": 270,
+    "without_a_forward_return": 0,
+    "ic_T": 0.12180115027540991,
+    "ic_R1": 0.1142032334408454,
+    "ic_R2": 0.056360169549650875,
+    "ic_R3": 0.11198648092499781
+   },
+   {
+    "D": "2021-08-16",
+    "to": "2021-11-15",
+    "eligible": 485,
+    "without_a_forward_return": 0,
+    "ic_T": 0.14249573450444192,
+    "ic_R1": 0.20727529937274045,
+    "ic_R2": 0.05214163923942118,
+    "ic_R3": 0.049700288211188166
+   },
+   {
+    "D": "2021-11-15",
+    "to": "2022-02-15",
+    "eligible": 523,
+    "without_a_forward_return": 0,
+    "ic_T": 0.18346720459706597,
+    "ic_R1": 0.17863509205095213,
+    "ic_R2": 0.09586996745814326,
+    "ic_R3": 0.1514639636205914
+   },
+   {
+    "D": "2022-02-15",
+    "to": "2022-06-01",
+    "eligible": 517,
+    "without_a_forward_return": 0,
+    "ic_T": 0.08683138945893089,
+    "ic_R1": 0.14245791475404462,
+    "ic_R2": 0.015972254123234195,
+    "ic_R3": 0.051490005001072765
+   },
+   {
+    "D": "2022-06-01",
+    "to": "2022-08-16",
+    "eligible": 500,
+    "without_a_forward_return": 0,
+    "ic_T": -0.11011094235560508,
+    "ic_R1": -0.08990014266008986,
+    "ic_R2": -0.03755324271936027,
+    "ic_R3": -0.08315648406433356
+   },
+   {
+    "D": "2022-08-16",
+    "to": "2022-11-15",
+    "eligible": 476,
+    "without_a_forward_return": 0,
+    "ic_T": 0.049532914381079124,
+    "ic_R1": -0.0034945451487983664,
+    "ic_R2": 0.10653592916809225,
+    "ic_R3": -0.006071654474190529
+   },
+   {
+    "D": "2022-11-15",
+    "to": "2023-02-15",
+    "eligible": 368,
+    "without_a_forward_return": 0,
+    "ic_T": 0.05764498744644779,
+    "ic_R1": 0.08200320676564722,
+    "ic_R2": 0.018095956341627153,
+    "ic_R3": 0.038339994603193824
+   },
+   {
+    "D": "2023-02-15",
+    "to": "2023-06-01",
+    "eligible": 367,
+    "without_a_forward_return": 0,
+    "ic_T": 0.17913037746961247,
+    "ic_R1": 0.10631105917143659,
+    "ic_R2": 0.12405248775978295,
+    "ic_R3": 0.10076235185214272
+   },
+   {
+    "D": "2023-06-01",
+    "to": "2023-08-16",
+    "eligible": 370,
+    "without_a_forward_return": 0,
+    "ic_T": 0.1382889662254331,
+    "ic_R1": 0.2002158363466817,
+    "ic_R2": -0.006791789488522116,
+    "ic_R3": 0.13320150997285155
+   },
+   {
+    "D": "2023-08-16",
+    "to": "2023-11-15",
+    "eligible": 357,
+    "without_a_forward_return": 0,
+    "ic_T": 0.13215082149317545,
+    "ic_R1": 0.02444583452628862,
+    "ic_R2": 0.07870469762194,
+    "ic_R3": 0.15723381323706465
+   },
+   {
+    "D": "2023-11-15",
+    "to": "2024-02-15",
+    "eligible": 369,
+    "without_a_forward_return": 0,
+    "ic_T": 0.06872390189381895,
+    "ic_R1": 0.1282621973402337,
+    "ic_R2": -0.040329645658383734,
+    "ic_R3": 0.02361170977282065
+   },
+   {
+    "D": "2024-02-15",
+    "to": "2024-06-03",
+    "eligible": 409,
+    "without_a_forward_return": 0,
+    "ic_T": 0.03226653434948596,
+    "ic_R1": 0.11726770632759033,
+    "ic_R2": 0.012623082508690755,
+    "ic_R3": -0.052278444954606935
+   },
+   {
+    "D": "2024-06-03",
+    "to": "2024-08-16",
+    "eligible": 441,
+    "without_a_forward_return": 0,
+    "ic_T": 0.06769356414133963,
+    "ic_R1": 0.0884535959079075,
+    "ic_R2": 0.010201703058845915,
+    "ic_R3": 0.05977154389045914
+   },
+   {
+    "D": "2024-08-16",
+    "to": "2024-11-18",
+    "eligible": 510,
+    "without_a_forward_return": 0,
+    "ic_T": -0.04010738556424133,
+    "ic_R1": 0.0722724486452513,
+    "ic_R2": -0.0815654582203202,
+    "ic_R3": -0.03986836657806071
+   },
+   {
+    "D": "2024-11-18",
+    "to": "2025-02-17",
+    "eligible": 505,
+    "without_a_forward_return": 0,
+    "ic_T": -0.08027065176170119,
+    "ic_R1": -0.005484840899406337,
+    "ic_R2": -0.046175176523863576,
+    "ic_R3": -0.0838697849690614
+   },
+   {
+    "D": "2025-02-17",
+    "to": "2025-06-02",
+    "eligible": 546,
+    "without_a_forward_return": 0,
+    "ic_T": 0.006082293482806392,
+    "ic_R1": -0.10774329889539555,
+    "ic_R2": 0.07718899687099877,
+    "ic_R3": 0.03244555861102145
+   },
+   {
+    "D": "2025-06-02",
+    "to": "2025-08-18",
+    "eligible": 518,
+    "without_a_forward_return": 0,
+    "ic_T": 0.04753332372127307,
+    "ic_R1": 0.04829778293636969,
+    "ic_R2": 0.012944708185146016,
+    "ic_R3": 0.0073104120604891845
+   },
+   {
+    "D": "2025-08-18",
+    "to": "2025-11-17",
+    "eligible": 537,
+    "without_a_forward_return": 0,
+    "ic_T": -0.029834748084402646,
+    "ic_R1": -0.02895697248300662,
+    "ic_R2": -0.03570042562002556,
+    "ic_R3": 0.01666288823465105
+   },
+   {
+    "D": "2025-11-17",
+    "to": "2026-02-16",
+    "eligible": 542,
+    "without_a_forward_return": 0,
+    "ic_T": 0.07589341180224099,
+    "ic_R1": 0.15423917118333808,
+    "ic_R2": 0.030254790451418566,
+    "ic_R3": -0.029883994789660997
+   },
+   {
+    "D": "2026-02-16",
+    "to": "2026-06-01",
+    "eligible": 576,
+    "without_a_forward_return": 0,
+    "ic_T": 0.028242531267510175,
+    "ic_R1": -0.003624375457523779,
+    "ic_R2": 0.013404101885754999,
+    "ic_R3": 0.04138183967177391
+   },
+   {
+    "D": "2026-06-01",
+    "to": "2026-08-17",
+    "eligible": 630,
+    "without_a_forward_return": 0,
+    "ic_T": 0.044242168398704936,
+    "ic_R1": 0.05422551218231757,
+    "ic_R2": 0.04729378851563159,
+    "ic_R3": -0.005548224850324505
+   },
+   {
+    "D": "2026-08-17",
+    "to": "2026-09-18",
+    "eligible": 646,
+    "without_a_forward_return": 0,
+    "ic_T": 0.07695740229950639,
+    "ic_R1": 0.05377640488161121,
+    "ic_R2": 0.031013613132668382,
+    "ic_R3": 0.08272397716162239
+   }
+  ],
+  "note": "the 27th review's period (17 August 2026 to the end) is shorter than a review period: its IC is reported in by_review and left out of the test",
+  "quintiles": {
+   "top_cagr": 0.35596935685796405,
+   "bottom_cagr": 0.13564000211179583,
+   "cagr_spread": 0.22032935474616822,
+   "information_ratio": 1.9668035503305996,
+   "tracking_error": 0.09650158261213893,
+   "method": "engine.run_quantile on minus the section-6 rank: v1's execution rules, no costs, dividends as cash, the 20-session exit; metrics.active(top, bottom)"
+  }
+ },
+ "earnings_and_rerating": {
+  "v3": {
+   "intervals": 27,
+   "undefined_intervals": 0,
+   "earnings_factor": 0.5135742249862086,
+   "rerating_factor": 6.498952940027001,
+   "earnings_annual": -0.096172582672852,
+   "rerating_annual": 0.3284488828929226,
+   "share_from_earnings": -0.5528678075731642,
+   "remainder": 1.2389302500149475,
+   "clock": {
+    "from_close": "2020-02-14",
+    "to_close": "2026-09-17",
+    "calendar_days": 2407
+   },
+   "by_interval": [
+    {
+     "defined": true,
+     "price": 0.786825211713357,
+     "earnings": 0.9948587916752961,
+     "rerating": 0.7908913489002593,
+     "from": "2020-02-17",
+     "to": "2020-06-01",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.2906752840569284,
+     "earnings": 0.8180672491151991,
+     "rerating": 1.5777129391903784,
+     "from": "2020-06-01",
+     "to": "2020-08-17",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1138278036279448,
+     "earnings": 1.0052088562833281,
+     "rerating": 1.1080560986561794,
+     "from": "2020-08-17",
+     "to": "2020-11-17",
+     "holdings": 17,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1772277088304992,
+     "earnings": 0.9607869526863358,
+     "rerating": 1.2252744539660958,
+     "from": "2020-11-17",
+     "to": "2021-02-15",
+     "holdings": 17,
+     "share_of_value_left_out": 0.10659821523832924
+    },
+    {
+     "defined": true,
+     "price": 1.4025472042204903,
+     "earnings": 1.047507702024369,
+     "rerating": 1.3389373667706566,
+     "from": "2021-02-15",
+     "to": "2021-06-01",
+     "holdings": 17,
+     "share_of_value_left_out": 0.13493453188920507
+    },
+    {
+     "defined": true,
+     "price": 1.12635591826547,
+     "earnings": 1.2342903268142686,
+     "rerating": 0.9125534680099294,
+     "from": "2021-06-01",
+     "to": "2021-08-16",
+     "holdings": 18,
+     "share_of_value_left_out": 0.08346713700721695
+    },
+    {
+     "defined": true,
+     "price": 0.9878392957075498,
+     "earnings": 1.0416474763286774,
+     "rerating": 0.948343194944631,
+     "from": "2021-08-16",
+     "to": "2021-11-15",
+     "holdings": 17,
+     "share_of_value_left_out": 0.08276432039047961
+    },
+    {
+     "defined": true,
+     "price": 0.9772093904707629,
+     "earnings": 1.0230767856362843,
+     "rerating": 0.9551672017100897,
+     "from": "2021-11-15",
+     "to": "2022-02-15",
+     "holdings": 16,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.8982313213953972,
+     "earnings": 1.0588619048847965,
+     "rerating": 0.848298835997055,
+     "from": "2022-02-15",
+     "to": "2022-06-01",
+     "holdings": 16,
+     "share_of_value_left_out": 0.24398118982817285
+    },
+    {
+     "defined": true,
+     "price": 0.962000678650089,
+     "earnings": 1.0143976761686653,
+     "rerating": 0.948346690110256,
+     "from": "2022-06-01",
+     "to": "2022-08-16",
+     "holdings": 16,
+     "share_of_value_left_out": 0.2332006600973841
+    },
+    {
+     "defined": true,
+     "price": 1.0123845245405605,
+     "earnings": 0.8780905164880531,
+     "rerating": 1.1529386840318234,
+     "from": "2022-08-16",
+     "to": "2022-11-15",
+     "holdings": 16,
+     "share_of_value_left_out": 0.23596827233566497
+    },
+    {
+     "defined": true,
+     "price": 0.9509755366922696,
+     "earnings": 1.147831124338388,
+     "rerating": 0.8284977785738415,
+     "from": "2022-11-15",
+     "to": "2023-02-15",
+     "holdings": 16,
+     "share_of_value_left_out": 0.26149833150070645
+    },
+    {
+     "defined": true,
+     "price": 1.093347083860475,
+     "earnings": 0.7189320529047406,
+     "rerating": 1.5207933481932885,
+     "from": "2023-02-15",
+     "to": "2023-06-01",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0857009325954308,
+     "earnings": 1.1446137878713165,
+     "rerating": 0.9485303637784687,
+     "from": "2023-06-01",
+     "to": "2023-08-16",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.296274458870045,
+     "earnings": 0.9095241394122969,
+     "rerating": 1.4252227100950312,
+     "from": "2023-08-16",
+     "to": "2023-11-15",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0972877248523987,
+     "earnings": 0.9713519175160487,
+     "rerating": 1.1296500321514724,
+     "from": "2023-11-15",
+     "to": "2024-02-15",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.9251634918274623,
+     "earnings": 0.8811815153164365,
+     "rerating": 1.0499125046843856,
+     "from": "2024-02-15",
+     "to": "2024-06-03",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1564698174490953,
+     "earnings": 0.9312709302714721,
+     "rerating": 1.241818873388409,
+     "from": "2024-06-03",
+     "to": "2024-08-16",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.044147773962001,
+     "earnings": 0.9756829047603789,
+     "rerating": 1.0701712296767532,
+     "from": "2024-08-16",
+     "to": "2024-11-18",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.8266190549080766,
+     "earnings": 1.0148146873167556,
+     "rerating": 0.8145517257872152,
+     "from": "2024-11-18",
+     "to": "2025-02-17",
+     "holdings": 18,
+     "share_of_value_left_out": 0.09968946494308302
+    },
+    {
+     "defined": true,
+     "price": 1.0976351641386715,
+     "earnings": 0.8660826858593911,
+     "rerating": 1.2673560874265914,
+     "from": "2025-02-17",
+     "to": "2025-06-02",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0015172318279828,
+     "earnings": 0.9693657490584068,
+     "rerating": 1.0331675456872769,
+     "from": "2025-06-02",
+     "to": "2025-08-18",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1206988435800045,
+     "earnings": 1.0289414408334598,
+     "rerating": 1.0891765061695053,
+     "from": "2025-08-18",
+     "to": "2025-11-17",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.9090425586867064,
+     "earnings": 0.9023322932965457,
+     "rerating": 1.0074365790075468,
+     "from": "2025-11-17",
+     "to": "2026-02-16",
+     "holdings": 18,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.067258212520502,
+     "earnings": 0.9032530579489441,
+     "rerating": 1.1815716571654586,
+     "from": "2026-02-16",
+     "to": "2026-06-01",
+     "holdings": 17,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.039313855138055,
+     "earnings": 1.0532047886227431,
+     "rerating": 0.9868107953602707,
+     "from": "2026-06-01",
+     "to": "2026-08-17",
+     "holdings": 17,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0200362996792318,
+     "earnings": 0.9999999999999998,
+     "rerating": 1.0200362996792323,
+     "from": "2026-08-17",
+     "to": "2026-09-18",
+     "holdings": 17,
+     "share_of_value_left_out": 0.0
+    }
+   ]
+  },
+  "v1": {
+   "intervals": 27,
+   "undefined_intervals": 0,
+   "earnings_factor": 11.956102987785128,
+   "rerating_factor": 0.5206381340731163,
+   "earnings_annual": 0.4571985981765927,
+   "rerating_annual": -0.09429706144774919,
+   "share_from_earnings": 1.3569511136891268,
+   "remainder": 1.0041143147031522,
+   "clock": {
+    "from_close": "2020-02-14",
+    "to_close": "2026-09-17",
+    "calendar_days": 2407
+   },
+   "by_interval": [
+    {
+     "defined": true,
+     "price": 0.8561110242588985,
+     "earnings": 1.0907825248379097,
+     "rerating": 0.7848594974384254,
+     "from": "2020-02-17",
+     "to": "2020-06-01",
+     "holdings": 10,
+     "share_of_value_left_out": 0.06457551106294523
+    },
+    {
+     "defined": true,
+     "price": 1.1489938133150828,
+     "earnings": 1.0272147467967432,
+     "rerating": 1.118552685208321,
+     "from": "2020-06-01",
+     "to": "2020-08-17",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0762414317219824,
+     "earnings": 0.9602318947056542,
+     "rerating": 1.1208140842394005,
+     "from": "2020-08-17",
+     "to": "2020-11-17",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.2687735150104908,
+     "earnings": 1.158697152971857,
+     "rerating": 1.0950001143580157,
+     "from": "2020-11-17",
+     "to": "2021-02-15",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.3664160915247585,
+     "earnings": 1.3799154012387918,
+     "rerating": 0.9902172917978055,
+     "from": "2021-02-15",
+     "to": "2021-06-01",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.2370599436417344,
+     "earnings": 1.5860741661867488,
+     "rerating": 0.7799508812478065,
+     "from": "2021-06-01",
+     "to": "2021-08-16",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.087411565038944,
+     "earnings": 1.1582079092229987,
+     "rerating": 0.9388742352557844,
+     "from": "2021-08-16",
+     "to": "2021-11-15",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0110912252075612,
+     "earnings": 1.1578643758999048,
+     "rerating": 0.8732380460550313,
+     "from": "2021-11-15",
+     "to": "2022-02-15",
+     "holdings": 9,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.8749059843016435,
+     "earnings": 1.0593508067481925,
+     "rerating": 0.8258888167436006,
+     "from": "2022-02-15",
+     "to": "2022-06-01",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0343755234512586,
+     "earnings": 1.1223845712573342,
+     "rerating": 0.9215874397600774,
+     "from": "2022-06-01",
+     "to": "2022-08-16",
+     "holdings": 10,
+     "share_of_value_left_out": 0.18777445061874035
+    },
+    {
+     "defined": true,
+     "price": 1.065728743092846,
+     "earnings": 1.0962530533085324,
+     "rerating": 0.9721557808905865,
+     "from": "2022-08-16",
+     "to": "2022-11-15",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.9060592802232992,
+     "earnings": 1.099029935075818,
+     "rerating": 0.8244172895625392,
+     "from": "2022-11-15",
+     "to": "2023-02-15",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1122218486903077,
+     "earnings": 1.1741684011226645,
+     "rerating": 0.9472421908364017,
+     "from": "2023-02-15",
+     "to": "2023-06-01",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.2269406076549203,
+     "earnings": 1.0779046333481386,
+     "rerating": 1.1382645270239287,
+     "from": "2023-06-01",
+     "to": "2023-08-16",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1380643127353811,
+     "earnings": 1.0928025381428876,
+     "rerating": 1.0414180723531365,
+     "from": "2023-08-16",
+     "to": "2023-11-15",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.28361684465211,
+     "earnings": 1.029569424123971,
+     "rerating": 1.246751131662928,
+     "from": "2023-11-15",
+     "to": "2024-02-15",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.1616610399045506,
+     "earnings": 1.1260030916662713,
+     "rerating": 1.0316677178794529,
+     "from": "2024-02-15",
+     "to": "2024-06-03",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0889872749633052,
+     "earnings": 1.0799761776783023,
+     "rerating": 1.0083437926421437,
+     "from": "2024-06-03",
+     "to": "2024-08-16",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.9742062402989629,
+     "earnings": 1.0059507448789882,
+     "rerating": 0.9684432814015719,
+     "from": "2024-08-16",
+     "to": "2024-11-18",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.890871497932797,
+     "earnings": 1.0460810301523253,
+     "rerating": 0.8516276199015602,
+     "from": "2024-11-18",
+     "to": "2025-02-17",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.117613322939657,
+     "earnings": 0.9262073241136185,
+     "rerating": 1.206655673997411,
+     "from": "2025-02-17",
+     "to": "2025-06-02",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0670808334004547,
+     "earnings": 1.0496157914305517,
+     "rerating": 1.0166394618988148,
+     "from": "2025-06-02",
+     "to": "2025-08-18",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0704501245065374,
+     "earnings": 1.0434560606587497,
+     "rerating": 1.0258698615739947,
+     "from": "2025-08-18",
+     "to": "2025-11-17",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0770330159578143,
+     "earnings": 1.04059252674777,
+     "rerating": 1.0350189803149308,
+     "from": "2025-11-17",
+     "to": "2026-02-16",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.9149675427958461,
+     "earnings": 1.08868364162564,
+     "rerating": 0.8404347303589513,
+     "from": "2026-02-16",
+     "to": "2026-06-01",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 1.0383249417170477,
+     "earnings": 1.0892389685133037,
+     "rerating": 0.953257248163139,
+     "from": "2026-06-01",
+     "to": "2026-08-17",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    },
+    {
+     "defined": true,
+     "price": 0.99810084074832,
+     "earnings": 1.0000000000000002,
+     "rerating": 0.99810084074832,
+     "from": "2026-08-17",
+     "to": "2026-09-18",
+     "holdings": 10,
+     "share_of_value_left_out": 0.0
+    }
+   ]
+  },
+  "nifty500": {
+   "available": true,
+   "index": "Nifty 500",
+   "price_factor": 2.274323489993525,
+   "rerating_factor": 0.7037512023084321,
+   "earnings_factor": 3.2317152461456975,
+   "earnings_annual": 0.19482383702483097,
+   "rerating_annual": -0.05191640365410044,
+   "note": "NSE's published P/E: a different earnings definition, for context only"
+  }
+ }
+}

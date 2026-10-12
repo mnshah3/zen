@@ -1,0 +1,761 @@
+{
+  "run": "data\\backtest\\v3",
+  "label": "v3",
+  "monthly_returns": {
+    "definition": "last NAV value of each calendar month on the run's clock, month-on-month change (jobs/libcheck_v1.monthly_returns)",
+    "first": "2020-03",
+    "last": "2026-09",
+    "n": 79,
+    "values": {
+      "2020-03": -0.3455245306793895,
+      "2020-04": 0.24722177607018292,
+      "2020-05": 0.010926209187629876,
+      "2020-06": 0.14355408152732752,
+      "2020-07": 0.02630866953761868,
+      "2020-08": 0.12803003491310827,
+      "2020-09": 0.08332034472243244,
+      "2020-10": -0.002327691583882574,
+      "2020-11": 0.07532245645868385,
+      "2020-12": 0.11306704659492173,
+      "2021-01": -0.03071285010647551,
+      "2021-02": 0.11654153837459114,
+      "2021-03": 0.10062919815096505,
+      "2021-04": 0.143040475895845,
+      "2021-05": 0.10024011699767921,
+      "2021-06": 0.09158301829574422,
+      "2021-07": 0.04031850757285094,
+      "2021-08": -0.05919664545878356,
+      "2021-09": 0.033996573970133115,
+      "2021-10": -0.04638768260254322,
+      "2021-11": 0.0123068341825181,
+      "2021-12": 0.07324051655756314,
+      "2022-01": -0.028059915863319573,
+      "2022-02": -0.09977603389520373,
+      "2022-03": 0.07801348114409179,
+      "2022-04": 0.0917491270226285,
+      "2022-05": -0.13087850443099291,
+      "2022-06": -0.09416586999041154,
+      "2022-07": 0.05109022731000867,
+      "2022-08": 0.05323775278748277,
+      "2022-09": -0.044435608280542715,
+      "2022-10": 0.03059086487413909,
+      "2022-11": 0.007886801671276089,
+      "2022-12": 0.005653018138673138,
+      "2023-01": -0.020115638056902307,
+      "2023-02": -0.07663914708652608,
+      "2023-03": 0.02834480575732745,
+      "2023-04": 0.0860773514623725,
+      "2023-05": 0.04359858132080641,
+      "2023-06": 0.028050117571407407,
+      "2023-07": 0.04637513179047281,
+      "2023-08": 0.12819812674276632,
+      "2023-09": 0.06909939306131019,
+      "2023-10": 0.06311096357967227,
+      "2023-11": 0.08808335672690415,
+      "2023-12": 0.036239257535136904,
+      "2024-01": 0.0461614637866361,
+      "2024-02": -0.06121818877194507,
+      "2024-03": -0.07916861518483553,
+      "2024-04": 0.11694927845207648,
+      "2024-05": -0.06815261434131858,
+      "2024-06": 0.13156886593279693,
+      "2024-07": 0.08779113836705532,
+      "2024-08": -0.0009719781375213676,
+      "2024-09": -0.019158094918609425,
+      "2024-10": 0.012868132756288508,
+      "2024-11": 0.06880769633611372,
+      "2024-12": 0.001551459749978168,
+      "2025-01": -0.10006227282197866,
+      "2025-02": -0.20086011152131433,
+      "2025-03": 0.07171982907767926,
+      "2025-04": 0.04442171057215338,
+      "2025-05": 0.06664627408930346,
+      "2025-06": 0.09335474228546481,
+      "2025-07": -0.003094585187867205,
+      "2025-08": -0.05169978139425191,
+      "2025-09": 0.07334734025705969,
+      "2025-10": -0.0032058625084070425,
+      "2025-11": -0.022890982829304685,
+      "2025-12": 0.028152063247825376,
+      "2026-01": -0.08485349299009759,
+      "2026-02": -0.03942372994564525,
+      "2026-03": -0.1177544102593906,
+      "2026-04": 0.19263739723494666,
+      "2026-05": 0.0664422516411598,
+      "2026-06": 0.03681828971508305,
+      "2026-07": -0.020118043074869196,
+      "2026-08": 0.06935458016836638,
+      "2026-09": -0.020135685268085846
+    }
+  },
+  "iima_four_factor": {
+    "months": 70,
+    "first": "2020-03",
+    "last": "2025-12",
+    "alpha_annual_pct": -0.59,
+    "alpha_t": -0.1,
+    "r_squared": 0.819,
+    "loadings": {
+      "MF": 1.038,
+      "SMB": 0.799,
+      "HML": 0.302,
+      "WML": 0.012
+    },
+    "loading_t": {
+      "MF": 10.68,
+      "SMB": 6.9,
+      "HML": 2.3,
+      "WML": 0.08
+    },
+    "exact": {
+      "alpha_monthly": -0.0004898548448275877,
+      "alpha_annual": -0.005862446756481621,
+      "alpha_t": -0.10261452341621084,
+      "alpha_p": 0.9182689156717766,
+      "r_squared": 0.8185919516867819
+    },
+    "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+  },
+  "quality": {
+    "margin": {
+      "months": 70,
+      "first": "2020-03",
+      "last": "2025-12",
+      "identical_months": true,
+      "without_quality": {
+        "months": 70,
+        "first": "2020-03",
+        "last": "2025-12",
+        "alpha_annual_pct": -0.59,
+        "alpha_t": -0.1,
+        "r_squared": 0.819,
+        "loadings": {
+          "MF": 1.038,
+          "SMB": 0.799,
+          "HML": 0.302,
+          "WML": 0.012
+        },
+        "loading_t": {
+          "MF": 10.68,
+          "SMB": 6.9,
+          "HML": 2.3,
+          "WML": 0.08
+        },
+        "exact": {
+          "alpha_monthly": -0.0004898548448275877,
+          "alpha_annual": -0.005862446756481621,
+          "alpha_t": -0.10261452341621084,
+          "alpha_p": 0.9182689156717766,
+          "r_squared": 0.8185919516867819
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "with_quality": {
+        "months": 70,
+        "first": "2020-03",
+        "last": "2025-12",
+        "alpha_annual_pct": -2.49,
+        "alpha_t": -0.49,
+        "r_squared": 0.828,
+        "loadings": {
+          "MF": 1.035,
+          "SMB": 0.863,
+          "HML": 0.389,
+          "WML": -0.053,
+          "QUAL": 0.399
+        },
+        "loading_t": {
+          "MF": 11.08,
+          "SMB": 7.16,
+          "HML": 2.71,
+          "WML": -0.42,
+          "QUAL": 1.97
+        },
+        "exact": {
+          "alpha_monthly": -0.002097000400586299,
+          "alpha_annual": -0.024875794864094858,
+          "alpha_t": -0.48991907545281954,
+          "alpha_p": 0.6241911641818221,
+          "r_squared": 0.8275564815694472
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "alpha_annual_change_pct": -1.9,
+      "label": "headline: operating margin, whole period",
+      "covers_whole_period": true
+    },
+    "roce": {
+      "months": 34,
+      "first": "2023-03",
+      "last": "2025-12",
+      "identical_months": true,
+      "without_quality": {
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "alpha_annual_pct": 5.35,
+        "alpha_t": 0.78,
+        "r_squared": 0.753,
+        "loadings": {
+          "MF": 0.822,
+          "SMB": 0.948,
+          "HML": 0.343,
+          "WML": -0.046
+        },
+        "loading_t": {
+          "MF": 4.32,
+          "SMB": 7.21,
+          "HML": 1.6,
+          "WML": -0.22
+        },
+        "exact": {
+          "alpha_monthly": 0.00435623993512363,
+          "alpha_annual": 0.053545716144186795,
+          "alpha_t": 0.7820229355869324,
+          "alpha_p": 0.4342010946650169,
+          "r_squared": 0.7532404933536218
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "with_quality": {
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "alpha_annual_pct": 1.8,
+        "alpha_t": 0.24,
+        "r_squared": 0.758,
+        "loadings": {
+          "MF": 0.824,
+          "SMB": 0.948,
+          "HML": 0.526,
+          "WML": -0.059,
+          "QUAL": 0.37
+        },
+        "loading_t": {
+          "MF": 4.73,
+          "SMB": 7.08,
+          "HML": 2.39,
+          "WML": -0.28,
+          "QUAL": 0.86
+        },
+        "exact": {
+          "alpha_monthly": 0.0014917656589585975,
+          "alpha_annual": 0.018048794779296662,
+          "alpha_t": 0.23651376248277567,
+          "alpha_p": 0.8130340292620815,
+          "r_squared": 0.7583246937659848
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "alpha_annual_change_pct": -3.55,
+      "label": "headline: ROCE, its months from March 2023"
+    },
+    "margin_no_r6": {
+      "months": 70,
+      "first": "2020-03",
+      "last": "2025-12",
+      "identical_months": true,
+      "without_quality": {
+        "months": 70,
+        "first": "2020-03",
+        "last": "2025-12",
+        "alpha_annual_pct": -0.59,
+        "alpha_t": -0.1,
+        "r_squared": 0.819,
+        "loadings": {
+          "MF": 1.038,
+          "SMB": 0.799,
+          "HML": 0.302,
+          "WML": 0.012
+        },
+        "loading_t": {
+          "MF": 10.68,
+          "SMB": 6.9,
+          "HML": 2.3,
+          "WML": 0.08
+        },
+        "exact": {
+          "alpha_monthly": -0.0004898548448275877,
+          "alpha_annual": -0.005862446756481621,
+          "alpha_t": -0.10261452341621084,
+          "alpha_p": 0.9182689156717766,
+          "r_squared": 0.8185919516867819
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "with_quality": {
+        "months": 70,
+        "first": "2020-03",
+        "last": "2025-12",
+        "alpha_annual_pct": -2.68,
+        "alpha_t": -0.5,
+        "r_squared": 0.83,
+        "loadings": {
+          "MF": 1.057,
+          "SMB": 0.896,
+          "HML": 0.404,
+          "WML": -0.068,
+          "QUAL": 0.489
+        },
+        "loading_t": {
+          "MF": 11.27,
+          "SMB": 7.56,
+          "HML": 2.82,
+          "WML": -0.57,
+          "QUAL": 2.13
+        },
+        "exact": {
+          "alpha_monthly": -0.0022646225911123674,
+          "alpha_annual": -0.026839531212822787,
+          "alpha_t": -0.4981766212817188,
+          "alpha_p": 0.618359559024036,
+          "r_squared": 0.8302124878777566
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "alpha_annual_change_pct": -2.1,
+      "label": "robustness only: margin, loss-makers kept",
+      "covers_whole_period": true
+    },
+    "roce_no_r6": {
+      "months": 34,
+      "first": "2023-03",
+      "last": "2025-12",
+      "identical_months": true,
+      "without_quality": {
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "alpha_annual_pct": 5.35,
+        "alpha_t": 0.78,
+        "r_squared": 0.753,
+        "loadings": {
+          "MF": 0.822,
+          "SMB": 0.948,
+          "HML": 0.343,
+          "WML": -0.046
+        },
+        "loading_t": {
+          "MF": 4.32,
+          "SMB": 7.21,
+          "HML": 1.6,
+          "WML": -0.22
+        },
+        "exact": {
+          "alpha_monthly": 0.00435623993512363,
+          "alpha_annual": 0.053545716144186795,
+          "alpha_t": 0.7820229355869324,
+          "alpha_p": 0.4342010946650169,
+          "r_squared": 0.7532404933536218
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "with_quality": {
+        "months": 34,
+        "first": "2023-03",
+        "last": "2025-12",
+        "alpha_annual_pct": 4.74,
+        "alpha_t": 0.69,
+        "r_squared": 0.754,
+        "loadings": {
+          "MF": 0.823,
+          "SMB": 0.955,
+          "HML": 0.398,
+          "WML": -0.057,
+          "QUAL": 0.111
+        },
+        "loading_t": {
+          "MF": 4.39,
+          "SMB": 7.05,
+          "HML": 1.73,
+          "WML": -0.28,
+          "QUAL": 0.26
+        },
+        "exact": {
+          "alpha_monthly": 0.0038674992228661617,
+          "alpha_annual": 0.04741002705313213,
+          "alpha_t": 0.6913618598055121,
+          "alpha_p": 0.48933816620007664,
+          "r_squared": 0.7536660572083265
+        },
+        "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+      },
+      "alpha_annual_change_pct": -0.61,
+      "label": "robustness only: ROCE, loss-makers kept"
+    }
+  },
+  "benchmarks": {
+    "nifty500": {
+      "name": "Nifty 500",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.14497335348641283,
+        "excess_cagr": 0.09607465183853048,
+        "information_ratio": 0.5628283131364014,
+        "tracking_error": 0.17960610240923428,
+        "agrees_with_metrics_json": true
+      }
+    },
+    "midcap150": {
+      "name": "Nifty Midcap 150",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.21198086024201035,
+        "excess_cagr": 0.029067145082932955,
+        "information_ratio": 0.26204382591177233,
+        "tracking_error": 0.15568053961156372,
+        "agrees_with_metrics_json": true
+      }
+    },
+    "smallcap250": {
+      "name": "Nifty Smallcap 250",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.21722283988576807,
+        "excess_cagr": 0.023825165439175233,
+        "information_ratio": 0.24577085270037563,
+        "tracking_error": 0.1367283506770732,
+        "agrees_with_metrics_json": true
+      }
+    },
+    "momentum30": {
+      "name": "Nifty200 Momentum 30",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.15752546054970384,
+        "excess_cagr": 0.08352254477523946,
+        "information_ratio": 0.44540206599732635,
+        "tracking_error": 0.18584912187609334,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-10-12 close",
+        "to": "2026-09-18 open",
+        "years": 5.932922655715264,
+        "n_returns": 1466,
+        "strategy_cagr": 0.24775216558074797,
+        "benchmark_cagr": 0.17469510133889732,
+        "excess_cagr": 0.07305706424185066,
+        "information_ratio": 0.40733204883777296,
+        "tracking_error": 0.18029886261662773,
+        "live_start": "2020-10-12",
+        "basis": "first date NSE printed an open (fallback)",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Momentum 30 has opens from 12 Oct 2020'. A search listed an NSE Indices press release titled 'NSE Indices launches Nifty200 Momentum 30 Index' at https://www.niftyindices.com/Press_Release/ind_prs25082020.pdf, but its text could not be read, so no launch sentence is quoted and its date is not used",
+        "same_as_whole_period": false
+      }
+    },
+    "value50": {
+      "name": "Nifty500 Value 50",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.2820517845848165,
+        "excess_cagr": -0.041003779259873196,
+        "information_ratio": -0.14410904494667087,
+        "tracking_error": 0.1765563129815676,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2024-12-16 close",
+        "to": "2026-09-18 open",
+        "years": 1.754962354551677,
+        "n_returns": 434,
+        "strategy_cagr": -0.03978859348346808,
+        "benchmark_cagr": 0.059010886767663084,
+        "excess_cagr": -0.09879948025113117,
+        "information_ratio": -0.538012989640347,
+        "tracking_error": 0.15763405541437164,
+        "live_start": "2024-12-16",
+        "basis": "first date NSE printed an open (fallback)",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Value 50 from 16 Dec 2024'",
+        "same_as_whole_period": false
+      }
+    },
+    "quality30": {
+      "name": "Nifty200 Quality 30",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.12634224503664537,
+        "excess_cagr": 0.11470576028829793,
+        "information_ratio": 0.6004546076772217,
+        "tracking_error": 0.2012799252683347,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.12634224503664537,
+        "excess_cagr": 0.11470576028829793,
+        "information_ratio": 0.6004546076772217,
+        "tracking_error": 0.2012799252683347,
+        "live_start": "on or before 2020-02-17",
+        "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv",
+        "same_as_whole_period": true
+      }
+    },
+    "lowvol30": {
+      "name": "Nifty100 Low Volatility 30",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.14218456222676434,
+        "excess_cagr": 0.09886344309817896,
+        "information_ratio": 0.5249279787533274,
+        "tracking_error": 0.20608885615036537,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.14218456222676434,
+        "excess_cagr": 0.09886344309817896,
+        "information_ratio": 0.5249279787533274,
+        "tracking_error": 0.20608885615036537,
+        "live_start": "on or before 2020-02-17",
+        "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv",
+        "same_as_whole_period": true
+      }
+    },
+    "alpha50": {
+      "name": "Nifty Alpha 50",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.23568336475289575,
+        "excess_cagr": 0.005364640572047552,
+        "information_ratio": 0.08149441240247682,
+        "tracking_error": 0.1594485217533075,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.23568336475289575,
+        "excess_cagr": 0.005364640572047552,
+        "information_ratio": 0.08149441240247682,
+        "tracking_error": 0.1594485217533075,
+        "live_start": "on or before 2020-02-17",
+        "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv",
+        "same_as_whole_period": true
+      }
+    },
+    "momentum30_no_overnight": {
+      "name": "Nifty200 Momentum 30 (no overnight move where NSE printed no open)",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.15777895923975382,
+        "excess_cagr": 0.08326904608518948,
+        "information_ratio": 0.44419254511108064,
+        "tracking_error": 0.18585532215252318,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-10-12 close",
+        "to": "2026-09-18 open",
+        "years": 5.932922655715264,
+        "n_returns": 1466,
+        "strategy_cagr": 0.24775216558074797,
+        "benchmark_cagr": 0.17469510133889732,
+        "excess_cagr": 0.07305706424185066,
+        "information_ratio": 0.4073320488377776,
+        "tracking_error": 0.1802988626166279,
+        "live_start": "2020-10-12",
+        "basis": "first date NSE printed an open (fallback)",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Momentum 30 has opens from 12 Oct 2020'. A search listed an NSE Indices press release titled 'NSE Indices launches Nifty200 Momentum 30 Index' at https://www.niftyindices.com/Press_Release/ind_prs25082020.pdf, but its text could not be read, so no launch sentence is quoted and its date is not used",
+        "same_as_whole_period": false
+      }
+    },
+    "value50_no_overnight": {
+      "name": "Nifty500 Value 50 (no overnight move where NSE printed no open)",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.2823467516499849,
+        "excess_cagr": -0.0412987463250416,
+        "information_ratio": -0.14542153503718552,
+        "tracking_error": 0.1765442385033636,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2024-12-16 close",
+        "to": "2026-09-18 open",
+        "years": 1.754962354551677,
+        "n_returns": 434,
+        "strategy_cagr": -0.03978859348346808,
+        "benchmark_cagr": 0.059010886767663084,
+        "excess_cagr": -0.09879948025113117,
+        "information_ratio": -0.5380129896403505,
+        "tracking_error": 0.15763405541437156,
+        "live_start": "2024-12-16",
+        "basis": "first date NSE printed an open (fallback)",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; data/external/SOURCES.md: 'Value 50 from 16 Dec 2024'",
+        "same_as_whole_period": false
+      }
+    },
+    "quality30_no_overnight": {
+      "name": "Nifty200 Quality 30 (no overnight move where NSE printed no open)",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.12634224503664537,
+        "excess_cagr": 0.11470576028829793,
+        "information_ratio": 0.6004546076772217,
+        "tracking_error": 0.2012799252683347,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.12634224503664537,
+        "excess_cagr": 0.11470576028829793,
+        "information_ratio": 0.6004546076772217,
+        "tracking_error": 0.2012799252683347,
+        "live_start": "on or before 2020-02-17",
+        "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv",
+        "same_as_whole_period": true
+      }
+    },
+    "lowvol30_no_overnight": {
+      "name": "Nifty100 Low Volatility 30 (no overnight move where NSE printed no open)",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.14218456222676434,
+        "excess_cagr": 0.09886344309817896,
+        "information_ratio": 0.5249279787533274,
+        "tracking_error": 0.20608885615036537,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.14218456222676434,
+        "excess_cagr": 0.09886344309817896,
+        "information_ratio": 0.5249279787533274,
+        "tracking_error": 0.20608885615036537,
+        "live_start": "on or before 2020-02-17",
+        "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv",
+        "same_as_whole_period": true
+      }
+    },
+    "alpha50_no_overnight": {
+      "name": "Nifty Alpha 50 (no overnight move where NSE printed no open)",
+      "whole_period": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.23568336475289575,
+        "excess_cagr": 0.005364640572047552,
+        "information_ratio": 0.08149441240247682,
+        "tracking_error": 0.1594485217533075,
+        "agrees_with_metrics_json": true
+      },
+      "live_part": {
+        "from": "2020-02-17 open",
+        "to": "2026-09-18 open",
+        "years": 6.584531143052704,
+        "n_returns": 1628,
+        "strategy_cagr": 0.2410480053249433,
+        "benchmark_cagr": 0.23568336475289575,
+        "excess_cagr": 0.005364640572047552,
+        "information_ratio": 0.08149441240247682,
+        "tracking_error": 0.1594485217533075,
+        "live_start": "on or before 2020-02-17",
+        "basis": "NSE printed an open at the clock start (fallback): live over the whole period",
+        "source": "no launch date could be read from an NSE document: niftyindices.com and nseindia.com timed out or failed the TLS handshake for every fetch on 2026-09-26; open printed on 15 Feb 2019 in data/external/nifty_price_endpoints.csv",
+        "same_as_whole_period": true
+      }
+    }
+  },
+  "live_start_check": {
+    "momentum30": {
+      "open_printed_at_clock_start": false
+    },
+    "value50": {
+      "open_printed_at_clock_start": false
+    },
+    "quality30": {
+      "open_printed_at_clock_start": true
+    },
+    "lowvol30": {
+      "open_printed_at_clock_start": true
+    },
+    "alpha50": {
+      "open_printed_at_clock_start": true
+    }
+  },
+  "launch_date_sources_tried": [
+    "https://www.niftyindices.com/Factsheet/Factsheet_Nifty200_Momentum30.pdf (timeout)",
+    "https://www.niftyindices.com/Press_Release/ind_prs25082020.pdf (timeout)",
+    "https://niftyindices.com/Methodology/Method_NIFTY_Equity_Indices.pdf (timeout)",
+    "https://nsearchives.nseindia.com/content/indices/Method_NIFTY_Equity_Indices.pdf (timeout)",
+    "https://www1.nseindia.com/content/indices/Factsheet_NIFTY200_Quality30.pdf (TLS error)",
+    "https://www1.nseindia.com/content/indices/Nifty100_LowVolatility30.pdf (TLS error)",
+    "https://www.nseindia.com/static/products-services/indices-strategy (timeout)",
+    "https://www.niftyindices.com/indices/equity/strategy-indices/nifty200-quality-30 (timeout)"
+  ]
+}
