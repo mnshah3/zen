@@ -433,9 +433,9 @@ date it was resolved, are in the specification.
 - **Selection by rule.** 36 portfolio variants were run in-sample, and the
   plateau rule picked one before the held-back data was unlocked. It picked the
   configuration that was written down first.
-- **197 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
-  including every failure below: 195 when v1 was measured, and v2's two runs
-  since.
+- **198 trials** are logged in [`state/trials.jsonl`](state/trials.jsonl),
+  including every failure below: 195 when v1 was measured, v2's two runs and
+  v3's one run since.
 
 ### What came before, and failed
 
@@ -617,6 +617,54 @@ picked a strong pool, and the extra machinery cost return. The technical entry
 rule it tested (variant b) bought slightly cheaper but ended lower and was not
 adopted. v2 is weaker evidence than v1 by construction: its rules were written
 after v1's results were known, so it had no unseen data to be tested on.
+
+**Strategy v3 was tested and did not replace v1 either.** v3 is purely
+fundamental: no price trend and no volatility input anywhere. It buys
+profitable companies (trailing profit of at least Rs 25 crore, interest cover
+of at least 2.5, debt to equity below 1.2, P/E of 60 or less, eight unbroken
+quarters of results), ranks them on accelerating growth, widening margins and
+growth at a reasonable price, holds eighteen with at most four a sector, never
+sells because a rank fell, and trims above a P/E of 85. Every rule and every
+test was fixed in
+[research/strategy/v3-spec.md](research/strategy/v3-spec.md) before any v3
+result existed. Two engines, one sharing none of this repository's code, agree
+on every holding, fill and daily value; they, the leak test and the ten dated
+clarifications the build needed were public here before the one full run; and
+a separate verification recomputed all 967 figures of the verdict and checked
+every exit, trim and fill against the rules
+([`data/backtest/v3/verification.md`](data/backtest/v3/verification.md)). It
+passed one of the five bars
+([`data/backtest/v3_verdict.md`](data/backtest/v3_verdict.md)). Both columns
+are 17 February 2020 to 18 September 2026, v1 replayed on the same frozen
+archive:
+
+| | v1 | v3 |
+|---|---|---|
+| Growth a year | 32.1% | 24.1% |
+| Worst fall | -32.9% | -44.5% |
+| Sortino, Calmar | 1.92, 1.00 | 1.31, 0.55 |
+| IIMA four-factor alpha a year, t | 3.7%, 0.80 | -0.6%, -0.10 |
+| Turnover a year | 1.97x | 0.52x |
+
+The test named in advance, alpha after the four factors and a quality factor,
+came to -2.5% a year at t = -0.49: no evidence of skill. After costs and tax v3
+made 22.1% a year against 13.2% for a Nifty 500 index fund.
+
+What it did show is where the result came from. The filters picked a good
+pool: every eligible stock held in equal amounts made 26.9% a year, against
+25.5% for v1's wider universe. The score ordered that pool: across all
+eligible stocks its rank correlation with the next period's return averaged
+0.05 (t = 3.05), and the top fifth beat the bottom fifth by 22 points a year
+before costs. But eighteen names bought and held until an exit rule fired did
+no better than eighteen drawn at random from the same list: v3 sits at the
+42nd and 53rd percentile of 500 random fill orders in each mode. A signal that
+weak needs many more holdings, and a book that re-ranks, to show. v3 was also
+fully invested on 17 February 2020, weeks before the market's fall. Like v2 it
+is weaker evidence than v1: its rules were written without looking at a return,
+but these years had already been seen once, through v1. The spec's section 16
+lists its other limits: a window that includes a small and mid cap boom, no
+balance sheets before September 2022, today's sector labels applied to the
+past, and whole quarters missing for some companies.
 
 **Next:** tracking v1 forward, on data that does not exist yet, is the only
 evidence still to be had.
