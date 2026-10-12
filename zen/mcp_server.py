@@ -34,7 +34,9 @@ mcp = FastMCP(
         "Pass as_of (YYYY-MM-DD) to see only what was public by the end of that day; this is how "
         "to avoid look-ahead. Prices from price_history are as traded, not split-adjusted. "
         "Lenders filing in the banking format have only total income in quarterly_results; "
-        "bank_results has their net interest income, provisions, profit and NPAs."),
+        "bank_results has their net interest income, provisions, profit and NPAs. balance_sheet and "
+        "cash_flow read the half-year and year-end filings in full: a cash flow is for the financial "
+        "year to date, so compare a year with a year and a half-year with a half-year."),
 )
 
 
@@ -60,6 +62,18 @@ def quarterly_results(symbol: str, as_of: str | None = None, quarters: int = 8) 
 def bank_results(symbol: str, as_of: str | None = None, quarters: int = 8) -> dict:
     """A lender's quarters from its banking-format filings: net interest income, provisions, net profit, EPS, NPAs."""
     return api.bank_results(symbol, as_of, quarters)
+
+
+@mcp.tool()
+def balance_sheet(symbol: str, as_of: str | None = None, periods: int = 6) -> dict:
+    """A company's balance sheets line by line from its half-year and year-end filings, Rs crore, newest first."""
+    return api.balance_sheet(symbol, as_of, periods)
+
+
+@mcp.tool()
+def cash_flow(symbol: str, as_of: str | None = None, periods: int = 6) -> dict:
+    """A company's cash flow statements (financial year to date, 6 or 12 months), capex and free cash flow, Rs crore."""
+    return api.cash_flow(symbol, as_of, periods)
 
 
 @mcp.tool()

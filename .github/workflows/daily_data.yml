@@ -53,6 +53,12 @@ jobs:
         continue-on-error: true
         timeout-minutes: 15
         run: python -m jobs.update_bank_results
+      # The detailed balance sheet and the cash flow statement from new half-year and year-end
+      # filings. Research data for the dashboard, read by no strategy.
+      - name: balance sheets and cash flows
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python -m jobs.update_statements --limit 800
       - name: industry labels for new listings
         continue-on-error: true
         timeout-minutes: 10
@@ -70,6 +76,7 @@ jobs:
           [ ! -d data/shareholding ] || git add data/shareholding
           [ ! -d data/pledges ] || git add data/pledges
           [ ! -d data/bank_results ] || git add data/bank_results
+          [ ! -d data/statements ] || git add data/statements
           [ ! -d data/events ] || git add data/events
           git add data/reference/industry_nse.parquet
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json

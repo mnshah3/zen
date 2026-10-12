@@ -80,3 +80,45 @@ def test_bank_results_are_point_in_time(tmp_path, monkeypatch):
     assert [q["period_end"] for q in early["quarters"]] == ["2026-03-31"]
     late = api.bank_results("XB")["quarters"][0]
     assert late["net_interest_income_cr"] == 66.0 and late["net_profit_cr"] == 33.0 and late["gross_npa_pct"] == 1.8
+
+
+def test_balance_sheet_and_cash_flow_are_point_in_time(tmp_path, monkeypatch):
+    import duckdb
+    from zen.data import statements as st
+    db = tmp_path / "st.duckdb"
+    con = duckdb.connect(str(db))
+    st.ensure_schema(con)
+    rows = [  # symbol, period end, broadcast, days, ppe, cash, equity, cfo, capex, intangibles, cfi, cff, url
+        ("XCO", "2025-09-30", "2025-11-10 18:00", 183, 400e7, 50e7, 900e7, 60e7, 25e7, None, -30e7, -20e7, "u1"),
+        ("XCO", "2026-03-31", "2026-05-12 18:00", 365, 440e7, 54e7, 990e7, 130e7, 70e7, 6e7, -80e7, -46e7, "u2"),
+        ("XCO", "2026-03-31", "2026-06-01 09:00", 365, 441e7, 54e7, 990e7, 131e7, 70e7, 6e7, -80e7, -47e7, "u3"),   # revised
+    ]
+    for sym, pe, bd, days, ppe, cash, eq, cfo, capex, intan, cfi, cff, url in rows:
+        con.execute("INSERT INTO statements (symbol, period_end, broadcast_dt, consolidated, format, fy_end, ytd_days, "
+                    "ppe, cash, equity, cfo, capex_ppe, capex_intangibles, cfi, cff, cf_adds_up, cash_ties, has_detail, "
+                    "has_cash_flow, xbrl_url) VALUES (?, ?, ?, true, 'indas', '2026-03-31', ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+                    "true, true, true, true, ?)", [sym, pe, bd, days, ppe, cash, eq, cfo, capex, intan, cfi, cff, url])
+    con.close()
+    monkeypatch.setattr(api, "DB", db)
+    early = api.cash_flow("xco", "2026-01-15")
+    assert [(p["period_end"], p["months"]) for p in early["periods"]] == [("2025-09-30", 6)]
+    assert early["periods"][0]["capex_cr"] == 25.0 and early["periods"][0]["free_cash_flow_cr"] == 35.0
+    assert "capex_intangibles_cr" not in early["periods"][0]                 # a line the filing does not tag
+    before_revision = api.cash_flow("XCO", "2026-05-31")["periods"][0]
+    assert before_revision["cfo_cr"] == 130.0 and before_revision["months"] == 12
+    now = api.cash_flow("XCO")
+    assert now["basis"] == "consolidated" and [p["period_end"] for p in now["periods"]] == ["2026-03-31", "2025-09-30"]
+    latest = now["periods"][0]
+    assert latest["cfo_cr"] == 131.0 and latest["capex_cr"] == 76.0 and latest["free_cash_flow_cr"] == 55.0
+    assert latest["adds_up"] is True and latest["financial_year_end"] == "2026-03-31"
+    bs = api.balance_sheet("XCO")
+    assert bs["format"] == "indas" and bs["periods"][0]["ppe_cr"] == 441.0 and bs["periods"][1]["cash_cr"] == 50.0
+    assert api.balance_sheet("XCO", "2025-10-01")["periods"] == [] and api.cash_flow("NOPE")["periods"] == []
+
+
+def test_statement_tools_say_so_when_the_table_is_not_built(tmp_path, monkeypatch):
+    import duckdb
+    db = tmp_path / "empty.duckdb"
+    duckdb.connect(str(db)).close()
+    monkeypatch.setattr(api, "DB", db)
+    assert "update_statements" in api.cash_flow("XCO")["note"] and "update_statements" in api.balance_sheet("XCO")["note"]

@@ -24,7 +24,8 @@ from __future__ import annotations
 
 import logging
 
-from zen.data import announcements, bank_results, corpactions, events, financials, indices, shareholding, store
+from zen.data import (announcements, bank_results, corpactions, events, financials, indices, shareholding,
+                      statements, store)
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ def main() -> int:
         ("shareholding", lambda: shareholding.rebuild_shareholding(con)),
         ("pledges", lambda: shareholding.rebuild_pledges(con)),
         ("bank_results", lambda: bank_results.rebuild(con)),
+        ("statements", lambda: statements.rebuild(con)),
         ("events", lambda: events.rebuild(con)),
     ]
 

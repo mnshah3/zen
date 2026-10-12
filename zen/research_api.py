@@ -161,6 +161,91 @@ def quarterly_results(symbol: str, as_of: str | None = None, quarters: int = 8,
             "quarters": _records(out)}
 
 
+def _statement_filings(symbol: str, as_of, consolidated: bool | None, flag: str):
+    """(day, basis, rows): this company's rows of `statements` known by the end of `as_of` that
+    have `flag` set, the latest revision of each period, in one basis (consolidated where the
+    company files one, unless asked). rows is None where the table is not built."""
+    d = _day(as_of)
+    con = _con()
+    try:
+        tabs = set(con.execute("SELECT table_name FROM information_schema.tables").df()["table_name"])
+        if "statements" not in tabs:
+            return d, None, None
+        cutoff = datetime.combine(d + timedelta(days=1), datetime.min.time()) if d else datetime(9999, 1, 1)
+        df = con.execute(f"SELECT * FROM statements WHERE symbol = ? AND broadcast_dt < ? AND {flag}",
+                         [symbol.upper(), cutoff]).df()
+    finally:
+        con.close()
+    if df.empty:
+        return d, None, df
+    df = df.sort_values("broadcast_dt").drop_duplicates(["consolidated", "period_end"], keep="last")
+    if consolidated is None:
+        consolidated = bool(df["consolidated"].any())
+    df = df[df["consolidated"] == consolidated].sort_values("period_end", ascending=False)
+    return d, ("consolidated" if consolidated else "standalone"), df
+
+
+def _crore_lines(df: pd.DataFrame, cols: list[str]) -> list[dict]:
+    """One dict a period: its end, when it was filed and every line that is filed, in Rs crore."""
+    out = []
+    for r in df.to_dict("records"):
+        row = {"period_end": _clean(pd.Timestamp(r["period_end"])), "filed": _clean(pd.Timestamp(r["broadcast_dt"]))}
+        for c in cols:
+            v = r.get(c)
+            if v is not None and not pd.isna(v):
+                row[f"{c}_cr"] = round(float(v) / 1e7, 2)
+        out.append(row)
+    return out
+
+
+def balance_sheet(symbol: str, as_of: str | None = None, periods: int = 6, consolidated: bool | None = None) -> dict:
+    """A company's balance sheets line by line, from its half-year and year-end filings known by the
+    end of `as_of`, newest first, in Rs crore. `format` is "indas" (current and non-current) or
+    "nbfc" (a finance company: financial and non-financial). Lines a filing does not tag are left
+    out. Lenders filing in the banking format are not here (see bank_results)."""
+    from zen.data import statements
+    d, basis, df = _statement_filings(symbol, as_of, consolidated, "has_detail")
+    out = {"symbol": symbol.upper(), "as_of": _clean(d), "basis": basis, "format": None, "periods": []}
+    if df is None:
+        return {**out, "note": "statements is not built in this archive (python -m jobs.update_statements)"}
+    if df.empty:
+        return out
+    df = df.head(int(periods))
+    out["format"] = str(df["format"].iloc[0])
+    out["periods"] = _crore_lines(df, statements.BALANCE)
+    return out
+
+
+def cash_flow(symbol: str, as_of: str | None = None, periods: int = 6, consolidated: bool | None = None) -> dict:
+    """A company's cash flow statements from its half-year and year-end filings known by the end of
+    `as_of`, newest first, in Rs crore. Each is for the financial year to date as filed: `months`
+    says whether it is the half-year (6) or the year (12). Totals are signed; the lines under them
+    are amounts paid or received, positive as filed. `capex_cr` is cash paid for property, plant
+    and equipment and intangible assets and `free_cash_flow_cr` is operating cash flow less it.
+    `adds_up` and `cash_ties` are zen's two checks on the statement as filed."""
+    from zen.data import statements
+    d, basis, df = _statement_filings(symbol, as_of, consolidated, "has_cash_flow")
+    out = {"symbol": symbol.upper(), "as_of": _clean(d), "basis": basis, "periods": []}
+    if df is None:
+        return {**out, "note": "statements is not built in this archive (python -m jobs.update_statements)"}
+    if df.empty:
+        return out
+    df = df.head(int(periods))
+    rows = _crore_lines(df, [*statements.CASH_FLOW, *statements.YTD])
+    for row, r in zip(rows, df.to_dict("records")):
+        row["months"] = None if pd.isna(r["ytd_days"]) else int(round(float(r["ytd_days"]) / 30.44))
+        row["financial_year_end"] = _clean(pd.Timestamp(r["fy_end"])) if not pd.isna(r["fy_end"]) else None
+        if "capex_ppe_cr" in row:
+            row["capex_cr"] = round(sum(row.get(f"{c}_cr", 0.0) for c in
+                                        ("capex_ppe", "capex_intangibles", "capex_intangibles_dev")), 2)
+            if "cfo_cr" in row:
+                row["free_cash_flow_cr"] = round(row["cfo_cr"] - row["capex_cr"], 2)
+        for flag, name in (("cf_adds_up", "adds_up"), ("cash_ties", "cash_ties")):
+            row[name] = None if pd.isna(r[flag]) else bool(r[flag])
+    out["periods"] = rows
+    return out
+
+
 def bank_results(symbol: str, as_of: str | None = None, quarters: int = 8, consolidated: bool | None = None) -> dict:
     """A lender's quarterly results from its banking-format filings, known by the end of `as_of`:
     total income, net interest income, operating profit before provisions, provisions, net
