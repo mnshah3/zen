@@ -1,0 +1,138 @@
+{
+  "run": "data\\backtest\\v1_final_window_2020",
+  "label": "v1_final_window_2020",
+  "clock": {
+    "first": "2020-02-17 09:15:00",
+    "last": "2026-09-18 09:15:00",
+    "marks": 1629
+  },
+  "full_period": {
+    "strategy": {
+      "cagr_calendar_pct": 32.02,
+      "cagr_quantstats_pct": 32.73,
+      "sharpe": 1.383,
+      "sortino": 1.914,
+      "calmar": 0.995,
+      "max_drawdown_pct": -32.89,
+      "volatility_pct": 22.29,
+      "exact": {
+        "cagr_calendar": 0.3202494303909975,
+        "cagr_quantstats": 0.3273206869147345,
+        "sharpe": 1.3833761736052985,
+        "sortino": 1.914330587997306,
+        "calmar": 0.9951155028643501,
+        "max_drawdown": -0.3289273315233975,
+        "volatility": 0.22289466564007643,
+        "n_returns": 1628
+      }
+    },
+    "universe_ew": {
+      "cagr_calendar_pct": 25.45,
+      "cagr_quantstats_pct": 26.0,
+      "sharpe": 1.219,
+      "sortino": 1.599,
+      "calmar": 0.624,
+      "max_drawdown_pct": -41.67,
+      "volatility_pct": 20.76,
+      "exact": {
+        "cagr_calendar": 0.2545268628621187,
+        "cagr_quantstats": 0.26000844856520233,
+        "sharpe": 1.218798276166985,
+        "sortino": 1.5994833192096347,
+        "calmar": 0.6240029318913805,
+        "max_drawdown": -0.4166782482529453,
+        "volatility": 0.20760111497906916,
+        "n_returns": 1628
+      }
+    }
+  },
+  "regression_full_period": {
+    "strategy": {
+      "months": 70,
+      "first": "2020-03",
+      "last": "2025-12",
+      "alpha_annual_pct": 3.71,
+      "alpha_t": 0.8,
+      "r_squared": 0.726,
+      "loadings": {
+        "MF": 0.89,
+        "SMB": 0.18,
+        "HML": 0.461,
+        "WML": 0.405
+      },
+      "loading_t": {
+        "MF": 8.9,
+        "SMB": 1.25,
+        "HML": 4.57,
+        "WML": 3.97
+      },
+      "exact": {
+        "alpha_monthly": 0.003036588031297461,
+        "alpha_annual": 0.03705383587566469,
+        "alpha_t": 0.8047610339654697,
+        "alpha_p": 0.42095759150434064,
+        "r_squared": 0.7255337496681395
+      },
+      "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+    },
+    "universe_ew": {
+      "months": 70,
+      "first": "2020-03",
+      "last": "2025-12",
+      "alpha_annual_pct": 0.35,
+      "alpha_t": 0.31,
+      "r_squared": 0.984,
+      "loadings": {
+        "MF": 0.951,
+        "SMB": 0.681,
+        "HML": 0.353,
+        "WML": -0.06
+      },
+      "loading_t": {
+        "MF": 58.63,
+        "SMB": 20.48,
+        "HML": 11.25,
+        "WML": -2.09
+      },
+      "exact": {
+        "alpha_monthly": 0.00029002096741049827,
+        "alpha_annual": 0.0034858083818363195,
+        "alpha_t": 0.3125504853752404,
+        "alpha_p": 0.7546222014838736,
+        "r_squared": 0.9841527607329564
+      },
+      "method": "statsmodels OLS, HAC (Newey-West, Bartlett) with 3 lags; alpha annualised as (1 + monthly alpha)^12 - 1"
+    }
+  },
+  "final_test": {
+    "clock": "open of 2023-02-15 to open of 2026-09-18",
+    "source": "in_sample_end_open.csv",
+    "years": 3.589322381930185,
+    "strategy_cagr_pct": 34.31,
+    "universe_ew_cagr_pct": 20.96,
+    "margin_interval": {
+      "point_pct": 13.35,
+      "lo90_pct": -2.68,
+      "hi90_pct": 29.23,
+      "share_of_draws_le_zero": 0.084,
+      "sessions_per_year": 246.3,
+      "method": "stationary bootstrap of paired daily returns, mean block 21 sessions, 5000 draws, statistic = difference in compound annual growth"
+    },
+    "index_tri_cagr_pct": {
+      "nifty500": 13.5,
+      "midcap150": 21.42,
+      "smallcap250": 21.88,
+      "momentum30": 15.92,
+      "value50": 27.3,
+      "quality30": 11.34,
+      "lowvol30": 12.75,
+      "alpha50": 24.45,
+      "momentum30_no_overnight": 15.92,
+      "value50_no_overnight": 27.23,
+      "quality30_no_overnight": 11.34,
+      "lowvol30_no_overnight": 12.75,
+      "alpha50_no_overnight": 24.45
+    },
+    "index_clock": "TRI at the open of the in-sample end (in_sample_end_open.csv) to TRI at the open of the end date (nav.csv's last mark); *_no_overnight: no overnight move where NSE printed no open"
+  }
+}

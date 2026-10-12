@@ -71,6 +71,27 @@ FACTOR_INDICES = {"momentum30": ("NIFTY200 MOMENTUM 30", "Nifty 200"),
                   "alpha50": ("NIFTY ALPHA 50", "Nifty 500")}
 
 
+def input_paths(frozen: str | Path | None = None) -> dict:
+    """The four files this job reads besides its own output: the database,
+    nse_list.json (diagnostics), the TRI file and the factor-index endpoints.
+
+    Without `frozen` they are the repository's. With it they are the same
+    relative paths under that directory (v3 spec 15.2.4, section 14.2: the v1
+    replay reads only the frozen copies), and a missing one raises rather than
+    falling back to the repository's."""
+    if frozen is None:
+        return {"db": pit.DB_PATH, "nse_list": pit.NSE_LIST, "tri": engine.TRI_PATH,
+                "endpoints": engine.ENDPOINTS_PATH}
+    root = Path(frozen)
+    paths = {"db": root / "data" / "zen.duckdb", "nse_list": root / "nse_list.json",
+             "tri": root / "data" / "external" / "nifty_tri.parquet",
+             "endpoints": root / "data" / "external" / "nifty_price_endpoints.csv"}
+    for k, v in paths.items():
+        if not v.is_file():
+            raise FileNotFoundError(f"--frozen {root}: {k} not found at {v}")
+    return paths
+
+
 def parse_args(argv=None) -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--config", default="base",
@@ -83,6 +104,10 @@ def parse_args(argv=None) -> argparse.Namespace:
                         "in-sample work.")
     p.add_argument("--no-record", action="store_true", help="do not append to trials.jsonl")
     p.add_argument("--out", default=str(OUT))
+    p.add_argument("--frozen", default=None, metavar="DIR",
+                   help="read every input from this frozen directory (v3 spec 15.2.4: "
+                        "data/frozen/v3) instead of the repository, after checking it "
+                        "against its freeze.json")
     return p.parse_args(argv)
 
 
@@ -112,36 +137,41 @@ def ranks_for(con, decisions, out: Path, reuse: bool, static=None):
     return ranks, funnel
 
 
-def index_navs(con, start, end, is_end, unlock):
+def index_navs(con, start, end, is_end, unlock, tri=engine.TRI_PATH,
+               endpoints=engine.ENDPOINTS_PATH):
     out = {}
     for key, (tri_name, price_name) in INDICES.items():
         try:
-            out[key] = engine.tri_nav(con, tri_name, price_name, start, end, is_end, unlock)
+            out[key] = engine.tri_nav(con, tri_name, price_name, start, end, is_end, unlock,
+                                      path=tri)
         except ValueError as e:
             log.warning("%s unavailable: %s", tri_name, e)
     # A factor index that cannot be built stops the run: nothing is skipped.
     for overnight, suffix in ((True, ""), (False, "_no_overnight")):
         for key, (tri_name, parent) in FACTOR_INDICES.items():
             out[key + suffix] = engine.factor_tri_nav(con, tri_name, parent, start, end, is_end,
-                                                      unlock, overnight=overnight)
+                                                      unlock, overnight=overnight, path=tri,
+                                                      endpoints_path=endpoints)
     return out
 
 
-def index_opens(con, start, d, end, is_end, unlock) -> dict:
+def index_opens(con, start, d, end, is_end, unlock, tri=engine.TRI_PATH,
+                endpoints=engine.ENDPOINTS_PATH) -> dict:
     """Every index column's level at the open of session d, on nav.csv's scale,
     by the same rule each column uses at its own two opens."""
     out = {}
     for key, (tri_name, price_name) in INDICES.items():
         try:
             out[key] = engine.tri_value_at_open(con, tri_name, price_name, start, d, end,
-                                                is_end, unlock)
+                                                is_end, unlock, path=tri)
         except ValueError as e:
             log.warning("%s open on %s unavailable: %s", tri_name, pd.Timestamp(d).date(), e)
     for overnight, suffix in ((True, ""), (False, "_no_overnight")):
         for key, (tri_name, parent) in FACTOR_INDICES.items():
             out[key + suffix] = engine.tri_value_at_open(con, tri_name, parent, start, d, end,
                                                          is_end, unlock, factor=True,
-                                                         overnight=overnight)
+                                                         overnight=overnight, path=tri,
+                                                         endpoints_path=endpoints)
     return out
 
 
@@ -208,7 +238,15 @@ def main(argv=None) -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    con = pit.connect()
+    paths = input_paths(args.frozen)
+    if args.frozen:
+        from jobs import freeze_v3
+        problems = freeze_v3.verify(Path(args.frozen))
+        if problems:
+            raise SystemExit(f"--frozen {args.frozen} does not match its freeze.json: "
+                             f"{problems[:5]}")
+        log.info("reading every input from the frozen copy %s", args.frozen)
+    con = pit.connect(paths["db"])
     cal = pit.sessions(con)
     is_end = engine.in_sample_end(cal)
     end = pd.Timestamp(args.end) if args.end else is_end
@@ -226,7 +264,7 @@ def main(argv=None) -> int:
     log.info("decision dates %s .. %s (%d); returns to the open of %s",
              decisions[0].date(), decisions[-1].date(), len(decisions), end.date())
 
-    static = pit.StaticLabels.load(con)
+    static = pit.StaticLabels.load(con, paths["nse_list"])
     ranks, funnel = ranks_for(con, decisions, out, args.reuse_ranks, static)
     print("\nUniverse per decision date:")
     print(funnel.to_string(index=False))
@@ -236,7 +274,8 @@ def main(argv=None) -> int:
                                args.run_final_test, ids=static.ids)
     log.info("panel %d sessions x %d symbols in %.1fs", len(panel.dates), len(panel.symbols),
              time.time() - t)
-    idx = index_navs(con, decisions[0], end, is_end, args.run_final_test)
+    idx = index_navs(con, decisions[0], end, is_end, args.run_final_test,
+                     tri=paths["tri"], endpoints=paths["endpoints"])
 
     if args.config in ("base", "cost40", "haircut50"):
         cfg = {"base": engine.BASE,
@@ -250,6 +289,10 @@ def main(argv=None) -> int:
         rep = variant_result(res, benches)
         rep["config"] = engine.config_dict(cfg)
         rep["label"] = cfg.label()
+        if args.frozen:
+            # What was read: the freeze's hash list (v3 spec 15.2.4). A default run adds nothing.
+            rep["frozen_inputs"] = {"dir": str(args.frozen),
+                                    "sha256": freeze_v3.load_freeze(Path(args.frozen))}
         rep["decision_dates"] = [str(d.date()) for d in decisions]
         rep["in_sample_end"] = str(is_end.date())
         rep["universe_median_size"] = float(funnel["r7_mcap_computable"].median())
@@ -298,7 +341,8 @@ def main(argv=None) -> int:
             row = {"date": is_end.date(),
                    "strategy": res.rebalance_open.get(is_end, np.nan),
                    "universe_ew": ew.rebalance_open.get(is_end, np.nan),
-                   **index_opens(con, decisions[0], is_end, end, is_end, args.run_final_test)}
+                   **index_opens(con, decisions[0], is_end, end, is_end, args.run_final_test,
+                                 tri=paths["tri"], endpoints=paths["endpoints"])}
             pd.DataFrame([row]).to_csv(out / f"in_sample_end_open{suffix}.csv", index=False)
         t4t = pd.concat([engine.bz_holdings(panel, res).assign(portfolio="strategy"),
                          engine.bz_holdings(panel, ew).assign(portfolio="universe_ew")],

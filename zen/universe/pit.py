@@ -347,10 +347,12 @@ class StaticLabels:
     taxonomy_fill: set = field(default_factory=set)
 
     @classmethod
-    def load(cls, con) -> "StaticLabels":
+    def load(cls, con, nse_list: Path | None = None) -> "StaticLabels":
+        """`nse_list` names another nse_list.json (v3's frozen copy, spec 15.2.4);
+        the default is the repository's."""
         ids = Identity.build(con)
         return cls(backfill_industry=industry_labels(con, None, ids),
-                   nse_lenders=ids.for_today(nse_list_lenders()), ids=ids,
+                   nse_lenders=ids.for_today(nse_list_lenders(nse_list or NSE_LIST)), ids=ids,
                    names=company_names(con, ids),
                    taxonomy_fill=taxonomy_backfill(con, ids))
 

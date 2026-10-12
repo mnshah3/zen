@@ -128,6 +128,10 @@ def with_without(monthly: pd.Series, q: pd.Series, iima: pd.DataFrame | None = N
     be the same months, so a month the factor lacks cannot silently leave only
     one of them."""
     d_with = lc.factor_frame(monthly, {"QUAL": q}, iima)
+    if d_with.empty:
+        # a run that ends before this version of the factor starts (ROCE's months begin in
+        # March 2023): nothing to regress, said so rather than left to fail
+        return {"months": 0, "error": "no month of this run has this version of the factor"}
     d_without = lc.factor_frame(monthly, None, iima)
     d_without = d_without[d_without.index.isin(q.index)]
     if not d_with.index.equals(d_without.index):
@@ -283,6 +287,9 @@ def main(argv=None) -> int:
     print(f"{rep['label']}: IIMA four-factor alpha {f['alpha_annual_pct']}%/yr, t {f['alpha_t']} "
           f"({f['months']} months {f['first']}..{f['last']})")
     for v, q in rep["quality"].items():
+        if "error" in q:
+            print(f"  {v:13} {q['error']}")
+            continue
         print(f"  {v:13} {q['months']:3} months {q['first']}..{q['last']}: alpha "
               f"{q['without_quality']['alpha_annual_pct']}% (t {q['without_quality']['alpha_t']}) "
               f"-> {q['with_quality']['alpha_annual_pct']}% (t {q['with_quality']['alpha_t']}), "
@@ -291,7 +298,7 @@ def main(argv=None) -> int:
         w = b["whole_period"]
         line = (f"  {col:24} whole: excess {w['excess_cagr'] * 100:+.2f}pp, IR "
                 f"{w['information_ratio']:.2f}")
-        if "live_part" in b:
+        if "from" in (b.get("live_part") or {}):          # absent when the run ends before it is live
             lp = b["live_part"]
             line += (f" | live from {lp['from']}: excess {lp['excess_cagr'] * 100:+.2f}pp, "
                      f"IR {lp['information_ratio']:.2f} ({lp['years']:.2f} yrs)")

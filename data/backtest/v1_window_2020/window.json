@@ -1,0 +1,85 @@
+{
+  "replay": "data\\backtest\\v1_replay_v3",
+  "start": "2020-02-17",
+  "files": {
+    "nav.csv": {
+      "rows_in": 1873,
+      "rows_out": 1629,
+      "first_mark": {
+        "date": "2020-02-17",
+        "mark": "open",
+        "strategy": 611481.700982908,
+        "universe_ew": 509007.8290875621,
+        "nifty500": 1.1352999852003205,
+        "midcap150": 1.1519856210747206,
+        "smallcap250": 1.1032239232697894,
+        "momentum30": 1.1483631045572529,
+        "value50": 0.9356375624606024,
+        "quality30": 1.073063946493101,
+        "lowvol30": 1.0756005081226687,
+        "alpha50": 1.2300910570185648,
+        "momentum30_no_overnight": 1.1493209402414717,
+        "value50_no_overnight": 0.9361436816716491,
+        "quality30_no_overnight": 1.073063946493101,
+        "lowvol30_no_overnight": 1.0756005081226687,
+        "alpha50_no_overnight": 1.2300910570185648
+      }
+    },
+    "trades.csv": {
+      "rows_in": 454,
+      "rows_out": 398,
+      "filtered_on": "date"
+    },
+    "holdings.csv": {
+      "rows_in": 453,
+      "rows_out": 397,
+      "filtered_on": "D"
+    },
+    "rebalance_open.csv": {
+      "rows_in": 31,
+      "rows_out": 27,
+      "filtered_on": "date"
+    },
+    "universe_funnel.csv": {
+      "rows_in": 31,
+      "rows_out": 27,
+      "filtered_on": "D"
+    },
+    "data_quality.csv": {
+      "rows_in": 1423,
+      "rows_out": 1409,
+      "filtered_on": "D"
+    },
+    "in_sample_end_open.csv": {
+      "rows_in": 1,
+      "rows_out": 1,
+      "filtered_on": "date"
+    },
+    "trade_for_trade.csv": {
+      "rows_in": 5,
+      "rows_out": 2,
+      "filtered_on": "entry"
+    },
+    "episodes.csv": {
+      "rows_in": 154,
+      "rows_out": 128,
+      "filtered_on": "entry"
+    },
+    "ranks.parquet": {
+      "rows_in": 28008,
+      "rows_out": 26329,
+      "filtered_on": "D"
+    }
+  },
+  "episodes_open_at_window_start": 10,
+  "not_copied": [
+    "metrics.json",
+    "sanity.json"
+  ],
+  "index_check_at_in_sample_end": {
+    "in_sample_end": "2023-02-15",
+    "columns": 13,
+    "max_rel_diff": 1.1102230246251565e-16
+  },
+  "frozen": "data/frozen/v3"
+}

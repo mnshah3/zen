@@ -248,3 +248,40 @@ def test_cli_writes_the_report_and_sets_the_exit_code(runs, tmp_path):
     assert "# Run comparison: p vs c" in text and "n_universe" in text
     s = json.loads((out / "summary.json").read_text())
     assert s["files"]["decisions.csv"]["by_column"] == {"n_universe": 1}
+
+
+# ---------------------------------------------------------------- the v3 profile
+def _add_eligibility(root: Path, *, flag: str = "true", extra: bool = False) -> None:
+    rows = [{"D": D, "symbol": s, "basis": "cons", "ttm_p": 3.0e8 + i, "f1": "true",
+             "eligible": flag if (D, s) == ("2019-06-03", "BBB") else "true"}
+            for D in ("2019-02-15", "2019-06-03") for i, s in enumerate(("AAA", "BBB", "CCC"))]
+    df = pd.DataFrame(rows)
+    if extra:
+        df["only_here"] = 1
+    df.to_csv(root / "eligibility.csv", index=False)
+
+
+def test_v3_profile_compares_eligibility_and_reports_a_column_only_one_side_writes(tmp_path):
+    a, b = _write_run(tmp_path / "a"), _write_run(tmp_path / "b")
+    _add_eligibility(a)
+    _add_eligibility(b)
+    d, s = _cmp(a, b, profile="v3")
+    # these small folders hold few of section 13's columns: each missing one is reported, and
+    # nothing that both folders do hold differs
+    assert set(d["class"]) == {"missing_column"} and "eligibility.csv" in s["files"]
+    assert "a1.json" not in s["files"]
+
+    _add_eligibility(b, flag="false", extra=True)
+    d, s = _cmp(a, b, profile="v3")
+    e = d[d["file"] == "eligibility.csv"]
+    assert ("eligible", "value") in set(zip(e["column"], e["class"]))
+    assert e[e["column"] == "eligible"]["key"].tolist() == ["2019-06-03|BBB"]
+    assert not (e["column"] == "only_here").any()        # a working column: a note, not a difference
+    assert any("only_here" in n for n in cr.Comparison(a, b, profile="v3").run().notes)
+    assert ("icr", "missing_column") in set(zip(e["column"], e["class"]))   # section 13 asks for it
+
+    (b / "eligibility.csv").unlink()
+    d, s = _cmp(a, b, profile="v3")
+    assert ((d["file"] == "eligibility.csv") & (d["column"] == "(file)")).sum() == 1
+    with pytest.raises(ValueError):
+        cr.Comparison(a, b, profile="v4")

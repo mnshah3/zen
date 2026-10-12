@@ -88,11 +88,76 @@ REQUIRED = {
 
 KEYS = {
     "universe.csv": ["D", "symbol"],
+    "eligibility.csv": ["D", "symbol"],
     "ranks.csv": ["D", "symbol"],
     "decisions.csv": ["D"],
     "holdings.csv": ["D", "symbol"],
     "fills.csv": ["D", "symbol", "kind", "side", "n"],
     "nav.csv": ["date", "mark"],
+}
+
+V2_FILES = ("universe.csv", "ranks.csv", "decisions.csv", "holdings.csv", "fills.csv", "nav.csv")
+# --profile v3 (research/strategy/v3-spec.md, section 13): the same files plus
+# eligibility.csv, and no a1.json. Only the keys are required. Every column both engines
+# write is compared, and a column only one of them writes is itself a difference (class
+# missing_column), so nothing goes uncompared unnoticed.
+V3_FILES = ("universe.csv", "eligibility.csv", "ranks.csv", "decisions.csv", "holdings.csv",
+            "fills.csv", "nav.csv")
+# canonical name <- the other engine's spelling (applied to every v3 file, and listed in the
+# report). A column outside V3_REQUIRED that only one engine writes is a working column: it
+# is listed in the report's notes and not counted as a difference.
+V3_ALIASES = {"basis": ["b_star"], "shares": ["N"], "shares_fix": ["N_src"], "fc_pos": ["fc_plus"],
+              **{f"f{i}": [f"F{i}"] for i in range(7)},
+              "shares_ref": ["N_ref"], "shares_ref_over_n": ["N_ref_over_N"],
+              "equity": ["bs_equity"], "debt": ["bs_debt"], "sector_key": ["sector"],
+              # decisions.csv
+              "cash_open": ["cash_after_step0"], "budget_left": ["B_left"],
+              "r1_ordinary_equity_recent_trade": ["v1_after_r1"], "r2_turnover_20L": ["v1_after_r2"],
+              "r3_200_sessions_365d": ["v1_after_r3"], "r4_not_lender": ["v1_after_r4"],
+              "r5_four_quarters_fresh": ["v1_after_r5"],
+              "r6_ttm_profit_ebitda_positive": ["v1_after_r6"],
+              "r7_mcap_computable": ["v1_after_r7"],
+              **{f"n_f{i}": [f"v3_after_F{i}"] for i in range(1, 7)},
+              "n_held_open": ["holdings_at_open"], "n_kept": ["kept"],
+              **{f"n_exit_E{i}": [f"exits_E{i}"] for i in range(1, 6)},
+              "n_exit_V": ["v_sales"], "n_trim_valuation": ["trims_valuation"],
+              "n_trim_cap": ["trims_cap"], "n_buys": ["buys_placed"],
+              "n_untested": ["untested_holdings"],
+              **{f"n_untested_{c}": [f"untested_{c}"] for c in ("E1", "E2", "E3", "E4", "trim")},
+              "n_held_outside_universe": ["holdings_outside_v1_universe"],
+              # holdings.csv
+              "in_universe": ["in_v1_universe"],
+              # fills.csv
+              "units": ["units_adjusted"], "price": ["price_adjusted"]}
+# a name that means something else in another file is mapped in its own file only
+V3_FILE_ALIASES = {"fills.csv": {"event": ["status"]}}
+# fills.csv `event` says whether a row is a fill or a cancellation; the two engines spell
+# it differently, so it is compared by meaning. Free-text columns section 13 does not ask
+# for are not compared (the exit code is compared in holdings.csv).
+V3_EVENT_CLASSES = {"fill": "fill", "filled": "fill", "cancel": "cancelled",
+                    "cancelled": "cancelled", "canceled": "cancelled"}
+V3_SKIP = {"fills.csv": {"reason", "exit_code"}}
+V3_REQUIRED = {
+    "universe.csv": ["D", "symbol"],
+    "eligibility.csv": ["D", "symbol", "c4_basis", "basis", "L", "run", "missing_quarters", "ttm_p",
+                        "close", "close_date", "close_series", "shares", "shares_fix", "mcap", "pe",
+                        "ttm_ebit", "fc_pos", "write_back", "icr_state", "icr", "bs_period_end",
+                        "de", "down0", "down1", "f0", "f1", "f2", "f3", "f4", "f5", "f6",
+                        "eligible", "owners_ttm_p", "owners_pe", "shares_ref", "shares_ref_over_n"],
+    "ranks.csv": ["D", "symbol", "A_R", "A_P", "M", "g", "PEG", "r_A_R", "r_A_P", "R1", "R2", "R3",
+                  "T", "rank", "S1", "S2", "S3", "S", "sector_key", "ticker"],
+    "decisions.csv": ["D", "nav_open", "cash_open", "budget_B", "budget_left", "n_eligible",
+                      "r1_ordinary_equity_recent_trade", "r2_turnover_20L", "r3_200_sessions_365d",
+                      "r4_not_lender", "r5_four_quarters_fresh", "r6_ttm_profit_ebitda_positive",
+                      "r7_mcap_computable", "n_f1", "n_f2", "n_f3", "n_f4", "n_f5", "n_f6",
+                      "n_held_open", "n_exit_E1", "n_exit_E2", "n_exit_E3", "n_exit_E4",
+                      "n_exit_E5", "n_exit_V", "n_trim_valuation", "n_trim_cap", "empty_slots",
+                      "n_buys", "slots_left_empty", "empty_reasons", "n_untested"],
+    "holdings.csv": ["D", "symbol", "status", "exit_codes", "units_open", "px_now", "weight_open",
+                     "pe", "excess", "U0", "u_V", "u_C", "units_to_sell", "down0", "down1",
+                     "untested", "rank", "sector_key"],
+    "fills.csv": ["D", "symbol", "kind", "side", "date", "event", "units", "price", "value", "cost"],
+    "nav.csv": REQUIRED["nav.csv"],
 }
 
 # canonical name <- other spellings
@@ -125,8 +190,15 @@ SOLD_REASON_CLASSES = {
 
 TEXT_COLUMNS = {"D", "date", "mark", "symbol", "ticker", "sector", "status", "sold_reason",
                 "side", "kind", "scheduled_date", "quality_measure", "cancelled_kind",
-                "reason", "sector_scheme", "weight_bound", "tri_date"}
-BOOL_COLUMNS = {"trend_c1", "trend_c2", "trend_c3"}
+                "reason", "sector_scheme", "weight_bound", "tri_date",
+                # v3
+                "c4_basis", "basis", "missing_quarters", "close_date", "close_series",
+                "shares_fix", "icr_state", "bs_period_end", "sector_key", "exit_codes",
+                "untested", "empty_reasons", "event", "latest_period_end_c4"}
+BOOL_COLUMNS = {"trend_c1", "trend_c2", "trend_c3",
+                # v3
+                "in_universe", "held_at_open", "write_back", "down0", "down1",
+                "f0", "f1", "f2", "f3", "f4", "f5", "f6", "eligible"}
 DIFF_COLUMNS = ["file", "key", "column", "a", "b", "class", "rel_diff"]
 MASKED_FILES = ("nav.csv",)
 
@@ -201,7 +273,13 @@ def read_csv(folder: Path, name: str) -> pd.DataFrame | None:
 # ------------------------------------------------------------------ core
 class Comparison:
     def __init__(self, a: Path, b: Path, rtol: float = 1e-9, atol: float = 1e-12,
-                 label_a: str = "a", label_b: str = "b", show_levels: bool = False):
+                 label_a: str = "a", label_b: str = "b", show_levels: bool = False,
+                 profile: str = "v2", files: tuple | None = None):
+        if profile not in ("v2", "v3"):
+            raise ValueError(f"unknown profile {profile!r}")
+        self.profile = profile
+        # `files` narrows the comparison, e.g. to the three files of v3's no-return stage
+        self.files = tuple(files) if files else (V3_FILES if profile == "v3" else V2_FILES)
         self.a, self.b = Path(a), Path(b)
         self.rtol, self.atol = rtol, atol
         self.label_a, self.label_b = label_a, label_b
@@ -221,7 +299,14 @@ class Comparison:
     # ---- frames
     def compare_frames(self, file: str, fa: pd.DataFrame, fb: pd.DataFrame, keys: list[str],
                        skip: set[str] = frozenset()) -> None:
-        req = [c for c in REQUIRED.get(file, []) if c not in keys and c != "n"]
+        required = V3_REQUIRED if self.profile == "v3" else REQUIRED
+        req = [c for c in required.get(file, []) if c not in keys and c != "n"]
+        if self.profile == "v3":
+            extra = sorted(c for c in fa.columns.symmetric_difference(fb.columns)
+                           if c not in skip and c not in req)
+            if extra:
+                self.notes.append(f"{file}: working columns only one engine writes, not compared: "
+                                  + ", ".join(extra))
         for c in req:
             if c not in fa.columns or c not in fb.columns:
                 self.add(file, "", c, "present" if c in fa.columns else "absent",
@@ -290,20 +375,30 @@ class Comparison:
 
     # ---- files
     def run(self) -> "Comparison":
-        for f in ("universe.csv", "ranks.csv", "decisions.csv", "holdings.csv", "fills.csv",
-                  "nav.csv"):
+        for f in self.files:
             fa, fb = read_csv(self.a, f), read_csv(self.b, f)
             if fa is None or fb is None:
                 self.add(f, "", "(file)", "absent" if fa is None else "present",
                          "absent" if fb is None else "present", "missing_column")
                 continue
+            if self.profile == "v3":
+                al = {**V3_ALIASES, **V3_FILE_ALIASES.get(f, {})}
+                fa, ra = apply_aliases(fa, al)
+                fb, rb = apply_aliases(fb, al)
+                for lab, r in ((self.label_a, ra), (self.label_b, rb)):
+                    if r:
+                        self.notes.append(f"{f} {lab} renamed: " + ", ".join(r))
             getattr(self, "_" + f.replace(".csv", ""))(fa, fb)
-        self._a1()
+        if self.profile != "v3":
+            self._a1()
         return self
 
     def _universe(self, fa, fb):
         self.compare_frames("universe.csv", fa[["D", "symbol"]].copy(),
                             fb[["D", "symbol"]].copy(), KEYS["universe.csv"])
+
+    def _eligibility(self, fa, fb):
+        self.compare_frames("eligibility.csv", fa, fb, KEYS["eligibility.csv"])
 
     def _ranks(self, fa, fb):
         fa, ra = apply_aliases(fa, RANK_ALIASES)
@@ -332,8 +427,17 @@ class Comparison:
         return f
 
     def _fills(self, fa, fb):
+        skip = frozenset()
+        if self.profile == "v3":
+            skip = frozenset(V3_SKIP["fills.csv"])
+            for f in (fa, fb):
+                if "event" in f.columns:
+                    t = _text(f["event"]).str.lower()
+                    f["event"] = t.map(V3_EVENT_CLASSES).fillna(t)
+            self.notes.append("fills.csv: `event` compared by meaning (fill / cancelled); "
+                              "not compared: " + ", ".join(sorted(skip)))
         self.compare_frames("fills.csv", self._number_fills(fa), self._number_fills(fb),
-                            KEYS["fills.csv"])
+                            KEYS["fills.csv"], skip=skip)
 
     def _nav(self, fa, fb):
         for f in (fa, fb):
@@ -495,9 +599,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--show-levels", action="store_true",
                     help="write the (scaled) nav.csv values of each difference; by default only "
                          "the relative difference is written, so no return is read in passing")
+    ap.add_argument("--profile", choices=["v2", "v3"], default="v2",
+                    help="v3: also eligibility.csv, no a1.json, and a column only one side "
+                         "writes is a difference (v3 spec, section 13)")
+    ap.add_argument("--files", nargs="*", default=None,
+                    help="compare only these files (v3's first stage writes universe.csv, "
+                         "eligibility.csv and ranks.csv for all 27 reviews and nothing else)")
     args = ap.parse_args(argv)
     c = Comparison(Path(args.a), Path(args.b), args.rtol, args.atol, args.label_a, args.label_b,
-                   args.show_levels).run()
+                   args.show_levels, args.profile, args.files).run()
     s = c.write(Path(args.out), args.max_rows)
     print(f"{s['n_differences']} differences ({s['n_substantive']} substantive); "
           f"report: {Path(args.out) / 'report.md'}")

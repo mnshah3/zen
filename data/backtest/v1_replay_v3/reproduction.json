@@ -1,0 +1,71 @@
+{
+  "replay": "data/backtest/v1_replay_v3",
+  "final": "data/backtest/v1_final",
+  "tolerance": 1e-09,
+  "nav": {
+    "marks_replay": 1873,
+    "marks_final": 1873,
+    "marks_common": 1873,
+    "columns": [
+      "strategy",
+      "universe_ew",
+      "nifty500",
+      "midcap150",
+      "smallcap250",
+      "momentum30",
+      "value50",
+      "quality30",
+      "lowvol30",
+      "alpha50",
+      "momentum30_no_overnight",
+      "value50_no_overnight",
+      "quality30_no_overnight",
+      "lowvol30_no_overnight",
+      "alpha50_no_overnight"
+    ],
+    "max_rel_diff": {
+      "strategy": 0.021791767119243577,
+      "universe_ew": 0.0009279661279901763,
+      "nifty500": 0.0,
+      "midcap150": 0.0,
+      "smallcap250": 0.0,
+      "momentum30": 0.0,
+      "value50": 0.0,
+      "quality30": 0.0,
+      "lowvol30": 0.0,
+      "alpha50": 0.0,
+      "momentum30_no_overnight": 0.0,
+      "value50_no_overnight": 0.0,
+      "quality30_no_overnight": 0.0,
+      "lowvol30_no_overnight": 0.0,
+      "alpha50_no_overnight": 0.0
+    },
+    "max_rel_diff_strategy_and_universe": 0.021791767119243577,
+    "max_rel_diff_all": 0.021791767119243577,
+    "identical": false,
+    "first_difference": {
+      "date": "2023-02-15",
+      "mark": "close",
+      "marks_differing": 884
+    }
+  },
+  "holdings": [
+    {
+      "D": "2023-02-15",
+      "replay_only": [
+        "WSTCSTPAPR"
+      ],
+      "final_only": [
+        "STARPAPER"
+      ]
+    }
+  ],
+  "trades": {
+    "replay": 454,
+    "final": 453,
+    "only_in_replay": 3,
+    "only_in_final": 2,
+    "common_with_a_different_value": 211
+  },
+  "identical": false
+}

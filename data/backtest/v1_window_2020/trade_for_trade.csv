@@ -1,0 +1,3 @@
+portfolio,symbol,entry,exit,exit_reason,bz_sessions,first_bz,last_bz,exit_fill_in_bz
+universe_ew,PTC,2022-08-16,2022-11-15,rebalance,14,2022-10-25,2022-11-15,True
+universe_ew,WANBURY,2024-02-15,2026-09-18,open_at_end,16,2025-01-03,2025-01-24,False

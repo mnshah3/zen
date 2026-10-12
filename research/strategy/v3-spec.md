@@ -1872,5 +1872,146 @@ ULTRACEMCO and WIPRO lack June 2022. TCS, INFY and WIPRO start at September
 
 ## Clarifications
 
-_None yet._ Anything the build turns up goes here, with its date and its
-reason, before any return that could be affected by it is computed.
+Anything the build turns up goes here, with its date and its reason, before any
+return that could be affected by it is computed. No rule above is changed by
+any of them.
+
+### 12 October 2026, before any v3 return was computed
+
+Written from the data prerequisites of section 15.2 and from the first
+comparison of the two engines, which covers eligibility and ranks only
+(section 15.4, first bullet). No v3 simulation had been run by either engine.
+
+**C1. Data prerequisites: what was done (section 15.2).**
+
+1. *Factor-index endpoints.* The five factor indices' printed values for 14 and
+   17 February 2020 were added on 6 October 2026
+   (`data/external/SOURCES.md`).
+2. *Refill and coverage gate.* 11 filings were added, all NSE still serves
+   (commit 7999473). 15 quarter-and-basis cells stay above 3%. Their 1,611
+   holes are listed one company at a time in
+   `data/reference/quarter_source_gaps.csv` with NSE's answer to both checks.
+   37 of them are filings NSE lists but whose document returns 404; they are
+   treated as not carried, since no document can be had.
+3. *Revision spot check.* 50 of 50 company-quarters confirmed against NSE's
+   listing (`data/reference/v3_revision_spot_check.csv`).
+4. *Freeze.* `data/frozen/v3/`, sealed on 6 October 2026, hash list in
+   `data/frozen/v3/freeze.json` (see C2).
+5. *Coverage on the frozen archive.* See C3.
+6. *v1 replay.* See C4.
+
+**C2. The freeze also holds the raw files the independent checker reads.**
+Section 15.2.4 lists the database and the statement files. The checker, like
+v2's, never opens the database: it reads the raw parquet files for prices,
+corporate actions, announcements and index levels (`data/daily`,
+`data/daily_other`, `data/corpactions`, `data/announcements`, `data/indices`).
+So that it too reads only frozen copies, those 366 files were added to the
+freeze on 12 October 2026, taken from git at commit 2be355e, the commit the
+database was frozen at (`jobs.freeze_v3 raw`). They are the files that database
+was rebuilt from: prices agree row for row, and the other tables agree in row
+count, latest date and totals. No hash already in `freeze.json` changed.
+
+**C3. Coverage on the frozen archive (section 15.2.5).** The evidence scripts
+of section 21 were re-run on the frozen copy
+(`research/strategy/v3_evidence/`). The refill moved the per-review counts at
+eight reviews; every other row of section 21.1 is unchanged.
+
+| D | N | Pass | F5 gap | F6 | Elig (evidence script) |
+|---|---|---|---|---|---|
+| 2022-08-16 | 859 → 860 | 608 → 609 | 20 | 73 | 477 → 478 |
+| 2022-11-15 | 828 → 832 | 523 → 528 | 23 | 98 → 99 | 364 → 368 |
+| 2023-02-15 | 862 → 866 | 573 → 577 | 51 | 116 → 117 | 364 → 367 |
+| 2023-06-01 | 854 → 857 | 569 → 572 | 47 | 116 | 367 → 370 |
+| 2023-08-16 | 1,032 | 639 → 640 | 115 → 113 | 124 | 354 → 357 |
+| 2023-11-15 | 1,081 → 1,082 | 669 → 670 | 132 → 130 | 130 | 366 → 369 |
+| 2024-02-15 | 1,174 → 1,175 | 671 → 672 | 118 → 116 | 114 | 406 → 409 |
+| 2024-06-03 | 1,181 → 1,182 | 679 | 99 → 97 | 101 | 439 → 441 |
+
+Companies per quarter moved in six cells only (2022-03 consolidated, 2022-06
+and 2023-06 both bases, 2022-09 standalone), by one to three companies each.
+
+**C4. v1's replay is not `v1_final`, so the A2 bars use the replay
+(section 14.2).** v1 was re-run unchanged on the frozen inputs into
+`data/backtest/v1_replay_v3/`. Its NAV equals `v1_final`'s at every mark before
+the close of 15 February 2023 and differs from there on, by at most 2.18%
+(`reproduction.json`). The cause is the refill: at the 15 February 2023 review
+one of the ten holdings differs (WSTCSTPAPR in the replay, STARPAPER in
+`v1_final`). As section 14.2 provides, v1's side of the comparison is the
+replay, and `v1_final`'s window figures are reported beside it. v1's published
+figures stay as published.
+
+**C5. Section 21's eligible counts and the rule of section 3.3a.** The evidence
+script behind section 21 measured each basis's eight-quarter window at that
+basis's own latest quarter. Section 3.3a measures it at L*, the latest quarter
+in either basis, and a stock for which neither window is complete at L* fails
+F5. Both engines follow section 3.3a, as written. The two differ for a company
+whose latest quarter is held in consolidated form only while its consolidated
+series is not yet eight quarters long: on the frozen archive, 7 stock-reviews
+out of 11,508, each one eligible under the evidence script and not under the
+rule.
+
+| D | Stock | Latest quarter, consolidated | Latest quarter, standalone |
+|---|---|---|---|
+| 2020-08-17 | NCLIND | June 2020 | March 2020 |
+| 2021-11-15 | TATASTLBSL | September 2021 | June 2021 |
+| 2022-06-01 | DCMNVL | March 2022 | December 2021 |
+| 2022-08-16 | GPIL | June 2022 | March 2022 |
+| 2022-08-16 | GULFOILLUB | June 2022 | March 2022 |
+| 2025-02-17 | CUPID | December 2024 | September 2024 |
+| 2025-11-17 | ABB | September 2025 | June 2025 |
+
+So the eligible counts of section 21.1 and of C3 are the evidence script's; the
+engines' are lower by one at five of these reviews and by two at 16 August
+2022. The rule stands as written.
+
+**C6. What three columns of `eligibility.csv` record (section 13).** The two
+engines computed the same figures and wrote three of them differently. From
+this date both write:
+
+- `icr` only in the fourth state of section 4.5 (an ICR is defined there and
+  nowhere else). In the write-back state the column is empty; E2 is still
+  tested on TTM_EBIT and FC⁺, which are both recorded.
+- D/E only for a usable balance sheet (section 4.6). A balance sheet older
+  than 400 days has its period recorded and no D/E.
+- the reference share count's ratio to N as N_ref / N, the reading of "its
+  ratio to N" in section 13. It is a diagnostic that no rule uses.
+
+**C7. Column names.** Section 13 fixes each file's contents and formats, not
+its column names, and the two engines named some columns differently (b* is
+`basis` in one and `b_star` in the other, for example). `jobs/compare_runs.py
+--profile v3` maps each pair to one name, lists the mapping in its report and
+requires every column section 13 asks for to be present in both. A working
+column that only one engine writes is listed in the report and not compared.
+
+### 12 October 2026, after the first comparison of the agreement period
+
+Both engines had run the agreement period (section 15.4). No return after the
+open of 15 February 2023 had been computed. At this comparison the two
+engines' universe, ranks, orders, fills, cash and all 746 NAV marks already
+agreed. What follows settles record fields only; no order or fill changes.
+
+**C8. Record fields (sections 13 and 13.1).**
+
+- *A holding with a full-sale order under section 8.* Its `u_V` is empty and
+  `trim` is not listed in its `untested`. Section 9.1 (step 3) and section 10
+  (step 6) compute the valuation target only for a holding without such an
+  order, so for this holding the trim is neither computed nor left untested.
+  The count of untested holdings in `decisions.csv` follows.
+- *A stock bought at D* (status `new`) has an empty `px_now`. Section 10,
+  step 1, defines px_now for the holdings at D's open.
+- *The reference share count and its ratio to N* are recorded only where N is
+  above zero, that is, where a market cap can exist.
+- *`fills.csv`.* Whether a row is a fill or a cancellation is compared by
+  meaning, since the engines spell it differently. Each engine's free-text
+  reason column is its own and is not compared; the exit codes are compared in
+  `holdings.csv`.
+
+**C9. After costs and tax for v1's window view (section 14.6).**
+`jobs/after_tax.py` rebuilds a book from cash and checks that it reproduces
+the run's NAV before it applies any tax. v1's window view starts on 17 February
+2020 with a book already held, whose lots were bought in 2019, so the job
+cannot be run on it as it stands. The after-tax figures are therefore reported
+for v3 (which starts from cash), for the Nifty 500 index fund over v3's window,
+and for v1 over its replay's whole period from 15 February 2019, labelled as
+that longer period. This is a reported figure only: it is not among the A2 bars
+or the five statements of section 14.7.

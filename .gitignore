@@ -68,3 +68,17 @@ data/raw_xbrl/
 data/financials_staging/
 data/financials_backup_*/
 data/backtest/v2*/ranks.parquet
+
+# v3's frozen inputs (spec 15.2.4): copies of ignored or large files. Only the hash list is kept.
+data/frozen/v3/*
+!data/frozen/v3/freeze.json
+
+# The v1 replay on the frozen inputs (spec 14.2): working ranks, rebuilt by jobs/backtest_v1.py.
+data/backtest/v1_replay_v3/ranks.parquet
+data/backtest/v1_window_2020/ranks.parquet
+
+# v3 development runs (agreement period, comparisons): rebuilt by jobs/backtest_v3.py and
+# jobs/crosscheck_v3.py from the frozen inputs. The final run folder is committed, these are not.
+data/backtest/v3_dev/
+data/backtest/v3_dev_check/
+data/backtest/v1_final_window_2020/ranks.parquet

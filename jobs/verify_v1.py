@@ -245,6 +245,67 @@ def reproduce_v2(replay, nav_strategy: pd.Series) -> float:
     return worst
 
 
+def is_v3(metrics_json: dict) -> bool:
+    """A run of the v3 engine: jobs/backtest_v3.py writes engine 'v3' into metrics.json."""
+    return (metrics_json or {}).get("engine") == "v3"
+
+
+def load_replay_v3(r: dict, con=None):
+    """The v3 book exactly as the run used it (jobs.backtest_v3.replay)."""
+    from jobs import backtest_v3
+
+    return backtest_v3.replay(r["run"], con=con)
+
+
+def random_orders_v3(eligible: dict, universe: list, rng, mode: str) -> dict:
+    """One draw's fill order at every review: {D: stock ids in random order}.
+
+    v1's two randomisations, drawn from the generator in the same order as `monkeys`
+    and `shuffled_ranks_v2` draw them: 'persistent' gives each stock one random score
+    for the whole run and orders every review's eligible list by it; 'fresh' permutes
+    each review's eligible list anew, in date order. `eligible` maps each review to
+    its eligible stock ids in the run's rank order."""
+    if mode not in MONKEY_MODES:
+        raise ValueError(f"mode must be one of {MONKEY_MODES}, not {mode!r}")
+    if mode == "persistent":
+        score = pd.Series(rng.random(len(universe)), index=universe)
+    out = {}
+    for D, syms in eligible.items():
+        s = pd.Index(syms)
+        if mode == "persistent":
+            rank = score.reindex(s).rank(method="first").astype(int).to_numpy()
+        else:
+            rank = rng.permutation(np.arange(1, len(s) + 1))
+        out[D] = list(s[np.argsort(rank, kind="stable")])
+    return out
+
+
+def monkeys_v3(replay, n_draws: int, mode: str = "persistent", seed: int = 20260922):
+    """Random portfolios through the v3 engine (engine_v3.Replay): only the order in
+    which empty slots are filled is randomised; eligibility, exits, the trim, the cap,
+    the sector cap, the slots, costs, dividends and the forced exit stay (v3 spec 14.6).
+
+    Returns (cagr per draw, annual one-way turnover per draw)."""
+    rng = np.random.default_rng(seed)
+    eligible = {D: list(rv.ranks.index) for D, rv in replay.reviews.items()}
+    universe = sorted({s for v in eligible.values() for s in v})
+    out, turn = [], []
+    for i in range(n_draws):
+        orders = random_orders_v3(eligible, universe, rng, mode)
+
+        def order(D, cand, orders=orders):
+            pos = {s: k for k, s in enumerate(orders[pd.Timestamp(D)])}
+            return cand.loc[sorted(cand.index, key=pos.__getitem__)]
+
+        res = replay.simulate(order, log_trades=True)
+        nav = res.nav.set_index("date")["nav"]
+        out.append(cagr(nav))
+        turn.append(turnover(res.trades, nav))
+        if (i + 1) % 100 == 0:
+            log.info("  %d/%d monkeys (%s, v3)", i + 1, n_draws, mode)
+    return np.array(out), np.array(turn)
+
+
 def shuffled_ranks_v2(byd: dict, universe: list, rng, mode: str) -> pd.DataFrame:
     """One draw's ranks for a v2 run: v1's two randomisations (see `monkeys`),
     drawn from the generator in the same order, applied to the rank column only.
@@ -538,18 +599,42 @@ def deflated(s_nav: pd.Series, grid_path: Path = GRID) -> dict:
 
 
 # ---------------------------------------------------------------- main
-def run_verify(run: Path, label: str, n_monkeys: int, out: Path, con=None) -> dict:
+def frozen_dir(metrics_json: dict) -> str | None:
+    """The frozen input directory a run recorded reading (v3 spec 15.2.4): a v3 run's
+    fingerprint, or the v1 replay's frozen_inputs."""
+    m = metrics_json or {}
+    return (m.get("fingerprint") or {}).get("frozen") or (m.get("frozen_inputs") or {}).get("dir")
+
+
+def run_verify(run: Path, label: str, n_monkeys: int, out: Path, con=None,
+               frozen: str | None = None) -> dict:
     r = load_run(run)
     s_nav, e_nav = r["strategy"], r["universe_ew"]
     s_cagr, e_cagr = cagr(s_nav), cagr(e_nav)
-    con = con or pit.connect()
-    static = pit.StaticLabels.load(con)
+    v3 = is_v3(r["metrics"])
+    # A run made on frozen inputs is measured on the same frozen inputs: its own record of
+    # them, or --frozen for a folder with no metrics.json (v1's window view).
+    frozen = frozen or frozen_dir(r["metrics"])
+    if frozen:
+        con = con or pit.connect(Path(frozen) / "data" / "zen.duckdb")
+        static = pit.StaticLabels.load(con, Path(frozen) / "nse_list.json")
+    else:
+        con = con or pit.connect()
+        static = pit.StaticLabels.load(con)
     trades = r["trades"][r["trades"]["side"].isin(["buy", "sell"])].reset_index(drop=True)
 
     monkey = {"strategy_cagr_pct": round(s_cagr * 100, 2),
               "strategy_turnover": round(turnover(r["trades"], s_nav), 2)}
     if n_monkeys > 0:
-        if is_v2(r["metrics"]):
+        if is_v3(r["metrics"]):
+            replay = load_replay_v3(r, con)
+            worst = reproduce_v2(replay, s_nav)          # the same check: the run's own NAV
+            monkey["engine"] = ("v3: zen.portfolio.engine_v3.Replay (the run's inputs, reviews, "
+                                "review dates and panel); only the fill order is randomised")
+
+            def draw(mode):
+                return monkeys_v3(replay, n_monkeys, mode=mode)
+        elif is_v2(r["metrics"]):
             replay = load_replay_v2(con, r, static)
             worst = reproduce_v2(replay, s_nav)
             monkey["engine"] = ("v2: zen.portfolio.engine_v2.Replay (the run's config, decision "
@@ -590,10 +675,14 @@ def run_verify(run: Path, label: str, n_monkeys: int, out: Path, con=None) -> di
               "deflated_sharpe": deflated(s_nav),
               "subperiods": subperiods(run, s_nav, e_nav), "by_year": by_year(s_nav, e_nav),
               "turnover_annual_incl_initial": turnover(r["trades"], s_nav),
-              "capacity": capacity(r["trades"], r["ranks"]),
+              "frozen_inputs": frozen,
+              # v3's ranks carry no turnover column: its capacity is the every-trade figure
+              # (A2's bar 5), recomputed from prices as for every run
+              "capacity": ({"note": "not computed for a v3 run; see capacity_all_trades"} if v3
+                           else capacity(r["trades"], r["ranks"])),
               "capacity_all_trades": {**capacity_all_trades(trades, med),
-                                      "check_against_ranks": check_against_ranks(
-                                          trades, med, r["ranks"])}}
+                                      **({} if v3 else {"check_against_ranks": check_against_ranks(
+                                          trades, med, r["ranks"])})}}
     return report
 
 
@@ -604,11 +693,14 @@ def main(argv=None) -> int:
     ap.add_argument("--label", default=None, help="name for this run (default: folder name)")
     ap.add_argument("--monkeys", type=int, default=500, help="draws per mode; 0 skips the test")
     ap.add_argument("--out", default=None, help="output folder (default: the run folder)")
+    ap.add_argument("--frozen", default=None,
+                    help="read prices from this frozen directory (v3 spec 15.2.4); a run that "
+                         "records its own frozen inputs needs no flag")
     args = ap.parse_args(argv)
     run = Path(args.run)
     out = Path(args.out) if args.out else run
     out.mkdir(parents=True, exist_ok=True)
-    rep = run_verify(run, args.label or run.name, args.monkeys, out)
+    rep = run_verify(run, args.label or run.name, args.monkeys, out, frozen=args.frozen)
     (out / "verify.json").write_text(json.dumps(rep, indent=2, default=float))
 
     monkey, attr, dsr = rep["monkey_test"], rep["attribution"], rep["deflated_sharpe"]
