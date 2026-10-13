@@ -47,6 +47,13 @@ jobs:
         timeout-minutes: 10
         run: python -m jobs.update_shareholding --days 10
 
+      # Who holds the public float (foreign and domestic institutions, funds, small holders),
+      # from the documents of the shareholding filings just fetched. Read by no strategy.
+      - name: shareholding detail
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python -m jobs.update_shareholding_detail --limit 400
+
       # Lenders' quarterly results from their banking-format filings, and NSE industry labels
       # for newly listed symbols. Research data for the dashboard, read by no live strategy.
       - name: bank results
@@ -75,6 +82,7 @@ jobs:
           git add data/announcements data/financials data/corpactions
           [ ! -d data/shareholding ] || git add data/shareholding
           [ ! -d data/pledges ] || git add data/pledges
+          [ ! -d data/shareholding_detail ] || git add data/shareholding_detail
           [ ! -d data/bank_results ] || git add data/bank_results
           [ ! -d data/statements ] || git add data/statements
           [ ! -d data/events ] || git add data/events

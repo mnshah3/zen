@@ -389,12 +389,33 @@ def filings(symbol: str, since: str | None = None, until: str | None = None, mat
 
 def shareholding(symbol: str, as_of: str | None = None, periods: int = 8) -> list[dict]:
     """Promoter, public and employee-trust holding by quarter, each quarter as last filed by the
-    end of `as_of`."""
+    end of `as_of`. Where zen has read that filing's own document (shareholding_detail) the row
+    also has the split of the public holding, in percent of all shares: fii_pct and dii_pct
+    (foreign and domestic institutions), mf_pct, insurance_pct, retail_pct (resident individuals
+    holding up to Rs 2 lakh of nominal capital) and the number of shareholders."""
     from zen.data import shareholding as sh
     con = _con()
     try:
         d = _day(as_of) or _last_session(con, None)
-        df = sh.asof(con, symbol.upper(), d, int(periods))
+        tabs = set(con.execute("SELECT table_name FROM information_schema.tables").df()["table_name"])
+        if "shareholding" in tabs and "shareholding_detail" in tabs:
+            # the same filing for both halves: the detail is joined on the filing chosen, by its id
+            df = con.execute(
+                """
+                SELECT s.period_end, s.promoter_pct, s.public_pct, s.employee_trusts_pct, s.broadcast_dt,
+                       d.fii_pct, d.dii_pct, d.mf_pct, d.insurance_pct, d.retail_pct, d.shareholders
+                FROM (
+                    SELECT *, row_number() OVER (PARTITION BY period_end ORDER BY broadcast_dt DESC, record_id DESC) AS rn
+                    FROM shareholding
+                    WHERE symbol = ? AND broadcast_dt < CAST(? AS DATE) + INTERVAL 1 DAY
+                ) s
+                LEFT JOIN shareholding_detail d ON d.record_id = s.record_id AND d.has_split AND d.agrees IS NOT FALSE
+                WHERE s.rn = 1
+                ORDER BY s.period_end DESC
+                LIMIT ?
+                """, [symbol.upper(), d, int(periods)]).df()
+        else:
+            df = sh.asof(con, symbol.upper(), d, int(periods))
     finally:
         con.close()
     return _records(df)

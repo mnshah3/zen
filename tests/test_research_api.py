@@ -122,3 +122,30 @@ def test_statement_tools_say_so_when_the_table_is_not_built(tmp_path, monkeypatc
     duckdb.connect(str(db)).close()
     monkeypatch.setattr(api, "DB", db)
     assert "update_statements" in api.cash_flow("XCO")["note"] and "update_statements" in api.balance_sheet("XCO")["note"]
+
+
+def test_shareholding_carries_the_split_of_the_filing_chosen(tmp_path, monkeypatch):
+    import duckdb
+    from zen.data import shareholding as sh, shareholding_detail as detail
+    db = tmp_path / "sh.duckdb"
+    con = duckdb.connect(str(db))
+    con.execute("CREATE TABLE prices (date DATE)")
+    con.execute("INSERT INTO prices VALUES ('2026-10-09')")
+    sh.ensure_schema(con)
+    detail.ensure_schema(con)
+    for rid, pe, bd, prom in (("1", "2026-03-31", "2026-04-15 18:00", 50.0), ("2", "2026-06-30", "2026-07-15 18:00", 51.0),
+                              ("3", "2026-06-30", "2026-08-01 10:00", 51.5)):               # 3 revises 2
+        con.execute("INSERT INTO shareholding (symbol, period_end, promoter_pct, public_pct, broadcast_dt, record_id) "
+                    "VALUES ('XCO', ?, ?, ?, ?, ?)", [pe, prom, 100 - prom, bd, rid])
+    for rid, fii, agrees in (("1", 20.0, True), ("2", 21.0, True), ("3", 99.0, False)):     # 3 does not match its listing
+        con.execute("INSERT INTO shareholding_detail (record_id, symbol, fii_pct, dii_pct, mf_pct, shareholders, agrees, "
+                    "has_split) VALUES (?, 'XCO', ?, 15.0, 9.0, 1000, ?, true)", [rid, fii, agrees])
+    con.close()
+    monkeypatch.setattr(api, "DB", db)
+    before = api.shareholding("xco", "2026-07-20")
+    assert [(r["period_end"], r["promoter_pct"], r["fii_pct"]) for r in before] == [("2026-06-30", 51.0, 21.0),
+                                                                                  ("2026-03-31", 50.0, 20.0)]
+    now = api.shareholding("XCO")
+    # the revision is the filing chosen; its document disagrees with its listing, so no split is shown for it
+    assert now[0]["promoter_pct"] == 51.5 and now[0]["fii_pct"] is None and now[1]["fii_pct"] == 20.0
+    assert now[1]["dii_pct"] == 15.0 and now[1]["shareholders"] == 1000.0

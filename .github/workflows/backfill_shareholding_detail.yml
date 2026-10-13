@@ -1,0 +1,65 @@
+name: backfill shareholding detail (manual)
+
+# One-off catch-up for data/shareholding_detail: who holds each company's public float, read
+# from every shareholding filing's own document (zen/data/shareholding_detail.py). Started by
+# hand. Each run reads a few thousand filings, commits them, and starts the next run itself
+# until none are left, so the whole catch-up runs here and not on anyone's laptop. The daily
+# data job keeps the table current afterwards. Research data: no strategy reads it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Filings to read in this run"
+        default: "4000"
+      chain:
+        description: "Start the next run when filings remain (true or false)"
+        default: "true"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: backfill-shareholding-detail
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+
+      - name: read the filings
+        id: read
+        run: |
+          python -m jobs.update_shareholding_detail --no-archive --limit "${{ inputs.limit }}" | tee run.log
+          echo "remaining=$(grep -o 'remaining=[0-9]*' run.log | tail -1 | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+          echo "read=$(grep -o '[0-9,]* read' run.log | tail -1 | tr -dc '0-9')" >> "$GITHUB_OUTPUT"
+
+      - name: commit what was read
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          [ ! -d data/shareholding_detail ] || git add data/shareholding_detail
+          git diff --staged --quiet && { echo "nothing new"; exit 0; }
+          git commit -m "data: shareholding detail backfill $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do            # another job may have pushed meanwhile
+            git pull --rebase origin main && git push && exit 0
+            sleep $((i * 15))
+          done
+          exit 1
+
+      # Only when this run made progress, so a run that read nothing cannot loop for ever.
+      - name: start the next run
+        if: ${{ inputs.chain == 'true' && steps.read.outputs.remaining != '0' && steps.read.outputs.read != '0' && steps.read.outputs.read != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run backfill_shareholding_detail.yml --ref main -f limit="${{ inputs.limit }}" -f chain=true

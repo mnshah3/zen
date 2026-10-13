@@ -77,6 +77,7 @@ def _mini_archive(path, extra_table: bool = False):
                           "announcements": ("an_dt", "TIMESTAMP"),
                           # research tables for the dashboard (read by no strategy, cut all the same)
                           "shareholding": ("broadcast_dt", "TIMESTAMP"), "pledges": ("observed_dt", "TIMESTAMP"),
+                          "shareholding_detail": ("broadcast_dt", "TIMESTAMP"),
                           "bank_results": ("broadcast_dt", "TIMESTAMP"), "statements": ("broadcast_dt", "TIMESTAMP"),
                           "events": ("observed_dt", "TIMESTAMP")}.items():
         con.execute(f"CREATE TABLE {t} ({col} {typ}, tag VARCHAR)")
