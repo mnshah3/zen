@@ -1,0 +1,65 @@
+name: backfill BSE filings (manual)
+
+# One-off catch-up for data/bse_announcements: every filing BSE disseminated since 2018, with
+# BSE's category and subcategory (zen/data/bse_announcements.py). Started by hand. Each run
+# fetches days not yet held, newest first, for about two and a half hours, commits them, and
+# starts the next run itself while it is still making progress. The daily data job keeps the
+# table current afterwards. Research data: no strategy reads it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "Minutes of fetching in this run"
+        default: "150"
+      chain:
+        description: "Start the next run when this one fetched something (true or false)"
+        default: "true"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: backfill-bse-announcements
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+
+      - name: fetch the days not yet held
+        id: fetch
+        run: |
+          python -m jobs.update_bse_announcements --backfill --minutes "${{ inputs.minutes }}" | tee run.log
+          echo "days=$(grep -o '[0-9,]* days fetched' run.log | tail -1 | tr -dc '0-9')" >> "$GITHUB_OUTPUT"
+
+      - name: commit what was fetched
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          [ ! -d data/bse_announcements ] || git add data/bse_announcements
+          [ ! -f data/reference/bse_scrips.parquet ] || git add data/reference/bse_scrips.parquet
+          git diff --staged --quiet && { echo "nothing new"; exit 0; }
+          git commit -m "data: BSE filings backfill $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do            # another job may have pushed meanwhile
+            git pull --rebase origin main && git push && exit 0
+            sleep $((i * 15))
+          done
+          exit 1
+
+      # Only when this run made progress, so a run that fetched nothing cannot loop for ever.
+      - name: start the next run
+        if: ${{ inputs.chain == 'true' && steps.fetch.outputs.days != '0' && steps.fetch.outputs.days != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run backfill_bse_announcements.yml --ref main -f minutes="${{ inputs.minutes }}" -f chain=true

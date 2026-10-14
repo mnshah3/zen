@@ -74,6 +74,10 @@ jobs:
         continue-on-error: true
         timeout-minutes: 5
         run: python -m jobs.update_events
+      - name: BSE filings with BSE's labels
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python -m jobs.update_bse_announcements --recent 5
 
       - name: commit new data
         run: |
@@ -86,6 +90,8 @@ jobs:
           [ ! -d data/bank_results ] || git add data/bank_results
           [ ! -d data/statements ] || git add data/statements
           [ ! -d data/events ] || git add data/events
+          [ ! -d data/bse_announcements ] || git add data/bse_announcements
+          [ ! -f data/reference/bse_scrips.parquet ] || git add data/reference/bse_scrips.parquet
           git add data/reference/industry_nse.parquet
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
           git diff --staged --quiet || git commit -m "data: filings, results, corporate actions $(date -u +%Y-%m-%d)"
