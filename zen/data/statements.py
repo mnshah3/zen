@@ -13,7 +13,10 @@ WHAT IS READ
 
 The documents are the ones `financials` already lists with a balance sheet
 (`has_balance_sheet`): the March and September filings of a company whose year ends in March.
-Downloads go through xbrl_cache, so a document is fetched from NSE once. From each:
+Before Sep 2022 the filings tag no balance sheet, but from the year to Mar 2021 they tag the
+cash flow statement, so the March and September filings from Sep 2020 to Mar 2022 are read
+too, for their cash flow alone (`has_detail` false). Downloads go through xbrl_cache, so a
+document is fetched from NSE once. From each:
 
   balance sheet   the instant facts at the balance-sheet date, through financials.parse_xbrl
                   with BALANCE_TAGS (NBFC_BALANCE_TAGS for a finance company's format), so the
@@ -39,6 +42,14 @@ the year to date under it: Infosys's March 2023 filing declares it as 2023-01-01
 and states it, correctly, as starting 2022-04-01, and the Rs 22,467 crore of operating cash
 flow under it is the year's. Where a document neither states nor declares the dates, the cash
 flow is left empty rather than given a span it does not claim.
+
+The year-end filings before Sep 2022 go further: they state the fourth quarter's dates for the
+context and tag that quarter's income under it beside the whole year's cash flow. TCS's March
+2021 filing has Rs 43,705 crore of revenue (the quarter) and Rs 38,802 crore of operating cash
+flow (the year, opening cash Rs 8,646 crore at 31 Mar 2020) under one context dated Jan to Mar.
+A cash flow ending on the financial year's last day is the year's, since SEBI asks for one only
+at the half year and the year end, so it is dated from the financial year's start and the
+quarter's income lines are not kept as year-to-date figures.
 
 TWO CHECKS, STORED WITH THE FIGURES
 
@@ -377,6 +388,17 @@ def parse_ytd(content: bytes) -> dict:
     figures = by_ref[ref]
     out.update(figures)
     out["ytd_start"], out["ytd_days"] = start, (end - start).days + 1
+    # A cash flow statement ending on the financial year's last day is the whole year's: SEBI
+    # asks for one at the half year and the year end only. Year-end filings before Sep 2022 put
+    # it in the fourth quarter's context, with that quarter's dates and its income lines (TCS,
+    # Mar 2021: the year's operating cash flow beside the quarter's revenue). The year's start
+    # is taken from the financial year then, and the quarter's income lines are not kept as
+    # year-to-date figures.
+    fs, fe = out.get("fy_start"), out.get("fy_end")
+    if fs and fe and end == fe and fs < start:
+        out["ytd_start"], out["ytd_days"] = fs, (end - fs).days + 1
+        for c in YTD:
+            out.pop(c, None)
 
     # Opening and closing cash. Newer documents tag them at the two balance-sheet dates; the 2023
     # and 2024 ones tag both under the cumulative context, opening first.
@@ -423,7 +445,8 @@ def documents(con, latest: bool = False) -> pd.DataFrame:
         """
         SELECT symbol, company, period_end, broadcast_dt, consolidated, xbrl_url
         FROM financials
-        WHERE has_balance_sheet AND xbrl_url IS NOT NULL
+        WHERE xbrl_url IS NOT NULL AND (has_balance_sheet
+              OR (month(period_end) IN (3, 9) AND period_end BETWEEN DATE '2020-09-30' AND DATE '2022-06-30'))
         ORDER BY broadcast_dt
         """).df()
     if latest and len(df):

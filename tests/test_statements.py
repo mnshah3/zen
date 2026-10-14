@@ -288,3 +288,32 @@ def test_sessions_are_replaced_after_a_failure_and_on_a_timer(monkeypatch):
     made.append(None)                                      # so that no session made here fails
     rows, failed = statements.fetch(_docs(2), pause=0, make_session=make)
     assert failed == 0 and len(rows) == 2 and len(made) == 3            # a fresh one once the first is old
+
+
+# A year-end filing before Sep 2022 (TCS, Mar 2021, in crores): one context dated as the fourth
+# quarter carries the quarter's income beside the whole year's cash flow.
+YEAR_END_2021 = _doc(
+    _span("FourD", "2021-01-01", "2021-03-31"), _instant("OneI", "2021-03-31"), _instant("PY_I", "2020-03-31"),
+    _fact("DateOfStartOfFinancialYear", "FourD", "2020-04-01"), _fact("DateOfEndOfFinancialYear", "FourD", "2021-03-31"),
+    _fact("DateOfStartOfReportingPeriod", "FourD", "2021-01-01"), _fact("DateOfEndOfReportingPeriod", "FourD", "2021-03-31"),
+    _fact("RevenueFromOperations", "FourD", "43705"),
+    _fact("CashFlowsFromUsedInOperatingActivities", "FourD", "38802"),
+    _fact("CashFlowsFromUsedInInvestingActivities", "FourD", "-8129"),
+    _fact("CashFlowsFromUsedInFinancingActivities", "FourD", "-32634"),
+    _fact("IncreaseDecreaseInCashAndCashEquivalents", "FourD", "-1788"),
+    _fact("CashAndCashEquivalentsCashFlowStatement", "PY_I", "8646"),
+    _fact("CashAndCashEquivalentsCashFlowStatement", "OneI", "6858"),
+)
+
+
+def test_a_year_end_cash_flow_before_sep_2022_is_the_years_not_the_quarters():
+    r = statements.parse_ytd(YEAR_END_2021)
+    assert r["ytd_start"] == date(2020, 4, 1) and r["ytd_days"] == 365
+    assert r["cfo"] == 38802 and r["cash_start"] == 8646 and r["cash_end"] == 6858 and r["cash_ties"]
+    assert "ytd_revenue" not in r                              # the quarter's revenue, not the year's
+    # a half-year one is dated as it states (Sep 2021: the stated span already starts in April)
+    half = statements.parse_ytd(_doc(
+        _span("FourD", "2021-04-01", "2021-09-30"),
+        _fact("DateOfStartOfFinancialYear", "FourD", "2021-04-01"), _fact("DateOfEndOfFinancialYear", "FourD", "2022-03-31"),
+        _fact("RevenueFromOperations", "FourD", "91000"), _fact("CashFlowsFromUsedInOperatingActivities", "FourD", "19310")))
+    assert half["ytd_days"] == 183 and half["ytd_revenue"] == 91000
