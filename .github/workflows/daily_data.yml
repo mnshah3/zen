@@ -74,10 +74,6 @@ jobs:
         continue-on-error: true
         timeout-minutes: 5
         run: python -m jobs.update_events
-      - name: BSE filings with BSE's labels
-        continue-on-error: true
-        timeout-minutes: 15
-        run: python -m jobs.update_bse_announcements --recent 5
 
       - name: commit new data
         run: |

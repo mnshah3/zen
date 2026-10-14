@@ -1,5 +1,10 @@
 name: backfill BSE filings (manual)
 
+# NOTE (15 Oct 2026): BSE refuses GitHub's runners (HTTP 403 on every request, the same requests
+# succeed from a home connection), so this workflow cannot fetch anything at present and the
+# archive is filled from the owner's machine with jobs.update_bse_announcements. Kept for when
+# BSE allows it, and so the commit-and-chain steps stay written down.
+#
 # One-off catch-up for data/bse_announcements: every filing BSE disseminated since 2018, with
 # BSE's category and subcategory (zen/data/bse_announcements.py). Started by hand. Each run
 # fetches days not yet held, newest first, for about two and a half hours, commits them, and
