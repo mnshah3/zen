@@ -249,3 +249,28 @@ def test_the_daily_run_reads_only_filings_never_read(tmp_path, monkeypatch):
     asked.clear()
     job.main(["--no-archive"])
     assert asked == ["R1", "R0"]
+
+
+class _Gone:
+    """NSE's answer for a document it no longer has."""
+    status_code = 404
+
+    def raise_for_status(self):
+        import requests
+        raise requests.HTTPError("404 Not Found", response=self)
+
+
+def test_documents_nse_no_longer_has_do_not_stop_the_run(monkeypatch):
+    monkeypatch.setattr(detail.xbrl_cache, "get", lambda url, root=None: None)
+    monkeypatch.setattr(detail.time, "sleep", lambda s: None)
+
+    class Mixed(_Session):
+        def get(self, url, timeout=None):
+            self.calls += 1
+            return _Gone() if self.calls <= 30 else _Resp(self.content)
+
+    s = Mixed(NEW)
+    rows, failed = detail.fetch(_filings(32), s, give_up_after=25)
+    assert failed == 30 and len(rows) == 2                    # thirty gone in a row, and the run went on
+    rows, failed = detail.fetch(_filings(8), _Session(b"<html>Access denied</html>"), give_up_after=3)
+    assert rows.empty and failed == 3                         # a refusal still stops it

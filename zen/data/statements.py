@@ -483,6 +483,8 @@ def fetch(todo: pd.DataFrame, session=None, pause: float = 0.35, give_up_after: 
 
     A failed download is left out, so the next run tries it again. `give_up_after` failures in
     a row stop the run: NSE is refusing, and hammering it helps nobody. What was read is kept.
+    A document NSE no longer has (404) does not count toward that, since old filings go missing
+    in clusters without NSE refusing anything.
 
     A `session` passed in is used as it is. Otherwise sessions come from `make_session` and are
     replaced on a timer and after every failed download. NSE's archive host drops keep-alive
@@ -503,15 +505,16 @@ def fetch(todo: pd.DataFrame, session=None, pause: float = 0.35, give_up_after: 
             streak = 0
         except Exception as e:                                       # noqa: BLE001
             failed += 1
-            streak += 1
+            gone = financials_legacy.missing(e)          # a document NSE no longer has: not a refusal
+            streak += 0 if gone else 1
             log.debug("statements: %s not fetched (%s)", meta["xbrl_url"], e)
-            if own and session is not None:                          # the connection has gone bad
+            if own and session is not None and not gone:                          # the connection has gone bad
                 session.close()
                 session = None
             if streak >= give_up_after:
                 log.warning("statements: %d downloads failed in a row, stopping at %d of %d", streak, i, len(todo))
                 break
-            time.sleep(pause * min(streak, 10))
+            time.sleep(pause * min(max(streak, 1), 10))
             continue
         rows.append({**meta, **parse(content, is_nbfc(meta["xbrl_url"]))})
         if not hit:

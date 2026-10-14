@@ -188,6 +188,13 @@ REWARM_SECONDS = 240
 REWARM_AFTER_FAILURES = 3
 
 
+def missing(e: Exception) -> bool:
+    """True when a download failed because NSE no longer has the document (HTTP 404). Several of
+    its old filings are gone for good, and they can sit together in a run (thirty from July
+    2025), so they must not count as NSE refusing, which is what a run of failures means."""
+    return getattr(getattr(e, "response", None), "status_code", None) == 404
+
+
 def document_session():
     """A throwaway session for nsearchives.
 

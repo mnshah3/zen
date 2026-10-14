@@ -272,8 +272,10 @@ def fetch(todo: pd.DataFrame, session=None, pause: float = 0.3, give_up_after: i
     """Read every document in `todo` (rows of documents()). Returns (rows, failed downloads).
 
     A failed download is left out, so the next run tries it again, and `give_up_after` failures
-    in a row stop the run. Sessions are replaced on a timer and after every failure, as in
-    zen.data.statements: NSE's archive host wedges a long-lived connection."""
+    in a row stop the run. A document NSE no longer has (404) does not count toward that: old
+    filings are gone in clusters, and they are not a refusal. Sessions are replaced on a timer
+    and after every other failure, as in zen.data.statements: NSE's archive host wedges a
+    long-lived connection."""
     rows, failed, streak = [], 0, 0
     own, born = session is None, 0.0
     for i, meta in enumerate(todo.to_dict("records"), 1):
@@ -286,16 +288,17 @@ def fetch(todo: pd.DataFrame, session=None, pause: float = 0.3, give_up_after: i
             streak = 0
         except Exception as e:                                       # noqa: BLE001
             failed += 1
-            streak += 1
+            gone = financials_legacy.missing(e)          # a document NSE no longer has: not a refusal
+            streak += 0 if gone else 1
             log.debug("shareholding detail: %s not fetched (%s)", meta["xbrl_url"], e)
-            if own and session is not None:
+            if own and session is not None and not gone:
                 session.close()
                 session = None
             if streak >= give_up_after:
                 log.warning("shareholding detail: %d downloads failed in a row, stopping at %d of %d",
                             streak, i, len(todo))
                 break
-            time.sleep(pause * min(streak, 10))
+            time.sleep(pause * min(max(streak, 1), 10))
             continue
         doc = parse(content)
         row = {"record_id": str(meta["record_id"]), "symbol": meta["symbol"], "period_end": meta["period_end"],
