@@ -176,3 +176,61 @@ def test_the_job_reads_the_newest_filings_first_so_dead_old_ones_cannot_block_th
     asked.clear()
     job.main(["--no-archive"])
     assert asked == ["R4", "R2", "R1", "R0"]
+
+
+def _promoter_doc(facts: dict, flags: dict | None = None) -> bytes:
+    """A filing whose promoter line (context C0) tags `facts`; `flags` are its yes/no answers."""
+    tags = "".join(f'<in-bse-shp:{k} contextRef="C0">{v}</in-bse-shp:{k}>' for k, v in facts.items())
+    tags += "".join(f'<in-bse-shp:{k} contextRef="C9">{v}</in-bse-shp:{k}>' for k, v in (flags or {}).items())
+    return _doc({"ShareholdingOfPromoterAndPromoterGroupMember": "0.4479", "PublicShareholdingMember": "0.5521",
+                 "ShareholdingPatternMember": "1"}, extra=tags)
+
+
+def test_promoter_pledges_are_read_from_share_counts_in_both_formats():
+    # current format, every promoter share pledged (RACE, Sep 2026: NSE's pledge page says 100%)
+    r = detail.parse(_promoter_doc({"NumberOfShares": "7730100", "NumberOfSharesEncumberedUnderPledged": "7730100",
+                                    "NumberOfSharesEncumbered": "7730100",
+                                    "EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares": "1"}))
+    assert r["promoter_shares"] == 7730100 and r["promoter_pledged_pct"] == 100.0 and r["promoter_encumbered_pct"] == 100.0
+    # current format, some shares under a non-disposal undertaking and none pledged
+    r = detail.parse(_promoter_doc({"NumberOfShares": "1000", "NumberOfSharesEncumbered": "250"},
+                                   {"WhetherAnySharesHeldByPromotersAreEncumberedUnderPledged": "No",
+                                    "WhetherAnySharesHeldByPromotersAreEncumberedUnderNonDisposalUndertaking": "Yes"}))
+    assert r["promoter_pledged_pct"] == 0.0 and r["promoter_encumbered_pct"] == 25.0
+    # older format: one "pledged or otherwise encumbered" figure (TEMBO, Dec 2022: the document says 8.74%)
+    r = detail.parse(_promoter_doc({"NumberOfShares": "7255000", "PledgedOrEncumberedNumberOfShares": "634047",
+                                    "PledgedOrEncumberedSharesHeldAsPercentageOfTotalNumberOfShares": "8.74"}))
+    assert r["promoter_encumbered_pct"] == 8.7394 and r["promoter_pledged_pct"] is None   # not split in that format
+
+
+def test_no_encumbrance_is_zero_but_silence_is_unknown():
+    no = {"WhetherAnySharesHeldByPromotersAreEncumberedUnderPledged": "No",
+          "WhetherAnySharesHeldByPromotersAreEncumberedOtherThanByWayOfPledgeOrNDU": "No"}
+    r = detail.parse(_promoter_doc({"NumberOfShares": "6715496096"}, no))           # RELIANCE: answers no, tags no count
+    assert r["promoter_pledged_pct"] == 0.0 and r["promoter_encumbered_pct"] == 0.0
+    r = detail.parse(_promoter_doc({"NumberOfShares": "6715496096"}))               # neither counts nor answers
+    assert r["promoter_pledged_pct"] is None and r["promoter_encumbered_pct"] is None
+    r = detail.parse(_doc({"PublicShareholdingMember": "1", "ShareholdingPatternMember": "1"}))   # no promoter at all
+    assert r["promoter_shares"] is None and r["promoter_encumbered_pct"] is None
+
+
+def test_rows_read_before_the_pledge_figures_are_read_again_and_replaced(tmp_path, monkeypatch):
+    monkeypatch.setattr(detail.xbrl_cache, "get", lambda url, root=None: None)
+    monkeypatch.setattr(detail.time, "sleep", lambda s: None)
+    out = tmp_path / "shareholding_detail"
+    out.mkdir()
+    old_cols = [c for c in detail.COLUMNS if c not in (*detail.PLEDGE_FIGURES, "pledge_read")]
+    old = pd.DataFrame([{"record_id": "R0", "symbol": "XCO", "period_end": pd.Timestamp("2026-06-30"),
+                         "broadcast_dt": pd.Timestamp("2026-07-16 19:24"), "fii_pct": 17.2, "agrees": True,
+                         "has_split": True, "xbrl_url": "https://example.invalid/SHP_0_WEB.xml"}]).reindex(columns=old_cols)
+    old.to_parquet(out / "2026.parquet", index=False)                 # the layout before pledges were read
+    assert detail.stored_ids(out) == set()                            # so it counts as not yet read
+    rows, failed = detail.fetch(_filings(1), _Session(NEW))
+    assert failed == 0 and bool(rows.loc[0, "pledge_read"])
+    detail.write(rows, out)
+    back = pd.read_parquet(out / "2026.parquet")
+    assert len(back) == 1 and bool(back.loc[0, "pledge_read"]) and detail.stored_ids(out) == {"R0"}
+    con = duckdb.connect(str(tmp_path / "t.duckdb"))
+    assert detail.rebuild(con, out) == 1
+    assert con.execute("SELECT pledge_read, fii_pct FROM shareholding_detail").fetchone() == (True, 17.2)
+    con.close()

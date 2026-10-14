@@ -24,6 +24,18 @@ SEBI's format totals itself, so nothing is added up here:
   non_institution_pct            everyone else in the public holding
   shareholders                   the number of shareholders in all
 
+And from the promoter group's own line, as share counts:
+
+  promoter_shares                the promoter group's shares
+  promoter_encumbered_shares     pledged or otherwise encumbered, both formats
+  promoter_pledged_shares        pledged only: the current format alone separates it
+  promoter_encumbered_pct, promoter_pledged_pct
+                                 each as a percentage of the promoter group's own shares,
+                                 the figure NSE's pledge page shows
+
+`pledge_read` marks rows read with these figures. Rows from before they were added are read
+again by the next run (stored_ids leaves them out) and replaced.
+
 TWO THINGS THE DOCUMENTS DO DIFFERENTLY
 
 Units. Filings up to early 2023 tag percentages (72.3); later ones tag fractions (0.723).
@@ -77,8 +89,22 @@ MEMBERS = {
     "residentindividualshareholdersholdingnominalsharecapitaluptorstwolakhmember": "retail_pct",
     "noninstitutionsmember": "non_institution_pct",
 }
-FIGURES = [*dict.fromkeys(MEMBERS.values()), "shareholders"]
-COLUMNS = ["record_id", "symbol", "period_end", "broadcast_dt", *FIGURES, "agrees", "has_split", "xbrl_url"]
+# The promoter group's own line: its shares, and how many of them are pledged or otherwise
+# encumbered. The format in use until 2023 has one column, "pledged or otherwise encumbered";
+# the current one splits pledges from other encumbrances (non-disposal undertakings and the
+# rest). Share counts are read, not the document's percentages, so the unit (72.3 or 0.723)
+# never matters.
+PROMOTER = "shareholdingofpromoterandpromotergroupmember"
+SHARES_TAG = "NumberOfShares"
+PLEDGED_TAG = "NumberOfSharesEncumberedUnderPledged"                       # current format
+ENCUMBERED_TAGS = ("NumberOfSharesEncumbered", "PledgedOrEncumberedNumberOfShares")   # current, older
+FLAG_PREFIX = "WhetherAnySharesHeldByPromoters"   # yes/no questions the documents answer
+PLEDGE_FIGURES = ["promoter_shares", "promoter_pledged_shares", "promoter_encumbered_shares",
+                  "promoter_pledged_pct", "promoter_encumbered_pct"]
+
+FIGURES = [*dict.fromkeys(MEMBERS.values()), "shareholders", *PLEDGE_FIGURES]
+COLUMNS = ["record_id", "symbol", "period_end", "broadcast_dt", *FIGURES, "agrees", "has_split",
+           "pledge_read", "xbrl_url"]
 AGREE_WITHIN = 0.05                 # percentage points between the document and the listing
 
 SCHEMA = """
@@ -86,7 +112,10 @@ CREATE TABLE IF NOT EXISTS shareholding_detail (
     record_id VARCHAR PRIMARY KEY, symbol VARCHAR, period_end DATE, broadcast_dt TIMESTAMP,
     promoter_pct DOUBLE, public_pct DOUBLE, fii_pct DOUBLE, dii_pct DOUBLE, mf_pct DOUBLE,
     insurance_pct DOUBLE, pension_pct DOUBLE, aif_pct DOUBLE, retail_pct DOUBLE,
-    non_institution_pct DOUBLE, shareholders DOUBLE, agrees BOOLEAN, has_split BOOLEAN, xbrl_url VARCHAR
+    non_institution_pct DOUBLE, shareholders DOUBLE,
+    promoter_shares DOUBLE, promoter_pledged_shares DOUBLE, promoter_encumbered_shares DOUBLE,
+    promoter_pledged_pct DOUBLE, promoter_encumbered_pct DOUBLE,
+    agrees BOOLEAN, has_split BOOLEAN, pledge_read BOOLEAN, xbrl_url VARCHAR
 )
 """
 
@@ -121,15 +150,23 @@ def parse(content: bytes) -> dict:
             category[ctx.get("id")] = members[0][1].lower()
     share: dict[str, float] = {}
     count: dict[str, float] = {}
+    promoter: dict[str, float] = {}             # the promoter group's share and encumbrance counts
+    flags: dict[str, str] = {}                  # the yes/no answers on promoter encumbrance
     for node in root.iter():
+        tag = node.tag.split("}")[-1]
+        if tag.startswith(FLAG_PREFIX):
+            flags.setdefault(tag, (node.text or "").strip().lower())
         cat = category.get(node.get("contextRef"))
         if cat is None:
             continue
-        tag = node.tag.split("}")[-1]
         if tag == SHARE_TAG or tag == COUNT_TAG:
             v = _number(node.text)
             if v is not None:
                 (share if tag == SHARE_TAG else count).setdefault(cat, v)
+        if cat == PROMOTER and (tag in (SHARES_TAG, PLEDGED_TAG) or tag in ENCUMBERED_TAGS):
+            v = _number(node.text)
+            if v is not None:
+                promoter.setdefault(tag, v)
     if not share:
         return {}
     whole = share.get(WHOLE)
@@ -140,7 +177,35 @@ def parse(content: bytes) -> dict:
     out = {col: round(share[m] * scale, 4) for m, col in MEMBERS.items() if m in share}
     if WHOLE in count:
         out["shareholders"] = count[WHOLE]
+    out.update(_pledges(promoter, flags))
     return out
+
+
+def _no(answers) -> bool:
+    answers = list(answers)
+    return bool(answers) and all(a in ("no", "false", "0") for a in answers)
+
+
+def _pledges(promoter: dict[str, float], flags: dict[str, str]) -> dict:
+    """The promoter group's pledged and encumbered shares, and each as a percentage of its own
+    holding. A document that tags no count but answers "no" to every encumbrance question has
+    none: zero, not a gap. The older format has no separate pledge figure, so there pledged is
+    left empty and only the encumbered total is known."""
+    current = PLEDGED_TAG in promoter or "NumberOfSharesEncumbered" in promoter \
+        or any("UnderPledged" in f for f in flags)
+    encumbered = next((promoter[t] for t in ENCUMBERED_TAGS if t in promoter), None)
+    pledged = promoter.get(PLEDGED_TAG)
+    if encumbered is None and _no(flags.values()):
+        encumbered = 0.0
+    if pledged is None and current and (encumbered == 0.0 or _no(v for k, v in flags.items() if "UnderPledged" in k)):
+        pledged = 0.0
+    shares = promoter.get(SHARES_TAG)
+
+    def pct(x):
+        return round(100.0 * x / shares, 4) if x is not None and shares else None
+
+    return {"promoter_shares": shares, "promoter_pledged_shares": pledged, "promoter_encumbered_shares": encumbered,
+            "promoter_pledged_pct": pct(pledged), "promoter_encumbered_pct": pct(encumbered)}
 
 
 def _agrees(doc: dict, listed_promoter, listed_public) -> bool | None:
@@ -174,10 +239,16 @@ def documents(sh_dir: Path = shareholding.SH_DIR) -> pd.DataFrame:
 
 
 def stored_ids(out_dir: Path = OUT_DIR) -> set[str]:
+    """The filings already read with every field this version reads. A row written before the
+    pledge figures were added does not count, so the job reads that filing again and the new
+    row replaces it."""
     files = sorted(Path(out_dir).glob("*.parquet")) if Path(out_dir).exists() else []
-    if not files:
-        return set()
-    return set(pd.concat([pd.read_parquet(f, columns=["record_id"]) for f in files])["record_id"].astype(str))
+    done = []
+    for f in files:
+        df = pd.read_parquet(f)
+        if "pledge_read" in df.columns:
+            done.append(df.loc[df["pledge_read"].fillna(False).astype(bool), "record_id"].astype(str))
+    return set(pd.concat(done)) if done else set()
 
 
 def _download(session, url: str) -> bytes:
@@ -229,7 +300,8 @@ def fetch(todo: pd.DataFrame, session=None, pause: float = 0.3, give_up_after: i
                "broadcast_dt": meta["broadcast_dt"], "xbrl_url": meta["xbrl_url"],
                **{k: doc.get(k) for k in FIGURES},
                "agrees": _agrees(doc, meta.get("promoter_pct"), meta.get("public_pct")),
-               "has_split": doc.get("fii_pct") is not None or doc.get("dii_pct") is not None}
+               "has_split": doc.get("fii_pct") is not None or doc.get("dii_pct") is not None,
+               "pledge_read": True}
         rows.append(row)
         time.sleep(pause)
         if i % 500 == 0:
@@ -243,7 +315,7 @@ def write(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> list[Path]:
     df = df.copy()
     df["period_end"] = pd.to_datetime(df["period_end"])
     df["broadcast_dt"] = pd.to_datetime(df["broadcast_dt"])
-    for c in ("agrees", "has_split"):
+    for c in ("agrees", "has_split", "pledge_read"):
         df[c] = df[c].astype("boolean")
     written = []
     years = df["period_end"].dt.year
@@ -254,6 +326,10 @@ def write(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> list[Path]:
             chunk = pd.concat([pd.read_parquet(p), chunk], ignore_index=True)
         chunk = chunk.reindex(columns=COLUMNS).drop_duplicates(subset=["record_id"], keep="last")
         chunk = chunk.sort_values(["symbol", "period_end", "record_id"])
+        for c in ("agrees", "has_split", "pledge_read"):        # rows written before a column existed
+            chunk[c] = chunk[c].astype("boolean")
+        for c in PLEDGE_FIGURES:
+            chunk[c] = pd.to_numeric(chunk[c], errors="coerce").astype("float64")
         tmp = p.with_name(p.name + ".tmp")         # whole or not at all, as in zen.data.statements
         chunk.to_parquet(tmp, index=False, compression="zstd")
         os.replace(tmp, p)
