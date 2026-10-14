@@ -168,7 +168,7 @@ def test_the_job_reads_the_newest_filings_first_so_dead_old_ones_cannot_block_th
         return pd.DataFrame(columns=detail.COLUMNS), 0
 
     monkeypatch.setattr(detail, "documents", lambda: _filings(5))      # R0 oldest .. R4 newest
-    monkeypatch.setattr(detail, "stored_ids", lambda: {"R3"})
+    monkeypatch.setattr(detail, "stored_ids", lambda complete=True: {"R3"})
     monkeypatch.setattr(detail, "fetch", fetch)
     monkeypatch.setattr(detail, "write", lambda rows: [])
     job.main(["--no-archive", "--limit", "3"])
@@ -234,3 +234,18 @@ def test_rows_read_before_the_pledge_figures_are_read_again_and_replaced(tmp_pat
     assert detail.rebuild(con, out) == 1
     assert con.execute("SELECT pledge_read, fii_pct FROM shareholding_detail").fetchone() == (True, 17.2)
     con.close()
+
+
+def test_the_daily_run_reads_only_filings_never_read(tmp_path, monkeypatch):
+    from jobs import update_shareholding_detail as job
+    asked = []
+    monkeypatch.setattr(detail, "documents", lambda: _filings(3))             # R0 .. R2
+    monkeypatch.setattr(detail, "stored_ids", lambda complete=True: {"R2"} if complete else {"R1", "R2"})
+    monkeypatch.setattr(detail, "fetch", lambda batch, pause=None: (asked.extend(batch["record_id"]),
+                                                                     (pd.DataFrame(columns=detail.COLUMNS), 0))[1])
+    monkeypatch.setattr(detail, "write", lambda rows: [])
+    job.main(["--no-archive", "--new-only"])
+    assert asked == ["R0"]                       # R1 was read before pledges were added: the backfill's job
+    asked.clear()
+    job.main(["--no-archive"])
+    assert asked == ["R1", "R0"]

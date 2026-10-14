@@ -52,7 +52,7 @@ jobs:
       - name: shareholding detail
         continue-on-error: true
         timeout-minutes: 15
-        run: python -m jobs.update_shareholding_detail --limit 400
+        run: python -m jobs.update_shareholding_detail --limit 400 --new-only
 
       # Lenders' quarterly results from their banking-format filings, and NSE industry labels
       # for newly listed symbols. Research data for the dashboard, read by no live strategy.

@@ -238,15 +238,17 @@ def documents(sh_dir: Path = shareholding.SH_DIR) -> pd.DataFrame:
     return df.drop_duplicates("record_id", keep="last").sort_values("broadcast_dt").reset_index(drop=True)
 
 
-def stored_ids(out_dir: Path = OUT_DIR) -> set[str]:
-    """The filings already read with every field this version reads. A row written before the
-    pledge figures were added does not count, so the job reads that filing again and the new
-    row replaces it."""
+def stored_ids(out_dir: Path = OUT_DIR, complete: bool = True) -> set[str]:
+    """The filings already read. With `complete`, only those read with every field this version
+    reads: a row written before the pledge figures were added does not count, so the job reads
+    that filing again and the new row replaces it."""
     files = sorted(Path(out_dir).glob("*.parquet")) if Path(out_dir).exists() else []
     done = []
     for f in files:
         df = pd.read_parquet(f)
-        if "pledge_read" in df.columns:
+        if not complete:
+            done.append(df["record_id"].astype(str))
+        elif "pledge_read" in df.columns:
             done.append(df.loc[df["pledge_read"].fillna(False).astype(bool), "record_id"].astype(str))
     return set(pd.concat(done)) if done else set()
 

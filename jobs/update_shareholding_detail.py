@@ -4,6 +4,7 @@
     python -m jobs.update_shareholding_detail               # every filing not yet read
     python -m jobs.update_shareholding_detail --limit 400   # at most 400 this run, the newest
     python -m jobs.update_shareholding_detail --no-archive  # do not rebuild the archive's table
+    python -m jobs.update_shareholding_detail --new-only    # skip filings read before a field was added
 
 The filings are the ones data/shareholding already lists, read from those files, so this needs
 no archive and runs on a fresh checkout (the backfill workflow uses --no-archive). Documents
@@ -28,10 +29,13 @@ def main(argv=None) -> int:
     p.add_argument("--limit", type=int)
     p.add_argument("--pause", type=float, default=0.3, help="seconds between downloads")
     p.add_argument("--no-archive", action="store_true", help="leave the archive alone (a checkout without one)")
+    p.add_argument("--new-only", action="store_true",
+                   help="only filings never read, not ones read before a field was added (the daily job's way: "
+                        "re-reading is for the backfill workflow, so the two never write the same files)")
     a = p.parse_args(argv)
 
     docs = detail.documents()
-    waiting = docs[~docs["record_id"].astype(str).isin(detail.stored_ids())]
+    waiting = docs[~docs["record_id"].astype(str).isin(detail.stored_ids(complete=not a.new_only))]
     # Newest first, always: old filings NSE no longer serves stay unread, and read first they
     # would end each run (fetch stops after a run of failures) before the new ones were reached.
     todo = waiting.iloc[::-1]
