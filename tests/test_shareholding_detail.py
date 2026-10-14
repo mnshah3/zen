@@ -149,10 +149,30 @@ def test_the_filings_to_read_come_from_the_committed_files(tmp_path):
             "broadcast_dt", "submission_date", "revised", "record_id", "xbrl_url"]
     rows = [("A", "I", "A Ltd", "2026-06-30", 50.0, 50.0, 0.0, "2026-07-10 10:00", None, None, "1", "https://x/SHP_1.xml"),
             ("A", "I", "A Ltd", "2026-03-31", 50.0, 50.0, 0.0, "2026-04-10 10:00", None, None, "2", None),          # no document
-            ("B", "J", "B Ltd", "2026-06-30", 60.0, 40.0, 0.0, "2026-07-05 10:00", None, None, "3", "https://x/SHP_3.xml")]
+            ("B", "J", "B Ltd", "2026-06-30", 60.0, 40.0, 0.0, "2026-07-05 10:00", None, None, "3", "https://x/SHP_3.xml"),
+            ("C", "K", "C Ltd", "2026-06-30", 70.0, 30.0, 0.0, "2026-07-06 10:00", None, None, "4", "https://x/xbrl/-")]  # NSE's "no document"
     df = pd.DataFrame(rows, columns=cols)
     df["period_end"], df["broadcast_dt"] = pd.to_datetime(df["period_end"]), pd.to_datetime(df["broadcast_dt"])
     df.to_parquet(sh / "2026.parquet", index=False)
     docs = detail.documents(sh)
     assert list(docs["record_id"]) == ["3", "1"]                     # oldest broadcast first, only those with a document
     assert detail.documents(tmp_path / "none").empty and detail.stored_ids(tmp_path / "none") == set()
+
+
+def test_the_job_reads_the_newest_filings_first_so_dead_old_ones_cannot_block_them(monkeypatch):
+    from jobs import update_shareholding_detail as job
+    asked = []
+
+    def fetch(batch, pause=None):
+        asked.extend(batch["record_id"])
+        return pd.DataFrame(columns=detail.COLUMNS), 0
+
+    monkeypatch.setattr(detail, "documents", lambda: _filings(5))      # R0 oldest .. R4 newest
+    monkeypatch.setattr(detail, "stored_ids", lambda: {"R3"})
+    monkeypatch.setattr(detail, "fetch", fetch)
+    monkeypatch.setattr(detail, "write", lambda rows: [])
+    job.main(["--no-archive", "--limit", "3"])
+    assert asked == ["R4", "R2", "R1"]
+    asked.clear()
+    job.main(["--no-archive"])
+    assert asked == ["R4", "R2", "R1", "R0"]

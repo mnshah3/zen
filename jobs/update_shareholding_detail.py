@@ -32,7 +32,11 @@ def main(argv=None) -> int:
 
     docs = detail.documents()
     waiting = docs[~docs["record_id"].astype(str).isin(detail.stored_ids())]
-    todo = waiting.tail(a.limit) if a.limit else waiting          # the newest first when limited
+    # Newest first, always: old filings NSE no longer serves stay unread, and read first they
+    # would end each run (fetch stops after a run of failures) before the new ones were reached.
+    todo = waiting.iloc[::-1]
+    if a.limit:
+        todo = todo.head(a.limit)
     read = split = failed = 0
     for at in range(0, len(todo), BATCH):
         batch = todo.iloc[at:at + BATCH]

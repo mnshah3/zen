@@ -161,13 +161,15 @@ def _agrees(doc: dict, listed_promoter, listed_public) -> bool | None:
 
 def documents(sh_dir: Path = shareholding.SH_DIR) -> pd.DataFrame:
     """The shareholding filings that have a document, read from the committed files (no archive
-    needed, so this runs on a fresh checkout), oldest broadcast first."""
+    needed, so this runs on a fresh checkout), oldest broadcast first. NSE lists some filings
+    with a link ending in "/-", which is no document at all: those are left out."""
     files = sorted(Path(sh_dir).glob("*.parquet")) if Path(sh_dir).exists() else []
     cols = ["record_id", "symbol", "period_end", "broadcast_dt", "promoter_pct", "public_pct", "xbrl_url"]
     if not files:
         return pd.DataFrame(columns=cols)
     df = pd.concat([pd.read_parquet(f, columns=cols) for f in files], ignore_index=True)
-    df = df[df["xbrl_url"].notna() & (df["xbrl_url"].astype(str).str.startswith("http"))]
+    url = df["xbrl_url"].astype(str)
+    df = df[df["xbrl_url"].notna() & url.str.startswith("http") & ~url.str.endswith("/-")]
     return df.drop_duplicates("record_id", keep="last").sort_values("broadcast_dt").reset_index(drop=True)
 
 

@@ -63,8 +63,11 @@ def main(argv=None) -> int:
         docs = (docs.sort_values(["consolidated", "broadcast_dt"])
                     .drop_duplicates(["symbol", "period_end"], keep="last").sort_values("broadcast_dt"))
     todo = docs if a.reparse else docs[~docs["xbrl_url"].isin(statements.stored_urls())]
+    # Newest first, always: old filings NSE no longer serves stay unread, and read first they
+    # would end each run (fetch stops after a run of failures) before the new ones were reached.
+    todo = todo.iloc[::-1]
     if a.limit:
-        todo = todo.tail(a.limit)                 # the newest first when limited
+        todo = todo.head(a.limit)
     read = with_cf = failed = 0
     for at in range(0, len(todo), BATCH):
         batch = todo.iloc[at:at + BATCH]

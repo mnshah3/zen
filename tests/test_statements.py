@@ -225,6 +225,38 @@ def test_documents_are_the_balance_sheet_filings_and_latest_keeps_the_last_revis
     con.close()
 
 
+def test_the_job_reads_the_newest_filings_first_so_dead_old_ones_cannot_block_them(monkeypatch):
+    from jobs import update_statements as job
+    asked = []
+
+    class Con:
+        def execute(self, sql):
+            return self
+
+        def fetchone(self):
+            return (0, 0, None, None)
+
+        def close(self):
+            pass
+
+    def fetch(batch, pause=None):
+        asked.extend(batch["xbrl_url"])
+        return pd.DataFrame(columns=["has_cash_flow"]), 0
+
+    monkeypatch.setattr(job, "_archive", lambda read_only: Con())
+    monkeypatch.setattr(statements, "documents", lambda con, latest=False: _docs(5))     # u0 oldest .. u4 newest
+    monkeypatch.setattr(statements, "stored_urls", lambda: {_docs(5)["xbrl_url"][3]})
+    monkeypatch.setattr(statements, "fetch", fetch)
+    monkeypatch.setattr(statements, "write", lambda rows: [])
+    monkeypatch.setattr(statements, "rebuild", lambda con: 0)
+    urls = list(_docs(5)["xbrl_url"])
+    job.main(["--limit", "3"])
+    assert asked == [urls[4], urls[2], urls[1]]
+    asked.clear()
+    job.main([])
+    assert asked == [urls[4], urls[2], urls[1], urls[0]]
+
+
 def test_sessions_are_replaced_after_a_failure_and_on_a_timer(monkeypatch):
     # NSE's archive host wedges a long-lived connection pool: only a new session object cures it
     _no_cache(monkeypatch)
