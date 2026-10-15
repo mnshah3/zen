@@ -422,6 +422,167 @@ def fetch_day(d: date, s: requests.Session | None = None, pause: float = 0.25, t
     return df
 
 
+# --------------------------------------------------------------------------------------------
+# Material labels by month
+# --------------------------------------------------------------------------------------------
+#
+# Fetching every filing a day at a time is about 30,000 requests since 2018, and BSE answers a
+# full day's page in about three seconds. Research needs the labels that carry an event, and
+# BSE's filter takes one label over one calendar month (a year range returns nothing) with an
+# exact count: June 2023's "Award of Order / Receipt of Order" is 60 either way, and 2023's
+# months add up to 882, the year NSE labelled none. The pairs below are BSE's own strings,
+# spacing included, from its subcategory lists (DDLSubCategoryData), first the categories NSE
+# leaves unlabelled from January 2023 to 22 September 2024.
+
+GAP_LABELS = (           # orders, expansion, contraction, regulatory, licenses
+    ("Company Update", "Award of Order / Receipt of Order"),
+    ("Company Update", "Bagging/Receiving of orders/contracts (Sub-para 4-Para B)"),
+    ("Company Update", "Awarding of order(s)/contract(s) (Sub-para 4-Para B)"),
+    ("Company Update", "Reg. 30 - Awarding of orders/contracts"),
+    ("Company Update", "Capacity addition (Sub-para 3-Para B)"),
+    ("Company Update", "Product launch (Sub-para 3-Para B)"),
+    ("Company Update", "Adoption of new line(s) of business (Sub-para 2-Para B)"),
+    ("Company Update", "Arrangements (Sub-para 2-Para B)"),
+    ("Company Update", "Commencement or postponement (Sub-para 1-Para B)"),
+    ("Company Update", "Closure of operations (Sub-para 2-Para B)"),
+    ("Company Update", "Disruption of operations (Sub-para 6-Para B)"),
+    ("Company Update", "Strike"),
+    ("Company Update", "Strikes /Lockouts / Disturbances"),
+    ("Company Update", "Amendment or termination of orders/contracts (Sub-para 4-Para B)"),
+    ("Company Update", "Pendency of any litigation(s) or dispute(s) (Sub-para 8-Para B)"),
+    ("Company Update", "Delay or default in the payment of fines (Sub-para 13-Para B)"),
+    ("Company Update", "Frauds/defaults/arrest - employee (Sub-para 9-Para B)"),
+    ("Company Update", "Intimation on Fraud"),
+    ("Company Update", "Change in regulatory framework (Sub-para 7-Para B)"),
+    ("Company Update", "Corporate Insolvency Resolution Process"),
+    ("Company Update", "Initiation of Corporate Insolvency Resolution Process (CIRP) by Corporate Applicant"),
+    ("Company Update", "Initiation of Corporate Insolvency Resolution Process (CIRP) by Financial Creditors"),
+    ("Company Update", "Admission of application by Tribunal"),
+    ("Company Update", "Appointment of Interim Resolution Professional (IRP)"),
+    ("Company Update", "Replacement of Interim Resolution Professional (IRP)"),
+    ("Company Update", "Approval of Resolution plan by Tribunal"),
+    ("Company Update", "Filing of Resolution plan with Tribunal"),
+    ("Company Update", "Rejection of Resolution pan by Tribunal"),
+    ("Company Update", "Resolution Plans received by Resolution Professional"),
+    ("Company Update", "Invitation of Resolution Plan"),
+    ("Company Update", "Intimation of meeting of Committee of Creditors"),
+    ("Company Update", "Outcome of meeting of Committee of Creditors"),
+    ("Company Update", "List of Creditors "),
+    ("Company Update", "Liquidation - Corporate Insolvency Resolution Process  (CIRP)"),
+    ("Company Update", "Updates - Corporate Insolvency Resolution Process  (CIRP)"),
+    ("Company Update", "Corporate Debt Restructuring"),
+    ("Company Update", "Intimation on OTS and Restructuring Loans or Borrowings"),
+    ("Company Update", "Winding-up"),
+    ("Company Update", "Public Announcement-Delisting"),
+    ("Others", "Disclosures by listed entities of defaults on payment of interest/ repayment of principal amount "
+               "for loans including revolving facilities like cash credit from banks / financial institutions."),
+    ("Others", "Disclosures by listed entities of defaults on payment of interest/ repayment of principal amount "
+               "for unlisted debt securities i.e. NCDs and NCRPS."),
+    ("Others", "Quarterly Disclosures by listed entities of defaults on payment of interest/ repayment of principal "
+               "amount on loans from banks / financial institutions and unlisted debt securities."),
+    ("Company Update", "Key licenses/regulatory approvals (Sub-para 12-Para B)"),
+)
+OTHER_MATERIAL_LABELS = (  # mna, capital, ratings: NSE labels these from 2022, BSE adds 2018 to 2021
+    ("Company Update", "Acquisition"),
+    ("Company Update", "Amalgamation/ Merger"),
+    ("Corp. Action", "Amalgamation / Merger / Demerger"),
+    ("Company Update", "Scheme of Arrangement"),
+    ("Company Update", "De-merger"),
+    ("Company Update", "Open Offer"),
+    ("Company Update", "Open Offer - Updates"),
+    ("Company Update", "Public Announcement-Open Offer"),
+    ("Company Update", "Post Offer Public Announcement"),
+    ("Company Update", "Sale or disposal"),
+    ("Company Update", "Diversification / Disinvestment"),
+    ("Company Update", "Restructuring"),
+    ("Company Update", "Other Restructuring"),
+    ("Company Update", "Update-Acquisition/Scheme/Sale/Disposal/Reg30"),
+    ("Company Update", "Slump Sale"),
+    ("Company Update", "Joint Venture"),
+    ("Company Update", "Voluntary Delisting"),
+    ("Company Update", "Change in Management Control"),
+    ("Company Update", "Allotment of Equity Shares"),
+    ("Company Update", "Allotment of Warrants"),
+    ("Company Update", "Alteration of Capital"),
+    ("Company Update", "Increase of Authorised Capital"),
+    ("Company Update", "Issue of Securities"),
+    ("Company Update", "Preferential Issue"),
+    ("Company Update", "Qualified Institutional Placement"),
+    ("Company Update", "Offer for Sale"),
+    ("Company Update", "Institutional Placement Programme"),
+    ("Company Update", "FCCBs"),
+    ("Company Update", "Raising of Funds"),
+    ("Company Update", "Debt Securities"),
+    ("Company Update", "Funds raising by issuance of Debt Securities by Large Entities"),
+    ("Company Update", "Options to purchase securities ESOPS (Sub-para 10-Para B)"),
+    ("Company Update", "Annulment / Re-issue of forfeited shares"),
+    ("Corp. Action", "Bonds / Right issue"),
+    ("Corp. Action", "Capital Reduction"),
+    ("Company Update", "Credit Rating"),
+    ("Others", "Reg. 55 - Credit Rating"),
+)
+MATERIAL_LABELS = GAP_LABELS + OTHER_MATERIAL_LABELS
+RANGES_FILE = OUT_DIR / "ranges.csv"
+FILTER_URL = "https://api.bseindia.com/BseIndiaAPI/api/AnnSubCategoryGetData/w"
+
+
+def fetch_label(category: str, subcategory: str, a: date, b: date, s: requests.Session | None = None,
+                pause: float = 0.25, tries: int = 4) -> pd.DataFrame | None:
+    """Every filing BSE labelled `subcategory` between a and b (one calendar month at most), or
+    None when the pages did not add up to BSE's count or a request kept failing."""
+    s = s or session()
+    rows, page, expected = [], 1, None
+    while True:
+        params = {"pageno": page, "strCat": category, "strPrevDate": f"{a:%Y%m%d}", "strScrip": "", "strSearch": "P",
+                  "strToDate": f"{b:%Y%m%d}", "strType": "C", "subcategory": subcategory}
+        payload = None
+        for attempt in range(tries):
+            try:
+                r = s.get(FILTER_URL, params=params, timeout=45)
+                if r.status_code in (403, 429, 500, 502, 503, 504):
+                    raise requests.HTTPError(f"HTTP {r.status_code}")
+                r.raise_for_status()
+                payload = r.json()
+                break
+            except (requests.RequestException, ValueError) as e:
+                log.info("%s %s page %d: %s (try %d)", subcategory[:40], a, page, e, attempt + 1)
+                time.sleep(2.0 * (attempt + 1) ** 2)
+        if payload is None:
+            return None
+        table = payload.get("Table") or []
+        if expected is None:
+            expected = ((payload.get("Table1") or [{}])[0] or {}).get("ROWCNT")
+        rows += table
+        if len(table) < PAGE:
+            break
+        page += 1
+        time.sleep(pause)
+    if expected is not None and len(rows) != int(expected):
+        log.warning("%s %s: %d rows read, BSE reports %s", subcategory[:40], a, len(rows), expected)
+        return None
+    if expected is None and rows:
+        return None                           # rows without a count: not a reply this module trusts
+    return parse_rows(rows)
+
+
+def done_ranges(path: Path = RANGES_FILE) -> set[tuple[str, str]]:
+    if not path.exists():
+        return set()
+    with path.open(newline="", encoding="utf-8") as f:
+        return {(r["month"], r["subcategory"]) for r in csv.DictReader(f)}
+
+
+def mark_ranges(done: list[tuple[str, str, str, int]], path: Path = RANGES_FILE) -> None:
+    """Append (month, category, subcategory, rows) lines for fetched label-months."""
+    new = not path.exists()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        if new:
+            w.writerow(["month", "category", "subcategory", "rows"])
+        w.writerows(done)
+
+
 def fetch_scrips(s: requests.Session | None = None) -> pd.DataFrame:
     """BSE's scrip list (active, suspended and delisted), for the ISIN of each scrip code."""
     s = s or session()

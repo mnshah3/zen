@@ -25,9 +25,9 @@ class FakeSession:
     def __init__(self, rows: list[dict], report: int | None = None):
         self.rows, self.report, self.calls = rows, len(rows) if report is None else report, 0
 
-    def get(self, url, timeout=None):
+    def get(self, url, timeout=None, params=None):
         self.calls += 1
-        page = int(url.split("pageno=")[1].split("&")[0])
+        page = int(params["pageno"]) if params else int(url.split("pageno=")[1].split("&")[0])
         chunk = self.rows[(page - 1) * bse.PAGE: page * bse.PAGE]
 
         class R:
@@ -125,3 +125,26 @@ def test_bad_times_are_skipped(bad):
     r = _row(1)
     r["DissemDT"], r["NEWS_DT"] = bad, bad
     assert bse.parse_rows([r]).empty
+
+
+def test_every_material_label_maps_to_its_category():
+    want = {"orders", "expansion", "contraction", "regulatory", "licenses"}
+    got = {bse.categorise(cat, sub) for cat, sub in bse.GAP_LABELS}
+    assert got == want, got
+    other = {bse.categorise(cat, sub) for cat, sub in bse.OTHER_MATERIAL_LABELS}
+    assert other == {"mna", "capital", "ratings"}, other
+    assert len(set(bse.MATERIAL_LABELS)) == len(bse.MATERIAL_LABELS) == 80
+    # BSE's own spacing is kept: its filter matches the exact string ("(CIRP)" after two spaces)
+    assert ("Company Update", "Updates - Corporate Insolvency Resolution Process  (CIRP)") in bse.GAP_LABELS
+
+
+def test_a_label_month_counts_only_when_it_adds_up(tmp_path):
+    rows = [_row(i, "Award of Order / Receipt of Order") for i in range(60)]
+    assert len(bse.fetch_label("Company Update", "Award of Order / Receipt of Order", date(2023, 6, 1),
+                               date(2023, 6, 30), FakeSession(rows), pause=0)) == 60
+    assert bse.fetch_label("Company Update", "x", date(2023, 6, 1), date(2023, 6, 30),
+                           FakeSession(rows, report=61), pause=0) is None
+    f = tmp_path / "ranges.csv"
+    bse.mark_ranges([("2023-06", "Company Update", "Strike", 1)], f)
+    bse.mark_ranges([("2023-05", "Company Update", "Strike", 0)], f)
+    assert bse.done_ranges(f) == {("2023-06", "Strike"), ("2023-05", "Strike")}
