@@ -12,7 +12,33 @@ permissions:
   contents: write
 
 jobs:
+  # The Cloudflare timer (zen-portfolios scheduler/) starts this workflow on time; GitHub's own
+  # schedule below is a fallback that GitHub has run hours late since 8 Oct 2026. A late
+  # scheduled run stands down when a run of this workflow already succeeded today (UTC), so it
+  # never writes the same files twice or races another job. A manual or timer start always runs.
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      go: ${{ steps.check.outputs.go }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          WORKFLOW: ${{ github.workflow }}
+        run: |
+          go=true
+          if [ "$EVENT" = "schedule" ]; then
+            n=$(gh run list -R "$GITHUB_REPOSITORY" -w "$WORKFLOW" --status success --created ">=$(date -u +%F)" --json databaseId -q 'length')
+            if [ "${n:-0}" -gt 0 ]; then go=false; echo "a run of this workflow already succeeded today: standing down"; fi
+          fi
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+
   update:
+    needs: gate
+    if: needs.gate.outputs.go == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

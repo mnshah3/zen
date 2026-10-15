@@ -178,6 +178,43 @@ def test_the_job_reads_the_newest_filings_first_so_dead_old_ones_cannot_block_th
     assert asked == ["R4", "R2", "R1", "R0"]
 
 
+def test_a_run_keeps_its_rows_and_they_merge_again_without_loss_or_doubling(tmp_path, monkeypatch):
+    """The backfill's recovery from a push conflict: the rows a run read, kept with --rows-out,
+    are merged with --merge-rows into the newer files another job pushed."""
+    from jobs import update_shareholding_detail as job
+    out = tmp_path / "detail"
+    real_write = detail.write
+
+    def fetch(batch, pause=None):
+        rows = pd.DataFrame([{c: None for c in detail.COLUMNS} for _ in range(len(batch))])
+        rows["record_id"] = list(batch["record_id"])
+        rows["period_end"] = pd.Timestamp("2025-03-31")
+        rows["has_split"] = False
+        rows["symbol"], rows["broadcast_dt"] = "XCO", pd.Timestamp("2026-07-16 19:24")
+        return rows, 0
+
+    monkeypatch.setattr(detail, "documents", lambda: _filings(3))
+    monkeypatch.setattr(detail, "stored_ids", lambda complete=True: set())
+    monkeypatch.setattr(detail, "fetch", fetch)
+    monkeypatch.setattr(detail, "write", lambda rows: real_write(rows, out_dir=out))
+    kept = tmp_path / "run_rows.parquet"
+    job.main(["--no-archive", "--rows-out", str(kept)])
+    assert sorted(pd.read_parquet(kept)["record_id"]) == ["R0", "R1", "R2"]
+    # another job's version of the same year's file, with one filing of its own
+    other = pd.DataFrame([{c: None for c in detail.COLUMNS}])
+    other["record_id"], other["period_end"], other["has_split"] = ["X9"], pd.Timestamp("2025-03-31"), False
+    other["symbol"], other["broadcast_dt"] = "XCO", pd.Timestamp("2026-07-17 10:00")
+    for f in out.glob("*.parquet"):
+        f.unlink()
+    real_write(other, out_dir=out)
+    job.main(["--merge-rows", str(kept)])
+    ids = sorted(pd.concat([pd.read_parquet(f) for f in out.glob("*.parquet")])["record_id"])
+    assert ids == ["R0", "R1", "R2", "X9"]
+    job.main(["--merge-rows", str(kept)])                               # again: nothing doubles
+    ids = sorted(pd.concat([pd.read_parquet(f) for f in out.glob("*.parquet")])["record_id"])
+    assert ids == ["R0", "R1", "R2", "X9"]
+
+
 def _promoter_doc(facts: dict, flags: dict | None = None) -> bytes:
     """A filing whose promoter line (context C0) tags `facts`; `flags` are its yes/no answers."""
     tags = "".join(f'<in-bse-shp:{k} contextRef="C0">{v}</in-bse-shp:{k}>' for k, v in facts.items())

@@ -27,7 +27,7 @@ concurrency:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 170
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,10 +37,21 @@ jobs:
           cache-dependency-path: requirements-lock.txt
       - run: pip install -r requirements-lock.txt
 
+      # The evening data job (started at 15:05 UTC by the Cloudflare timer) writes these same
+      # files. A run that would read inside its window waits until the window is over.
+      - name: wait out the evening data job
+        run: |
+          now=$(date -u +%H%M)
+          if [ "$now" -ge 1430 ] && [ "$now" -lt 1645 ]; then
+            secs=$(( $(date -u -d "16:45" +%s) - $(date -u +%s) ))
+            echo "inside the evening data job's window: waiting ${secs}s"
+            sleep "$secs"
+          fi
+
       - name: read the filings
         id: read
         run: |
-          python -m jobs.update_shareholding_detail --no-archive --limit "${{ inputs.limit }}" | tee run.log
+          python -m jobs.update_shareholding_detail --no-archive --limit "${{ inputs.limit }}" --rows-out "$RUNNER_TEMP/run_rows.parquet" | tee run.log
           echo "remaining=$(grep -o 'remaining=[0-9]*' run.log | tail -1 | cut -d= -f2)" >> "$GITHUB_OUTPUT"
           echo "read=$(grep -o '[0-9,]* read' run.log | tail -1 | tr -dc '0-9')" >> "$GITHUB_OUTPUT"
 
@@ -50,9 +61,20 @@ jobs:
           git config user.email "actions@github.com"
           [ ! -d data/shareholding_detail ] || git add data/shareholding_detail
           git diff --staged --quiet && { echo "nothing new"; exit 0; }
-          git commit -m "data: shareholding detail backfill $(date -u +%Y-%m-%d)"
-          for i in 1 2 3; do            # another job may have pushed meanwhile
+          git commit -q -m "data: shareholding detail backfill $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
+            # Another job pushed new versions of the same yearly files, which git cannot merge
+            # (they are binary). Start again from GitHub's copy and merge this run's rows into it:
+            # write() keeps one row a filing, so nothing is lost or doubled. (On 14 Oct 2026 the
+            # old retry lost 4,000 filings: a failed rebase left every later attempt stuck.)
+            git rebase --abort 2>/dev/null || true
+            git fetch -q origin main && git reset -q --hard origin/main
+            [ -f "$RUNNER_TEMP/run_rows.parquet" ] || exit 1
+            python -m jobs.update_shareholding_detail --merge-rows "$RUNNER_TEMP/run_rows.parquet"
+            git add data/shareholding_detail
+            git diff --staged --quiet && { echo "nothing new after the merge"; exit 0; }
+            git commit -q -m "data: shareholding detail backfill $(date -u +%Y-%m-%d)"
             sleep $((i * 15))
           done
           exit 1

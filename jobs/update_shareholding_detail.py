@@ -5,6 +5,13 @@
     python -m jobs.update_shareholding_detail --limit 400   # at most 400 this run, the newest
     python -m jobs.update_shareholding_detail --no-archive  # do not rebuild the archive's table
     python -m jobs.update_shareholding_detail --new-only    # skip filings read before a field was added
+    python -m jobs.update_shareholding_detail --rows-out F  # also keep this run's rows in F (parquet)
+    python -m jobs.update_shareholding_detail --merge-rows F  # only merge the rows in F into data/
+
+A run's rows are merged into the yearly files, one row a filing (write() keeps the last), so
+writing the same rows again on top of newer files loses and doubles nothing. The backfill
+workflow relies on that: when another job has pushed new versions of the same files, it starts
+again from those and merges the rows it kept with --rows-out.
 
 The filings are the ones data/shareholding already lists, read from those files, so this needs
 no archive and runs on a fresh checkout (the backfill workflow uses --no-archive). Documents
@@ -17,6 +24,8 @@ from __future__ import annotations
 
 import argparse
 import logging
+
+import pandas as pd
 
 from zen.data import shareholding_detail as detail
 
@@ -32,7 +41,15 @@ def main(argv=None) -> int:
     p.add_argument("--new-only", action="store_true",
                    help="only filings never read, not ones read before a field was added (the daily job's way: "
                         "re-reading is for the backfill workflow, so the two never write the same files)")
+    p.add_argument("--rows-out", help="also keep every row this run reads in this parquet file")
+    p.add_argument("--merge-rows", help="merge the rows in this parquet file into data/ and do nothing else")
     a = p.parse_args(argv)
+
+    if a.merge_rows:
+        rows = pd.read_parquet(a.merge_rows)
+        detail.write(rows)
+        print(f"shareholding detail: merged {len(rows):,} rows from {a.merge_rows}")
+        return 0
 
     docs = detail.documents()
     waiting = docs[~docs["record_id"].astype(str).isin(detail.stored_ids(complete=not a.new_only))]
@@ -42,10 +59,14 @@ def main(argv=None) -> int:
     if a.limit:
         todo = todo.head(a.limit)
     read = split = failed = 0
+    kept = []
     for at in range(0, len(todo), BATCH):
         batch = todo.iloc[at:at + BATCH]
         rows, missed = detail.fetch(batch, pause=a.pause)
         detail.write(rows)
+        if a.rows_out and len(rows):
+            kept.append(rows)
+            pd.concat(kept, ignore_index=True).to_parquet(a.rows_out, index=False)   # whole file each batch
         read += len(rows)
         failed += missed
         split += int(rows["has_split"].sum()) if len(rows) else 0
