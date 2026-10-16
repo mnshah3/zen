@@ -6,6 +6,11 @@ name: backfill statements (manual)
 # newest first, commits them, and starts the next run itself while it is still making
 # progress. The daily data job keeps the table current afterwards. Research data: no strategy
 # reads it.
+#
+# reparse=true reads again the documents an older parser read (statements.PARSER_VERSION), and
+# full_year=true keeps to the year-end filings, whose year to date is the audited year: that is
+# how the full-year income statement (Oct 2026: owners' profit, EPS, tax and the main costs) is
+# filled in for the years already stored.
 
 on:
   workflow_dispatch:
@@ -16,6 +21,12 @@ on:
       chain:
         description: "Start the next run when this one read something (true or false)"
         default: "true"
+      reparse:
+        description: "Read again what an older parser read (true or false)"
+        default: "false"
+      full_year:
+        description: "Only the year-end filings (true or false)"
+        default: "false"
 
 permissions:
   contents: write
@@ -39,10 +50,24 @@ jobs:
       - run: pip install -r requirements-lock.txt
       - run: python -m jobs.rebuild_db
 
+      # The evening data job (started at 15:05 UTC by the Cloudflare timer) writes these same
+      # files. A run that would read inside its window waits until the window is over.
+      - name: wait out the evening data job
+        run: |
+          now=$(date -u +%H%M)
+          if [ "$now" -ge 1430 ] && [ "$now" -lt 1645 ]; then
+            secs=$(( $(date -u -d "16:45" +%s) - $(date -u +%s) ))
+            echo "inside the evening data job's window: waiting ${secs}s"
+            sleep "$secs"
+          fi
+
       - name: read the filings
         id: read
         run: |
-          python -m jobs.update_statements --limit "${{ inputs.limit }}" | tee run.log
+          flags=""
+          [ "${{ inputs.reparse }}" = "true" ] && flags="$flags --reparse"
+          [ "${{ inputs.full_year }}" = "true" ] && flags="$flags --full-year"
+          python -m jobs.update_statements --limit "${{ inputs.limit }}" $flags --rows-out "$RUNNER_TEMP/run_rows.parquet" | tee run.log
           echo "read=$(grep -o '[0-9,]* read (' run.log | tail -1 | tr -dc '0-9')" >> "$GITHUB_OUTPUT"
 
       - name: commit what was read
@@ -51,9 +76,19 @@ jobs:
           git config user.email "actions@github.com"
           [ ! -d data/statements ] || git add data/statements
           git diff --staged --quiet && { echo "nothing new"; exit 0; }
-          git commit -m "data: statements backfill $(date -u +%Y-%m-%d)"
-          for i in 1 2 3; do            # another job may have pushed meanwhile
+          git commit -q -m "data: statements backfill $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
+            # Another job pushed new versions of the same yearly files, which git cannot merge
+            # (they are binary). Start again from GitHub's copy and merge this run's rows into it:
+            # write() keeps one row a filing, the later reading winning, so nothing is lost or doubled.
+            git rebase --abort 2>/dev/null || true
+            git fetch -q origin main && git reset -q --hard origin/main
+            [ -f "$RUNNER_TEMP/run_rows.parquet" ] || exit 1
+            python -m jobs.update_statements --merge-rows "$RUNNER_TEMP/run_rows.parquet"
+            git add data/statements
+            git diff --staged --quiet && { echo "nothing new after the merge"; exit 0; }
+            git commit -q -m "data: statements backfill $(date -u +%Y-%m-%d)"
             sleep $((i * 15))
           done
           exit 1
@@ -63,4 +98,4 @@ jobs:
         if: ${{ inputs.chain == 'true' && steps.read.outputs.read != '0' && steps.read.outputs.read != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run backfill_statements.yml --ref main -f limit="${{ inputs.limit }}" -f chain=true
+        run: gh workflow run backfill_statements.yml --ref main -f limit="${{ inputs.limit }}" -f chain=true -f reparse="${{ inputs.reparse }}" -f full_year="${{ inputs.full_year }}"

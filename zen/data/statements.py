@@ -23,9 +23,12 @@ document is fetched from NSE once. From each:
                   period rules are exactly those of the summary lines in `financials`
   cash flow       the year to date: see below
   financial year  DateOfStartOfFinancialYear and DateOfEndOfFinancialYear, as stated
-  year to date    revenue, total income, profit before tax and profit for the same span as
-                  the cash flow, so a year built from four quarters can be checked against
-                  the year the company filed
+  year to date    the income statement for the same span as the cash flow: revenue, other and
+                  total income, the main costs, exceptional items, profit before tax, tax, profit,
+                  profit attributable to the owners of the parent and basic EPS. In the March
+                  filing that is the full year as audited, so a year built from four quarters as
+                  first filed (which misses later restatements) can be replaced by the year the
+                  company filed (PARSER_VERSION 2, Oct 2026; version 1 read the first four lines)
 
 THE CASH FLOW IS FOR THE YEAR TO DATE
 
@@ -227,10 +230,26 @@ CASH_FLOW_TAGS = {
 # The income statement for the same span as the cash flow.
 YTD_TAGS = {
     "RevenueFromOperations": "ytd_revenue",
+    "OtherIncome": "ytd_other_income",
     "Income": "ytd_total_income",
+    "CostOfMaterialsConsumed": "ytd_materials",
+    "EmployeeBenefitExpense": "ytd_employee_cost",
+    "FinanceCosts": "ytd_finance_costs",
+    "DepreciationDepletionAndAmortisationExpense": "ytd_depreciation",
+    "OtherExpenses": "ytd_other_expenses",
+    "Expenses": "ytd_total_expenses",
+    "ProfitBeforeExceptionalItemsAndTax": "ytd_pbt_before_exceptional",
+    "ExceptionalItemsBeforeTax": "ytd_exceptional_items",
     "ProfitBeforeTax": "ytd_pbt",
+    "TaxExpense": "ytd_tax",
+    "ProfitLossForPeriodFromContinuingOperations": "ytd_profit_continuing",
     "ProfitLossForPeriod": "ytd_profit",
+    "ProfitOrLossAttributableToOwnersOfParent": "ytd_profit_owners",
+    "BasicEarningsLossPerShareFromContinuingOperations": "ytd_eps_basic",
 }
+# The parser that read a stored row. A re-read (jobs/update_statements --reparse) takes the rows
+# below this, so a run that is stopped and started again carries on where it was.
+PARSER_VERSION = 2
 CASH_TAG = "CashAndCashEquivalentsCashFlowStatement"
 CF_TOTALS = ("cfo", "cfi", "cff")
 
@@ -239,7 +258,7 @@ CASH_FLOW = [*dict.fromkeys(CASH_FLOW_TAGS.values()), "cash_start", "cash_end"]
 YTD = list(YTD_TAGS.values())
 COLUMNS = ["symbol", "company", "period_end", "broadcast_dt", "consolidated", "format",
            "fy_start", "fy_end", "ytd_start", "ytd_days", *BALANCE, *CASH_FLOW, *YTD,
-           "cf_adds_up", "cash_ties", "has_detail", "has_cash_flow", "xbrl_url"]
+           "cf_adds_up", "cash_ties", "has_detail", "has_cash_flow", "xbrl_url", "parser"]
 _DATES = ("period_end", "fy_start", "fy_end", "ytd_start")
 _FLAGS = ("consolidated", "cf_adds_up", "cash_ties", "has_detail", "has_cash_flow")
 
@@ -251,7 +270,7 @@ def _sql_type(col: str) -> str:
         return "BOOLEAN"
     if col == "broadcast_dt":
         return "TIMESTAMP"
-    if col == "ytd_days":
+    if col in ("ytd_days", "parser"):
         return "INTEGER"
     if col in ("symbol", "company", "format"):
         return "VARCHAR"
@@ -435,6 +454,7 @@ def parse(content: bytes, nbfc: bool = False) -> dict:
     lines = ("loans", "investments") if nbfc else ("ppe", "inventories", "receivables", "cash")
     row["has_detail"] = any(row.get(c) is not None for c in lines)
     row["has_cash_flow"] = all(row.get(c) is not None for c in CF_TOTALS) and row.get("ytd_start") is not None
+    row["parser"] = PARSER_VERSION
     return row
 
 
@@ -452,6 +472,23 @@ def documents(con, latest: bool = False) -> pd.DataFrame:
     if latest and len(df):
         df = df.drop_duplicates(["symbol", "consolidated", "period_end"], keep="last")
     return df
+
+
+def stored_versions(out_dir: Path = OUT_DIR) -> pd.DataFrame:
+    """Each stored document's parser version (0 before versions were kept) and its year-to-date
+    length in days: what a re-read needs to pick its documents."""
+    files = sorted(out_dir.glob("*.parquet")) if out_dir.exists() else []
+    parts = []
+    for f in files:
+        t = pd.read_parquet(f)
+        parts.append(pd.DataFrame({"xbrl_url": t["xbrl_url"],
+                                   "parser": t["parser"] if "parser" in t else pd.NA,
+                                   "ytd_days": t["ytd_days"] if "ytd_days" in t else pd.NA}))
+    if not parts:
+        return pd.DataFrame(columns=["xbrl_url", "parser", "ytd_days"])
+    out = pd.concat(parts, ignore_index=True).drop_duplicates("xbrl_url", keep="last")
+    out["parser"] = pd.to_numeric(out["parser"], errors="coerce").fillna(0).astype(int)
+    return out
 
 
 def stored_urls(out_dir: Path = OUT_DIR) -> set[str]:
@@ -533,6 +570,8 @@ def write(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> list[Path]:
     for c in _FLAGS:
         df[c] = df[c].astype("boolean")
     df["ytd_days"] = df["ytd_days"].astype("Int64")
+    if "parser" in df:
+        df["parser"] = df["parser"].astype("Int64")
     written = []
     years = pd.to_datetime(df["period_end"]).dt.year
     for year, chunk in df.groupby(years):
@@ -562,7 +601,10 @@ def rebuild(con, out_dir: Path = OUT_DIR) -> int:
     if not out_dir.exists() or not any(out_dir.glob("*.parquet")):
         return 0
     con.execute("DELETE FROM statements")
+    src = f"read_parquet('{out_dir.as_posix()}/*.parquet', union_by_name=true)"
+    # a column no file has yet (one a newer parser added) comes in empty, rather than failing
+    have = {r[0] for r in con.execute(f"DESCRIBE SELECT * FROM {src}").fetchall()}
+    picks = ", ".join(c if c in have else f"CAST(NULL AS {_sql_type(c).split()[0]}) AS {c}" for c in COLUMNS)
     cols = ", ".join(COLUMNS)
-    con.execute(f"INSERT OR IGNORE INTO statements ({cols}) "
-                f"SELECT {cols} FROM read_parquet('{out_dir.as_posix()}/*.parquet', union_by_name=true)")
+    con.execute(f"INSERT OR IGNORE INTO statements ({cols}) SELECT {picks} FROM {src}")
     return con.execute("SELECT count(*) FROM statements").fetchone()[0]

@@ -317,3 +317,87 @@ def test_a_year_end_cash_flow_before_sep_2022_is_the_years_not_the_quarters():
         _fact("DateOfStartOfFinancialYear", "FourD", "2021-04-01"), _fact("DateOfEndOfFinancialYear", "FourD", "2022-03-31"),
         _fact("RevenueFromOperations", "FourD", "91000"), _fact("CashFlowsFromUsedInOperatingActivities", "FourD", "19310")))
     assert half["ytd_days"] == 183 and half["ytd_revenue"] == 91000
+
+
+# ------------------------------------------------------------------ the full year as filed (Oct 2026)
+
+FULL_YEAR = _doc(
+    _span("OneD", "2024-01-01", "2024-03-31"), _span("FourD", "2024-01-01", "2024-03-31"), _instant("OneI", "2024-03-31"),
+    _fact("DateOfStartOfFinancialYear", "OneD", "2023-04-01"), _fact("DateOfEndOfFinancialYear", "OneD", "2024-03-31"),
+    _fact("DateOfStartOfReportingPeriod", "FourD", "2023-04-01"), _fact("DateOfEndOfReportingPeriod", "FourD", "2024-03-31"),
+    # BHEL's March 2024 consolidated filing, Rs: the quarter under OneD, the audited year under FourD
+    _fact("RevenueFromOperations", "OneD", "82602500000"), _fact("RevenueFromOperations", "FourD", "238927800000"),
+    _fact("ProfitBeforeTax", "FourD", "1786800000"), _fact("TaxExpense", "FourD", "-1035400000"),
+    _fact("ProfitLossForPeriod", "OneD", "4896200000"), _fact("ProfitLossForPeriod", "FourD", "2822200000"),
+    _fact("ProfitOrLossAttributableToOwnersOfParent", "FourD", "2822200000"),
+    _fact("BasicEarningsLossPerShareFromContinuingOperations", "OneD", "1.41"),
+    _fact("BasicEarningsLossPerShareFromContinuingOperations", "FourD", "0.81"),
+    _fact("FinanceCosts", "FourD", "5600000000"), _fact("DepreciationDepletionAndAmortisationExpense", "FourD", "2300000000"),
+    _fact("Equity", "OneI", "250000000000"), _fact("Assets", "OneI", "700000000000"),
+    _fact("CashFlowsFromUsedInOperatingActivities", "FourD", "10000000000"),
+    _fact("CashFlowsFromUsedInInvestingActivities", "FourD", "-2000000000"),
+    _fact("CashFlowsFromUsedInFinancingActivities", "FourD", "-7000000000"),
+    _fact("IncreaseDecreaseInCashAndCashEquivalents", "FourD", "1000000000"),
+)
+
+
+def test_the_march_filing_gives_the_audited_year_with_owners_profit_and_eps():
+    r = statements.parse(FULL_YEAR)
+    assert r["ytd_start"] == date(2023, 4, 1) and r["ytd_days"] == 366
+    assert r["ytd_revenue"] == 238927800000 and r["ytd_profit"] == 2822200000        # the year, not the quarter
+    assert r["ytd_profit_owners"] == 2822200000 and r["ytd_eps_basic"] == 0.81
+    assert r["ytd_tax"] == -1035400000 and r["ytd_finance_costs"] == 5600000000 and r["ytd_depreciation"] == 2300000000
+    assert r["parser"] == statements.PARSER_VERSION == 2
+
+
+def test_a_table_built_from_files_a_previous_parser_wrote_takes_the_new_columns_empty(tmp_path):
+    out = tmp_path / "statements"
+    out.mkdir()
+    old = pd.DataFrame([{"symbol": "XCO", "period_end": pd.Timestamp("2025-03-31"), "consolidated": True,
+                         "ytd_days": 365, "ytd_profit": 10.0, "xbrl_url": "u-old"}])
+    old.to_parquet(out / "2025.parquet", index=False)                      # no parser, no ytd_eps_basic
+    con = duckdb.connect()
+    assert statements.rebuild(con, out) == 1
+    assert con.execute("SELECT ytd_profit, ytd_eps_basic, parser FROM statements").fetchone() == (10.0, None, None)
+    v = statements.stored_versions(out)
+    assert v.to_dict("records") == [{"xbrl_url": "u-old", "parser": 0, "ytd_days": 365}]
+
+
+def test_a_reparse_reads_only_what_an_older_parser_read_and_full_year_keeps_the_year_end_filings(monkeypatch, tmp_path):
+    from jobs import update_statements as job
+    asked = []
+
+    class Con:
+        def execute(self, sql):
+            return self
+
+        def fetchone(self):
+            return (0, 0, None, None)
+
+        def close(self):
+            pass
+
+    docs = _docs(4)
+    urls = list(docs["xbrl_url"])
+    stored = pd.DataFrame({"xbrl_url": urls, "parser": [0, 2, 0, 0], "ytd_days": [365, 365, 183, 366]})
+
+    def fetch(batch, pause=None):
+        asked.extend(batch["xbrl_url"])
+        return pd.DataFrame([{**r, "has_cash_flow": True, "parser": 2} for r in batch.to_dict("records")]), 0
+
+    monkeypatch.setattr(job, "_archive", lambda read_only: Con())
+    monkeypatch.setattr(statements, "documents", lambda con, latest=False: docs)
+    monkeypatch.setattr(statements, "stored_versions", lambda: stored)
+    monkeypatch.setattr(statements, "fetch", fetch)
+    monkeypatch.setattr(statements, "write", lambda rows: [])
+    monkeypatch.setattr(statements, "rebuild", lambda con: 0)
+    job.main(["--reparse"])
+    assert asked == [urls[3], urls[2], urls[0]]                              # newest first; the v2 row left alone
+    asked.clear()
+    kept = tmp_path / "rows.parquet"
+    job.main(["--reparse", "--full-year", "--rows-out", str(kept)])
+    assert asked == [urls[3], urls[0]]                                       # the half-year filing is not re-read
+    assert list(pd.read_parquet(kept)["xbrl_url"]) == [urls[3], urls[0]]
+    merged = []
+    monkeypatch.setattr(statements, "write", lambda rows: merged.append(len(rows)) or [])
+    assert job.main(["--merge-rows", str(kept)]) == 0 and merged == [2]
