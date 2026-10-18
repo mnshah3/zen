@@ -39,6 +39,15 @@ HEADER = ("Index Name,Index Date,Open Index Value,High Index Value,"
     ("Nifty Full Smallcap 100", None),
     ("Nifty500 Shariah", None),
     ("Nifty50 TR 2x Leverage", None),
+    # the factor benchmarks, as NSE's 2026-10-16 file spells them; their cousins are not kept
+    ("Nifty200 Momentum 30", "Nifty200 Momentum 30"),
+    ("NIFTY500 Value 50", "NIFTY500 Value 50"),
+    ("Nifty500 Value 50", "NIFTY500 Value 50"),
+    ("NIFTY200 Quality 30", "NIFTY200 Quality 30"),
+    ("Nifty100 Low Volatility 30", "Nifty100 Low Volatility 30"),
+    ("Nifty Alpha 50", "Nifty Alpha 50"),
+    ("NIFTY100 Quality 30", None),
+    ("Nifty500 Momentum 50", None),
 ])
 def test_canonical_name(raw, want):
     assert indices.canonical_name(raw) == want

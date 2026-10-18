@@ -69,8 +69,11 @@ PARQUET_DIR = Path("data/indices")
 REQUEST_DELAY_S = 1.0
 
 # The series worth storing, in NSE's current spelling (checked against the
-# 2026-09-18 file). Everything else NSE computes is sectoral or
-# strategy-flavoured and would just bloat the table.
+# 2026-09-18 file; the factor indices against the 2026-10-16 file). Everything
+# else NSE computes is sectoral or strategy-flavoured and would just bloat the
+# table. The five factor indices are the factor benchmarks zen-portfolios sets
+# its portfolios against; until 2026-10-17 they were left out, so their stored
+# history begins with the backfill made that day (from 2024-01-01).
 KEEP = {
     "Nifty 50", "Nifty Next 50", "Nifty 100", "Nifty 200", "Nifty 500",
     "Nifty Total Market", "NIFTY Midcap 100", "Nifty Midcap 150",
@@ -79,6 +82,8 @@ KEEP = {
     "Nifty Bank", "Nifty IT", "Nifty Auto",
     "Nifty Pharma", "Nifty FMCG", "Nifty Metal", "Nifty Realty",
     "Nifty Energy", "Nifty Infrastructure", "Nifty PSU Bank",
+    "Nifty200 Momentum 30", "NIFTY500 Value 50", "NIFTY200 Quality 30",
+    "Nifty100 Low Volatility 30", "Nifty Alpha 50",
 }
 
 # Former spellings -> canonical name. Keys are normalised (see _norm). Each

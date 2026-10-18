@@ -98,6 +98,66 @@ TAGS = {
     "NoncurrentLiabilities": "noncurrent_liabilities",
 }
 
+# Insurers file in IRDAI's formats (life "_LI_", general "_GI_" documents). These carry
+# assets and the current lines under the Ind-AS names above but profit, EPS and net
+# worth under their own, which were not read until 2026-10-18: no insurer had a profit,
+# an EPS or a share count in the archive, so none could be valued. Their names are read
+# only from a document carrying INSURANCE_MARK, the EPS line both formats share and the
+# Ind-AS statement never uses, so no other filing can pick them up.
+#
+# The two formats use the same names for different lines, measured on all 109 insurer
+# filings stored on 2026-10-18 (57 life, 52 general):
+#   * ShareholdersFunds is a life insurer's net worth (share capital, reserves and the
+#     shareholders' fair value change account) but only that fair value change account
+#     in a general insurer's balance sheet. A general insurer's net worth is therefore
+#     share capital + reserves and surplus + that line (ICICIGI, 30 Sep 2026: 499.6 +
+#     17,505.7 + 814.6 crore, against 814.6 crore read as its net worth before).
+#   * A general insurer's "profit before extraordinary items" is before tax (it equals
+#     its profit before tax in all 52), so it is not taken as profit after tax.
+#   * ProvisionForTax is a general insurer's tax (profit before less after tax in all
+#     52) but the first one in a life filing is the policyholders' account's (it differs
+#     from profit before less after tax in 56 of 57), so a life insurer's tax is taken
+#     as that difference instead.
+#   * Both report one EPS as "basic and diluted"; before extraordinary items is the
+#     counterpart of EPS from continuing operations, so it fills both.
+INSURANCE_MARK = b"BasicAndDilutedEPSAfterExtraordinaryItemsNetOfTaxExpenseForThePeriodNotToBeAnnualized"
+GENERAL_MARK = b"GrossPremiumsWritten"          # in all 52 general filings, none of the 57 life
+INSURANCE_TAGS = {
+    "BasicAndDilutedEPSBeforeExtraordinaryItemsNetOfTaxExpenseForThePeriodNotToBeAnnualized": "eps_basic",
+    "ShareCapital": "equity_capital",
+    "ReservesAndSurplus": "other_equity",
+}
+LIFE_TAGS = {
+    **INSURANCE_TAGS,
+    "ProfitLossBeforeTax": "pbt",
+    "ProfitLossAfterTaxBeforeExtraordinaryItems": "profit_continuing",
+    "ProfitLossAfterTaxAndExtraordinaryItems": "profit_reported",
+    "ShareholdersFunds": "equity",
+}
+GENERAL_TAGS = {
+    **INSURANCE_TAGS,
+    "OperatingIncome": "total_income",            # the revenue account's total, as a life insurer's Income
+    "ProfitOrLossBeforeTax": "pbt",
+    "ProvisionForTax": "tax",
+    "ProfitLossAfterTax": "profit_reported",
+    "ShareholdersFunds": "_fair_value_shareholders",
+}
+
+
+def _insurer_facts(facts: dict, general: bool) -> dict:
+    """The lines an insurer's format does not state the way the Ind-AS one does (see LIFE_TAGS)."""
+    if "eps_basic" in facts:
+        facts["eps_diluted"] = facts["eps_basic"]
+    if general:
+        fv = facts.pop("_fair_value_shareholders", None)
+        facts.pop("equity", None)
+        if "equity_capital" in facts and "other_equity" in facts:
+            facts["equity"] = facts["equity_capital"] + facts["other_equity"] + (fv or 0.0)
+    elif "pbt" in facts and "profit_continuing" in facts:
+        facts["tax"] = facts["pbt"] - facts["profit_continuing"]
+    return facts
+
+
 DERIVED = ["ebitda", "profit_normalised", "shares_implied",
            "debt_total", "debt_to_equity", "has_balance_sheet"]
 
@@ -313,6 +373,10 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
     -- figures present in the document that this rule refused.
     """
     tagmap = TAGS if tags is None else tags
+    insurer = tags is None and INSURANCE_MARK in content
+    general = insurer and GENERAL_MARK in content
+    if insurer:
+        tagmap = {**TAGS, **(GENERAL_TAGS if general else LIFE_TAGS)}
     try:
         root = ET.fromstring(content)
     except ET.ParseError as e:
@@ -527,6 +591,8 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
         duration_source = "audit_fallback"
     else:
         duration_source = None
+    if insurer:
+        _insurer_facts(facts, general)
 
     if detail is not None:
         dropped = set()
