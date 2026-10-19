@@ -128,8 +128,8 @@ def parse_archive(table: list[dict]) -> pd.DataFrame:
     rows = []
     for a in table or []:
         q = (a.get("Quarter") or "").split(";")
-        if not q or not q[0].startswith("Standalone"):
-            continue
+        if not q or not q[0].startswith("Standalone") or a.get("qtr") is None or a.get("scripcode") is None:
+            continue                                    # BSE lists some filings without a quarter number
         filed = a.get("Filing_Date_Time")
         rows.append({"scrip_cd": int(a["scripcode"]), "qtr": float(a["qtr"]), "label": q[0].split("-", 1)[1],
                      "kind": a.get("Fld_QuarterName") or "", "filed_dt": pd.Timestamp(filed) if filed else pd.NaT})

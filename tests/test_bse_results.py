@@ -53,7 +53,9 @@ def test_the_archive_keeps_standalone_filings_with_their_filing_time():
         {"Quarter": "Standalone-Mar-12;MQ2011-2012;73.50;D", "qtr": 73.5, "Fld_QuarterName": "Year",
          "Filing_Date_Time": None, "scripcode": 500488},
         {"Quarter": "Consolidated-Jun-16;JQ2016-2017;90.00;C", "qtr": 90.0, "Fld_QuarterName": "Quarter",
-         "Filing_Date_Time": None, "scripcode": 500488}])
+         "Filing_Date_Time": None, "scripcode": 500488},
+        {"Quarter": "Standalone-Sep-16;SQ2016-2017;;D", "qtr": None, "Fld_QuarterName": "Quarter",
+         "Filing_Date_Time": None, "scripcode": 500488}])                  # no quarter number: skipped
     assert list(a["qtr"]) == [90.0, 73.5] and list(a["label"]) == ["Jun-16", "Mar-12"]
     assert str(a["filed_dt"].iloc[0]) == "2016-08-27 16:15:27" and a["filed_dt"].isna().iloc[1]
 
