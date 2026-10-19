@@ -51,6 +51,14 @@ jobs:
           MARKETAUX_KEY: ${{ secrets.MARKETAUX_KEY }}
         run: python -m jobs.daily_brief
 
+      # Delivery positions, bulk and block deals, FII/DII flows and the surveillance lists
+      # (zen/data/market_daily.py). NSE serves only the latest session of most of these, and by
+      # the morning it is final. After the email, and never fatal: a failure marks this step only.
+      - name: market data
+        if: steps.sent.outputs.done != 'true'
+        continue-on-error: true
+        run: python -m jobs.update_market_daily
+
       # The filings the brief fetched are part of the archive. Until 2026-10-04
       # only the story memory was committed, so they vanished with the runner.
       - name: commit story memory and filings
@@ -61,6 +69,7 @@ jobs:
           git add state/seen.json data/announcements
           [ ! -d state/briefs ] || git add state/briefs
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
+          for d in data/delivery data/deals data/flows data/surveillance; do [ ! -d "$d" ] || git add "$d"; done
           git diff --staged --quiet || git commit -m "state: brief memory $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile
             git pull --rebase origin main && git push && exit 0

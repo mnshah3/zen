@@ -79,7 +79,11 @@ def _mini_archive(path, extra_table: bool = False):
                           "shareholding": ("broadcast_dt", "TIMESTAMP"), "pledges": ("observed_dt", "TIMESTAMP"),
                           "shareholding_detail": ("broadcast_dt", "TIMESTAMP"),
                           "bank_results": ("broadcast_dt", "TIMESTAMP"), "statements": ("broadcast_dt", "TIMESTAMP"),
-                          "events": ("observed_dt", "TIMESTAMP")}.items():
+                          "events": ("observed_dt", "TIMESTAMP"),
+                          "bse_announcements": ("dissem_dt", "TIMESTAMP"),
+                          # market-wide daily data (zen/data/market_daily.py)
+                          "delivery": ("date", "DATE"), "deals": ("date", "DATE"), "fii_dii": ("date", "DATE"),
+                          "surveillance": ("observed_dt", "TIMESTAMP")}.items():
         con.execute(f"CREATE TABLE {t} ({col} {typ}, tag VARCHAR)")
         if typ == "DATE":
             rows = [("2024-05-31", "before"), ("2024-06-03", "on"), ("2024-06-04", "after")]

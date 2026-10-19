@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 
 from zen.data import (announcements, bank_results, bse_announcements, corpactions, events, financials, indices,
-                      shareholding, shareholding_detail, statements, store)
+                      market_daily, shareholding, shareholding_detail, statements, store)
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ def main() -> int:
         ("statements", lambda: statements.rebuild(con)),
         ("events", lambda: events.rebuild(con)),
         ("bse_announcements", lambda: bse_announcements.rebuild(con)),
+        ("market_daily", lambda: market_daily.rebuild(con)),         # delivery, deals, fii_dii, surveillance
     ]
 
     try:

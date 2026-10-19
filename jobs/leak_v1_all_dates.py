@@ -102,9 +102,14 @@ CUTS = {
     "bank_results": ("broadcast_dt", "broadcast_dt < ?", "lenders' filings broadcast before D 00:00"),
     "statements": ("broadcast_dt", "broadcast_dt < ?", "balance sheets and cash flows broadcast before D 00:00"),
     "events": ("observed_dt", "observed_dt < ?", "calendar events first listed before D 00:00"),
+    "bse_announcements": ("dissem_dt", "dissem_dt < ?", "BSE announcements disseminated before D 00:00"),
+    "delivery": ("date", "date < ?", "delivery positions of sessions strictly before D"),
+    "deals": ("date", "date < ?", "bulk and block deals of sessions strictly before D"),
+    "fii_dii": ("date", "date < ?", "institutional flows of sessions strictly before D"),
+    "surveillance": ("observed_dt", "observed_dt < ?", "surveillance lists as read before D 00:00"),
 }
 TIMESTAMP_CUTS = {"financials", "announcements", "shareholding", "pledges", "shareholding_detail",
-                  "bank_results", "statements", "events"}
+                  "bank_results", "statements", "events", "bse_announcements", "surveillance"}
 
 STATIC_NOTE = ("pit.StaticLabels is loaded once from the full archive and given to both runs, "
                "as jobs/backtest_v1.py does: the first-ever NSE industry label (v1 "
