@@ -86,3 +86,7 @@ data/backtest/v1_final_window_2020/ranks.parquet
 # v3 run: the working tables the engine rebuilds (jobs/backtest_v3.py); the CSV records are committed
 data/backtest/v3/figures.parquet
 data/backtest/v3/ranks.parquet
+
+# BSE data stays on the machine that fetched it: BSE prohibits reproducing or redistributing it
+data/bse_announcements/
+data/bse_results/

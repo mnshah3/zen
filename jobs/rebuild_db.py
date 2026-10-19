@@ -26,6 +26,7 @@ import logging
 
 from zen.data import (announcements, bank_results, bse_announcements, corpactions, events, financials, indices,
                       market_daily, shareholding, shareholding_detail, statements, store)
+from zen.data import amfi_nav, bse_results
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,8 @@ def main() -> int:
         ("events", lambda: events.rebuild(con)),
         ("bse_announcements", lambda: bse_announcements.rebuild(con)),
         ("market_daily", lambda: market_daily.rebuild(con)),         # delivery, deals, fii_dii, surveillance
+        ("mf_nav", lambda: amfi_nav.rebuild(con)),                    # mutual fund NAVs (AMFI)
+        ("bse_results", lambda: bse_results.rebuild(con)),            # BSE's results; local files only
     ]
 
     try:
