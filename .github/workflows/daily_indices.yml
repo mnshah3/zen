@@ -56,6 +56,9 @@ jobs:
           git commit -m "data: indices $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile
             git pull --rebase origin main && git push && exit 0
+            # a failed rebase is undone so the next try starts clean; name what clashed
+            git diff --name-only --diff-filter=U | sed 's/^/conflict: /'
+            git rebase --abort 2>/dev/null || true
             sleep $((i * 15))
           done
           exit 1
