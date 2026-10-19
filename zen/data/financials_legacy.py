@@ -172,6 +172,40 @@ def listing(session, start: date, end: date, window_days: int = 7) -> pd.DataFra
     return df.reset_index(drop=True)
 
 
+# Insurers' quarterly results before SEBI's integrated filing (from the March 2025 quarter) are not in
+# the equities list above: NSE lists them under index=insurance, with its own field names, and only
+# from the June 2024 quarter (uploaded in October 2024). Measured on 19 Oct 2026: HDFC Life has the
+# June, September and December 2024 quarters there and nothing earlier; a July-August 2023 window
+# returns nothing.
+INSURANCE_LISTING = ("https://www.nseindia.com/api/corporates-financial-results"
+                     "?index=insurance&period=Quarterly&from_date={frm}&to_date={to}")
+
+
+def insurance_listing(session, start: date, end: date, window_days: int = 30) -> pd.DataFrame:
+    """Insurers' quarterly filings broadcast between two dates, in listing()'s columns."""
+    rows, cur = [], start
+    while cur <= end:
+        stop = min(cur + timedelta(days=window_days - 1), end)
+        r = session.get(INSURANCE_LISTING.format(frm=cur.strftime("%d-%m-%Y"), to=stop.strftime("%d-%m-%Y")), timeout=60)
+        r.raise_for_status()
+        batch = r.json()
+        if not isinstance(batch, list):
+            raise ValueError(f"unexpected payload: {str(batch)[:120]}")
+        rows.extend(batch)
+        cur = stop + timedelta(days=1)
+        time.sleep(0.3)
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    out = pd.DataFrame({
+        "symbol": df["symbol"], "company": df.get("companyName"), "isin": df.get("isin"),
+        "period_end": df["periodEnd"].map(_d), "broadcast_dt": df["broadCastDate"].map(_dt),
+        "consolidated": df["consolidated"].astype(str).str.strip().str.lower().eq("consolidated"),
+        "audited": df.get("audited", pd.Series(dtype=str)).astype(str).str.lower().eq("audited"),
+        "xbrl_url": df["xbrl"], "has_xbrl": df["xbrl"].map(_has_xbrl)})
+    return out.drop_duplicates(subset=["symbol", "period_end", "consolidated", "broadcast_dt", "xbrl_url"]).reset_index(drop=True)
+
+
 MISSING_LEDGER = PARQUET_DIR / "legacy_missing.parquet"
 
 # NSE's cookies go stale within minutes and the endpoint then degrades rather

@@ -120,3 +120,26 @@ def test_an_ind_as_filing_does_not_read_the_insurers_names():
     assert facts["pbt"] == 20.0
     assert facts["equity"] == 500.0
     assert "equity_capital" not in facts and "eps_diluted" not in facts and "tax" not in facts
+
+
+def test_the_insurance_list_is_read_into_the_equities_columns():
+    from datetime import date
+    from zen.data import financials_legacy as fl
+
+    class Resp:
+        def __init__(self, data): self.data = data
+        def raise_for_status(self): pass
+        def json(self): return self.data
+
+    class Session:
+        def get(self, url, timeout=None):
+            return Resp([{"symbol": "HDFCLIFE", "companyName": "HDFC Life", "periodEnd": "30-Jun-2024",
+                          "broadCastDate": "04-Oct-2024 20:44:16", "consolidated": "Consolidated", "audited": "Un-Audited",
+                          "xbrl": "https://nsearchives.nseindia.com/corporate/xbrl/LI_109003_1259467_04102024084415.xml"}]
+                        if "01-07-2024" in url else [])
+
+    df = fl.insurance_listing(Session(), date(2024, 7, 1), date(2024, 8, 29))
+    r = df.iloc[0]
+    assert len(df) == 1 and r["symbol"] == "HDFCLIFE" and r["period_end"] == date(2024, 6, 30)
+    assert bool(r["consolidated"]) and not bool(r["audited"]) and bool(r["has_xbrl"])
+    assert str(r["broadcast_dt"]).startswith("2024-10-04 20:44")
