@@ -93,20 +93,29 @@ def surveillance(now: datetime, s) -> int:
     return len(df)
 
 
+def fo_ban(now: datetime) -> int:
+    r = financials_legacy.document_session().get(md.FO_BAN_URL, timeout=30)
+    r.raise_for_status()
+    df = md.parse_fo_ban(r.text, now)
+    md.write_yearly(df, md.FO_BAN_DIR, ["trade_date", "symbol"], "trade_date", md.FO_BAN_COLUMNS)
+    log.info("fo_ban: %s for %s", df["symbol"].dropna().tolist(), df["trade_date"].iloc[0])
+    return len(df)
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     ap = argparse.ArgumentParser()
     ap.add_argument("--start", type=date.fromisoformat)
     ap.add_argument("--end", type=date.fromisoformat)
     ap.add_argument("--days", type=int, default=10, help="delivery: look back this far for missing sessions")
-    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance"])
+    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban"])
     a = ap.parse_args(argv)
     now = datetime.now(IST).replace(tzinfo=None, microsecond=0)
     end = a.end or now.date()
     start = a.start or end - timedelta(days=a.days)
     failed = []
     site = None
-    for name in ("delivery", "deals", "flows", "surveillance"):
+    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban"):
         if a.only and name != a.only:
             continue
         try:
@@ -114,6 +123,8 @@ def main(argv: list[str] | None = None) -> int:
                 delivery(start, end)
             elif name == "deals":
                 deals(now)
+            elif name == "fo_ban":
+                fo_ban(now)
             else:
                 site = site or site_session()
                 (flows if name == "flows" else surveillance)(now, site)

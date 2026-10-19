@@ -32,7 +32,7 @@ def test_an_mto_file_gives_each_equity_line_with_its_trade_date():
 
 def test_delivery_is_stored_by_month_and_takes_volume_from_prices(tmp_path, monkeypatch):
     monkeypatch.setattr(md, "DELIVERY_DIR", tmp_path / "delivery")
-    for d in ("DEALS_DIR", "FLOWS_DIR", "SURV_DIR"):
+    for d in ("DEALS_DIR", "FLOWS_DIR", "SURV_DIR", "FO_BAN_DIR"):
         monkeypatch.setattr(md, d, tmp_path / d)
     md.write_delivery(md.parse_mto(MTO))
     md.write_delivery(md.parse_mto(MTO))                                 # read twice: stored once
@@ -70,3 +70,13 @@ def test_yearly_files_keep_one_copy_of_a_row_read_twice(tmp_path):
     md.write_yearly(f.assign(observed_dt=pd.Timestamp(2026, 10, 19, 20, 0)), tmp_path, ["date", "category"], "date", md.FLOW_COLUMNS)
     out = pd.read_parquet(tmp_path / "2026.parquet")
     assert len(out) == 1 and out.iloc[0]["observed_dt"] == pd.Timestamp(2026, 10, 19, 20, 0)
+
+
+def test_the_fo_ban_list_is_read_with_its_trade_date_and_an_empty_list_is_kept_as_read():
+    from datetime import date, datetime
+    from zen.data import market_daily as md
+    text = "Securities in Ban For Trade Date 21-OCT-2026:\n1,AMBUJACEM\n2,KAYNES\n3,SAIL\n"   # NSE, 19 Oct 2026
+    df = md.parse_fo_ban(text, datetime(2026, 10, 19, 20, 0))
+    assert df["symbol"].tolist() == ["AMBUJACEM", "KAYNES", "SAIL"] and set(df["trade_date"]) == {date(2026, 10, 21)}
+    empty = md.parse_fo_ban("Securities in Ban For Trade Date 22-OCT-2026: NIL\n", datetime(2026, 10, 20, 20, 0))
+    assert len(empty) == 1 and empty["symbol"].isna().all()

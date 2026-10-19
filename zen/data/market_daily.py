@@ -17,6 +17,11 @@ SOURCES, AS MEASURED ON 19 OCT 2026
   surveillance  www.nseindia.com /api/reportASM (long and short term) and /api/reportGSM: the
                 lists as they stand. Each read is kept with the time it was seen, so the record
                 says which stocks were under which measure on each day zen looked.
+  fo_ban        nsearchives /content/fo/fo_secban.csv: the F&O stocks in the ban period for the
+                next trade date (open interest past 95% of the market-wide position limit, so only
+                positions that reduce it may be traded). Kept apart from surveillance: a ban is
+                about derivatives positions, not a warning on the company. 19 Oct 2026, for 21 Oct:
+                AMBUJACEM, KAYNES, SAIL.
 
 Equity series only (EQ, BE) for delivery, the two the universe is built from. The quantity traded
 in an MTO file equalled zen's volume in all 16,129 rows of 9-16 October 2026, so the files keep only
@@ -42,18 +47,21 @@ DEAL_URLS = {"bulk": ARCHIVE + "/content/equities/bulk.csv", "block": ARCHIVE + 
 FII_DII_URL = "https://www.nseindia.com/api/fiidiiTradeReact"
 ASM_URL = "https://www.nseindia.com/api/reportASM"
 GSM_URL = "https://www.nseindia.com/api/reportGSM"
+FO_BAN_URL = ARCHIVE + "/content/fo/fo_secban.csv"
 SERIES = ("EQ", "BE")
 
 DELIVERY_DIR = Path("data/delivery")
 DEALS_DIR = Path("data/deals")
 FLOWS_DIR = Path("data/flows")
 SURV_DIR = Path("data/surveillance")
+FO_BAN_DIR = Path("data/fo_ban")
 
 DELIVERY_COLUMNS = ["date", "symbol", "series", "traded_qty", "deliv_qty", "deliv_pct"]
 DELIVERY_STORED = ["date", "symbol", "series", "deliv_qty"]
 DEAL_COLUMNS = ["date", "kind", "symbol", "security", "client", "side", "qty", "price", "remarks", "observed_dt"]
 FLOW_COLUMNS = ["date", "category", "buy_cr", "sell_cr", "net_cr", "observed_dt"]
 SURV_COLUMNS = ["observed_dt", "list", "symbol", "company", "isin", "stage", "code", "description"]
+FO_BAN_COLUMNS = ["trade_date", "symbol", "observed_dt"]
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS delivery (date DATE, symbol VARCHAR, series VARCHAR, traded_qty BIGINT,
@@ -64,6 +72,7 @@ CREATE TABLE IF NOT EXISTS fii_dii (date DATE, category VARCHAR, buy_cr DOUBLE, 
     observed_dt TIMESTAMP);
 CREATE TABLE IF NOT EXISTS surveillance (observed_dt TIMESTAMP, list VARCHAR, symbol VARCHAR, company VARCHAR,
     isin VARCHAR, stage VARCHAR, code VARCHAR, description VARCHAR);
+CREATE TABLE IF NOT EXISTS fo_ban (trade_date DATE, symbol VARCHAR, observed_dt TIMESTAMP);
 """
 
 
@@ -201,6 +210,23 @@ def parse_gsm(data: list, observed: datetime) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=SURV_COLUMNS)
 
 
+# ---------------------------------------------------------------- F&O ban
+_BAN_HEAD = re.compile(r"trade date\s+(\d{1,2}-[A-Za-z]{3}-\d{4})", re.I)
+
+
+def parse_fo_ban(text: str, observed: datetime) -> pd.DataFrame:
+    """'Securities in Ban For Trade Date 21-OCT-2026:' then 'n,SYMBOL' lines; a list with no stock
+    keeps one row with no symbol, so the record says the list was read and was empty."""
+    lines = [x.strip() for x in (text or "").splitlines() if x.strip()]
+    m = _BAN_HEAD.search(lines[0]) if lines else None
+    if not m:
+        raise ValueError("the F&O ban file has no trade date")
+    day = datetime.strptime(m.group(1).title(), "%d-%b-%Y").date()
+    syms = [x.split(",", 1)[1].strip() for x in lines[1:] if "," in x and x.split(",", 1)[0].strip().isdigit()]
+    rows = [{"trade_date": day, "symbol": s, "observed_dt": pd.Timestamp(observed)} for s in syms] or            [{"trade_date": day, "symbol": None, "observed_dt": pd.Timestamp(observed)}]
+    return pd.DataFrame(rows, columns=FO_BAN_COLUMNS)
+
+
 # ---------------------------------------------------------------- the archive
 def ensure_schema(con) -> None:
     for stmt in SCHEMA.split(";"):
@@ -209,7 +235,7 @@ def ensure_schema(con) -> None:
 
 
 def rebuild(con) -> int:
-    """Recreate the four tables from the committed parquet; the row count across them."""
+    """Recreate the five tables from the committed parquet; the row count across them."""
     ensure_schema(con)
     con.execute("DELETE FROM delivery")
     if DELIVERY_DIR.exists() and any(DELIVERY_DIR.glob("*/*.parquet")):
@@ -222,7 +248,8 @@ def rebuild(con) -> int:
     total = con.execute("SELECT count(*) FROM delivery").fetchone()[0]
     for table, folder, glob, cols in (("deals", DEALS_DIR, "*.parquet", DEAL_COLUMNS),
                                       ("fii_dii", FLOWS_DIR, "*.parquet", FLOW_COLUMNS),
-                                      ("surveillance", SURV_DIR, "*.parquet", SURV_COLUMNS)):
+                                      ("surveillance", SURV_DIR, "*.parquet", SURV_COLUMNS),
+                                      ("fo_ban", FO_BAN_DIR, "*.parquet", FO_BAN_COLUMNS)):
         con.execute(f"DELETE FROM {table}")
         if folder.exists() and any(folder.glob(glob)):
             con.execute(f"INSERT INTO {table} SELECT {', '.join(cols)} "
