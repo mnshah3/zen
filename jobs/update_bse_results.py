@@ -45,9 +45,11 @@ def gap_targets(con) -> dict[int, set]:
     """{scrip: {period-end months}}: NSE-missing quarters since 2018, and BSE-only companies' quarters."""
     q = con.execute("SELECT DISTINCT symbol, period_end FROM financials").df()
     q["p"] = pd.to_datetime(q["period_end"]).dt.to_period("Q")
-    isin = con.execute("SELECT symbol, any_value(isin_code) AS isin FROM prices WHERE date >= '2018-01-01' "
-                       "AND series IN ('EQ', 'BE') GROUP BY symbol").df()
-    codes = isin.merge(isin_codes(), on="isin")
+    # every ISIN a symbol has traded under: a split or bonus changes it (MCX: INE745G01035 became
+    # INE745G01043), and BSE's list carries only the current one
+    isin = con.execute("SELECT DISTINCT symbol, isin_code AS isin FROM prices WHERE date >= '2018-01-01' "
+                       "AND series IN ('EQ', 'BE')").df()
+    codes = isin.merge(isin_codes(), on="isin").drop_duplicates("symbol")
     out: dict[int, set] = {}
     for sym, g in q.groupby("symbol"):
         span = pd.period_range(g["p"].min(), g["p"].max(), freq="Q")
