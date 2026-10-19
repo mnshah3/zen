@@ -2,6 +2,10 @@
 
     python -m jobs.update_amfi_nav                      # the sessions since the last one stored
     python -m jobs.update_amfi_nav --monthly 2018-06    # backfill: the last session of each month
+    python -m jobs.update_amfi_nav --dir ../data/mf_nav # into another folder (zen-portfolios keeps them)
+
+AMFI's terms allow personal, non-commercial use only and forbid publishing, so the NAVs are never
+committed to zen (public): zen-portfolios, a private repository, keeps them.
 
 The backfill reads one session a month (about 1.2 MB each), enough to compare returns over months
 and years; from the first daily run on, every session is kept.
@@ -13,6 +17,7 @@ import argparse
 import logging
 import time
 from datetime import date, timedelta
+from pathlib import Path
 
 import duckdb
 import pandas as pd
@@ -37,9 +42,11 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--monthly", metavar="YYYY-MM", help="backfill the last session of each month from this month")
+    ap.add_argument("--dir", default=str(amfi_nav.NAV_DIR), help="where the NAV files are kept")
     a = ap.parse_args(argv)
+    root = Path(a.dir)
     s = requests.Session()
-    have = amfi_nav.stored_dates()
+    have = amfi_nav.stored_dates(root)
     if a.monthly:
         for d in month_end_sessions(a.monthly, date.today()):
             if d in have:
@@ -49,7 +56,7 @@ def main(argv=None) -> int:
                 if len(df):
                     break
                 time.sleep(1)
-            log.info("%s: %s rows%s", d, amfi_nav.store(df), "" if len(df) and df["date"].iloc[0] == d else f" (from {df['date'].iloc[0] if len(df) else 'nothing'})")
+            log.info("%s: %s rows%s", d, amfi_nav.store(df, root), "" if len(df) and df["date"].iloc[0] == d else f" (from {df['date'].iloc[0] if len(df) else 'nothing'})")
             time.sleep(1)
         return 0
     start = (max(have) + timedelta(days=1)) if have else date.today() - timedelta(days=7)
@@ -58,7 +65,7 @@ def main(argv=None) -> int:
         log.info("nothing new")
         return 0
     df = amfi_nav.fetch(s, start, end)
-    log.info("%s to %s: %s rows over %s sessions", start, end, amfi_nav.store(df), df["date"].nunique() if len(df) else 0)
+    log.info("%s to %s: %s rows over %s sessions", start, end, amfi_nav.store(df, root), df["date"].nunique() if len(df) else 0)
     return 0
 
 

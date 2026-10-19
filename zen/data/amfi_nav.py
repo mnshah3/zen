@@ -18,6 +18,11 @@ SOURCE, AS MEASURED ON 19 OCT 2026
   category it had, and still appears on the dates it existed: comparisons by date are free of
   survivorship.
 
+TERMS (read 19 Oct 2026, the version archived 21 Feb 2026): "personal and non-commercial use only";
+no one may "publicly display, transmit, publish" or "create derivative works", nor "store
+electronically any significant portion of any part of the Site". So the NAVs are kept privately
+(zen-portfolios), never committed to zen, and no public page shows them.
+
 KEPT
 
   Open-ended equity schemes (every "Equity Scheme(s) - ..." section) and index funds, Growth option

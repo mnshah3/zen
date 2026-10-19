@@ -90,3 +90,5 @@ data/backtest/v3/ranks.parquet
 # BSE data stays on the machine that fetched it: BSE prohibits reproducing or redistributing it
 data/bse_announcements/
 data/bse_results/
+# AMFI's terms: personal use only, no publishing; zen-portfolios (private) keeps the NAVs
+data/mf_nav/
