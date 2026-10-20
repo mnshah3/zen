@@ -80,3 +80,13 @@ def test_the_fo_ban_list_is_read_with_its_trade_date_and_an_empty_list_is_kept_a
     assert df["symbol"].tolist() == ["AMBUJACEM", "KAYNES", "SAIL"] and set(df["trade_date"]) == {date(2026, 10, 21)}
     empty = md.parse_fo_ban("Securities in Ban For Trade Date 22-OCT-2026: NIL\n", datetime(2026, 10, 20, 20, 0))
     assert len(empty) == 1 and empty["symbol"].isna().all()
+
+
+def test_nse_equity_list_gives_names_listing_dates_and_face_values():
+    from zen.data import names
+    text = ("SYMBOL,NAME OF COMPANY, SERIES, DATE OF LISTING, PAID UP VALUE, MARKET LOT, ISIN NUMBER, FACE VALUE\n"
+            "20MICRONS,20 Microns Limited,EQ,06-OCT-2008,5,1,INE144J01027,5\n"
+            "TCS,Tata Consultancy Services Limited,EQ,25-AUG-2004,1,1,INE467B01029,1\n")
+    m, f = names.parse_equity_list(text)
+    assert m["TCS"] == "Tata Consultancy Services Limited"
+    assert f["20MICRONS"] == {"listed": "2008-10-06", "face_value": 5.0, "isin": "INE144J01027", "series": "EQ"}

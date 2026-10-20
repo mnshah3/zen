@@ -61,24 +61,59 @@ def phrase(name: str) -> str:
     return _SUFFIX.sub("", name).strip(" .,").lower()
 
 
+def parse_equity_list(text: str) -> tuple[dict[str, str], dict[str, dict]]:
+    """NSE's EQUITY_L.csv: {symbol: name} and {symbol: {listed, face_value, isin, series}}, the date
+    the company listed on NSE (DATE OF LISTING, e.g. 06-OCT-2008) as ISO and its face value in rupees.
+    Its headers carry leading spaces (" DATE OF LISTING"), so they are stripped first."""
+    from datetime import datetime
+    reader = csv.DictReader(io.StringIO(text))
+    reader.fieldnames = [f.strip() for f in reader.fieldnames or []]
+    names, facts = {}, {}
+    for row in reader:
+        row = {k: (v or "").strip() for k, v in row.items() if k}
+        sym, name = row.get("SYMBOL", ""), row.get("NAME OF COMPANY", "")
+        if not sym:
+            continue
+        if name:
+            names[sym] = name
+        try:
+            listed = datetime.strptime(row.get("DATE OF LISTING", ""), "%d-%b-%Y").date().isoformat()
+        except ValueError:
+            listed = None
+        try:
+            fv = float(row.get("FACE VALUE", ""))
+        except ValueError:
+            fv = None
+        facts[sym] = {"listed": listed, "face_value": fv, "isin": row.get("ISIN NUMBER") or None,
+                      "series": row.get("SERIES") or None}
+    return names, facts
+
+
+FACTS = Path("state/equity_list.json")   # {symbol: {listed, face_value, isin, series}}, from the same file
+
+
 def refresh() -> dict[str, str]:
-    """Download the current NSE equity list and cache symbol -> name."""
+    """Download the current NSE equity list; cache symbol -> name, and each company's listing date,
+    face value and ISIN (FACTS)."""
     s = _session()
     r = s.get(URL, timeout=30)
     r.raise_for_status()
-
-    reader = csv.DictReader(io.StringIO(r.text))
-    mapping = {}
-    for row in reader:
-        sym = (row.get("SYMBOL") or "").strip()
-        name = (row.get("NAME OF COMPANY") or "").strip()
-        if sym and name:
-            mapping[sym] = name
-
+    mapping, facts = parse_equity_list(r.text)
+    if len(mapping) < 1000:
+        raise RuntimeError(f"NSE's equity list has only {len(mapping)} names: not replacing the cache")
     CACHE.parent.mkdir(parents=True, exist_ok=True)
-    CACHE.write_text(json.dumps(mapping, indent=0, sort_keys=True))
-    log.info("cached %d symbol names", len(mapping))
+    CACHE.write_text(json.dumps(mapping, indent=0, sort_keys=True), newline="\n")
+    FACTS.write_text(json.dumps(facts, indent=0, sort_keys=True), newline="\n")
+    log.info("cached %d symbol names and their listing facts", len(mapping))
     return mapping
+
+
+def load_facts() -> dict[str, dict]:
+    """The cached listing facts (FACTS), or {} where none are cached yet."""
+    try:
+        return json.loads(FACTS.read_text()) if FACTS.exists() else {}
+    except json.JSONDecodeError:
+        return {}
 
 
 def load(refresh_if_missing: bool = True) -> dict[str, str]:

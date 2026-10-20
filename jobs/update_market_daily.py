@@ -108,14 +108,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--start", type=date.fromisoformat)
     ap.add_argument("--end", type=date.fromisoformat)
     ap.add_argument("--days", type=int, default=10, help="delivery: look back this far for missing sessions")
-    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban"])
+    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban", "names"])
     a = ap.parse_args(argv)
     now = datetime.now(IST).replace(tzinfo=None, microsecond=0)
     end = a.end or now.date()
     start = a.start or end - timedelta(days=a.days)
     failed = []
     site = None
-    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban"):
+    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban", "names"):
         if a.only and name != a.only:
             continue
         try:
@@ -125,6 +125,9 @@ def main(argv: list[str] | None = None) -> int:
                 deals(now)
             elif name == "fo_ban":
                 fo_ban(now)
+            elif name == "names":
+                from zen.data import names as nse_names   # NSE's equity list: names, listing dates, face values
+                nse_names.refresh()
             else:
                 site = site or site_session()
                 (flows if name == "flows" else surveillance)(now, site)

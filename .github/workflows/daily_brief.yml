@@ -70,6 +70,7 @@ jobs:
           [ ! -d state/briefs ] || git add state/briefs
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
           for d in data/delivery data/deals data/flows data/surveillance data/fo_ban; do [ ! -d "$d" ] || git add "$d"; done
+          for f in state/symbol_names.json state/equity_list.json; do [ ! -f "$f" ] || git add "$f"; done
           git diff --staged --quiet || git commit -m "state: brief memory $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile
             git pull --rebase origin main && git push && exit 0
