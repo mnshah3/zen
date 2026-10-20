@@ -92,3 +92,5 @@ data/bse_announcements/
 data/bse_results/
 # AMFI's terms: personal use only, no publishing; zen-portfolios (private) keeps the NAVs
 data/mf_nav/
+# BSE's terms: research data kept on the machine that fetched it
+data/bse_statements/
