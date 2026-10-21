@@ -525,6 +525,7 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
     # equals the half-year figure the same document reports, to within 3%.
     declared = set(spans) | set(instants)
     referenced = {n.get("contextRef") for n in root.iter()} - {None}
+    oned_period = None
     if "OneI" in referenced and "OneI" not in declared:
         inst.add("OneI")
     duration_source = "declared" if dur else None
@@ -540,6 +541,11 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
             d = (date.fromisoformat(stated["DateOfEndOfReportingPeriod"])
                  - date.fromisoformat(stated["DateOfStartOfReportingPeriod"])).days
             oned_days = d if d >= 0 else None
+        except (KeyError, ValueError):
+            pass
+        try:
+            oned_period = (date.fromisoformat(stated["DateOfStartOfReportingPeriod"]),
+                           date.fromisoformat(stated["DateOfEndOfReportingPeriod"]))
         except (KeyError, ValueError):
             pass
         if oned_days is None and one_dim_spans:
@@ -618,8 +624,11 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
     if insurer:
         _insurer_facts(facts, general)
     if tags is None and not insurer and duration_source in ("declared", "OneD", "OneD_undated"):
-        duty = _excise(root, expense_ctx, {spans[c] for c in dur if c in spans},
-                       legacy_one=("OneD" in dur and "OneD" not in declared))
+        quarter = {spans[c] for c in dur if c in spans}
+        if "OneD" in dur and "OneD" not in declared:
+            # the undeclared OneD's own stated dates, else the declared "One..." spans of a quarter's length
+            quarter |= {oned_period} if oned_period else {p for p in one_dim_spans if (p[1] - p[0]).days <= QUARTER_MAX_DAYS}
+        duty = _excise(root, expense_ctx, quarter)
         if duty is not None:
             facts["excise_duty"] = duty
 
@@ -638,12 +647,19 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
     return facts
 
 
-def _excise(root, expense_ctx: dict, quarter: set, legacy_one: bool) -> float | None:
+def _excise(root, expense_ctx: dict, quarter: set) -> float | None:
     """The quarter's excise duty: the "other expenses" lines described as excise duty alone
-    (EXCISE_LINE), from the breakdown contexts dated the same as the quarter the income statement
-    was taken from. In the 2018-2024 filings the quarter is the undeclared OneD and its breakdown
-    the declared "One..." contexts, which carry its dates (see parse_xbrl). None without such a line."""
-    ok = {c for c, per in expense_ctx.items() if per in quarter or (legacy_one and c.startswith("One"))}
+    (EXCISE_LINE), from the breakdown contexts dated exactly as the quarter the income statement was
+    taken from, and no longer than a quarter. Matched on dates only: a year-end filing's "One..."
+    breakdown can be the year's (United Spirits, Mar 2023: Rs 20,493 crore, the four quarters' duty
+    together), so a context's name says nothing. None without such a line."""
+    ok = {c for c, per in expense_ctx.items() if per in quarter and (per[1] - per[0]).days <= QUARTER_MAX_DAYS}
+    # As for the company totals (OneD before FourD in parse_xbrl): a "Four..." breakdown dated as the
+    # quarter can hold the year to date. United Spirits' Dec-2022 filing dates FourOperatingExpenses02D
+    # Oct to Dec while it holds nine months' excise (Rs 13,915 crore, the quarter's being Rs 3,831 crore).
+    # Where the quarter has a "One..." breakdown, only that counts.
+    if any(c.startswith("One") for c in ok):
+        ok = {c for c in ok if c.startswith("One")}
     if not ok:
         return None
     desc, vals = {}, {}

@@ -375,3 +375,24 @@ def test_excise_duty_is_read_from_the_quarters_other_expenses_breakdown():
     # a second excise line in another column (the year to date) is not the quarter's
     r2 = fin.parse_xbrl(doc("Excise duty on sale of goods", "Excise duty", period_b=("2025-04-01", "2026-03-31")))
     assert r2["excise_duty"] == 104089300000
+
+
+def test_excise_is_the_quarters_own_breakdown_when_a_year_to_date_one_is_dated_as_the_quarter():
+    """United Spirits' Dec-2022 filing dates its "Four..." (year to date) breakdown Oct to Dec while it
+    holds nine months' excise (Rs 13,915 crore); the quarter's own "One..." line is Rs 3,831 crore."""
+    def ctx(cid, a, b, member=""):
+        return (f'<xbrli:context id="{cid}"><xbrli:entity><xbrli:identifier scheme="x">U</xbrli:identifier>'
+                + (f'<xbrli:segment><xbrldi:explicitMember dimension="in-bse-fin:DetailsOfOtherExpensesAxis">{member}</xbrldi:explicitMember></xbrli:segment>' if member else "")
+                + f'</xbrli:entity><xbrli:period><xbrli:startDate>{a}</xbrli:startDate><xbrli:endDate>{b}</xbrli:endDate></xbrli:period></xbrli:context>')
+    doc = ('<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:in-bse-fin="http://x">'
+           + ctx("OneOperatingExpenses02D", "2022-10-01", "2022-12-31", "m2") + ctx("FourOperatingExpenses02D", "2022-10-01", "2022-12-31", "m2")
+           + '<in-bse-fin:DateOfStartOfReportingPeriod contextRef="OneD">2022-10-01</in-bse-fin:DateOfStartOfReportingPeriod>'
+           + '<in-bse-fin:DateOfEndOfReportingPeriod contextRef="OneD">2022-12-31</in-bse-fin:DateOfEndOfReportingPeriod>'
+           + '<in-bse-fin:RevenueFromOperations contextRef="OneD">66100000000</in-bse-fin:RevenueFromOperations>'
+           + '<in-bse-fin:DescriptionOfOtherExpenses contextRef="OneOperatingExpenses02D">Excise duty</in-bse-fin:DescriptionOfOtherExpenses>'
+           + '<in-bse-fin:OtherExpenses contextRef="OneOperatingExpenses02D">38310000000</in-bse-fin:OtherExpenses>'
+           + '<in-bse-fin:DescriptionOfOtherExpenses contextRef="FourOperatingExpenses02D">Excise duty</in-bse-fin:DescriptionOfOtherExpenses>'
+           + '<in-bse-fin:OtherExpenses contextRef="FourOperatingExpenses02D">139150000000</in-bse-fin:OtherExpenses>'
+           + '</xbrli:xbrl>').encode()
+    r = fin.parse_xbrl(doc)
+    assert r["revenue"] == 66100000000 and r["excise_duty"] == 38310000000
