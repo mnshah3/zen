@@ -4,6 +4,7 @@ zen-portfolios, private, copies what its pages need): data/bse_statements/<BSE c
 
     python -m jobs.update_bse_statements                  # Sep 2018 to Mar 2022, every company zen prices
     python -m jobs.update_bse_statements --from 2018-03 --to 2022-06
+    python -m jobs.update_bse_statements --reparse        # read again what an older parser left short
 
 WHY BSE, AND HOW IT WAS CHECKED (20 Oct 2026). NSE's results XBRL tags no balance sheet before Sep
 2022. BSE's filings of the same results do (Result_Arch_ng lists each filing's standalone and
@@ -114,6 +115,43 @@ def fetch_company(s, code: int, lo, hi, pause: float = 1.0) -> int:
     return len(rows)
 
 
+def stale(have: pd.DataFrame) -> pd.Series:
+    """The stored year-end filings an older parser read without the year's income: before version 3
+    (21 Oct 2026) the year was read only from a filing whose cash flow dates it, so year ends to Mar
+    2020 and many of Mar 2021 have none, though they tag it under a context of their own."""
+    if have.empty or "parser" not in have or "fy_end" not in have:
+        return pd.Series(False, index=have.index)
+    year_end = pd.to_datetime(have["period_end"]).eq(pd.to_datetime(have["fy_end"]))
+    no_year = have["ytd_profit"].isna() if "ytd_profit" in have else pd.Series(True, index=have.index)
+    return (have["parser"].fillna(0) < statements.PARSER_VERSION) & year_end & no_year
+
+
+def reparse_company(s, code: int, pause: float = 1.0) -> int:
+    """Each stale filing of a stored company read again from its own address (no archive request), the
+    new reading kept and the old one's lines kept only where the new one has none."""
+    p = path(code)
+    if not p.exists():
+        return 0
+    have = pd.read_parquet(p)
+    todo = have[stale(have)]
+    rows = []
+    for f in todo.itertuples():
+        r = s.get(HOST + f.url, timeout=90)
+        time.sleep(pause)
+        if r.status_code != 200 or not r.content.lstrip()[:1] == b"<":
+            continue
+        row = statements.parse(r.content, nbfc=statements.is_nbfc(f.url))
+        if not row.get("has_detail") and not row.get("has_cash_flow"):
+            continue
+        rows.append({"scrip_cd": code, "url": f.url, "consolidated": f.consolidated, "period_end": f.period_end,
+                     "filed_dt": f.filed_dt, **row})
+    if rows:
+        new, old = pd.DataFrame(rows).set_index("url"), have.set_index("url")
+        merged = new.combine_first(old.loc[new.index]).copy()
+        pd.concat([old.drop(new.index), merged]).reset_index().to_parquet(p, index=False, compression="zstd")
+    return len(rows)
+
+
 def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -121,6 +159,7 @@ def main(argv=None) -> int:
     ap.add_argument("--to", dest="hi", default="2022-06")
     ap.add_argument("--pause", type=float, default=1.0)
     ap.add_argument("--codes", help="a file of BSE codes in the order to read them (the rest follow)")
+    ap.add_argument("--reparse", action="store_true", help="only read again the stored filings an older parser left short (stale)")
     a = ap.parse_args(argv)
     con = duckdb.connect("data/zen.duckdb", read_only=True)
     codes = targets(con)
@@ -134,8 +173,10 @@ def main(argv=None) -> int:
     s.headers.update(bse_announcements.HEADERS)
     failures = done = rows = 0
     for code in codes:
+        if a.reparse and not path(code).exists():
+            continue
         try:
-            rows += fetch_company(s, code, lo, hi, a.pause)
+            rows += reparse_company(s, code, a.pause) if a.reparse else fetch_company(s, code, lo, hi, a.pause)
             failures = 0
         except Exception as e:                                       # noqa: BLE001
             failures += 1

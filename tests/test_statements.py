@@ -483,3 +483,18 @@ def test_missing_year_reads_new_filings_and_once_more_the_year_ends_an_older_par
     asked.clear()
     job.main(["--missing-year"])
     assert asked == [urls[1], urls[0]]                                       # newest first
+
+
+def test_bse_filings_an_older_parser_left_without_the_year_are_read_again():
+    """jobs/update_bse_statements --reparse: only year-end filings stored by a parser older than this
+    one and holding no year's income; half years and filings with the year are left alone."""
+    import pandas as pd
+    from jobs.update_bse_statements import stale
+    from zen.data import statements as st
+    have = pd.DataFrame({
+        "period_end": pd.to_datetime(["2020-03-31", "2019-09-30", "2021-03-31", "2020-03-31"]),
+        "fy_end": pd.to_datetime(["2020-03-31", "2020-03-31", "2021-03-31", "2020-03-31"]),
+        "ytd_profit": [None, None, 5.0e9, None],
+        "parser": [2, 2, 2, st.PARSER_VERSION]})
+    assert stale(have).tolist() == [True, False, False, False]
+    assert not stale(pd.DataFrame()).any()
