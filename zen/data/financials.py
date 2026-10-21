@@ -161,14 +161,15 @@ def _insurer_facts(facts: dict, general: bool) -> dict:
 DERIVED = ["ebitda", "profit_normalised", "shares_implied",
            "debt_total", "debt_to_equity", "has_balance_sheet"]
 
-# quarter_span_days is LAST, after xbrl_url, and must stay there. The table is
+# quarter_span_days and then excise_duty are LAST, after xbrl_url, and must stay so (a column added
+# later goes after them). The table is
 # rebuilt with a positional INSERT ... SELECT * over read_parquet(union_by_name),
 # and union_by_name appends a column missing from the first file at the end. A
 # file written before the column existed then lines up with one written after
 # only if the new column is the last one in both.
 COLUMNS = ["symbol", "company", "period_end", "broadcast_dt", "consolidated",
            "audited", *dict.fromkeys(TAGS.values()), *DERIVED, "xbrl_url",
-           "quarter_span_days"]
+           "quarter_span_days", "excise_duty"]
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS financials (
@@ -197,6 +198,9 @@ CREATE TABLE IF NOT EXISTS financials (
     -- NULL when none were taken (a filing tagging only a half-year or year has
     -- its duration figures left empty) and in rows parsed before the column.
     quarter_span_days INTEGER,
+    -- The quarter's excise duty, a line of other expenses (EXCISE_LINE), from 21 Oct 2026; NULL
+    -- where the filing has no such line and in rows parsed before the column.
+    excise_duty DOUBLE,
     -- Keyed on the DOCUMENT, not on (symbol, period, basis). A company files a
     -- quarter and then files it again: 572 keys in this archive, 132 of them
     -- with revised figures. Keying on the period would keep only the last
@@ -336,6 +340,23 @@ def listing(symbol: str | None = None, start: date | None = None,
 # days off the calendar and is still far below a half-year (181-183) or a year.
 QUARTER_MAX_DAYS = 100
 
+# EXCISE DUTY. Revenue from operations is filed GROSS of excise duty (Ind AS 115 keeps it in
+# revenue; GST and cess are left out), and the duty is one of the lines the filing breaks "other
+# expenses" into (DetailsOfOtherExpensesAxis, each with a DescriptionOfOtherExpenses). For the few
+# industries still under excise -- tobacco, liquor, fuel, natural gas -- revenue then mixes sales with
+# a tax collected for the state: ITC's Jun-2026 quarter files Rs 29,523 crore of revenue, of which
+# Rs 10,409 crore is excise duty, after cigarettes moved from a cess to an excise duty in Feb 2026.
+# The duty is kept as its own column so a reader can take revenue net of it (Screener's "Sales" is,
+# to the crore: 29,523 - 10,409 = 19,114). Only a line described as excise duty alone is counted;
+# "Excise duty, VAT and TCS" or "Royalty, Cess & Excise Duty" mix it with other items the filing
+# does not split, and "Excise Duty and Service Tax" with a tax that ended in 2017, so they are left
+# out. "Excise duty recovered" is Reliance's own name for it in some quarters (the duty recovered from
+# customers in the price): its Jun-2026 line, Rs 2,382 crore, is exactly what separates its filed
+# revenue from Screener's. Misspellings filers use are accepted ("Exise", "Exice", "Excie", "Exciese",
+# GAIL's "EnExcise": 36 filings of the 38 companies on 21 Oct 2026).
+EXCISE_LINE = re.compile(r"^(state\s+|en)?ex(?=[ces]*i)[cise]{2,5}\s+dut(y|ies)(\s+(expenses?|recovered|(on|in)\s+.*))?$",
+                         re.IGNORECASE)
+
 
 def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = None) -> dict:
     """Extract tagged figures for the period being reported.
@@ -392,6 +413,7 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
     # documents these carry the same reporting-period dates the undeclared
     # OneD stands for; they date OneD when its own date facts are missing.
     one_dim_spans: set[tuple[date, date]] = set()
+    expense_ctx: dict[str, tuple[date, date]] = {}      # other expenses broken down, by line
     for ctx in root.iter():
         if not (ctx.tag.endswith("}context") or ctx.tag == "context"):
             continue
@@ -434,6 +456,8 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
         if dimensioned:
             if period[0] == "span" and cid.startswith("One"):
                 one_dim_spans.add((period[1], period[2]))
+            if period[0] == "span" and any(a.endswith("OtherExpensesAxis") for a, _ in axes):
+                expense_ctx[cid] = (period[1], period[2])
             # One exception, and only one. AuditedOrAdjustedAxis is SEBI's
             # statement-of-impact-of-audit-qualifications disclosure, not a
             # business segment: AuditedMember is the company as reported and
@@ -593,6 +617,11 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
         duration_source = None
     if insurer:
         _insurer_facts(facts, general)
+    if tags is None and not insurer and duration_source in ("declared", "OneD", "OneD_undated"):
+        duty = _excise(root, expense_ctx, {spans[c] for c in dur if c in spans},
+                       legacy_one=("OneD" in dur and "OneD" not in declared))
+        if duty is not None:
+            facts["excise_duty"] = duty
 
     if detail is not None:
         dropped = set()
@@ -607,6 +636,32 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
                       rejected_span_days=max(rejected_days) if rejected_days else None,
                       dropped_columns=sorted(dropped))
     return facts
+
+
+def _excise(root, expense_ctx: dict, quarter: set, legacy_one: bool) -> float | None:
+    """The quarter's excise duty: the "other expenses" lines described as excise duty alone
+    (EXCISE_LINE), from the breakdown contexts dated the same as the quarter the income statement
+    was taken from. In the 2018-2024 filings the quarter is the undeclared OneD and its breakdown
+    the declared "One..." contexts, which carry its dates (see parse_xbrl). None without such a line."""
+    ok = {c for c, per in expense_ctx.items() if per in quarter or (legacy_one and c.startswith("One"))}
+    if not ok:
+        return None
+    desc, vals = {}, {}
+    for node in root.iter():
+        ref = node.get("contextRef")
+        if ref not in ok:
+            continue
+        tag = node.tag.split("}")[-1]
+        txt = (node.text or "").strip()
+        if tag == "DescriptionOfOtherExpenses":
+            desc[ref] = " ".join(txt.replace("&amp;", "&").split())
+        elif tag == "OtherExpenses" and txt:
+            try:
+                vals[ref] = float(re.sub(r"[,\s]", "", txt))
+            except ValueError:
+                continue
+    hits = [vals[r] for r, d in desc.items() if r in vals and EXCISE_LINE.match(d)]
+    return float(sum(hits)) if hits else None
 
 
 def _derive(row: dict) -> dict:
@@ -679,6 +734,7 @@ def ensure_schema(con) -> None:
     # would fail, so the column is added in place. It goes last, which is
     # where COLUMNS puts it.
     con.execute("ALTER TABLE financials ADD COLUMN IF NOT EXISTS quarter_span_days INTEGER")
+    con.execute("ALTER TABLE financials ADD COLUMN IF NOT EXISTS excise_duty DOUBLE")    # 21 Oct 2026, also last
 
 
 _COLS_SQL = ", ".join(COLUMNS)
@@ -762,11 +818,16 @@ def rebuild_from_parquet(con, out_dir: Path = PARQUET_DIR) -> int:
     # positional. Before 2026-09-24 a failed insert (a column-count mismatch
     # after a schema change) left the table deleted and empty, and rebuild_db
     # only logged a warning.
+    # A column no file holds yet (one just added to COLUMNS, before any file was written with it)
+    # is selected as empty rather than failing the whole rebuild.
+    held = {r[0] for r in con.execute(
+        f"DESCRIBE SELECT * FROM read_parquet([{listed}], union_by_name=true)").fetchall()}
+    select = ", ".join(c if c in held else f"NULL AS {c}" for c in COLUMNS)
     con.execute("BEGIN TRANSACTION")
     try:
         con.execute("DELETE FROM financials")
         con.execute(f"""INSERT INTO financials ({_COLS_SQL})
-            SELECT {_COLS_SQL} FROM (
+            SELECT {select} FROM (
                 SELECT *, row_number() OVER (PARTITION BY xbrl_url
                                              ORDER BY period_end DESC, broadcast_dt DESC) AS rn
                 FROM read_parquet([{listed}], union_by_name=true)

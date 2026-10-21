@@ -92,7 +92,7 @@ STAGE = Path("data/financials_staging")
 META = ["symbol", "company", "period_end", "broadcast_dt", "consolidated",
         "audited", "xbrl_url"]
 FACTS = list(dict.fromkeys(fin.TAGS.values()))
-VALUE_COLS = FACTS + fin.DERIVED + ["quarter_span_days"]
+VALUE_COLS = FACTS + fin.DERIVED + ["quarter_span_days", "excise_duty"]
 
 # Outcomes whose fresh parse is used. Everything else keeps the stored values.
 USED = ("ok", "nofacts")

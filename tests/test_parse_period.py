@@ -248,8 +248,10 @@ def test_undeclared_references_other_than_oned_and_onei_stay_ignored():
 
 # ------------------------------------------------------------- schema and rebuild
 
-def test_quarter_span_days_is_the_last_column_in_both_definitions():
-    assert fin.COLUMNS[-1] == "quarter_span_days"
+def test_columns_added_later_are_last_in_both_definitions():
+    # quarter_span_days (24 Sep 2026) and excise_duty (21 Oct 2026) arrived after the files began,
+    # so they come last, in the order they arrived (see the note on COLUMNS)
+    assert fin.COLUMNS[-2:] == ["quarter_span_days", "excise_duty"]
     con = duckdb.connect()
     con.execute(fin.SCHEMA)
     cols = [r[0] for r in con.execute("DESCRIBE financials").fetchall()]
@@ -340,3 +342,36 @@ def test_declared_oned_beats_fourd_with_the_same_dates_whatever_the_order():
         assert facts["revenue"] == 977.0, order
         # FourD's figures are year-to-date, so none of them fill a gap either.
         assert "other_income" not in facts, order
+
+
+def test_excise_duty_is_read_from_the_quarters_other_expenses_breakdown():
+    """ITC's Jun-2026 quarter, in the integrated filing's layout: revenue is filed gross of excise
+    duty, which is a described line of other expenses. Only a line that is excise duty alone counts,
+    and only in a breakdown dated the same as the quarter."""
+    def doc(desc_a, desc_b, period_b=("2026-04-01", "2026-06-30")):
+        ctx = lambda cid, a, b, member="": (                                    # noqa: E731
+            f'<xbrli:context id="{cid}"><xbrli:entity><xbrli:identifier scheme="x">ITC</xbrli:identifier>'
+            + (f'<xbrli:segment><xbrldi:explicitMember dimension="in-capmkt:DetailsOfOtherExpensesAxis">{member}</xbrldi:explicitMember></xbrli:segment>' if member else "")
+            + f'</xbrli:entity><xbrli:period><xbrli:startDate>{a}</xbrli:startDate><xbrli:endDate>{b}</xbrli:endDate></xbrli:period></xbrli:context>')
+        return ('<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" '
+                'xmlns:in-capmkt="http://x">'
+                + ctx("OneD", "2026-04-01", "2026-06-30") + ctx("OneExpenses1D", "2026-04-01", "2026-06-30", "m1")
+                + ctx("OneExpenses2D", *period_b, "m2")
+                + '<in-capmkt:RevenueFromOperations contextRef="OneD">295233000000</in-capmkt:RevenueFromOperations>'
+                + '<in-capmkt:OtherExpenses contextRef="OneD">135746700000</in-capmkt:OtherExpenses>'
+                + f'<in-capmkt:DescriptionOfOtherExpenses contextRef="OneExpenses1D">{desc_a}</in-capmkt:DescriptionOfOtherExpenses>'
+                + '<in-capmkt:OtherExpenses contextRef="OneExpenses1D">104089300000</in-capmkt:OtherExpenses>'
+                + f'<in-capmkt:DescriptionOfOtherExpenses contextRef="OneExpenses2D">{desc_b}</in-capmkt:DescriptionOfOtherExpenses>'
+                + '<in-capmkt:OtherExpenses contextRef="OneExpenses2D">31657400000</in-capmkt:OtherExpenses>'
+                + '</xbrli:xbrl>').encode()
+    r = fin.parse_xbrl(doc("Excise Duty", "Other Expenses"))
+    assert r["revenue"] == 295233000000 and r["other_expenses"] == 135746700000     # the company total untouched
+    assert r["excise_duty"] == 104089300000                                          # 29,523 - 10,409 = 19,114 crore
+    assert "excise_duty" not in fin.parse_xbrl(doc("Excise duty, VAT and TCS", "Other Expenses"))
+    assert "excise_duty" not in fin.parse_xbrl(doc("Royalty, Cess &amp; Excise Duty", "Other Expenses"))
+    assert fin.parse_xbrl(doc("Excise duty recovered", "Other Expenses"))["excise_duty"] == 104089300000   # Reliance's name for it
+    assert fin.parse_xbrl(doc("Exise Duty", "Other Expenses"))["excise_duty"] == 104089300000              # misspelt, still excise
+    assert "excise_duty" not in fin.parse_xbrl(doc("Excise Duty and Service Tax", "Other Expenses"))
+    # a second excise line in another column (the year to date) is not the quarter's
+    r2 = fin.parse_xbrl(doc("Excise duty on sale of goods", "Excise duty", period_b=("2025-04-01", "2026-03-31")))
+    assert r2["excise_duty"] == 104089300000
