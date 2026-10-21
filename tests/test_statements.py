@@ -213,15 +213,19 @@ def test_an_error_page_is_a_failed_download_and_a_run_of_them_stops_the_job(monk
 def test_documents_are_the_balance_sheet_filings_and_latest_keeps_the_last_revision(tmp_path):
     con = duckdb.connect(str(tmp_path / "t.duckdb"))
     con.execute("CREATE TABLE financials (symbol VARCHAR, company VARCHAR, period_end DATE, broadcast_dt TIMESTAMP, "
-                "consolidated BOOLEAN, has_balance_sheet BOOLEAN, xbrl_url VARCHAR)")
-    con.executemany("INSERT INTO financials VALUES (?, ?, ?, ?, ?, ?, ?)", [
-        ("A", "A Ltd", "2026-03-31", "2026-05-01 10:00", True, True, "u1"),
-        ("A", "A Ltd", "2026-03-31", "2026-05-20 10:00", True, True, "u2"),          # a revision
-        ("A", "A Ltd", "2026-03-31", "2026-05-01 10:05", False, True, "u3"),
-        ("A", "A Ltd", "2025-12-31", "2026-01-20 10:00", True, False, "u4"),         # a quarter: no balance sheet
+                "consolidated BOOLEAN, has_balance_sheet BOOLEAN, audited BOOLEAN, xbrl_url VARCHAR)")
+    con.executemany("INSERT INTO financials VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
+        ("A", "A Ltd", "2026-03-31", "2026-05-01 10:00", True, True, True, "u1"),
+        ("A", "A Ltd", "2026-03-31", "2026-05-20 10:00", True, True, True, "u2"),    # a revision
+        ("A", "A Ltd", "2026-03-31", "2026-05-01 10:05", False, True, True, "u3"),
+        ("A", "A Ltd", "2025-12-31", "2026-01-20 10:00", True, False, False, "u4"),  # a quarter: no balance sheet
+        ("B", "B Ltd", "2019-03-31", "2019-05-10 10:00", True, False, False, "u5"),  # a March filing: its full year
+        ("C", "C Ltd", "2020-12-31", "2021-02-11 10:00", False, False, True, "u6"),  # audited: a December year end
+        ("C", "C Ltd", "2019-09-30", "2019-11-11 10:00", False, False, False, "u7"), # a quarter before Sep 2020
+        ("D", "D Bank", "2019-03-31", "2019-05-02 10:00", False, False, True, "x/BANKING_1.xml"),  # a bank's own format
     ])
-    assert list(statements.documents(con)["xbrl_url"]) == ["u1", "u3", "u2"]
-    assert sorted(statements.documents(con, latest=True)["xbrl_url"]) == ["u2", "u3"]
+    assert list(statements.documents(con)["xbrl_url"]) == ["u5", "u6", "u1", "u3", "u2"]
+    assert sorted(statements.documents(con, latest=True)["xbrl_url"]) == ["u2", "u3", "u5", "u6"]
     con.close()
 
 
@@ -347,7 +351,7 @@ def test_the_march_filing_gives_the_audited_year_with_owners_profit_and_eps():
     assert r["ytd_revenue"] == 238927800000 and r["ytd_profit"] == 2822200000        # the year, not the quarter
     assert r["ytd_profit_owners"] == 2822200000 and r["ytd_eps_basic"] == 0.81
     assert r["ytd_tax"] == -1035400000 and r["ytd_finance_costs"] == 5600000000 and r["ytd_depreciation"] == 2300000000
-    assert r["parser"] == statements.PARSER_VERSION == 2
+    assert r["parser"] == statements.PARSER_VERSION == 3
 
 
 def test_a_table_built_from_files_a_previous_parser_wrote_takes_the_new_columns_empty(tmp_path):
@@ -360,7 +364,7 @@ def test_a_table_built_from_files_a_previous_parser_wrote_takes_the_new_columns_
     assert statements.rebuild(con, out) == 1
     assert con.execute("SELECT ytd_profit, ytd_eps_basic, parser FROM statements").fetchone() == (10.0, None, None)
     v = statements.stored_versions(out)
-    assert v.to_dict("records") == [{"xbrl_url": "u-old", "parser": 0, "ytd_days": 365}]
+    assert v.to_dict("records") == [{"xbrl_url": "u-old", "parser": 0, "ytd_days": 365, "has_year": True}]
 
 
 def test_a_reparse_reads_only_what_an_older_parser_read_and_full_year_keeps_the_year_end_filings(monkeypatch, tmp_path):
@@ -379,11 +383,11 @@ def test_a_reparse_reads_only_what_an_older_parser_read_and_full_year_keeps_the_
 
     docs = _docs(4)
     urls = list(docs["xbrl_url"])
-    stored = pd.DataFrame({"xbrl_url": urls, "parser": [0, 2, 0, 0], "ytd_days": [365, 365, 183, 366]})
+    stored = pd.DataFrame({"xbrl_url": urls, "parser": [0, statements.PARSER_VERSION, 0, 0], "ytd_days": [365, 365, 183, 366]})
 
     def fetch(batch, pause=None):
         asked.extend(batch["xbrl_url"])
-        return pd.DataFrame([{**r, "has_cash_flow": True, "parser": 2} for r in batch.to_dict("records")]), 0
+        return pd.DataFrame([{**r, "has_cash_flow": True, "parser": statements.PARSER_VERSION} for r in batch.to_dict("records")]), 0
 
     monkeypatch.setattr(job, "_archive", lambda read_only: Con())
     monkeypatch.setattr(statements, "documents", lambda con, latest=False: docs)
@@ -392,7 +396,7 @@ def test_a_reparse_reads_only_what_an_older_parser_read_and_full_year_keeps_the_
     monkeypatch.setattr(statements, "write", lambda rows: [])
     monkeypatch.setattr(statements, "rebuild", lambda con: 0)
     job.main(["--reparse"])
-    assert asked == [urls[3], urls[2], urls[0]]                              # newest first; the v2 row left alone
+    assert asked == [urls[3], urls[2], urls[0]]                              # newest first; the current one left alone
     asked.clear()
     kept = tmp_path / "rows.parquet"
     job.main(["--reparse", "--full-year", "--rows-out", str(kept)])
@@ -401,3 +405,81 @@ def test_a_reparse_reads_only_what_an_older_parser_read_and_full_year_keeps_the_
     merged = []
     monkeypatch.setattr(statements, "write", lambda rows: merged.append(len(rows)) or [])
     assert job.main(["--merge-rows", str(kept)]) == 0 and merged == [2]
+
+
+# ------------------------------------------------------------------ the year where no cash flow dates it (21 Oct 2026)
+
+def _abb(year, quarter, full, cash_flow_beside=False):
+    """ABB India's December filing of `year`, standalone (Rs): revenue, profit and EPS for the quarter
+    under OneD and for the year under FourD, each context declared with the quarter's dates and
+    stated with its own; in 2020 the year's cash flow sits under the quarter's context."""
+    q0, y0, end = f"{year}-10-01", f"{year}-01-01", f"{year}-12-31"
+    cf = ([_fact("CashFlowsFromUsedInOperatingActivities", "OneD", "9000000000"),
+           _fact("CashFlowsFromUsedInInvestingActivities", "OneD", "-4000000000"),
+           _fact("CashFlowsFromUsedInFinancingActivities", "OneD", "-1000000000"),
+           _fact("IncreaseDecreaseInCashAndCashEquivalents", "OneD", "4000000000")] if cash_flow_beside else [])
+    return _doc(
+        _span("OneD", q0, end), _span("FourD", q0, end),
+        _fact("DateOfStartOfFinancialYear", "OneD", y0), _fact("DateOfEndOfFinancialYear", "OneD", end),
+        _fact("DateOfStartOfReportingPeriod", "OneD", q0), _fact("DateOfEndOfReportingPeriod", "OneD", end),
+        _fact("DateOfStartOfReportingPeriod", "FourD", y0), _fact("DateOfEndOfReportingPeriod", "FourD", end),
+        _fact("RevenueFromOperations", "OneD", quarter[0]), _fact("RevenueFromOperations", "FourD", full[0]),
+        _fact("ProfitLossForPeriod", "OneD", quarter[1]), _fact("ProfitLossForPeriod", "FourD", full[1]),
+        _fact("BasicEarningsLossPerShareFromContinuingOperations", "OneD", quarter[2]),
+        _fact("BasicEarningsLossPerShareFromContinuingOperations", "FourD", full[2]), *cf)
+
+
+def test_a_year_end_filing_without_a_cash_flow_gives_the_year_it_states_abb_2019():
+    r = statements.parse(_abb(2019, ("19533300000.00", "386600000.00", "3.05"), ("73150600000.00", "3034000000.00", "14.26")))
+    assert r["ytd_start"] == date(2019, 1, 1) and r["ytd_days"] == 365
+    assert r["ytd_revenue"] == 73150600000 and r["ytd_profit"] == 3034000000 and r["ytd_eps_basic"] == 14.26
+    assert r["has_cash_flow"] is False and "cfo" not in r and r["parser"] == 3
+
+
+def test_the_years_income_beside_a_cash_flow_in_the_quarters_context_abb_2020():
+    r = statements.parse(_abb(2020, ("17007600000.00", "575600000.00", "2.94"), ("58209500000.00", "2192200000.00", "10.87"),
+                              cash_flow_beside=True))
+    assert r["ytd_start"] == date(2020, 1, 1) and r["ytd_days"] == 366 and r["cfo"] == 9000000000
+    assert r["ytd_revenue"] == 58209500000 and r["ytd_profit"] == 2192200000 and r["ytd_eps_basic"] == 10.87
+
+
+def test_income_under_dates_only_declared_is_not_read_as_the_year():
+    doc = _doc(_span("FourD", "2019-04-01", "2020-03-31"), _fact("RevenueFromOperations", "FourD", "1000"),
+               _fact("DateOfStartOfFinancialYear", "FourD", "2019-04-01"), _fact("DateOfEndOfFinancialYear", "FourD", "2020-03-31"))
+    r = statements.parse_ytd(doc)
+    assert "ytd_revenue" not in r and "ytd_days" not in r and r["fy_end"] == date(2020, 3, 31)
+
+
+def test_missing_year_reads_new_filings_and_once_more_the_year_ends_an_older_parser_left_without_the_year(monkeypatch):
+    from jobs import update_statements as job
+    asked = []
+
+    class Con:
+        def execute(self, sql):
+            return self
+
+        def fetchone(self):
+            return (0, 0, None, None)
+
+        def close(self):
+            pass
+
+    docs = _docs(5)
+    urls = list(docs["xbrl_url"])
+    # u0 not yet read; u1 a year without its profit (version 2); u2 the same read by this parser;
+    # u3 a year with its profit; u4 a half-year without one
+    stored = pd.DataFrame({"xbrl_url": urls[1:], "parser": [2, statements.PARSER_VERSION, 2, 2],
+                           "ytd_days": [365, 365, 365, 183], "has_year": [False, False, True, False]})
+    monkeypatch.setattr(job, "_archive", lambda read_only: Con())
+    monkeypatch.setattr(statements, "documents", lambda con, latest=False: docs)
+    monkeypatch.setattr(statements, "stored_versions", lambda: stored)
+    monkeypatch.setattr(statements, "stored_urls", lambda: set(urls[1:]))
+    monkeypatch.setattr(statements, "fetch", lambda batch, pause=None: (asked.extend(batch["xbrl_url"]) or pd.DataFrame(
+        [{**r, "has_cash_flow": False, "parser": statements.PARSER_VERSION} for r in batch.to_dict("records")]), 0))
+    monkeypatch.setattr(statements, "write", lambda rows: [])
+    monkeypatch.setattr(statements, "rebuild", lambda con: 0)
+    job.main([])
+    assert asked == [urls[0]]
+    asked.clear()
+    job.main(["--missing-year"])
+    assert asked == [urls[1], urls[0]]                                       # newest first

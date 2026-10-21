@@ -10,7 +10,9 @@ name: backfill statements (manual)
 # reparse=true reads again the documents an older parser read (statements.PARSER_VERSION), and
 # full_year=true keeps to the year-end filings, whose year to date is the audited year: that is
 # how the full-year income statement (Oct 2026: owners' profit, EPS, tax and the main costs) is
-# filled in for the years already stored.
+# filled in for the years already stored. missing_year=true reads the filings not yet stored
+# and, again, the year-end ones an older parser left without the year's profit: with
+# PARSER_VERSION 3 that brings in the audited years to Mar 2021 and other year ends (ABB).
 
 on:
   workflow_dispatch:
@@ -26,6 +28,9 @@ on:
         default: "false"
       full_year:
         description: "Only the year-end filings (true or false)"
+        default: "false"
+      missing_year:
+        description: "Also read again the year-end filings an older parser left without the year's profit (true or false)"
         default: "false"
 
 permissions:
@@ -67,6 +72,7 @@ jobs:
           flags=""
           [ "${{ inputs.reparse }}" = "true" ] && flags="$flags --reparse"
           [ "${{ inputs.full_year }}" = "true" ] && flags="$flags --full-year"
+          [ "${{ inputs.missing_year }}" = "true" ] && flags="$flags --missing-year"
           python -m jobs.update_statements --limit "${{ inputs.limit }}" $flags --rows-out "$RUNNER_TEMP/run_rows.parquet" | tee run.log
           echo "read=$(grep -o '[0-9,]* read (' run.log | tail -1 | tr -dc '0-9')" >> "$GITHUB_OUTPUT"
 
@@ -98,4 +104,4 @@ jobs:
         if: ${{ inputs.chain == 'true' && steps.read.outputs.read != '0' && steps.read.outputs.read != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run backfill_statements.yml --ref main -f limit="${{ inputs.limit }}" -f chain=true -f reparse="${{ inputs.reparse }}" -f full_year="${{ inputs.full_year }}"
+        run: gh workflow run backfill_statements.yml --ref main -f limit="${{ inputs.limit }}" -f chain=true -f reparse="${{ inputs.reparse }}" -f full_year="${{ inputs.full_year }}" -f missing_year="${{ inputs.missing_year }}"

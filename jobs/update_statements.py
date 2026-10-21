@@ -10,6 +10,8 @@ filings (zen.data.statements).
                                                    # parser read (statements.PARSER_VERSION)
     python -m jobs.update_statements --reparse --full-year   # only the year-end filings
     python -m jobs.update_statements --cache-only  # only documents already in the local copy
+    python -m jobs.update_statements --missing-year  # also read again the year-end filings an older
+                                                   # parser left without the year's profit
     python -m jobs.update_statements --rows-out F  # also keep this run's rows in F, so they can be
                                                    # merged again after a conflict (--merge-rows F)
 
@@ -58,6 +60,8 @@ def main(argv=None) -> int:
     p.add_argument("--full-year", action="store_true",
                    help="only documents whose stored year to date is a full year (360 to 370 days)")
     p.add_argument("--cache-only", action="store_true", help="only documents already in the local copy")
+    p.add_argument("--missing-year", action="store_true",
+                   help="besides the documents not yet read, the year-end ones an older parser left without the year's profit")
     p.add_argument("--rows-out", help="also write this run's rows to this parquet file")
     p.add_argument("--merge-rows", help="merge the rows in this parquet file into data/statements and stop")
     p.add_argument("--pause", type=float, default=0.35, help="seconds between downloads")
@@ -90,6 +94,13 @@ def main(argv=None) -> int:
             todo = todo[todo["xbrl_url"].isin(st.loc[full, "xbrl_url"])]
     else:
         todo = docs[~docs["xbrl_url"].isin(statements.stored_urls())]
+        if a.missing_year:
+            # PARSER_VERSION 3 reads the year's income where no cash flow dates it: the year-end
+            # filings to Mar 2021 a version 2 run stored without it are read again, once
+            st = statements.stored_versions()
+            year = pd.to_numeric(st["ytd_days"], errors="coerce").between(360, 370)
+            again = st[year & ~st["has_year"].astype(bool) & (st["parser"] < statements.PARSER_VERSION)]
+            todo = pd.concat([todo, docs[docs["xbrl_url"].isin(again["xbrl_url"])]]).sort_values("broadcast_dt", kind="stable")
     if a.cache_only:
         todo = todo[[statements.xbrl_cache.get(u) is not None for u in todo["xbrl_url"]]]
     # Newest first, always: old filings NSE no longer serves stay unread, and read first they

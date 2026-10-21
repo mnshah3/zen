@@ -15,8 +15,10 @@ The documents are the ones `financials` already lists with a balance sheet
 (`has_balance_sheet`): the March and September filings of a company whose year ends in March.
 Before Sep 2022 the filings tag no balance sheet, but from the year to Mar 2021 they tag the
 cash flow statement, so the March and September filings from Sep 2020 to Mar 2022 are read
-too, for their cash flow alone (`has_detail` false). Downloads go through xbrl_cache, so a
-document is fetched from NSE once. From each:
+too, for their cash flow alone (`has_detail` false). And every year-end filing before Sep 2022
+is read for its full year: the March filings from 2018 to 2020 and the audited ones of any
+month (ABB's year ends in December), banks' banking-format filings apart. Downloads go through
+xbrl_cache, so a document is fetched from NSE once. From each:
 
   balance sheet   the instant facts at the balance-sheet date, through financials.parse_xbrl
                   with BALANCE_TAGS (NBFC_BALANCE_TAGS for a finance company's format), so the
@@ -28,7 +30,8 @@ document is fetched from NSE once. From each:
                   profit attributable to the owners of the parent and basic EPS. In the March
                   filing that is the full year as audited, so a year built from four quarters as
                   first filed (which misses later restatements) can be replaced by the year the
-                  company filed (PARSER_VERSION 2, Oct 2026; version 1 read the first four lines)
+                  company filed (PARSER_VERSION 2, Oct 2026; version 1 read the first four lines).
+                  Where the cash flow cannot date it, see below (PARSER_VERSION 3)
 
 THE CASH FLOW IS FOR THE YEAR TO DATE
 
@@ -53,6 +56,17 @@ flow (the year, opening cash Rs 8,646 crore at 31 Mar 2020) under one context da
 A cash flow ending on the financial year's last day is the year's, since SEBI asks for one only
 at the half year and the year end, so it is dated from the financial year's start and the
 quarter's income lines are not kept as year-to-date figures.
+
+THE YEAR'S INCOME WHERE THE CASH FLOW CANNOT DATE IT
+
+Year-end filings to Mar 2020 carry no cash flow statement, and some later ones keep the year's
+income under a context of its own beside the cash flow in the quarter's. Both state that
+context's dates: ABB's December 2019 filing states FourD as 1 Jan to 31 Dec 2019 and tags the
+year under it (revenue Rs 7,315.06 crore, profit Rs 303.40 crore, EPS 14.26), and its December
+2020 filing does the same beside a cash flow under the quarter's OneD. The income lines are then
+read from the context the document STATES the dates of, ending latest and the longest of those:
+with no cash flow, that span is the year to date; beside one, only when it is the whole
+financial year. A context whose dates are only declared is not used for this.
 
 TWO CHECKS, STORED WITH THE FIGURES
 
@@ -249,7 +263,7 @@ YTD_TAGS = {
 }
 # The parser that read a stored row. A re-read (jobs/update_statements --reparse) takes the rows
 # below this, so a run that is stopped and started again carries on where it was.
-PARSER_VERSION = 2
+PARSER_VERSION = 3
 CASH_TAG = "CashAndCashEquivalentsCashFlowStatement"
 CF_TOTALS = ("cfo", "cfi", "cff")
 
@@ -398,10 +412,26 @@ def parse_ytd(content: bytes) -> dict:
             return s["start"], s["end"]            # what the document says about it comes first
         return spans.get(ref)
 
+    def year_income():
+        """The income lines under the context whose dates the document states, ending latest and
+        the longest of those, with its span; None if it states none."""
+        refs = [(ref, (stated[ref]["start"], stated[ref]["end"])) for ref, cols in by_ref.items()
+                if any(c in cols for c in YTD) and {"start", "end"} <= set(stated.get(ref, {}))
+                and stated[ref]["start"] <= stated[ref]["end"]]
+        if not refs:
+            return None
+        ref, span = max(refs, key=lambda x: (x[1][1], (x[1][1] - x[1][0]).days))
+        return {c: v for c, v in by_ref[ref].items() if c in YTD}, span
+
     # The context the cash flow totals sit in: the one ending latest, and the longest of those.
     dated = [(ref, period(ref)) for ref, cols in by_ref.items() if any(c in cols for c in CF_TOTALS)]
     dated = [(ref, p) for ref, p in dated if p is not None]
     if not dated:
+        got = year_income()                        # a filing with no cash flow (to Mar 2020)
+        if got is not None:
+            lines, (start, end) = got
+            out.update(lines)
+            out["ytd_start"], out["ytd_days"] = start, (end - start).days + 1
         return out
     ref, (start, end) = max(dated, key=lambda x: (x[1][1], (x[1][1] - x[1][0]).days))
     figures = by_ref[ref]
@@ -418,6 +448,9 @@ def parse_ytd(content: bytes) -> dict:
         out["ytd_start"], out["ytd_days"] = fs, (end - fs).days + 1
         for c in YTD:
             out.pop(c, None)
+        got = year_income()                        # the year's income under a context of its own
+        if got is not None and got[1] == (fs, fe):
+            out.update(got[0])
 
     # Opening and closing cash. Newer documents tag them at the two balance-sheet dates; the 2023
     # and 2024 ones tag both under the cumulative context, opening first.
@@ -459,14 +492,18 @@ def parse(content: bytes, nbfc: bool = False) -> dict:
 
 
 def documents(con, latest: bool = False) -> pd.DataFrame:
-    """The filings `financials` lists with a balance sheet, oldest broadcast first. `latest`
-    keeps only the last revision of each (symbol, basis, period end)."""
+    """The filings `financials` lists with a balance sheet, the March and September ones from Sep
+    2020 to Jun 2022 (a cash flow) and the year-end ones before Sep 2022 (the full year: every
+    March filing, and the audited ones of any month), oldest broadcast first. `latest` keeps only
+    the last revision of each (symbol, basis, period end)."""
     df = con.execute(
         """
         SELECT symbol, company, period_end, broadcast_dt, consolidated, xbrl_url
         FROM financials
         WHERE xbrl_url IS NOT NULL AND (has_balance_sheet
-              OR (month(period_end) IN (3, 9) AND period_end BETWEEN DATE '2020-09-30' AND DATE '2022-06-30'))
+              OR (month(period_end) IN (3, 9) AND period_end BETWEEN DATE '2020-09-30' AND DATE '2022-06-30')
+              OR (period_end < DATE '2022-09-30' AND (audited OR month(period_end) = 3)
+                  AND xbrl_url NOT LIKE '%BANKING%'))
         ORDER BY broadcast_dt
         """).df()
     if latest and len(df):
@@ -475,17 +512,19 @@ def documents(con, latest: bool = False) -> pd.DataFrame:
 
 
 def stored_versions(out_dir: Path = OUT_DIR) -> pd.DataFrame:
-    """Each stored document's parser version (0 before versions were kept) and its year-to-date
-    length in days: what a re-read needs to pick its documents."""
+    """Each stored document's parser version (0 before versions were kept), its year-to-date
+    length in days and whether it holds the year to date's profit: what a re-read needs to pick
+    its documents."""
     files = sorted(out_dir.glob("*.parquet")) if out_dir.exists() else []
     parts = []
     for f in files:
         t = pd.read_parquet(f)
         parts.append(pd.DataFrame({"xbrl_url": t["xbrl_url"],
                                    "parser": t["parser"] if "parser" in t else pd.NA,
-                                   "ytd_days": t["ytd_days"] if "ytd_days" in t else pd.NA}))
+                                   "ytd_days": t["ytd_days"] if "ytd_days" in t else pd.NA,
+                                   "has_year": t["ytd_profit"].notna() if "ytd_profit" in t else False}))
     if not parts:
-        return pd.DataFrame(columns=["xbrl_url", "parser", "ytd_days"])
+        return pd.DataFrame(columns=["xbrl_url", "parser", "ytd_days", "has_year"])
     out = pd.concat(parts, ignore_index=True).drop_duplicates("xbrl_url", keep="last")
     out["parser"] = pd.to_numeric(out["parser"], errors="coerce").fillna(0).astype(int)
     return out
