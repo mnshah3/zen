@@ -4607,6 +4607,12 @@
 "listed": "2022-11-15",
 "series": "EQ"
 },
+"FUSIONCX": {
+"face_value": 1.0,
+"isin": "INE0N2201019",
+"listed": "2026-10-22",
+"series": "EQ"
+},
 "GABRIEL": {
 "face_value": 1.0,
 "isin": "INE524A01029",
@@ -6978,8 +6984,8 @@
 "series": "EQ"
 },
 "JSWDULUX": {
-"face_value": 10.0,
-"isin": "INE133A01011",
+"face_value": 1.0,
+"isin": "INE133A01029",
 "listed": "2001-06-28",
 "series": "EQ"
 },
@@ -10221,7 +10227,7 @@
 "face_value": 5.0,
 "isin": "INE561H01026",
 "listed": "2006-11-30",
-"series": "BE"
+"series": "BZ"
 },
 "PASHUPATI": {
 "face_value": 1.0,
