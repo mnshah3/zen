@@ -1644,8 +1644,8 @@
 "series": "EQ"
 },
 "AZADIND": {
-"face_value": 10.0,
-"isin": "INE566M01017",
+"face_value": 2.0,
+"isin": "INE566M01025",
 "listed": "2026-08-17",
 "series": "EQ"
 },
@@ -2351,6 +2351,12 @@
 "listed": "1995-04-26",
 "series": "EQ"
 },
+"BONFIG": {
+"face_value": 10.0,
+"isin": "INE28SO01013",
+"listed": "2026-10-23",
+"series": "EQ"
+},
 "BONLON": {
 "face_value": 10.0,
 "isin": "INE0B9A01018",
@@ -2991,7 +2997,7 @@
 "face_value": 1.0,
 "isin": "INE819A01049",
 "listed": "2026-04-20",
-"series": "EQ"
+"series": "BE"
 },
 "COMPEAU": {
 "face_value": 10.0,
@@ -5469,7 +5475,7 @@
 "face_value": 1.0,
 "isin": "INE299D01022",
 "listed": "2026-08-17",
-"series": "EQ"
+"series": "BZ"
 },
 "HAPPSTMNDS": {
 "face_value": 2.0,
@@ -6029,7 +6035,7 @@
 "listed": "2017-09-27",
 "series": "EQ"
 },
-"ICICIPRULI": {
+"ICICILIFE": {
 "face_value": 10.0,
 "isin": "INE726G01019",
 "listed": "2016-09-29",
@@ -9627,7 +9633,7 @@
 "face_value": 5.0,
 "isin": "INE211501023",
 "listed": "2026-10-08",
-"series": "BE"
+"series": "EQ"
 },
 "NIVABUPA": {
 "face_value": 10.0,
@@ -12845,6 +12851,12 @@
 "listed": "2007-02-28",
 "series": "EQ"
 },
+"SMT": {
+"face_value": 1.0,
+"isin": "INE356Y01018",
+"listed": "2026-10-23",
+"series": "EQ"
+},
 "SNOWMAN": {
 "face_value": 10.0,
 "isin": "INE734N01019",
@@ -14195,6 +14207,12 @@
 "listed": "2024-09-16",
 "series": "EQ"
 },
+"TONBO": {
+"face_value": 2.0,
+"isin": "INE0LDG01026",
+"listed": "2026-10-23",
+"series": "EQ"
+},
 "TORNTPHARM": {
 "face_value": 5.0,
 "isin": "INE685A01028",
@@ -15117,7 +15135,7 @@
 "face_value": 2.0,
 "isin": "INE526G01021",
 "listed": "2005-08-17",
-"series": "BE"
+"series": "BZ"
 },
 "VIVOBIOT": {
 "face_value": 10.0,
@@ -15165,7 +15183,7 @@
 "face_value": 10.0,
 "isin": "INE1O5L01025",
 "listed": "2026-10-08",
-"series": "BE"
+"series": "EQ"
 },
 "VOEPL": {
 "face_value": 10.0,
@@ -15585,6 +15603,12 @@
 "face_value": 1.0,
 "isin": "INE251B01027",
 "listed": "2015-03-30",
+"series": "EQ"
+},
+"ZETWERK": {
+"face_value": 1.0,
+"isin": "INE09PO01019",
+"listed": "2026-10-23",
 "series": "EQ"
 },
 "ZFCVINDIA": {
