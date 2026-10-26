@@ -53,7 +53,7 @@ jobs:
 
       # Delivery positions, bulk and block deals, FII/DII flows, the surveillance lists
       # (zen/data/market_daily.py), the insider trades (zen/data/insider.py), NSDL's FPI
-      # investment by sector (zen/data/fpi_sectors.py) and credit rating actions (zen/data/ratings.py). NSE serves only the latest session of most of these, and by
+      # investment by sector (zen/data/fpi_sectors.py), credit rating actions (zen/data/ratings.py) and NSE's index lists (zen/data/index_members.py). NSE serves only the latest session of most of these, and by
       # the morning it is final. After the email, and never fatal: a failure marks this step only.
       - name: market data
         if: steps.sent.outputs.done != 'true'
@@ -70,7 +70,7 @@ jobs:
           git add state/seen.json data/announcements
           [ ! -d state/briefs ] || git add state/briefs
           [ ! -f state/data_freshness.json ] || git add state/data_freshness.json
-          for d in data/delivery data/deals data/flows data/surveillance data/fo_ban data/insider data/fpi_sectors data/ratings; do [ ! -d "$d" ] || git add "$d"; done
+          for d in data/delivery data/deals data/flows data/surveillance data/fo_ban data/insider data/fpi_sectors data/ratings data/index_members; do [ ! -d "$d" ] || git add "$d"; done
           for f in state/symbol_names.json state/equity_list.json; do [ ! -f "$f" ] || git add "$f"; done
           git diff --staged --quiet || git commit -m "state: brief memory $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do            # another job may have pushed meanwhile

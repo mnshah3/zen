@@ -111,14 +111,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--start", type=date.fromisoformat)
     ap.add_argument("--end", type=date.fromisoformat)
     ap.add_argument("--days", type=int, default=10, help="delivery: look back this far for missing sessions")
-    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban", "names", "insider", "fpi_sectors", "ratings"])
+    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban", "names", "insider", "fpi_sectors", "ratings", "index_members"])
     a = ap.parse_args(argv)
     now = datetime.now(IST).replace(tzinfo=None, microsecond=0)
     end = a.end or now.date()
     start = a.start or end - timedelta(days=a.days)
     failed = []
     site = None
-    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban", "names", "insider", "fpi_sectors", "ratings"):
+    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban", "names", "insider", "fpi_sectors", "ratings", "index_members"):
         if a.only and name != a.only:
             continue
         try:
@@ -141,6 +141,9 @@ def main(argv: list[str] | None = None) -> int:
             elif name == "fpi_sectors":
                 from zen.data import fpi_sectors      # one request a day; a report every fortnight
                 fpi_sectors.update(now=now)
+            elif name == "index_members":
+                from zen.data import index_members    # 16 small CSVs; stored only when a list changes
+                index_members.update(now=now)
             elif name == "ratings":
                 import importlib.util
                 if importlib.util.find_spec("pdfminer") is None:   # the reader's dependency: an install without it skips this

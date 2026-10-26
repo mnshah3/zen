@@ -85,7 +85,8 @@ def _mini_archive(path, extra_table: bool = False):
                           "delivery": ("date", "DATE"), "deals": ("date", "DATE"), "fii_dii": ("date", "DATE"),
                           "surveillance": ("observed_dt", "TIMESTAMP"), "mf_nav": ("date", "DATE"), "bse_results": ("filed_dt", "TIMESTAMP"),
                           "fo_ban": ("observed_dt", "TIMESTAMP"), "insider": ("broadcast_dt", "TIMESTAMP"),
-                          "fpi_sectors": ("observed_dt", "TIMESTAMP"), "ratings": ("an_dt", "TIMESTAMP")}.items():
+                          "fpi_sectors": ("observed_dt", "TIMESTAMP"), "ratings": ("an_dt", "TIMESTAMP"),
+                          "index_members": ("observed_dt", "TIMESTAMP")}.items():
         con.execute(f"CREATE TABLE {t} ({col} {typ}, tag VARCHAR)")
         if typ == "DATE":
             rows = [("2024-05-31", "before"), ("2024-06-03", "on"), ("2024-06-04", "after")]

@@ -494,6 +494,7 @@ cron, so strategies never run against a stale archive.
 | NSE insider trading disclosures | every trade promoters, directors and key managers reported since November 2015 | free |
 | NSE credit rating filings | the action in each rating letter, read by fixed rules, since October 2025 | free |
 | NSDL FPI reports | foreign investors' holdings and net investment by sector, every fortnight since April 2022 | free |
+| NSE index lists | the constituents of 16 NSE indices, each version stored from when zen first read it, since October 2026 | free |
 | RSS and a news API | Indian market, macro and global news | free tiers |
 | Google Gemini | plain-English explanations, optional | free tier |
 
