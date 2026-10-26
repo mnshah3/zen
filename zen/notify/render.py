@@ -471,6 +471,69 @@ FILING_LABELS = {
 }
 
 
+RATING_WORDS = {"downgrade": "Downgraded", "not cooperating": "Issuer not cooperating", "watch negative": "On watch, negative",
+                "outlook negative": "Outlook to negative", "upgrade": "Upgraded", "outlook positive": "Outlook to positive",
+                "watch positive": "On watch, positive", "watch developing": "On watch, developing"}
+
+
+def _cr(v: float) -> str:
+    a = abs(v)
+    return f"Rs {a:,.0f} cr" if a >= 100 else f"Rs {a:,.2f} cr"
+
+
+def _signals_section(sig: dict) -> str:
+    """Insider trades, rating actions and foreign investors' sector flows since the last brief
+    (zen.notify.signals). Wrapped as the owner's: the public copy of the brief leaves it out
+    (zen-portfolios site/briefs.py drops a div marked data-zp-owner)."""
+    ins, rts, fpi = sig.get("insiders") or {}, sig.get("ratings") or [], sig.get("fpi")
+    if not (ins.get("buys") or ins.get("sells") or rts or fpi):
+        return ""
+
+    def line(color: str, sym: str, company: str, text: str, link: str | None = None) -> str:
+        t = _esc(text)
+        if link:
+            t = f'<a href="{_esc(link)}" style="color:inherit;text-decoration:none;">{t}</a>'
+        return (f'<div style="margin-bottom:8px;"><span style="font-size:12px;font-weight:700;">{_esc(sym)}</span>'
+                f'<span style="font-size:11px;color:{MUTED};margin-left:6px;">{_esc(company[:44])}</span>'
+                f'<div style="font-size:12.5px;color:{color};margin-top:2px;line-height:1.5;">{t}</div></div>')
+
+    def sub(text: str) -> str:
+        return (f'<div style="font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;'
+                f'color:{ACCENT};margin:12px 0 6px;">{_esc(text)}</div>')
+
+    body = ""
+    if ins.get("buys") or ins.get("sells"):
+        body += sub("Insiders trading in the market")
+        for x in ins.get("buys") or []:
+            body += line(UP, x["symbol"], x["company"], f'{x["who"]} bought {_cr(x["net_cr"])} ({x["n"]} disclosure{"" if x["n"] == 1 else "s"})')
+        for x in ins.get("sells") or []:
+            body += line(DOWN, x["symbol"], x["company"], f'{x["who"]} sold {_cr(x["net_cr"])} ({x["n"]} disclosure{"" if x["n"] == 1 else "s"})')
+    if rts:
+        body += sub("Credit rating actions")
+        for x in rts[:8]:
+            neg = x["action"] in ("downgrade", "not cooperating", "watch negative", "outlook negative")
+            pos = x["action"] in ("upgrade", "outlook positive", "watch positive")
+            body += line(DOWN if neg else UP if pos else INK, x["symbol"], x["company"],
+                         f'{x.get("agency") or "A rating agency"}: {RATING_WORDS.get(x["action"], x["action"])}', x.get("url"))
+    if fpi:
+        body += sub("Foreign investors by sector, NSDL's latest fortnight")
+        def day(d) -> str:
+            return f"{d.day} {d:%b}"
+        span = f'{day(fpi["start"])} to {day(fpi["end"])}' if fpi.get("start") else f'to {day(fpi["end"])}'
+        tot = fpi.get("total_cr")
+        body += (f'<div style="font-size:12.5px;margin-bottom:6px;">{_esc(span)}: equity net '
+                 f'<span style="font-weight:700;color:{UP if (tot or 0) >= 0 else DOWN};">{"bought" if (tot or 0) >= 0 else "sold"} {_cr(tot or 0)}</span></div>')
+        for label, rows, color in (("Bought most", fpi.get("bought") or [], UP), ("Sold most", fpi.get("sold") or [], DOWN)):
+            if rows:
+                body += (f'<div style="font-size:12.5px;margin-bottom:4px;"><span style="color:{MUTED};">{label}</span> '
+                         + ", ".join(f'{_esc(r["sector"])} <span style="color:{color};font-weight:700;">{_cr(r["cr"])}</span>' for r in rows) + "</div>")
+    note = (f'<div style="font-size:11px;color:{FAINT};margin-top:-2px;margin-bottom:6px;">Since yesterday\'s brief. '
+            f'Insider trades as companies disclosed them to NSE, netted for each company; rating actions read from each '
+            f'letter by fixed rules.</div>')
+    return (f'<div data-zp-owner="1" style="margin-bottom:26px;">'
+            f'{_heading("Insiders, ratings and foreign flows")}{note}{body}</div>')
+
+
 def _filings_section(filings) -> str:
     """What companies themselves told the exchange today.
 
@@ -513,12 +576,13 @@ def _filings_section(filings) -> str:
 def daily_brief(sections: dict, market: dict, insights: dict, charts: dict,
                 explanations: dict, facts_map: dict, bridge_text: str,
                 filings, when: datetime, backdrop: dict | None = None,
-                global_items: list | None = None) -> tuple[str, str, str]:
+                global_items: list | None = None, signals: dict | None = None) -> tuple[str, str, str]:
     """Returns (subject, html, plain text)."""
     body = _bridge(bridge_text)
     body += _backdrop_section(backdrop or {}, global_items or [])
     body += _data_section(market, insights, charts)
     body += _filings_section(filings)
+    body += _signals_section(signals or {})
     body += _news_section(sections, explanations, facts_map)
 
     n = sum(len(v) for v in sections.values())

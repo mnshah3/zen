@@ -177,6 +177,12 @@ def main() -> int:
         log.warning("index backdrop failed (%s)", e)
         bd = {}
     global_items = backdrop.global_backdrop()
+    try:
+        from zen.notify import signals as brief_signals
+        sig = brief_signals.collect(con)
+    except Exception as e:                              # never stops the brief
+        log.warning("insider, rating and FPI signals failed (%s)", e)
+        sig = {}
     con.close()
 
     # --- render -----------------------------------------------------------
@@ -192,6 +198,7 @@ def main() -> int:
         when=datetime.now(),
         backdrop=bd,
         global_items=global_items,
+        signals=sig,
     )
 
     if args.dry_run:
