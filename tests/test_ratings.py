@@ -55,7 +55,7 @@ def test_agency():
 
 
 def test_a_file_with_no_text_is_stored_as_unread():
-    pytest.importorskip("pdfminer")              # the reader's dependency (not yet in the CI lock)
+    pytest.importorskip("pdfminer")              # the reader's dependency
     assert R.read(b"not a pdf") == {"action": None, "actions": "", "agency": None, "read": False, "chars": 0}
 
 

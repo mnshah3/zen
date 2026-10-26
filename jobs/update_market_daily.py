@@ -143,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
                 fpi_sectors.update(now=now)
             elif name == "ratings":
                 import importlib.util
-                if importlib.util.find_spec("pdfminer") is None:   # the reader's one dependency, not yet in the lock
+                if importlib.util.find_spec("pdfminer") is None:   # the reader's dependency: an install without it skips this
                     log.info("ratings: skipped, pdfminer.six is not installed")
                     continue
                 from zen.data import ratings          # the filings in the archive; a PDF each, about ten a day

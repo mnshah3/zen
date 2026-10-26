@@ -6,3 +6,5 @@ python-dotenv>=1.0
 feedparser>=6.0
 matplotlib>=3.9
 pytest>=8.0
+lxml>=5
+pdfminer.six>=20240706
