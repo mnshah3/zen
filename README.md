@@ -491,6 +491,9 @@ cron, so strategies never run against a stale archive.
 | NSE corporate filings | every announcement, timestamped by the exchange | free |
 | NSE XBRL financials | quarterly income statement and balance sheet | free |
 | NSE indices | daily levels of the index series counted above, and total-return series for the eight benchmarks in the result | free |
+| NSE insider trading disclosures | every trade promoters, directors and key managers reported since November 2015 | free |
+| NSE credit rating filings | the action in each rating letter, read by fixed rules, since October 2025 | free |
+| NSDL FPI reports | foreign investors' holdings and net investment by sector, every fortnight since April 2022 | free |
 | RSS and a news API | Indian market, macro and global news | free tiers |
 | Google Gemini | plain-English explanations, optional | free tier |
 

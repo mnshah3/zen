@@ -110,9 +110,12 @@ CUTS = {
     "fo_ban": ("observed_dt", "observed_dt < ?", "F&O ban lists as read before D 00:00"),
     "mf_nav": ("date", "date < ?", "mutual fund NAVs of sessions strictly before D (AMFI publishes in the evening)"),
     "bse_results": ("filed_dt", "filed_dt < ?", "BSE results filed before D 00:00; a row with no filing time is never kept"),
+    "insider": ("broadcast_dt", "broadcast_dt < ?", "insider trade disclosures broadcast before D 00:00"),
+    "fpi_sectors": ("observed_dt", "observed_dt < ?", "NSDL's fortnightly FPI sector reports as first read before D 00:00"),
+    "ratings": ("an_dt", "an_dt < ?", "credit rating filings disseminated before D 00:00 (the action read from the filed letter)"),
 }
 TIMESTAMP_CUTS = {"financials", "announcements", "shareholding", "pledges", "shareholding_detail",
-                  "bank_results", "statements", "events", "bse_announcements", "surveillance", "bse_results", "fo_ban"}
+                  "bank_results", "statements", "events", "bse_announcements", "surveillance", "bse_results", "fo_ban", "insider", "fpi_sectors", "ratings"}
 
 STATIC_NOTE = ("pit.StaticLabels is loaded once from the full archive and given to both runs, "
                "as jobs/backtest_v1.py does: the first-ever NSE industry label (v1 "

@@ -1,5 +1,8 @@
 """Fetch NSE's delivery positions, bulk and block deals, FII/DII flows and surveillance lists
-(zen.data.market_daily). Run each evening after the close by "4. daily indices".
+(zen.data.market_daily), the insider trades of the last 10 days (zen.data.insider), NSDL's
+fortnightly FPI sector reports not yet read (zen.data.fpi_sectors) and the rating actions in the
+last 10 days' credit rating filings (zen.data.ratings). Run each evening after the
+close by "4. daily indices".
 
     python -m jobs.update_market_daily                          # catch up delivery, read the rest
     python -m jobs.update_market_daily --start 2015-01-01 --only delivery   # the delivery backfill
@@ -108,14 +111,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--start", type=date.fromisoformat)
     ap.add_argument("--end", type=date.fromisoformat)
     ap.add_argument("--days", type=int, default=10, help="delivery: look back this far for missing sessions")
-    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban", "names"])
+    ap.add_argument("--only", choices=["delivery", "deals", "flows", "surveillance", "fo_ban", "names", "insider", "fpi_sectors", "ratings"])
     a = ap.parse_args(argv)
     now = datetime.now(IST).replace(tzinfo=None, microsecond=0)
     end = a.end or now.date()
     start = a.start or end - timedelta(days=a.days)
     failed = []
     site = None
-    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban", "names"):
+    for name in ("delivery", "deals", "flows", "surveillance", "fo_ban", "names", "insider", "fpi_sectors", "ratings"):
         if a.only and name != a.only:
             continue
         try:
@@ -128,6 +131,29 @@ def main(argv: list[str] | None = None) -> int:
             elif name == "names":
                 from zen.data import names as nse_names   # NSE's equity list: names, listing dates, face values
                 nse_names.refresh()
+            elif name == "insider":
+                from zen.data import insider          # filings of the last 10 days not already stored
+                site = site or site_session()
+                filings = insider.list_new(site, end - timedelta(days=10), end)
+                df = insider.fetch_new(site, filings, insider.stored_urls(), pause=RATE_S, renew=site_session)
+                insider.write(df)
+                log.info("insider: %d filings listed, %d disclosures written", len(filings), len(df))
+            elif name == "fpi_sectors":
+                from zen.data import fpi_sectors      # one request a day; a report every fortnight
+                fpi_sectors.update(now=now)
+            elif name == "ratings":
+                import importlib.util
+                if importlib.util.find_spec("pdfminer") is None:   # the reader's one dependency, not yet in the lock
+                    log.info("ratings: skipped, pdfminer.six is not installed")
+                    continue
+                from zen.data import ratings          # the filings in the archive; a PDF each, about ten a day
+                from zen.universe import pit
+                con = pit.connect()
+                try:
+                    todo = ratings.filings(con, now - timedelta(days=10))
+                finally:
+                    con.close()
+                ratings.update(todo, financials_legacy.document_session(), now=now)
             else:
                 site = site or site_session()
                 (flows if name == "flows" else surveillance)(now, site)

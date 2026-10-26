@@ -94,3 +94,5 @@ data/bse_results/
 data/mf_nav/
 # BSE's terms: research data kept on the machine that fetched it
 data/bse_statements/
+# the insider backfill's resume list (jobs/update_insider.py)
+data/insider/_old_done.txt
