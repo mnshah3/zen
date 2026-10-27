@@ -1,6 +1,7 @@
 {
-"asof": "2026-10-26",
+"asof": "2026-10-27",
 "keys": [
+"momentum_12_1:buy:AEROFLEX",
 "momentum_12_1:buy:BHAGYANGR",
 "momentum_12_1:buy:BLISSGVS",
 "momentum_12_1:buy:HFCL",
@@ -14,7 +15,6 @@
 "momentum_12_1:buy:TBZ",
 "momentum_12_1:buy:UFBL",
 "momentum_12_1:buy:VENUSREM",
-"momentum_12_1:buy:WELCORP",
-"momentum_12_1:buy:WHEELS"
+"momentum_12_1:buy:WELCORP"
 ]
 }
