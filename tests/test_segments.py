@@ -72,3 +72,24 @@ def test_segments_that_do_not_sum_to_the_total_are_flagged_and_a_half_year_is_re
 def test_a_filing_without_segments_gives_none():
     assert parse_segments(doc(ctx("OneD", *Q), fact("SegmentRevenue", "OneD", "10"))) is None
     assert parse_segments(b"<not-xml") is None
+
+
+def test_rows_are_stored_per_segment_and_rebuilt_into_the_table(tmp_path):
+    import duckdb
+    import pandas as pd
+    from zen.data import segments
+    d = doc(ctx("OneD", *Q),
+            ctx("OneReportable1D", *Q, "ReportableSegmentsAxis", "ReportableSegments1Member"),
+            ctx("OneReportable2D", *Q, "ReportableSegmentsAxis", "ReportableSegments2Member"),
+            fact("DescriptionOfReportableSegment", "OneReportable1D", "Steel"), fact("SegmentRevenue", "OneReportable1D", "700"),
+            fact("DescriptionOfReportableSegment", "OneReportable2D", "Power"), fact("SegmentRevenue", "OneReportable2D", "300"),
+            fact("SegmentRevenue", "OneD", "1000"))
+    meta = {"symbol": "AAA", "consolidated": True, "period_end": "2026-06-30", "broadcast_dt": "2026-07-20 18:00", "xbrl_url": "u1"}
+    rows = segments.rows_for(meta, parse_segments(d))
+    assert [(r["name"], r["revenue"], r["reconciles"]) for r in rows] == [("Steel", 700, True), ("Power", 300, True)]
+    assert segments.rows_for({**meta, "period_end": "2026-03-31"}, parse_segments(d)) == []     # another quarter's filing
+    segments.write_parquet(pd.DataFrame(rows), tmp_path)
+    segments.write_parquet(pd.DataFrame(rows), tmp_path)                                        # written twice, kept once
+    con = duckdb.connect()
+    assert segments.rebuild(con, tmp_path) == 2
+    assert con.execute("SELECT sum(revenue) FROM segments").fetchone()[0] == 1000

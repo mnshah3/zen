@@ -128,3 +128,59 @@ def parse_segments(content: bytes) -> dict | None:
     ok = bool(total) and all(s["revenue"] is not None for s in out) and abs(rsum - total) <= RECONCILE_TOL * abs(total)
     return {"period_start": start.isoformat(), "period_end": end.isoformat(), "segments": out,
             "total": total, "inter": inter, "reconciles": ok}
+
+
+# ---- storage, as the results' (zen.data.financials): one parquet per quarter under data/segments,
+# every revision kept (de-duplicated on the document and the segment), rebuilt into the `segments`
+# table. One row per segment; the filing's total and inter-segment sales repeat on each.
+from pathlib import Path  # noqa: E402
+
+import pandas as pd  # noqa: E402
+
+PARQUET_DIR = Path("data/segments")
+COLUMNS = ["symbol", "consolidated", "period_end", "broadcast_dt", "xbrl_url", "member", "name",
+           "revenue", "pbit", "total", "inter", "reconciles"]
+
+
+def rows_for(meta: dict, parsed: dict | None) -> list[dict]:
+    """The rows of one filing: `meta` is its results row (symbol, consolidated, broadcast_dt,
+    xbrl_url), `parsed` what parse_segments read from it. None or a different quarter gives none."""
+    if not parsed or not parsed.get("segments"):
+        return []
+    pe = pd.Timestamp(meta.get("period_end")) if meta.get("period_end") is not None else None
+    if pe is not None and pd.notna(pe) and pe.strftime("%Y-%m-%d") != parsed["period_end"]:
+        return []
+    return [{"symbol": meta["symbol"], "consolidated": bool(meta.get("consolidated")), "period_end": parsed["period_end"],
+             "broadcast_dt": meta.get("broadcast_dt"), "xbrl_url": meta["xbrl_url"], "member": s["member"], "name": s["name"],
+             "revenue": s["revenue"], "pbit": s["pbit"], "total": parsed["total"], "inter": parsed["inter"],
+             "reconciles": bool(parsed["reconciles"])} for s in parsed["segments"]]
+
+
+def write_parquet(df: pd.DataFrame, out_dir: Path = PARQUET_DIR) -> list[Path]:
+    if df.empty:
+        return []
+    df = df.copy()
+    df["period_end"] = pd.to_datetime(df["period_end"])
+    df["broadcast_dt"] = pd.to_datetime(df["broadcast_dt"])
+    written = []
+    for q, chunk in df.groupby(df["period_end"].map(lambda d: f"{d:%Y-%m}")):
+        p = out_dir / f"{q}.parquet"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        if p.exists():
+            old = pd.read_parquet(p)
+            old["period_end"] = pd.to_datetime(old["period_end"])
+            old["broadcast_dt"] = pd.to_datetime(old["broadcast_dt"])
+            chunk = pd.concat([old, chunk], ignore_index=True)
+        chunk = chunk.drop_duplicates(subset=["xbrl_url", "member"], keep="first").reindex(columns=COLUMNS)
+        chunk.to_parquet(p, index=False, compression="zstd")
+        written.append(p)
+    return written
+
+
+def rebuild(con, out_dir: Path = PARQUET_DIR) -> int:
+    files = sorted(out_dir.glob("*.parquet"))
+    con.execute("DROP TABLE IF EXISTS segments")
+    if not files:
+        return 0
+    con.execute("CREATE TABLE segments AS SELECT * FROM read_parquet(?, union_by_name = true)", [[str(f) for f in files]])
+    return con.execute("SELECT count(*) FROM segments").fetchone()[0]

@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from zen.data import financials as fin, freshness, store, xbrl_cache
+from zen.data import financials as fin, freshness, segments, store, xbrl_cache
 
 log = logging.getLogger(__name__)
 CHUNK_DAYS = 30          # one results-season slice at a time
@@ -57,6 +57,7 @@ def main() -> int:
 
     total_new, buf, cur = 0, [], start
     failed_windows, failed_docs = [], 0
+    seg_rows: list[dict] = []                # segments of the documents fetched (zen.data.segments)
     while cur <= end:
         stop = min(cur + timedelta(days=CHUNK_DAYS), end)
         try:
@@ -90,6 +91,10 @@ def main() -> int:
                 except Exception:                                # noqa: BLE001
                     failed_docs += 1        # not in `have`, so retried next run
                     continue
+                try:                        # revenue and profit by segment from the same document
+                    seg_rows += segments.rows_for(meta, segments.parse_segments(content))
+                except Exception:                                # noqa: BLE001
+                    pass
                 if facts:
                     rows.append(fin._derive({**meta, **facts}))
                     have.add(meta["xbrl_url"])
@@ -108,6 +113,9 @@ def main() -> int:
 
     if buf:
         fin.write_parquet(pd.concat(buf, ignore_index=True))
+    if seg_rows:
+        segments.write_parquet(pd.DataFrame(seg_rows))
+        log.info("segments: %d rows from %d filings", len(seg_rows), len({r["xbrl_url"] for r in seg_rows}))
 
     stats = con.execute(
         "SELECT count(*), count(DISTINCT symbol), count(*) FILTER (WHERE has_balance_sheet), "
