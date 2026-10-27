@@ -553,3 +553,5 @@ https://nsearchives.nseindia.com/corporate/xbrl/PIT_530919_305202614911_IT_WebXM
 https://nsearchives.nseindia.com/corporate/xbrl/Intimation_IT_WebXMLFile_20260601_173130079.xml
 https://nsearchives.nseindia.com/corporate/xbrl/Formcewt1june2026_IT_WebXMLFile_20260601_155011735.xml
 https://nsearchives.nseindia.com/corporate/xbrl/PIT_532900_1352026104855_IT_WebXMLFile_20260513_104902558.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_539_WebXMLFile_20261026_193335296.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_16784_WebXMLFile_20261026_173341750.xml

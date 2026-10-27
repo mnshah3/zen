@@ -2045,12 +2045,6 @@
 "listed": "2007-05-03",
 "series": "EQ"
 },
-"BGLOBAL": {
-"face_value": 10.0,
-"isin": "INE224M01013",
-"listed": "2011-07-28",
-"series": "BZ"
-},
 "BGRENERGY": {
 "face_value": 10.0,
 "isin": "INE661I01014",
@@ -2753,12 +2747,6 @@
 "listed": "2007-11-02",
 "series": "EQ"
 },
-"CEREBRAINT": {
-"face_value": 10.0,
-"isin": "INE345B01019",
-"listed": "2013-06-26",
-"series": "BZ"
-},
 "CESC": {
 "face_value": 1.0,
 "isin": "INE486A01021",
@@ -2903,12 +2891,6 @@
 "listed": "1995-02-08",
 "series": "EQ"
 },
-"CLCIND": {
-"face_value": 10.0,
-"isin": "INE376C01038",
-"listed": "2006-12-20",
-"series": "BE"
-},
 "CLEAN": {
 "face_value": 1.0,
 "isin": "INE227W01023",
@@ -2932,12 +2914,6 @@
 "isin": "INE419D01026",
 "listed": "2021-05-12",
 "series": "EQ"
-},
-"CMICABLES": {
-"face_value": 10.0,
-"isin": "INE981B01011",
-"listed": "2016-11-29",
-"series": "BZ"
 },
 "CMLL": {
 "face_value": 10.0,
@@ -3964,12 +3940,6 @@
 "isin": "INE532F01054",
 "listed": "2007-12-12",
 "series": "EQ"
-},
-"EDUCOMP": {
-"face_value": 2.0,
-"isin": "INE216H01027",
-"listed": "2006-01-13",
-"series": "BZ"
 },
 "EFCIL": {
 "face_value": 2.0,
@@ -6233,12 +6203,6 @@
 "listed": "2005-10-07",
 "series": "EQ"
 },
-"IMPEXFERRO": {
-"face_value": 10.0,
-"isin": "INE691G01015",
-"listed": "2005-02-03",
-"series": "BZ"
-},
 "INA": {
 "face_value": 1.0,
 "isin": "INE0LGX01024",
@@ -7895,12 +7859,6 @@
 "listed": "2007-03-16",
 "series": "EQ"
 },
-"LASA": {
-"face_value": 10.0,
-"isin": "INE670X01014",
-"listed": "2017-09-21",
-"series": "BE"
-},
 "LASERPOWER": {
 "face_value": 5.0,
 "isin": "INE17IR01028",
@@ -9263,12 +9221,6 @@
 "listed": "2017-04-07",
 "series": "EQ"
 },
-"NAGAFERT": {
-"face_value": 1.0,
-"isin": "INE454M01024",
-"listed": "2016-06-15",
-"series": "BZ"
-},
 "NAGREEKCAP": {
 "face_value": 5.0,
 "isin": "INE245I01016",
@@ -9893,12 +9845,6 @@
 "listed": "2024-08-09",
 "series": "EQ"
 },
-"OLAELEC-RE": {
-"face_value": 10.0,
-"isin": "INE0LXG20016",
-"listed": "2026-10-22",
-"series": "BE"
-},
 "OLECTRA": {
 "face_value": 4.0,
 "isin": "INE260D01016",
@@ -10108,12 +10054,6 @@
 "isin": "INE16NZ01023",
 "listed": "2025-11-06",
 "series": "EQ"
-},
-"ORTEL": {
-"face_value": 10.0,
-"isin": "INE849L01019",
-"listed": "2015-03-19",
-"series": "BZ"
 },
 "ORTINGLOBE": {
 "face_value": 10.0,
@@ -11158,12 +11098,6 @@
 "isin": "INE952H01027",
 "listed": "2007-03-16",
 "series": "BE"
-},
-"RAJVIR": {
-"face_value": 10.0,
-"isin": "INE011H01014",
-"listed": "2005-09-20",
-"series": "BZ"
 },
 "RALLIS": {
 "face_value": 1.0,
@@ -12245,12 +12179,6 @@
 "listed": "2026-08-17",
 "series": "EQ"
 },
-"SELMC": {
-"face_value": 10.0,
-"isin": "INE105I01020",
-"listed": "2021-10-26",
-"series": "BE"
-},
 "SEMAC": {
 "face_value": 10.0,
 "isin": "INE617A01013",
@@ -12526,6 +12454,12 @@
 "isin": "INE788J01021",
 "listed": "2021-12-09",
 "series": "EQ"
+},
+"SHIVAM-RE1": {
+"face_value": 2.0,
+"isin": "INE637H20024",
+"listed": "2026-10-28",
+"series": "BE"
 },
 "SHIVAMAUTO": {
 "face_value": 2.0,
@@ -12863,12 +12797,6 @@
 "listed": "2025-12-05",
 "series": "EQ"
 },
-"SKIL": {
-"face_value": 10.0,
-"isin": "INE429F01012",
-"listed": "1996-10-09",
-"series": "BZ"
-},
 "SKIPPER": {
 "face_value": 1.0,
 "isin": "INE439E01022",
@@ -13077,12 +13005,6 @@
 "face_value": 10.0,
 "isin": "INE01EO01010",
 "listed": "2025-03-28",
-"series": "BE"
-},
-"SPELS": {
-"face_value": 10.0,
-"isin": "INE252A01019",
-"listed": "2026-08-17",
 "series": "BE"
 },
 "SPENCERS": {
@@ -14445,7 +14367,7 @@
 "face_value": 2.0,
 "isin": "INE2WKE01011",
 "listed": "2026-10-12",
-"series": "BE"
+"series": "EQ"
 },
 "TRU": {
 "face_value": 2.0,
@@ -14716,12 +14638,6 @@
 "isin": "INE458F01011",
 "listed": "2015-01-28",
 "series": "EQ"
-},
-"UNIVAFOODS": {
-"face_value": 10.0,
-"isin": "INE275F01019",
-"listed": "1996-04-03",
-"series": "BE"
 },
 "UNIVASTU": {
 "face_value": 10.0,
