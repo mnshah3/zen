@@ -63,7 +63,7 @@ def main(argv=None) -> int:
                 time.sleep(wait)
             last = time.monotonic()
             try:
-                resp = s.get(r["xbrl_url"], timeout=60)
+                resp = s.get(r["xbrl_url"], timeout=20)
                 if resp.ok:
                     xbrl_cache.put(r["xbrl_url"], resp.content)
                     b = xbrl_cache.get(r["xbrl_url"])
@@ -79,10 +79,11 @@ def main(argv=None) -> int:
             n_seg += 1
             n_ok += bool(parsed["reconciles"])
             out += rows
-        if len(out) >= 5000:
+        if (n_read + missing) % 250 == 0:
+            log.info("read %d, with segments %d, reconciling %d, not held %d", n_read, n_seg, n_ok, missing)
+        if len(out) >= 1000:
             segments.write_parquet(pd.DataFrame(out))
             out = []
-            log.info("read %d, with segments %d, reconciling %d, not held %d", n_read, n_seg, n_ok, missing)
     if out:
         segments.write_parquet(pd.DataFrame(out))
     print(f"filings read {n_read}, with segments {n_seg}, reconciling {n_ok}, not held locally {missing}")
