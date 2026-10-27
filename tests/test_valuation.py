@@ -61,3 +61,11 @@ def test_summary_and_breaks():
     assert sm["pct_at_or_below"] == 1.0 and valuation.summary(series[:5]) is None
     px = pd.DataFrame({"date": pd.to_datetime(["2025-01-01", "2025-01-02", "2025-01-03"]), "adj": [100.0, 101.0, 200.0]})
     assert valuation.price_breaks(px) == [pd.Timestamp("2025-01-03")]
+
+
+def test_weekly_points_see_a_result_from_the_week_it_was_filed():
+    """points="W": a P/E at each week's last session; the December quarter, filed on Mon 10 Feb
+    2025, counts from that week's Friday, not from the month end."""
+    px = pd.DataFrame({"date": pd.to_datetime(["2025-02-07", "2025-02-14", "2025-02-21"]), "adj": [100.0, 120.0, 90.0]})
+    s = valuation.pe_series(_fil(QUARTERS), None, px, months=1, asof=pd.Timestamp("2025-02-21"), points="W")
+    assert s == [{"d": "2025-02-07", "pe": None}, {"d": "2025-02-14", "pe": 6.0}, {"d": "2025-02-21", "pe": 4.5}]

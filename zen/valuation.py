@@ -56,8 +56,9 @@ def _later_factors(filed: np.ndarray, fac: pd.DataFrame | None) -> np.ndarray:
 
 
 def pe_series(fil: pd.DataFrame, fac: pd.DataFrame | None, px: pd.DataFrame, brk=(), months: int = 60,
-              asof=None) -> list[dict]:
-    """[{d, pe}] oldest first, one per month-end session in the last `months` months.
+              asof=None, points: str = "M") -> list[dict]:
+    """[{d, pe}] oldest first, one per month-end session in the last `months` months (with
+    points="W", one per week's last session, for the research explorer's weekly frames).
 
     fil: one basis' quarterly filings, every revision: period_end, broadcast_dt, eps, profit, and
     xbrl_url where known (it orders revisions broadcast at the same instant).
@@ -74,7 +75,7 @@ def pe_series(fil: pd.DataFrame, fac: pd.DataFrame | None, px: pd.DataFrame, brk
     p = px[(px["date"] > start) & (px["date"] <= end)]
     if not len(p):
         return []
-    me = p.groupby(p["date"].dt.to_period("M")).tail(1)
+    me = p.groupby(p["date"].dt.to_period(points)).tail(1)
     f = fil.dropna(subset=["eps"])
     f = f.assign(period_end=pd.to_datetime(f["period_end"]), broadcast_dt=pd.to_datetime(f["broadcast_dt"]))
     # revisions broadcast at the same instant: NSE's document link, whose filing number rises with
