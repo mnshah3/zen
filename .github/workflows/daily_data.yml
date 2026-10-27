@@ -112,6 +112,8 @@ jobs:
           [ ! -d data/bank_results ] || git add data/bank_results
           [ ! -d data/statements ] || git add data/statements
           [ ! -d data/events ] || git add data/events
+          [ ! -d data/segments ] || git add data/segments
+          [ ! -d data/rpt ] || git add data/rpt
           [ ! -d data/bse_announcements ] || git add data/bse_announcements
           [ ! -f data/reference/bse_scrips.parquet ] || git add data/reference/bse_scrips.parquet
           git add data/reference/industry_nse.parquet

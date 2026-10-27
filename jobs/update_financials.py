@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from zen.data import financials as fin, freshness, segments, store, xbrl_cache
+from zen.data import financials as fin, freshness, rpt, segments, store, xbrl_cache
 
 log = logging.getLogger(__name__)
 CHUNK_DAYS = 30          # one results-season slice at a time
@@ -58,6 +58,7 @@ def main() -> int:
     total_new, buf, cur = 0, [], start
     failed_windows, failed_docs = [], 0
     seg_rows: list[dict] = []                # segments of the documents fetched (zen.data.segments)
+    rpt_rows: list[dict] = []                # related-party transactions in them (zen.data.rpt)
     while cur <= end:
         stop = min(cur + timedelta(days=CHUNK_DAYS), end)
         try:
@@ -95,6 +96,10 @@ def main() -> int:
                     seg_rows += segments.rows_for(meta, segments.parse_segments(content))
                 except Exception:                                # noqa: BLE001
                     pass
+                try:                        # and the related-party transactions a half year's standalone filing discloses
+                    rpt_rows += rpt.rows_for(meta, rpt.parse_rpt(content))
+                except Exception:                                # noqa: BLE001
+                    pass
                 if facts:
                     rows.append(fin._derive({**meta, **facts}))
                     have.add(meta["xbrl_url"])
@@ -116,6 +121,9 @@ def main() -> int:
     if seg_rows:
         segments.write_parquet(pd.DataFrame(seg_rows))
         log.info("segments: %d rows from %d filings", len(seg_rows), len({r["xbrl_url"] for r in seg_rows}))
+    if rpt_rows:
+        rpt.write_parquet(pd.DataFrame(rpt_rows))
+        log.info("related-party transactions: %d rows from %d filings", len(rpt_rows), len({r["xbrl_url"] for r in rpt_rows}))
 
     stats = con.execute(
         "SELECT count(*), count(DISTINCT symbol), count(*) FILTER (WHERE has_balance_sheet), "
