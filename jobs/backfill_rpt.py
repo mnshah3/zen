@@ -62,7 +62,7 @@ def main(argv=None) -> int:
                 time.sleep(wait)
             last = time.monotonic()
             try:
-                resp = s.get(r["xbrl_url"], timeout=20)
+                resp = s.get(r["xbrl_url"], timeout=(6, 12))
                 if resp.ok:
                     xbrl_cache.put(r["xbrl_url"], resp.content)
                     b = xbrl_cache.get(r["xbrl_url"])
@@ -76,9 +76,9 @@ def main(argv=None) -> int:
         if rows:
             n_rpt += 1
             out += rows
-        if (n_read + missing) % 250 == 0:
+        if (n_read + missing) % 100 == 0:
             log.info("read %d, disclosing %d, not held %d", n_read, n_rpt, missing)
-        if len(out) >= 5000:
+        if len(out) >= 2000:
             rpt.write_parquet(pd.DataFrame(out))
             out = []
     if out:
