@@ -93,3 +93,23 @@ def test_rows_are_stored_per_segment_and_rebuilt_into_the_table(tmp_path):
     con = duckdb.connect()
     assert segments.rebuild(con, tmp_path) == 2
     assert con.execute("SELECT sum(revenue) FROM segments").fetchone()[0] == 1000
+
+
+def test_a_pre_2025_filing_with_revenue_and_profit_under_different_members_gives_one_row_a_segment():
+    """TCS, Dec 2024: each segment named twice, once with its revenue on the segments axis and once
+    with its profit on the finance-costs axis under another member; joined by name."""
+    d = doc(ctx("OneD", *Q),
+            ctx("R1", *Q, "ReportableSegmentsAxis", "ReportableSegments1Member"),
+            ctx("R2", *Q, "ReportableSegmentsAxis", "ReportableSegments2Member"),
+            ctx("P7", *Q, "ReportableSegmentsFinanceCostsAxis", "ReportableSegments7Member"),
+            ctx("P8", *Q, "ReportableSegmentsFinanceCostsAxis", "ReportableSegments8Member"),
+            fact("DescriptionOfReportableSegment", "R1", "Banking, Financial Services and Insurance"), fact("SegmentRevenue", "R1", "23481"),
+            fact("DescriptionOfReportableSegment", "R2", "Manufacturing"), fact("SegmentRevenue", "R2", "6194"),
+            fact("DescriptionOfReportableSegment", "P7", "Banking, Financial Services and Insurance"),
+            fact("SegmentProfitLossBeforeTaxAndFinanceCosts", "P7", "6403"),
+            fact("DescriptionOfReportableSegment", "P8", "Manufacturing"), fact("SegmentProfitLossBeforeTaxAndFinanceCosts", "P8", "2042"),
+            fact("SegmentRevenue", "OneD", "29675"))
+    s = parse_segments(d)
+    assert [(x["name"], x["revenue"], x["pbit"]) for x in s["segments"]] == [
+        ("Banking, Financial Services and Insurance", 23481, 6403), ("Manufacturing", 6194, 2042)]
+    assert s["reconciles"] is True

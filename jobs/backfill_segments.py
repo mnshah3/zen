@@ -3,6 +3,8 @@ with --download, from NSE for the documents not held (stored in the copy first, 
 
     python -m jobs.backfill_segments --quarters 8              # the last eight quarters, local copies only
     python -m jobs.backfill_segments --quarters 8 --download   # and fetch the rest
+    python -m jobs.backfill_segments --quarters 28 --legacy --download   # back to 2019: the filings
+                                       # before the 2025 format carry segments too (zen.data.segments)
 
 WHICH FILINGS. Each company's filings for the quarters asked, the consolidated ones where the company
 filed consolidated results for that quarter, else the standalone; every revision of them. New filings
@@ -32,8 +34,9 @@ UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.3
                     "Chrome/124.0 Safari/537.36", "Accept": "*/*"}
 
 
-def filings(quarters: int) -> pd.DataFrame:
-    files = [p for p in fin.statement_files() if not p.stem.startswith("legacy")]
+def filings(quarters: int, legacy: bool = False) -> pd.DataFrame:
+    files = [p for p in fin.statement_files()
+             if not p.stem.startswith("legacy") or (legacy and p.stem != "legacy_missing")]
     df = pd.concat([pd.read_parquet(p, columns=["symbol", "period_end", "broadcast_dt", "consolidated", "xbrl_url"]) for p in files],
                    ignore_index=True)
     df = df[df["xbrl_url"].notna()].copy()
@@ -48,12 +51,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--quarters", type=int, default=8)
     ap.add_argument("--download", action="store_true")
+    ap.add_argument("--legacy", action="store_true", help="also the quarters filed before the 2025 format")
     ap.add_argument("--rate", type=float, default=3.0, help="downloads a second")
     ap.add_argument("--minutes", type=float, default=None, help="stop reading after this long")
     a = ap.parse_args(argv)
     t0 = time.monotonic()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    todo = filings(a.quarters)
+    todo = filings(a.quarters, a.legacy)
     done = set()
     for p in sorted(segments.PARQUET_DIR.glob("*.parquet")):
         done |= set(pd.read_parquet(p, columns=["xbrl_url"])["xbrl_url"])

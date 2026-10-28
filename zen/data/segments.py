@@ -124,6 +124,20 @@ def parse_segments(content: bytes) -> dict | None:
     if not out:
         return None
     out.sort(key=lambda s: int(re.sub(r"\D", "", s["member"]) or 0))
+    # the pre-2025 filings put a segment's revenue and its profit under different members of the two
+    # axes (TCS, Dec 2024: six names, twelve members): one segment per name, revenue and profit joined
+    merged, by_name = [], {}
+    for s in out:
+        k = (s["name"] or "").strip().lower()
+        first = by_name.get(k) if k else None
+        if first is not None and (first["revenue"] is None) != (s["revenue"] is None) and (first["pbit"] is None) != (s["pbit"] is None):
+            first["revenue"] = first["revenue"] if first["revenue"] is not None else s["revenue"]
+            first["pbit"] = first["pbit"] if first["pbit"] is not None else s["pbit"]
+            continue
+        if k:
+            by_name.setdefault(k, s)
+        merged.append(s)
+    out = merged
     rsum = sum(s["revenue"] or 0.0 for s in out)
     ok = bool(total) and all(s["revenue"] is not None for s in out) and abs(rsum - total) <= RECONCILE_TOL * abs(total)
     return {"period_start": start.isoformat(), "period_end": end.isoformat(), "segments": out,

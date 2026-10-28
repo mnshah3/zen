@@ -15,6 +15,10 @@ on:
       minutes:
         description: "Minutes of reading before committing"
         default: "200"
+      legacy:
+        description: "Also the quarters filed before the 2025 format"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -26,7 +30,7 @@ concurrency:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,7 +51,7 @@ jobs:
           fi
 
       - name: read the filings
-        run: python -m jobs.backfill_segments --quarters "${{ inputs.quarters }}" --download --rate 2 --minutes "${{ inputs.minutes }}"
+        run: python -m jobs.backfill_segments --quarters "${{ inputs.quarters }}" --download --rate 2 --minutes "${{ inputs.minutes }}" ${{ inputs.legacy && '--legacy' || '' }}
 
       - name: commit what was read
         if: always()
