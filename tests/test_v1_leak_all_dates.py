@@ -86,7 +86,8 @@ def _mini_archive(path, extra_table: bool = False):
                           "surveillance": ("observed_dt", "TIMESTAMP"), "mf_nav": ("date", "DATE"), "bse_results": ("filed_dt", "TIMESTAMP"),
                           "fo_ban": ("observed_dt", "TIMESTAMP"), "insider": ("broadcast_dt", "TIMESTAMP"),
                           "fpi_sectors": ("observed_dt", "TIMESTAMP"), "ratings": ("an_dt", "TIMESTAMP"),
-                          "index_members": ("observed_dt", "TIMESTAMP")}.items():
+                          "index_members": ("observed_dt", "TIMESTAMP"),
+                          "rpt": ("broadcast_dt", "TIMESTAMP"), "segments": ("broadcast_dt", "TIMESTAMP")}.items():
         con.execute(f"CREATE TABLE {t} ({col} {typ}, tag VARCHAR)")
         if typ == "DATE":
             rows = [("2024-05-31", "before"), ("2024-06-03", "on"), ("2024-06-04", "after")]
@@ -94,6 +95,11 @@ def _mini_archive(path, extra_table: bool = False):
             rows = [("2024-06-02 23:59:59", "before"), ("2024-06-03 00:00:00", "on"),
                     ("2024-06-03 09:15:00", "on"), ("2024-06-04 10:00:00", "after")]
         con.executemany(f"INSERT INTO {t} VALUES (?, ?)", rows)
+    # a BRSR report revised on or after D holds text that was not public before D
+    con.execute("CREATE TABLE brsr (filed TIMESTAMP, revised TIMESTAMP, tag VARCHAR)")
+    con.executemany("INSERT INTO brsr VALUES (?, ?, ?)",
+                    [("2024-06-02 23:59:59", None, "before"), ("2024-06-01 10:00:00", "2024-06-03 09:15:00", "on"),
+                     ("2024-06-04 10:00:00", None, "after")])
     if extra_table:
         con.execute("CREATE TABLE some_future_table (as_of DATE)")
     con.close()
