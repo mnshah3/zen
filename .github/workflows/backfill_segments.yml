@@ -1,0 +1,72 @@
+name: backfill segments (manual)
+
+# Catch-up for data/segments (zen/data/segments.py): revenue and profit by business segment from every
+# company's quarterly integrated filing not yet read, fetched from NSE (jobs/backfill_segments.py).
+# Resumable: what was read is committed, a filing with no segments is listed in
+# data/segments_checked.txt, and a second start reads only what is left. Started by hand; the daily
+# data job reads new filings' segments afterwards. Research data: no strategy reads it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      quarters:
+        description: "Quarters to cover, the latest first"
+        default: "7"
+      minutes:
+        description: "Minutes of reading before committing"
+        default: "200"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backfill-segments
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+
+      # The evening data job (started at 15:05 UTC by the Cloudflare timer) writes data/segments too.
+      - name: wait out the evening data job
+        run: |
+          now=$(date -u +%H%M)
+          if [ "$now" -ge 1430 ] && [ "$now" -lt 1645 ]; then
+            secs=$(( $(date -u -d "16:45" +%s) - $(date -u +%s) ))
+            echo "inside the evening data job's window: waiting ${secs}s"
+            sleep "$secs"
+          fi
+
+      - name: read the filings
+        run: python -m jobs.backfill_segments --quarters "${{ inputs.quarters }}" --download --rate 2 --minutes "${{ inputs.minutes }}"
+
+      - name: commit what was read
+        if: always()
+        run: |
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          git add data/segments data/segments_checked.txt 2>/dev/null || git add data/segments
+          git diff --staged --quiet && { echo "nothing new"; exit 0; }
+          git commit -q -m "data: segment backfill $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            # the daily job pushed a new version of a quarter's file, which git cannot merge (binary):
+            # start again from GitHub's copy and read again from this runner's copy of the documents
+            git rebase --abort 2>/dev/null || true
+            git fetch -q origin main && git reset -q --hard origin/main
+            python -m jobs.backfill_segments --quarters "${{ inputs.quarters }}"
+            git add data/segments data/segments_checked.txt 2>/dev/null || git add data/segments
+            git diff --staged --quiet && { echo "nothing new after the merge"; exit 0; }
+            git commit -q -m "data: segment backfill $(date -u +%Y-%m-%d)"
+            sleep $((i * 15))
+          done
+          exit 1

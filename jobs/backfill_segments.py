@@ -9,13 +9,17 @@ filed consolidated results for that quarter, else the standalone; every revision
 get their segments as they are fetched (jobs/update_financials.py).
 
 Writes data/segments/<quarter>.parquet and prints how many filings were read, how many report
-segments and how many of those reconcile.
+segments and how many of those reconcile. A filing read that reports no segments (a company with one
+business) goes into CHECKED, so a later run skips it too: the run is resumable, and on GitHub, where
+no copy of the documents is kept, a second run fetches only what the first could not. --minutes stops
+reading in time for the workflow to commit what was read.
 """
 from __future__ import annotations
 
 import argparse
 import logging
 import time
+from pathlib import Path
 
 import pandas as pd
 import requests
@@ -23,6 +27,7 @@ import requests
 from zen.data import financials as fin, segments, xbrl_cache
 
 log = logging.getLogger("backfill_segments")
+CHECKED = Path(__file__).resolve().parents[1] / "data" / "segments_checked.txt"   # filings read, no segments reported
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                     "Chrome/124.0 Safari/537.36", "Accept": "*/*"}
 
@@ -44,18 +49,35 @@ def main(argv=None) -> int:
     ap.add_argument("--quarters", type=int, default=8)
     ap.add_argument("--download", action="store_true")
     ap.add_argument("--rate", type=float, default=3.0, help="downloads a second")
+    ap.add_argument("--minutes", type=float, default=None, help="stop reading after this long")
     a = ap.parse_args(argv)
+    t0 = time.monotonic()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     todo = filings(a.quarters)
     done = set()
     for p in sorted(segments.PARQUET_DIR.glob("*.parquet")):
         done |= set(pd.read_parquet(p, columns=["xbrl_url"])["xbrl_url"])
+    checked = set(CHECKED.read_text(encoding="utf-8").split()) if CHECKED.exists() else set()
+    new_checked: list[str] = []
+
+    def save():
+        nonlocal out, new_checked
+        if out:
+            segments.write_parquet(pd.DataFrame(out))
+            out = []
+        if new_checked:
+            with CHECKED.open("a", encoding="utf-8") as f:
+                f.write("\n".join(new_checked) + "\n")
+            new_checked = []
     s = requests.Session()
     s.headers.update(UA)
     out, n_read, n_seg, n_ok, missing, last = [], 0, 0, 0, 0, 0.0
     for r in todo.to_dict("records"):
-        if r["xbrl_url"] in done:
+        if r["xbrl_url"] in done or r["xbrl_url"] in checked:
             continue
+        if a.minutes is not None and time.monotonic() - t0 > a.minutes * 60:
+            log.info("time is up: stopping, the rest for the next run")
+            break
         b = xbrl_cache.get(r["xbrl_url"])
         if b is None and a.download:
             wait = 1.0 / a.rate - (time.monotonic() - last)
@@ -63,7 +85,7 @@ def main(argv=None) -> int:
                 time.sleep(wait)
             last = time.monotonic()
             try:
-                resp = s.get(r["xbrl_url"], timeout=20)
+                resp = s.get(r["xbrl_url"], timeout=(6, 12))
                 if resp.ok:
                     xbrl_cache.put(r["xbrl_url"], resp.content)
                     b = xbrl_cache.get(r["xbrl_url"])
@@ -79,13 +101,13 @@ def main(argv=None) -> int:
             n_seg += 1
             n_ok += bool(parsed["reconciles"])
             out += rows
+        else:
+            new_checked.append(r["xbrl_url"])
         if (n_read + missing) % 250 == 0:
             log.info("read %d, with segments %d, reconciling %d, not held %d", n_read, n_seg, n_ok, missing)
-        if len(out) >= 1000:
-            segments.write_parquet(pd.DataFrame(out))
-            out = []
-    if out:
-        segments.write_parquet(pd.DataFrame(out))
+        if len(out) >= 1000 or len(new_checked) >= 500:
+            save()
+    save()
     print(f"filings read {n_read}, with segments {n_seg}, reconciling {n_ok}, not held locally {missing}")
     return 0
 
