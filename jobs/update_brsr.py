@@ -3,6 +3,8 @@ for what each company does (zen.data.brsr) and stored in data/brsr/brsr.parquet.
 
     python -m jobs.update_brsr --days 10                   # nightly: the new filings
     python -m jobs.update_brsr --days 420 --latest-only    # catch-up: each company's latest report
+    python -m jobs.update_brsr --days 420 --latest-only --refill    # and again, those stored before
+                                                                    # the group companies were read
 
 A filing already stored is not read again. Documents are fetched at --rate a second.
 """
@@ -28,6 +30,7 @@ def main(argv=None) -> int:
     ap.add_argument("--days", type=int, default=10)
     ap.add_argument("--latest-only", action="store_true", help="only each company's latest report")
     ap.add_argument("--rate", type=float, default=2.0, help="downloads a second")
+    ap.add_argument("--refill", action="store_true", help="read again the stored filings without group companies")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     s = requests.Session()
@@ -43,7 +46,10 @@ def main(argv=None) -> int:
     lst = brsr.listing(r.json())
     if a.latest_only and len(lst):
         lst = lst.sort_values(["fy_to", "filed"], ascending=False).drop_duplicates("symbol")
-    done = set(pd.read_parquet(brsr.PARQUET, columns=["xbrl_url"])["xbrl_url"]) if brsr.PARQUET.exists() else set()
+    stored = pd.read_parquet(brsr.PARQUET) if brsr.PARQUET.exists() else pd.DataFrame(columns=["xbrl_url"])
+    done = set(stored["xbrl_url"])
+    if a.refill:              # stored before group_cos was read (28 Oct 2026): read again
+        done -= set(stored.loc[stored["group_cos"].isna(), "xbrl_url"]) if "group_cos" in stored else done
     todo = lst[~lst["xbrl_url"].isin(done)]
     log.info("%d filings listed, %d to read", len(lst), len(todo))
     rows, n_ok, n_bad, last = [], 0, 0, 0.0

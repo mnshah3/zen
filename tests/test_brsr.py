@@ -33,7 +33,12 @@ def doc():
          fact("NumberOfLocations", "Pl_N", "78"), fact("NumberOfLocations", "Of_I", "25"),
          fact("NumberOfEmployeesOrWorkersIncludingDifferentlyAbled", "E", "71037"), fact("NumberOfEmployeesOrWorkersIncludingDifferentlyAbled", "E_M", "64211"),
          fact("PercentageOfContributionOfExportsInTheTotalTurnoverOfTheEntity", "Main", "0.08"),
-         fact("ABriefOnTypesOfCustomersExplanatoryTextBlock", "Main", "<p>Automotive and   construction.</p>")]
+         fact("ABriefOnTypesOfCustomersExplanatoryTextBlock", "Main", "<p>Automotive and   construction.</p>"),
+         ctx("G2", (brsr.GROUP_AXIS, "2", True)), ctx("G1", (brsr.GROUP_AXIS, "1", True)),
+         fact("NameOfTheHoldingOrSubsidiaryAssociateCompaniesOrJointVentures", "G2", "Tata Steel Downstream Products Limited"),
+         fact("CategoryOfCompany", "G2", "Subsidiary"), fact("PercentageOfSharesHeldByListedEntity", "G2", "1"),
+         fact("NameOfTheHoldingOrSubsidiaryAssociateCompaniesOrJointVentures", "G1", "Tata Sons Private Limited"),
+         fact("CategoryOfCompany", "G1", "Holding"), fact("PercentageOfSharesHeldByListedEntity", "G1", "0.3163")]
     return (HEAD + "".join(p) + "</xbrli:xbrl>").encode()
 
 
@@ -45,6 +50,8 @@ def test_section_a_is_read_by_dimension():
     assert r["plants_india"] == 78 and r["offices_abroad"] == 25 and r["plants_abroad"] is None
     assert r["employees"] == 71037 and r["workers"] is None and r["exports"] == 0.08
     assert r["customers"] == "Automotive and construction."
+    assert r["group_cos"] == [{"name": "Tata Sons Private Limited", "category": "Holding", "pct": 0.3163},
+                              {"name": "Tata Steel Downstream Products Limited", "category": "Subsidiary", "pct": 1.0}]
     assert brsr.parse_brsr(b"<x/>") is None and brsr.parse_brsr(b"not xml") is None
 
 

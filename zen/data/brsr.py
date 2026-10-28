@@ -15,6 +15,10 @@ general disclosures, is the company's own account of itself, and this module rea
   people       permanent employees and permanent workers (71,037 and 41,225)
   identity     date of incorporation, website, the reporting boundary (standalone or
                consolidated), and its brief on its types of customers, in its own words
+  group_cos    its holding, subsidiary and associate companies and joint ventures (item 23): the
+               name, the category and the share of the company held by the listed entity, as filed
+               (Maruti Suzuki, FY2025-26: 19, from J.J. Impex (Delhi) a subsidiary at 1 to Nippon
+               Thermostat (India) an associate at 0.1)
 
 Facts are matched by their dimensions in each context (typed or explicit members), never by the
 context's name. Shares are as filed (fractions of one). Nothing is derived.
@@ -33,6 +37,7 @@ LIST_URL = "https://www.nseindia.com/api/corporate-bussiness-sustainabilitiy?ind
 PAGE = "https://www.nseindia.com/companies-listing/corporate-filings-bussiness-sustainabilitiy-reports"
 ACT_AXIS = "DetailsOfBusinessActivitiesAccountingForNinetyPercentOfTheTurnoverAxis"
 PROD_AXIS = "ProductsOrServicesSoldByTheEntityAccountingForNinetyPercentOfTheTurnoverAxis"
+GROUP_AXIS = "HoldingSubsidiaryAssociateCompaniesAndJointVenturesAxis"
 CUSTOMERS_MAX = 700          # characters of the company's brief on its customers
 
 
@@ -93,6 +98,9 @@ def parse_brsr(content: bytes) -> dict | None:
     prods = [{"name": _txt(r.get("name")), "nic": _txt(r.get("nic")), "share": _num(r.get("share"))}
              for r in rows(PROD_AXIS, {"ProductOrServiceSoldByTheEntity": "name", "NICCodeOfProductOrServiceSoldByTheEntity": "nic",
                                        "PercentageOfTotalTurnoverForProductOrServiceSold": "share"})]
+    grp = [{"name": _txt(r.get("name")), "category": _txt(r.get("category")), "pct": _num(r.get("pct"))}
+           for r in rows(GROUP_AXIS, {"NameOfTheHoldingOrSubsidiaryAssociateCompaniesOrJointVentures": "name",
+                                      "CategoryOfCompany": "category", "PercentageOfSharesHeldByListedEntity": "pct"})]
     loc: dict[str, float | None] = {}
     for t, d, v in facts:
         if t == "NumberOfLocations" and "LocationAxis" in d:
@@ -115,7 +123,7 @@ def parse_brsr(content: bytes) -> dict | None:
             "states": _num(plain("NumberOfStatesWhereMarketServedByTheEntity")), "countries": _num(plain("NumberOfCountriesWhereMarketServedByTheEntity")),
             "exports": _num(plain("PercentageOfContributionOfExportsInTheTotalTurnoverOfTheEntity")),
             "employees": people.get("PermanentEmployeesMember"), "workers": people.get("PermanentWorkersMember"),
-            "customers": _brief(cust)}
+            "customers": _brief(cust), "group_cos": [x for x in grp if x["name"]]}
 
 
 def _brief(text: str | None) -> str | None:
@@ -151,12 +159,12 @@ def listing(payload) -> pd.DataFrame:
 PARQUET = Path("data/brsr/brsr.parquet")
 COLUMNS = ["symbol", "company", "fy_from", "fy_to", "filed", "revised", "xbrl_url", "name", "incorporated", "website", "boundary",
            "activities", "products", "plants_india", "offices_india", "plants_abroad", "offices_abroad", "states", "countries",
-           "exports", "employees", "workers", "customers"]
+           "exports", "employees", "workers", "customers", "group_cos"]
 
 
 def row_for(meta: dict, parsed: dict) -> dict:
     return {**{k: meta.get(k) for k in ("symbol", "company", "fy_from", "fy_to", "filed", "revised", "xbrl_url")},
-            **{k: (json.dumps(parsed[k], ensure_ascii=False) if k in ("activities", "products") else parsed[k])
+            **{k: (json.dumps(parsed[k], ensure_ascii=False) if k in ("activities", "products", "group_cos") else parsed[k])
                for k in COLUMNS if k in parsed}}
 
 

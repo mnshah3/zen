@@ -11,6 +11,10 @@ on:
       days:
         description: "Days of filings to list"
         default: "420"
+      refill:
+        description: "Read again the stored reports without group companies"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -43,7 +47,7 @@ jobs:
           fi
 
       - name: read the filings
-        run: python -m jobs.update_brsr --days "${{ inputs.days }}" --latest-only --rate 2
+        run: python -m jobs.update_brsr --days "${{ inputs.days }}" --latest-only --rate 2 ${{ inputs.refill && '--refill' || '' }}
 
       - name: commit what was read
         run: |
@@ -59,7 +63,7 @@ jobs:
             # are skipped and the rest come from this runner's copy of the documents
             git rebase --abort 2>/dev/null || true
             git fetch -q origin main && git reset -q --hard origin/main
-            python -m jobs.update_brsr --days "${{ inputs.days }}" --latest-only --rate 2
+            python -m jobs.update_brsr --days "${{ inputs.days }}" --latest-only --rate 2 ${{ inputs.refill && '--refill' || '' }}
             git add data/brsr
             git diff --staged --quiet && { echo "nothing new after the merge"; exit 0; }
             git commit -q -m "data: sustainability report backfill $(date -u +%Y-%m-%d)"
