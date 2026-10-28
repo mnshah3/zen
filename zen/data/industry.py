@@ -179,9 +179,10 @@ def fetch_symbol(client: Client, symbol: str) -> dict:
 
         last_status = resp.status_code
         if resp.status_code == 404:
-            # the symbol is unknown to NSE; another series will not help
+            # unknown under this series: a stock that trades only in BE is 404 under EQ (SWANDEF,
+            # 29 Oct 2026), so the next series is still asked
             notes.append(f"{series}: 404 unknown symbol")
-            break
+            continue
         if resp.status_code != 200:
             transient = True
             notes.append(f"{series}: HTTP {resp.status_code}")

@@ -38,7 +38,10 @@ def recent_eq_symbols(sessions: int = 30) -> tuple[set[str], str, str]:
             break
     d = pd.concat(frames)
     dates = sorted(d["date"].unique())[-sessions:]
-    eq = d[d["date"].isin(dates) & (d["series"] == "EQ")]
+    # EQ and BE: a stock moved to trade-for-trade (BE, often under surveillance) is still a listed
+    # company on the research pages (64 had no sector on 28 Oct 2026, ESAFSFB, TIL, RCOM among them)
+    eq = d[d["date"].isin(dates) & d["series"].isin(["EQ", "BE"])]
+    eq = eq[~eq["symbol"].str.contains(r"-RE\d*$", regex=True)]        # rights entitlements are not companies
     return set(eq["symbol"]), str(dates[0])[:10], str(dates[-1])[:10]
 
 

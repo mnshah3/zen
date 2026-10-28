@@ -4,7 +4,7 @@
     python -m jobs.update_industry_new --limit 200
 
 data/reference/industry_nse.parquet was fetched once (jobs/fetch_industry.py) and a symbol
-listed after that has no sector on the research pages. This job takes every EQ symbol traded
+listed after that has no sector on the research pages. This job takes every EQ or BE symbol traded
 in the last 30 sessions of data/daily, keeps the ones the file has no final answer for, and
 fetches those through the same resumable code (zen.data.industry.fetch_all). Symbols already
 labelled are never fetched again.
