@@ -2351,6 +2351,12 @@
 "listed": "1995-04-26",
 "series": "EQ"
 },
+"BONDADA": {
+"face_value": 2.0,
+"isin": "INE0Q8P01029",
+"listed": "2026-10-29",
+"series": "EQ"
+},
 "BONFIG": {
 "face_value": 10.0,
 "isin": "INE28SO01013",
@@ -6947,6 +6953,12 @@
 "listed": "2008-10-08",
 "series": "EQ"
 },
+"JPL": {
+"face_value": 10.0,
+"isin": "INE0BJO01010",
+"listed": "2026-10-28",
+"series": "EQ"
+},
 "JPOLYINVST": {
 "face_value": 10.0,
 "isin": "INE147P01019",
@@ -10197,6 +10209,12 @@
 "face_value": 5.0,
 "isin": "INE045601023",
 "listed": "2021-10-01",
+"series": "EQ"
+},
+"PARASHLTH": {
+"face_value": 1.0,
+"isin": "INE661T01029",
+"listed": "2026-10-28",
 "series": "EQ"
 },
 "PARASPETRO": {
