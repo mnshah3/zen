@@ -1,0 +1,45 @@
+name: live wire (the day's filings)
+
+# The day's NSE filings for the owner's site's wire (jobs/live_wire.py), every ten minutes in market
+# hours and every fifteen in the evening, when most results are filed. The file is published alone on
+# the `live` branch as one commit replaced each run, so main's history does not grow and nothing here
+# touches the archive. GitHub may start a scheduled run late; the wire shows the time it was read.
+
+on:
+  schedule:
+    - cron: "*/10 3-10 * * 1-5"          # 08:30 to 16:20 IST
+    - cron: "*/15 11-17 * * 1-5"         # 16:30 to 23:15 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-wire
+  cancel-in-progress: true
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+      - name: read the day's filings
+        run: python -m jobs.live_wire --out "$RUNNER_TEMP/wire/live/filings.json"
+      - name: publish on the live branch
+        run: |
+          cd "$RUNNER_TEMP/wire"
+          git init -q -b live
+          git config user.name  "zen-bot"
+          git config user.email "actions@github.com"
+          git add live/filings.json
+          git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live
