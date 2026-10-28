@@ -101,6 +101,11 @@ jobs:
         timeout-minutes: 5
         run: python -m jobs.update_events
 
+      - name: sustainability reports (what each company does)
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python -m jobs.update_brsr --days 10
+
       - name: commit new data
         run: |
           git config user.name  "zen-bot"
@@ -114,6 +119,7 @@ jobs:
           [ ! -d data/events ] || git add data/events
           [ ! -d data/segments ] || git add data/segments
           [ ! -d data/rpt ] || git add data/rpt
+          [ ! -d data/brsr ] || git add data/brsr
           [ ! -d data/bse_announcements ] || git add data/bse_announcements
           [ ! -f data/reference/bse_scrips.parquet ] || git add data/reference/bse_scrips.parquet
           git add data/reference/industry_nse.parquet

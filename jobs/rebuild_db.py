@@ -26,7 +26,7 @@ import logging
 
 from zen.data import (announcements, bank_results, bse_announcements, corpactions, events, financials, indices,
                       market_daily, shareholding, shareholding_detail, statements, store)
-from zen.data import amfi_nav, bse_results, fpi_sectors, index_members, insider, ratings, rpt, segments
+from zen.data import amfi_nav, brsr, bse_results, fpi_sectors, index_members, insider, ratings, rpt, segments
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +69,7 @@ def main() -> int:
         ("ratings", lambda: ratings.rebuild(con)),                    # credit rating actions, read from the filings
         ("segments", lambda: segments.rebuild(con)),                  # revenue and profit by business segment
         ("rpt", lambda: rpt.rebuild(con)),                            # related-party transactions, half-yearly
+        ("brsr", lambda: brsr.rebuild(con)),                          # what each company does, from its BRSR
     ]
 
     try:
