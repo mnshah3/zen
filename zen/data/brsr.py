@@ -89,7 +89,7 @@ def parse_brsr(content: bytes) -> dict | None:
 
     acts = [{"main": _txt(r.get("main")), "business": _txt(r.get("business")), "share": _num(r.get("share"))}
             for r in rows(ACT_AXIS, {"DescriptionOfMainActivity": "main", "DescriptionOfBusinessActivity": "business",
-                                     "PercentageOfTurnoverOfTheEntity": "share"})]
+                                     "PercentageOfTurnoverOfTheEntity": "share", "PercentageOfTotalTurnoverForBusinessActivities": "share"})]
     prods = [{"name": _txt(r.get("name")), "nic": _txt(r.get("nic")), "share": _num(r.get("share"))}
              for r in rows(PROD_AXIS, {"ProductOrServiceSoldByTheEntity": "name", "NICCodeOfProductOrServiceSoldByTheEntity": "nic",
                                        "PercentageOfTotalTurnoverForProductOrServiceSold": "share"})]
