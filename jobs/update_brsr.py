@@ -31,6 +31,7 @@ def main(argv=None) -> int:
     ap.add_argument("--latest-only", action="store_true", help="only each company's latest report")
     ap.add_argument("--rate", type=float, default=2.0, help="downloads a second")
     ap.add_argument("--refill", action="store_true", help="read again the stored filings without group companies")
+    ap.add_argument("--minutes", type=float, default=None, help="stop reading after this long (what was read is kept)")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     s = requests.Session()
@@ -52,14 +53,17 @@ def main(argv=None) -> int:
         done -= set(stored.loc[stored["group_cos"].isna(), "xbrl_url"]) if "group_cos" in stored else done
     todo = lst[~lst["xbrl_url"].isin(done)]
     log.info("%d filings listed, %d to read", len(lst), len(todo))
-    rows, n_ok, n_bad, last = [], 0, 0, 0.0
+    rows, n_ok, n_bad, last, t0 = [], 0, 0, 0.0, time.monotonic()
     for m in todo.to_dict("records"):
+        if a.minutes is not None and time.monotonic() - t0 > a.minutes * 60:
+            log.info("time is up: stopping, the rest for the next run")
+            break
         wait = 1.0 / a.rate - (time.monotonic() - last)
         if wait > 0:
             time.sleep(wait)
         last = time.monotonic()
         try:
-            resp = s.get(m["xbrl_url"], timeout=(6, 30))
+            resp = s.get(m["xbrl_url"], timeout=(6, 15))
             resp.raise_for_status()
             parsed = brsr.parse_brsr(resp.content)
         except requests.RequestException:

@@ -26,7 +26,7 @@ concurrency:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,9 +47,10 @@ jobs:
           fi
 
       - name: read the filings
-        run: python -m jobs.update_brsr --days "${{ inputs.days }}" --latest-only --rate 2 ${{ inputs.refill && '--refill' || '' }}
+        run: python -m jobs.update_brsr --days "${{ inputs.days }}" --latest-only --rate 2 --minutes 150 ${{ inputs.refill && '--refill' || '' }}
 
       - name: commit what was read
+        if: always()                     # a run stopped early keeps what it read
         run: |
           git config user.name  "zen-bot"
           git config user.email "actions@github.com"

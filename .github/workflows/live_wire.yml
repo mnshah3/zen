@@ -1,14 +1,17 @@
 name: live wire (the day's filings)
 
-# The day's NSE filings for the owner's site's wire (jobs/live_wire.py), every ten minutes in market
-# hours and every fifteen in the evening, when most results are filed. The file is published alone on
-# the `live` branch as one commit replaced each run, so main's history does not grow and nothing here
-# touches the archive. GitHub may start a scheduled run late; the wire shows the time it was read.
+# The day's NSE filings for the owner's site's wire (jobs/live_wire.py), read every five minutes.
+# GitHub ran a ten-minute schedule only once in the first market day (29 Oct 2026), so each start now
+# runs for nearly six hours and reads in a loop; three starts a weekday cover 08:50 IST to past
+# midnight, and a start cancels the one still running. The file is published alone on the `live`
+# branch as one commit replaced each time, so main's history does not grow. The wire shows the time
+# it was read.
 
 on:
   schedule:
-    - cron: "*/10 3-10 * * 1-5"          # 08:30 to 16:20 IST
-    - cron: "*/15 11-17 * * 1-5"         # 16:30 to 23:15 IST
+    - cron: "20 3 * * 1-5"               # 08:50 IST
+    - cron: "20 9 * * 1-5"               # 14:50 IST, through the results filed after the close
+    - cron: "20 15 * * 1-5"              # 20:50 IST
   workflow_dispatch:
 
 permissions:
@@ -21,7 +24,7 @@ concurrency:
 jobs:
   wire:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,14 +35,19 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-lock.txt
       - run: pip install -r requirements-lock.txt
-      - name: read the day's filings
-        run: python -m jobs.live_wire --out "$RUNNER_TEMP/wire/live/filings.json"
-      - name: publish on the live branch
+      - name: read the day's filings every five minutes and publish them on the live branch
         run: |
-          cd "$RUNNER_TEMP/wire"
-          git init -q -b live
-          git config user.name  "zen-bot"
-          git config user.email "actions@github.com"
-          git add live/filings.json
-          git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live
+          end=$(( $(date +%s) + 345 * 60 ))
+          git config --global user.name  "zen-bot"
+          git config --global user.email "actions@github.com"
+          while [ "$(date +%s)" -lt "$end" ]; do
+            out="$RUNNER_TEMP/wire"
+            rm -rf "$out" && mkdir -p "$out/live"
+            if python -m jobs.live_wire --out "$out/live/filings.json"; then
+              ( cd "$out" && git init -q -b live && git add live/filings.json && git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)" &&
+                git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live ) || echo "publish failed, next round"
+            else
+              echo "NSE did not answer, next round"
+            fi
+            sleep 300
+          done
