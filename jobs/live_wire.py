@@ -7,8 +7,8 @@
 Run every ten minutes in market hours by .github/workflows/live_wire.yml, which publishes the file
 alone on the `live` branch (one commit, replaced each run, so the repository's history does not
 grow). The site reads it through its own /api/wire. Each filing: its time, the symbol, the company,
-zen's category (zen.data.filing_types, as the archive), whether NSE counts it material for the day
-(announcements.MATERIAL), the subject and NSE's link. Newest first; nothing is summarised.
+zen's category (zen.data.filing_types, as the archive), whether it is material for the day
+(announcements.MATERIAL, less the call schedules, recordings and transcripts), the subject and NSE's link. Newest first; nothing is summarised.
 """
 from __future__ import annotations
 
@@ -23,11 +23,23 @@ from zen.data import announcements, filing_types
 OUT = Path("live/filings.json")
 KEEP = 600                      # filings kept, newest first
 IST = timezone(timedelta(hours=5, minutes=30))
+# NSE subtypes the wire does not count as news though their category is material: the schedule of an
+# analysts' call, its recording and its transcript (on 29 Oct 2026 most of the wire's "material"
+# filings in the evening were "Link of Recording" and "Schedule of meet")
+ROUTINE = {filing_types._norm(x) for x in (
+    "Analysts/Institutional Investor Meet/Con. Call Updates",
+    "Recording of Analysts/Institutional Investor Meet/Con. Call",
+    "Transcript of Analysts/Institutional Investor Meet/Con. Call")}
+
+
+def material(category: str, subject) -> bool:
+    """Material for the wire: a material category (announcements.MATERIAL) and not a ROUTINE subtype."""
+    return category in announcements.MATERIAL and filing_types._norm(filing_types.subtype(subject)) not in ROUTINE
 
 
 def build(df) -> dict:
     df = df.sort_values("an_dt", ascending=False).head(KEEP)
-    rows = [[r.an_dt.strftime("%Y-%m-%d %H:%M:%S"), r.symbol, r.company, r.category, r.category in announcements.MATERIAL,
+    rows = [[r.an_dt.strftime("%Y-%m-%d %H:%M:%S"), r.symbol, r.company, r.category, material(r.category, r.subject),
              filing_types.gist(r.subject, 220), r.url] for r in df.itertuples()]
     return {"at": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S"), "n": len(rows),
             "cols": ["t", "s", "n", "cat", "material", "gist", "url"], "rows": rows}
