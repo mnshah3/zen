@@ -1127,6 +1127,12 @@
 "listed": "2025-07-22",
 "series": "EQ"
 },
+"ARHAM": {
+"face_value": 10.0,
+"isin": "INE0L2Y01011",
+"listed": "2026-10-30",
+"series": "EQ"
+},
 "ARIES": {
 "face_value": 10.0,
 "isin": "INE298I01015",
@@ -6399,6 +6405,12 @@
 "face_value": 2.0,
 "isin": "INE611L01021",
 "listed": "2011-03-11",
+"series": "EQ"
+},
+"INDTONER": {
+"face_value": 2.0,
+"isin": "INE826B01026",
+"listed": "2026-10-30",
 "series": "EQ"
 },
 "INDUSINDBK": {
@@ -12555,7 +12567,7 @@
 "face_value": 5.0,
 "isin": "INE879A01019",
 "listed": "2000-03-13",
-"series": "EQ"
+"series": "BE"
 },
 "SHRENIK": {
 "face_value": 1.0,
