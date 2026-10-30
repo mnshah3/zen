@@ -4023,7 +4023,7 @@
 "face_value": 10.0,
 "isin": "INE927X01018",
 "listed": "2026-04-20",
-"series": "EQ"
+"series": "BE"
 },
 "ELDEHSG": {
 "face_value": 2.0,
@@ -4845,7 +4845,7 @@
 "face_value": 1.0,
 "isin": "INE538A01037",
 "listed": "1995-05-25",
-"series": "EQ"
+"series": "BE"
 },
 "GHCL": {
 "face_value": 10.0,
@@ -5763,7 +5763,7 @@
 "face_value": 5.0,
 "isin": "INE00RL01028",
 "listed": "2025-08-12",
-"series": "EQ"
+"series": "BE"
 },
 "HILTON": {
 "face_value": 10.0,
@@ -7173,7 +7173,7 @@
 "face_value": 10.0,
 "isin": "INE411F01010",
 "listed": "2026-04-20",
-"series": "EQ"
+"series": "BE"
 },
 "KAMANWALA": {
 "face_value": 10.0,
@@ -7407,7 +7407,7 @@
 "face_value": 10.0,
 "isin": "INE029L01018",
 "listed": "2011-01-14",
-"series": "EQ"
+"series": "BE"
 },
 "KILITCH": {
 "face_value": 10.0,
@@ -8319,7 +8319,7 @@
 "face_value": 10.0,
 "isin": "INE288A01013",
 "listed": "1995-02-08",
-"series": "EQ"
+"series": "BE"
 },
 "MAHSEAMLES": {
 "face_value": 5.0,
@@ -9753,7 +9753,7 @@
 "face_value": 10.0,
 "isin": "INE023A01030",
 "listed": "2003-11-17",
-"series": "EQ"
+"series": "BE"
 },
 "NSLNISP": {
 "face_value": 10.0,
@@ -10479,7 +10479,7 @@
 "face_value": 10.0,
 "isin": "INE417C01014",
 "listed": "2015-12-08",
-"series": "EQ"
+"series": "BE"
 },
 "PILITA": {
 "face_value": 1.0,
@@ -12729,7 +12729,7 @@
 "face_value": 10.0,
 "isin": "INE923A01015",
 "listed": "1996-05-22",
-"series": "EQ"
+"series": "BE"
 },
 "SILVERTUC": {
 "face_value": 2.0,
@@ -14463,7 +14463,7 @@
 "face_value": 5.0,
 "isin": "INE105A01035",
 "listed": "2012-10-23",
-"series": "EQ"
+"series": "BE"
 },
 "TVSMOTOR": {
 "face_value": 1.0,
@@ -15471,7 +15471,7 @@
 "face_value": 10.0,
 "isin": "INE210A01017",
 "listed": "1995-02-08",
-"series": "EQ"
+"series": "BE"
 },
 "WINDLAS": {
 "face_value": 5.0,

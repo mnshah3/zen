@@ -575,3 +575,16 @@ https://nsearchives.nseindia.com/corporate/xbrl/IT_2568_WebXMLFile_20261028_1437
 https://nsearchives.nseindia.com/corporate/xbrl/IT_91_WebXMLFile_20261028_141429588.xml
 https://nsearchives.nseindia.com/corporate/xbrl/IT_15677_WebXMLFile_20261028_100239015.xml
 https://nsearchives.nseindia.com/corporate/xbrl/IT_15677_WebXMLFile_20261028_100212859.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_3013_WebXMLFile_20261029_202828061.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_2696_WebXMLFile_20261029_200955842.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_2460_WebXMLFile_20261029_182156263.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_233_WebXMLFile_20261029_172100958.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_1299_WebXMLFile_20261029_171729430.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_624_WebXMLFile_20261029_162038635.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_20276_WebXMLFile_20261029_161105248.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_17571_WebXMLFile_20261029_155944284.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_2266_WebXMLFile_20261029_154056749.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_11353_WebXMLFile_20261029_122855945.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_180_WebXMLFile_20261029_120656926.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_1257_WebXMLFile_20261029_101919601.xml
+https://nsearchives.nseindia.com/corporate/xbrl/IT_1597_WebXMLFile_20261029_093618789.xml
