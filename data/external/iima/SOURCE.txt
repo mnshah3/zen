@@ -10,3 +10,9 @@ Access:  public, no login; the page asks only for the citation above.
 
 Files are saved unmodified. Values are percent per month.
 Used by jobs/crosscheck_iima.py, which reads only 2016-01..2022-12 (holdout lock).
+
+2026-11-01: added the daily four-factor file of the same release
+(2025-12_FourFactors_and_Market_Returns_Daily_SurvivorshipBiasAdjusted.csv, 831,223 bytes,
+1993-10-01 to 2025-12-31, saved unmodified). Re-checked that day: 2025-12 is still the latest
+release. Compounding the daily file by calendar month reproduces the monthly file exactly in all
+385 months (MF, SMB, HML, WML, RF). Used by zen-portfolios research/comove.py (styles).
