@@ -1,21 +1,26 @@
 name: live wire (the day's filings)
 
-# The day's NSE filings for the owner's site's wire (jobs/live_wire.py), read every five minutes.
-# GitHub ran a ten-minute schedule only once in the first market day (29 Oct 2026), so each start now
-# runs for nearly six hours and reads in a loop; three starts a weekday cover 08:50 IST to past
-# midnight, and a start cancels the one still running. The file is published alone on the `live`
-# branch as one commit replaced each time, so main's history does not grow. The wire shows the time
-# it was read.
+# The NSE filings of the last three days and the figures of the results among them, for the owner's
+# site (jobs/live_wire.py), read every five minutes. GitHub ran a ten-minute schedule only once in the
+# first market day (29 Oct 2026), so each start runs for nearly six hours and reads in a loop; three
+# starts a day cover 08:50 IST to past 02:30, and a start cancels the one still running. Every day of
+# the week since 2 Nov 2026: companies file results on Saturdays, and Reliance's of Friday 30 Oct
+# (figures at 21:32 IST) waited for Monday night. The files are published alone on the `live` branch
+# as one commit replaced each time, so main's history does not grow; each says when it was read. The
+# results file a round starts from is the last one published, so a filing is parsed once.
+# GitHub started none of the three on 2 Nov 2026 on time (08:50 never, 14:50 at 16:56, 20:50 never),
+# so each run starts the next as it ends and the schedules below only restart a broken chain.
 
 on:
   schedule:
-    - cron: "20 3 * * 1-5"               # 08:50 IST
-    - cron: "20 9 * * 1-5"               # 14:50 IST, through the results filed after the close
-    - cron: "20 15 * * 1-5"              # 20:50 IST
+    - cron: "20 3 * * *"                 # 08:50 IST
+    - cron: "20 9 * * *"                 # 14:50 IST, through the results filed after the close
+    - cron: "20 15 * * *"                # 20:50 IST
   workflow_dispatch:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: live-wire
@@ -35,19 +40,29 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-lock.txt
       - run: pip install -r requirements-lock.txt
-      - name: read the day's filings every five minutes and publish them on the live branch
+      - name: read the filings and the results' figures every five minutes and publish them on the live branch
         run: |
           end=$(( $(date +%s) + 345 * 60 ))
+          prev="$RUNNER_TEMP/results-prev.json"
+          curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/live/live/results.json" -o "$prev" || rm -f "$prev"
           git config --global user.name  "zen-bot"
           git config --global user.email "actions@github.com"
           while [ "$(date +%s)" -lt "$end" ]; do
             out="$RUNNER_TEMP/wire"
             rm -rf "$out" && mkdir -p "$out/live"
-            if python -m jobs.live_wire --out "$out/live/filings.json"; then
-              ( cd "$out" && git init -q -b live && git add live/filings.json && git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)" &&
+            # a round whose results read fails publishes the last results file again
+            [ -f "$prev" ] && cp "$prev" "$out/live/results.json"
+            if python -m jobs.live_wire --days 3 --out "$out/live/filings.json" --results-out "$out/live/results.json" --prev "$prev"; then
+              [ -f "$out/live/results.json" ] && cp "$out/live/results.json" "$prev"
+              ( cd "$out" && git init -q -b live && git add live && git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)" &&
                 git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live ) || echo "publish failed, next round"
             else
               echo "NSE did not answer, next round"
             fi
             sleep 300
           done
+      - name: start the next run
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run live_wire.yml --ref main
