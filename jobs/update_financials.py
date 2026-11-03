@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import time
 from datetime import date, timedelta
 
 import pandas as pd
@@ -18,6 +19,9 @@ from zen.data import financials as fin, freshness, rpt, segments, store, xbrl_ca
 log = logging.getLogger(__name__)
 CHUNK_DAYS = 30          # one results-season slice at a time
 FLUSH_EVERY = 400
+RETRY_PAUSE = 30         # seconds before the failed downloads are tried again
+RETRY_GAP = 0.5          # seconds between them the second time
+FAILED = object()        # take(): the document could not be downloaded or parsed
 
 
 def main() -> int:
@@ -56,9 +60,49 @@ def main() -> int:
     log.info("%d filing documents already stored", len(have))
 
     total_new, buf, cur = 0, [], start
-    failed_windows, failed_docs = [], 0
+    failed_windows, retry = [], []
     seg_rows: list[dict] = []                # segments of the documents fetched (zen.data.segments)
     rpt_rows: list[dict] = []                # related-party transactions in them (zen.data.rpt)
+
+    def take(meta, session):
+        """One filing: its derived row (None when it carries no figures), or FAILED when it could not be
+        downloaded or parsed. A stored copy is read instead of downloaded; a download is stored before
+        it is parsed (zen/data/xbrl_cache.py)."""
+        nonlocal seg_rows, rpt_rows
+        try:
+            content = xbrl_cache.get(meta["xbrl_url"])
+            if content is None:
+                resp = session.get(meta["xbrl_url"], timeout=60)
+                resp.raise_for_status()
+                content = resp.content
+                xbrl_cache.put(meta["xbrl_url"], content)
+            facts = fin.parse_xbrl(content)
+        except Exception:                                        # noqa: BLE001
+            return FAILED
+        try:                        # revenue and profit by segment from the same document
+            seg_rows += segments.rows_for(meta, segments.parse_segments(content))
+        except Exception:                                        # noqa: BLE001
+            pass
+        try:                        # and the related-party transactions a half year's standalone filing discloses
+            rpt_rows += rpt.rows_for(meta, rpt.parse_rpt(content))
+        except Exception:                                        # noqa: BLE001
+            pass
+        if not facts:
+            return None
+        have.add(meta["xbrl_url"])
+        return fin._derive({**meta, **facts})
+
+    def store_rows(rows) -> int:
+        nonlocal buf
+        df = pd.DataFrame(rows).reindex(columns=fin.COLUMNS)
+        # Parquet first. The database is rebuilt from parquet, so a row
+        # that reached the database but not the file would be skipped
+        # by every later run and then vanish at the next rebuild.
+        buf.append(df)
+        if sum(len(b) for b in buf) >= FLUSH_EVERY:
+            fin.write_parquet(pd.concat(buf, ignore_index=True))
+            buf = []
+        return fin.upsert(con, df)
     while cur <= end:
         stop = min(cur + timedelta(days=CHUNK_DAYS), end)
         try:
@@ -79,42 +123,34 @@ def main() -> int:
             session = fin._session()
             rows = []
             for meta in idx.to_dict("records"):
-                try:
-                    # A stored copy is read instead of downloaded; a download
-                    # is stored before it is parsed (zen/data/xbrl_cache.py).
-                    content = xbrl_cache.get(meta["xbrl_url"])
-                    if content is None:
-                        resp = session.get(meta["xbrl_url"], timeout=60)
-                        resp.raise_for_status()
-                        content = resp.content
-                        xbrl_cache.put(meta["xbrl_url"], content)
-                    facts = fin.parse_xbrl(content)
-                except Exception:                                # noqa: BLE001
-                    failed_docs += 1        # not in `have`, so retried next run
-                    continue
-                try:                        # revenue and profit by segment from the same document
-                    seg_rows += segments.rows_for(meta, segments.parse_segments(content))
-                except Exception:                                # noqa: BLE001
-                    pass
-                try:                        # and the related-party transactions a half year's standalone filing discloses
-                    rpt_rows += rpt.rows_for(meta, rpt.parse_rpt(content))
-                except Exception:                                # noqa: BLE001
-                    pass
-                if facts:
-                    rows.append(fin._derive({**meta, **facts}))
-                    have.add(meta["xbrl_url"])
+                row = take(meta, session)
+                if row is FAILED:
+                    retry.append(meta)
+                elif row is not None:
+                    rows.append(row)
             if rows:
-                df = pd.DataFrame(rows).reindex(columns=fin.COLUMNS)
-                # Parquet first. The database is rebuilt from parquet, so a row
-                # that reached the database but not the file would be skipped
-                # by every later run and then vanish at the next rebuild.
-                buf.append(df)
-                if sum(len(b) for b in buf) >= FLUSH_EVERY:
-                    fin.write_parquet(pd.concat(buf, ignore_index=True))
-                    buf = []
-                total_new += fin.upsert(con, df)
+                total_new += store_rows(rows)
                 log.info("%s to %s: +%d (total %d)", cur, stop, len(rows), total_new)
         cur = stop + timedelta(days=1)
+
+    # A second pass over the downloads that failed, after a pause and slower (2 Nov 2026: 246 of the
+    # week's filings failed within 35 seconds, NSE refusing the burst, among them Reliance's and
+    # NTPC's results, and the evening's export went without them)
+    failed_docs = 0
+    if retry:
+        log.warning("%d documents failed; trying them again after %d seconds", len(retry), RETRY_PAUSE)
+        time.sleep(RETRY_PAUSE)
+        session, rows = fin._session(), []
+        for meta in retry:
+            row = take(meta, session)
+            if row is FAILED:
+                failed_docs += 1                # not in `have`, so retried next run
+            elif row is not None:
+                rows.append(row)
+            time.sleep(RETRY_GAP)
+        if rows:
+            total_new += store_rows(rows)
+            log.info("second pass: +%d (total %d)", len(rows), total_new)
 
     if buf:
         fin.write_parquet(pd.concat(buf, ignore_index=True))

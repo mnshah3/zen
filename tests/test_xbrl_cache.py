@@ -264,6 +264,41 @@ def run_update(monkeypatch, docs, calls):
     return pd.concat(written, ignore_index=True) if written else pd.DataFrame()
 
 
+def test_update_financials_tries_a_failed_download_again_before_giving_up(monkeypatch, cache_dir):
+    """2 Nov 2026: NSE refused a burst of downloads and the week's results waited a day."""
+    import jobs.update_financials as uf
+    docs = synthetic_docs()
+    flaky = sorted(u for u in docs if "INDAS_" in u)[:2]
+    tries = {}
+
+    class Flaky(StubSession):
+        def get(self, url, timeout=None):
+            tries[url] = tries.get(url, 0) + 1
+            if url in flaky and tries[url] == 1:
+                raise ConnectionError("refused")
+            return super().get(url, timeout)
+
+    monkeypatch.setattr(uf, "RETRY_PAUSE", 0)
+    monkeypatch.setattr(uf, "RETRY_GAP", 0)
+    with monkeypatch.context() as m:
+        uncached(m)
+        m.setattr(uf.fin, "_session", lambda: Flaky(docs, []))
+        listing = pd.DataFrame([{
+            "symbol": f"S{i}", "company": f"Co {i}", "period_end": date(2025, 9, 30),
+            "broadcast_dt": datetime(2025, 11, 1, 10) + timedelta(minutes=i), "consolidated": True,
+            "audited": False, "xbrl_url": u} for i, u in enumerate(docs)])
+        written = []
+        m.setattr(uf.store, "connect", lambda: duckdb.connect(":memory:"))
+        m.setattr(uf.fin, "listing", lambda start, end: listing)
+        m.setattr(uf.fin, "write_parquet", lambda df: written.append(df.copy()))
+        m.setattr(uf.freshness, "record", lambda *a, **k: None)
+        m.setattr(sys, "argv", ["update_financials", "--start", "2025-11-01", "--end", "2025-11-02"])
+        uf.main()
+    got = pd.concat(written, ignore_index=True)
+    assert len(got) == 6 and set(flaky) <= set(got["xbrl_url"])
+    assert all(tries[u] == 2 for u in flaky)
+
+
 def test_update_financials_identical_cached_and_uncached(monkeypatch, cache_dir):
     docs = synthetic_docs()
     with monkeypatch.context() as m:
