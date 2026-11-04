@@ -96,6 +96,10 @@ jobs:
         continue-on-error: true
         timeout-minutes: 10
         run: python -m jobs.update_industry_new --limit 60
+      - name: NSE's issued share counts, a seventh of them
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python -m jobs.fetch_issued --limit 400
       - name: event calendar
         continue-on-error: true
         timeout-minutes: 5
@@ -111,6 +115,7 @@ jobs:
           git config user.name  "zen-bot"
           git config user.email "actions@github.com"
           git add data/announcements data/financials data/corpactions
+          [ ! -f data/reference/issued_nse.parquet ] || git add data/reference/issued_nse.parquet
           [ ! -d data/shareholding ] || git add data/shareholding
           [ ! -d data/pledges ] || git add data/pledges
           [ ! -d data/shareholding_detail ] || git add data/shareholding_detail
