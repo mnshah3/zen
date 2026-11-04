@@ -4211,6 +4211,12 @@
 "listed": "2026-08-17",
 "series": "EQ"
 },
+"ENNATURE": {
+"face_value": 5.0,
+"isin": "INE2WCT01016",
+"listed": "2026-11-04",
+"series": "BE"
+},
 "ENRIN": {
 "face_value": 2.0,
 "isin": "INE1NPP01017",
@@ -4353,6 +4359,12 @@
 "face_value": 10.0,
 "isin": "INE295A01018",
 "listed": "1995-03-29",
+"series": "EQ"
+},
+"EVONILE": {
+"face_value": 5.0,
+"isin": "INE234A01025",
+"listed": "2026-04-20",
 "series": "EQ"
 },
 "EXCELINDUS": {
@@ -6154,6 +6166,12 @@
 "isin": "INE203G01027",
 "listed": "2003-12-26",
 "series": "EQ"
+},
+"IGLSPIRITS": {
+"face_value": 5.0,
+"isin": "INE2W6901017",
+"listed": "2026-11-04",
+"series": "BE"
 },
 "IGPL": {
 "face_value": 10.0,
@@ -8729,6 +8747,12 @@
 "listed": "2025-08-28",
 "series": "EQ"
 },
+"MELSTAR": {
+"face_value": 10.0,
+"isin": "INE817A01050",
+"listed": "2000-03-07",
+"series": "BE"
+},
 "MENNPIS": {
 "face_value": 1.0,
 "isin": "INE650G01029",
@@ -8883,6 +8907,12 @@
 "face_value": 10.0,
 "isin": "INE227F01010",
 "listed": "2026-08-17",
+"series": "EQ"
+},
+"MKJEWELS": {
+"face_value": 10.0,
+"isin": "INE2IXO01012",
+"listed": "2026-11-04",
 "series": "EQ"
 },
 "MKPL": {
@@ -9729,12 +9759,6 @@
 "face_value": 2.0,
 "isin": "INE02H701025",
 "listed": "2024-01-31",
-"series": "EQ"
-},
-"NOVARTIND": {
-"face_value": 5.0,
-"isin": "INE234A01025",
-"listed": "2026-04-20",
 "series": "EQ"
 },
 "NPST": {
