@@ -9,7 +9,7 @@
 "face_value": 10.0,
 "isin": "INE253B01015",
 "listed": "1995-05-03",
-"series": "EQ"
+"series": "BE"
 },
 "360ONE": {
 "face_value": 1.0,
@@ -1667,6 +1667,12 @@
 "listed": "2003-10-17",
 "series": "EQ"
 },
+"BAHETI": {
+"face_value": 10.0,
+"isin": "INE029Q01017",
+"listed": "2026-11-06",
+"series": "EQ"
+},
 "BAIDFIN": {
 "face_value": 2.0,
 "isin": "INE020D01022",
@@ -1942,6 +1948,12 @@
 "isin": "INE00SW01015",
 "listed": "2026-03-27",
 "series": "EQ"
+},
+"BCSSL": {
+"face_value": 10.0,
+"isin": "INE0XFY01011",
+"listed": "2026-11-05",
+"series": "BE"
 },
 "BDL": {
 "face_value": 5.0,
@@ -2457,6 +2469,12 @@
 "face_value": 10.0,
 "isin": "INE630D01010",
 "listed": "2026-08-17",
+"series": "EQ"
+},
+"BRIGHTOUTD": {
+"face_value": 10.0,
+"isin": "INE0OMI01019",
+"listed": "2026-11-06",
 "series": "EQ"
 },
 "BRITANNIA": {
@@ -5070,8 +5088,8 @@
 "series": "EQ"
 },
 "GNRL": {
-"face_value": 10.0,
-"isin": "INE207H01018",
+"face_value": 1.0,
+"isin": "INE207H01026",
 "listed": "2026-04-20",
 "series": "EQ"
 },
