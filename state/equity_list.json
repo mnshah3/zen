@@ -1221,7 +1221,7 @@
 "face_value": 10.0,
 "isin": "INE006Z01016",
 "listed": "2021-03-22",
-"series": "EQ"
+"series": "BE"
 },
 "ARVIND": {
 "face_value": 10.0,
@@ -2295,7 +2295,7 @@
 "face_value": 2.0,
 "isin": "INE657B01025",
 "listed": "1997-03-12",
-"series": "EQ"
+"series": "BE"
 },
 "BLUECLOUDS": {
 "face_value": 1.0,
@@ -4311,6 +4311,12 @@
 "face_value": 1.0,
 "isin": "INE0DRI01029",
 "listed": "2026-09-04",
+"series": "EQ"
+},
+"ESFL": {
+"face_value": 10.0,
+"isin": "INE0ITO01014",
+"listed": "2026-11-13",
 "series": "EQ"
 },
 "ESSARSHPNG": {
@@ -13636,6 +13642,12 @@
 "isin": "INE495B01038",
 "listed": "2003-10-23",
 "series": "EQ"
+},
+"SUVID-RE": {
+"face_value": 1.0,
+"isin": "INE018420013",
+"listed": "2026-11-13",
+"series": "BE"
 },
 "SUVIDHAA": {
 "face_value": 1.0,
