@@ -477,7 +477,7 @@
 "face_value": 10.0,
 "isin": "INE692Z01013",
 "listed": "2024-10-23",
-"series": "EQ"
+"series": "BE"
 },
 "AFIL": {
 "face_value": 1.0,
@@ -1845,7 +1845,7 @@
 "face_value": 10.0,
 "isin": "INE862Y01015",
 "listed": "2020-10-29",
-"series": "EQ"
+"series": "BE"
 },
 "BANKBARODA": {
 "face_value": 2.0,
@@ -3699,7 +3699,7 @@
 "face_value": 10.0,
 "isin": "INE731U01028",
 "listed": "2021-10-18",
-"series": "EQ"
+"series": "BE"
 },
 "DISAQ": {
 "face_value": 10.0,
@@ -7887,7 +7887,7 @@
 "face_value": 1.0,
 "isin": "INE740X01023",
 "listed": "2023-04-10",
-"series": "EQ"
+"series": "BE"
 },
 "LALITHAA": {
 "face_value": 5.0,
@@ -8397,7 +8397,7 @@
 "face_value": 10.0,
 "isin": "INE987A01010",
 "listed": "2026-08-17",
-"series": "EQ"
+"series": "BE"
 },
 "MALLCOM": {
 "face_value": 10.0,
