@@ -57,6 +57,14 @@ def listing_window(start: date, end: date, step_days: int = 5) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
+def doc_key(url) -> str:
+    """A filing's document by its name, whatever host served it. NSE moved its archive from nsearchives.nseindia.com
+    to nsearchives.nseindia.in (seen 17 Nov 2026): compared by the full address, every document already held looked
+    missing (a dry run of June 2022 listed 2,569 of 2,569 as not held), and a real run would have stored each twice."""
+    u = str(url or "").strip().lower()
+    return u.split("/corporate/", 1)[1] if "/corporate/" in u else u
+
+
 def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     ap = argparse.ArgumentParser()
@@ -91,7 +99,8 @@ def main(argv=None) -> int:
         return 1
     L["period_end"] = pd.to_datetime(L["period_end"])
     target = L[L["period_end"] == pe].drop_duplicates("xbrl_url")
-    todo = target[~target["xbrl_url"].isin(set(held["xbrl_url"]))].copy()
+    have = {doc_key(u) for u in held["xbrl_url"]}
+    todo = target[~target["xbrl_url"].map(doc_key).isin(have)].copy()
     gain = set(todo["symbol"]) - set(held["symbol"])
     log.info("listed %d filings for %s across %d companies; %d documents not held, "
              "%d companies entirely missing", len(target), pe.date(),
@@ -114,7 +123,7 @@ def main(argv=None) -> int:
     held["period_end"] = pd.to_datetime(held["period_end"])
     # Only documents not already held are appended. Existing rows are never
     # de-duplicated or rewritten, even the handful that are stored twice.
-    new = rows[~rows["xbrl_url"].isin(set(held["xbrl_url"]))].drop_duplicates("xbrl_url")
+    new = rows[~rows["xbrl_url"].map(doc_key).isin(have)].drop_duplicates("xbrl_url")
     out = pd.concat([held, new], ignore_index=True)
     out.to_parquet(path, index=False, compression="zstd")
     log.info("wrote %s: %d rows (+%d), %d companies (was %d)", path.name, len(out),
