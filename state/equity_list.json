@@ -2453,6 +2453,12 @@
 "listed": "2026-08-17",
 "series": "EQ"
 },
+"BRAHMVIRAT": {
+"face_value": 10.0,
+"isin": "INE467D01017",
+"listed": "2026-08-17",
+"series": "BE"
+},
 "BRIGADE": {
 "face_value": 10.0,
 "isin": "INE791I01019",
@@ -4221,7 +4227,7 @@
 "face_value": 5.0,
 "isin": "INE2WCT01016",
 "listed": "2026-11-04",
-"series": "BE"
+"series": "EQ"
 },
 "ENRIN": {
 "face_value": 2.0,
@@ -4575,7 +4581,7 @@
 "face_value": 10.0,
 "isin": "INE060J01017",
 "listed": "2011-10-19",
-"series": "EQ"
+"series": "BE"
 },
 "FLFL": {
 "face_value": 2.0,
@@ -6183,7 +6189,7 @@
 "face_value": 5.0,
 "isin": "INE2W6901017",
 "listed": "2026-11-04",
-"series": "BE"
+"series": "EQ"
 },
 "IGPL": {
 "face_value": 10.0,
@@ -15172,12 +15178,6 @@
 "isin": "INE946H01037",
 "listed": "2015-04-23",
 "series": "EQ"
-},
-"VIRAT": {
-"face_value": 10.0,
-"isin": "INE467D01017",
-"listed": "2026-08-17",
-"series": "BE"
 },
 "VIRINCHI": {
 "face_value": 10.0,
