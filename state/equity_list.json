@@ -1953,7 +1953,7 @@
 "face_value": 10.0,
 "isin": "INE0XFY01011",
 "listed": "2026-11-05",
-"series": "BE"
+"series": "EQ"
 },
 "BDL": {
 "face_value": 5.0,
@@ -3046,12 +3046,6 @@
 "isin": "INE823B01015",
 "listed": "2026-08-17",
 "series": "EQ"
-},
-"COMPINFO": {
-"face_value": 2.0,
-"isin": "INE070C01037",
-"listed": "2016-07-07",
-"series": "BZ"
 },
 "COMPUSOFT": {
 "face_value": 2.0,
@@ -12683,7 +12677,7 @@
 "listed": "2026-08-17",
 "series": "EQ"
 },
-"SHUKRAPHAR": {
+"SHUKRAMED": {
 "face_value": 1.0,
 "isin": "INE551C01044",
 "listed": "2026-08-14",
@@ -12795,7 +12789,7 @@
 "face_value": 10.0,
 "isin": "INE923A01015",
 "listed": "1996-05-22",
-"series": "BE"
+"series": "EQ"
 },
 "SILVERTUC": {
 "face_value": 2.0,
