@@ -61,3 +61,14 @@ def test_a_loss_filed_with_a_positive_eps_of_its_own_size_gets_its_sign():
     assert owners["eps_basic"] == 0.83 and fix2 is None                             # the owners' share is a profit: as filed
     far, fix3 = parse(doc(profit=-20781000, cont=1.20, paid=6000000, face=1))
     assert far["eps_basic"] == 1.20 and fix3 is None                                # not that profit over its shares: left
+
+
+def test_a_both_line_eps_that_does_not_fit_the_profit_is_left_as_filed():
+    # HLVL, Jun 2025: a Rs 3.47 crore loss, the both line +0.05; Gangotri Textiles, Jun 2025: -0.10 beside a
+    # loss of Rs 2.38 lakh on 2.13 crore shares (that would be -0.01)
+    f, fix = parse(doc(profit=-34700000, cont=0, both=0.05))
+    assert f["eps_basic"] == 0 and fix is None
+    g, fix2 = parse(doc(profit=-238000, cont=0, both=-0.10, paid=21345460, face=1))
+    assert g["eps_basic"] == 0 and fix2 is None
+    ok, fix3 = parse(doc(profit=-238000, cont=0, both=-0.01, paid=21345460, face=1))
+    assert ok["eps_basic"] == -0.01 and fix3 == "both_line"

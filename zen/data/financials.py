@@ -154,7 +154,8 @@ GENERAL_TAGS = {
 # (Orissa Minerals, Jun 2024: a Rs 2.08 crore loss on 60 lakh shares, EPS filed as 3.46). Read from the same
 # context as the rest of the quarter, the lines below decide, and only within the document itself:
 #   * a continuing-operations EPS that is 0 or absent beside a profit, in a filing with no profit from
-#     discontinued operations, is the "both" line where that one is not 0;
+#     discontinued operations, is the "both" line where that one is not 0, has the profit's sign and, where
+#     the filing states its share count, is that profit over it within 25% (and an EPS's rounding);
 #   * an EPS of 0 on every line beside a profit that is at least 5 paise a share (the filing's own paid-up
 #     capital over its face value) was not given: it is left empty, not 0;
 #   * an EPS of the opposite sign to the profit it is of (the owners' share where the filing states one) that
@@ -170,6 +171,7 @@ EPS_LINES = {
 }
 EPS_SHARE_FLOOR = 0.05          # Rs a share: a profit this large cannot round to an EPS of 0.00
 EPS_SIGN_BAND = 0.02
+EPS_BOTH_BAND = 0.25
 
 
 def _eps_lines(facts: dict) -> str | None:
@@ -182,12 +184,17 @@ def _eps_lines(facts: dict) -> str | None:
     eps = facts.get("eps_basic")
     if not profit:
         return None
-    if not eps and not disc and both:
-        facts["eps_basic"] = both
-        if not facts.get("eps_diluted"):
-            facts["eps_diluted"] = both_d if both_d else both
-        return "both_line"
     shares = paid / face if paid and face and paid > 0 and face > 0 else None
+    of = owners if owners else profit
+    if not eps and not disc and both and (both > 0) == (of > 0):
+        # and, where the filing states its share count, the line is that profit over it (25%, and the
+        # rounding of an EPS filed to two decimals): Gangotri Textiles' -0.10 beside a loss of Rs 2.4 lakh
+        # on 2.1 crore shares is not its EPS, and is left as filed
+        if shares is None or abs(abs(both) * shares / abs(of) - 1) <= EPS_BOTH_BAND + 0.005 / abs(both):
+            facts["eps_basic"] = both
+            if not facts.get("eps_diluted"):
+                facts["eps_diluted"] = both_d if both_d else both
+            return "both_line"
     if shares is None:
         return None
     if eps == 0 and not both and abs(profit) / shares >= EPS_SHARE_FLOOR:
@@ -195,7 +202,6 @@ def _eps_lines(facts: dict) -> str | None:
         if not facts.get("eps_diluted"):
             facts.pop("eps_diluted", None)
         return "not_given"
-    of = owners if owners else profit
     if eps and of and (eps > 0) != (of > 0) and abs(abs(eps) * shares / abs(of) - 1) <= EPS_SIGN_BAND:
         facts["eps_basic"] = -eps
         d = facts.get("eps_diluted")
