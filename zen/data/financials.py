@@ -144,6 +144,67 @@ GENERAL_TAGS = {
 }
 
 
+# EPS ON ANOTHER LINE (20 Nov 2026). The statement has three EPS lines: from continuing operations (the one
+# read, TAGS), from discontinued operations, and from both. Some filers put the quarter's EPS on the wrong
+# one and 0 on the continuing line: Shaily Engineering's consolidated Mar, Jun and Sep 2026 filings show
+# continuing 0, discontinued 8.74, 10.45 and 13.32 and both 8.74, 10.45 and 13.32, with no discontinued
+# operations at all; Orissa Minerals' Sep 2023 one 0, 3.21 and 3.21. Read as filed, its trailing EPS was a
+# quarter of the real one and its P/E history jumped from 74 to 390. Others leave every EPS line at 0 beside
+# a profit (BPL, Sep 2023: Rs 9.8 crore of profit, all six lines 0.00), or drop the minus sign of a loss
+# (Orissa Minerals, Jun 2024: a Rs 2.08 crore loss on 60 lakh shares, EPS filed as 3.46). Read from the same
+# context as the rest of the quarter, the lines below decide, and only within the document itself:
+#   * a continuing-operations EPS that is 0 or absent beside a profit, in a filing with no profit from
+#     discontinued operations, is the "both" line where that one is not 0;
+#   * an EPS of 0 on every line beside a profit that is at least 5 paise a share (the filing's own paid-up
+#     capital over its face value) was not given: it is left empty, not 0;
+#   * an EPS of the opposite sign to the profit it is of (the owners' share where the filing states one) that
+#     is that profit over the filing's own share count within 2% is that EPS with its sign put right.
+# `detail["eps_fix"]` says which, when one applies.
+EPS_LINES = {
+    "BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations": "_eps_both",
+    "DilutedEarningsLossPerShareFromContinuingAndDiscontinuedOperations": "_eps_both_diluted",
+    "ProfitLossFromDiscontinuedOperationsAfterTax": "_profit_discontinued",
+    "ProfitOrLossAttributableToOwnersOfParent": "_profit_owners",
+    "PaidUpValueOfEquityShareCapital": "_paid_up",
+    "FaceValueOfEquityShareCapital": "_face_value",
+}
+EPS_SHARE_FLOOR = 0.05          # Rs a share: a profit this large cannot round to an EPS of 0.00
+EPS_SIGN_BAND = 0.02
+
+
+def _eps_lines(facts: dict) -> str | None:
+    """Put the quarter's EPS right where it is on another line (EPS ON ANOTHER LINE), in place; drops the
+    helper lines. Returns what was done, or None."""
+    both, both_d = facts.pop("_eps_both", None), facts.pop("_eps_both_diluted", None)
+    disc, owners = facts.pop("_profit_discontinued", None), facts.pop("_profit_owners", None)
+    paid, face = facts.pop("_paid_up", None), facts.pop("_face_value", None)
+    profit = facts.get("profit_continuing", facts.get("profit_reported"))
+    eps = facts.get("eps_basic")
+    if not profit:
+        return None
+    if not eps and not disc and both:
+        facts["eps_basic"] = both
+        if not facts.get("eps_diluted"):
+            facts["eps_diluted"] = both_d if both_d else both
+        return "both_line"
+    shares = paid / face if paid and face and paid > 0 and face > 0 else None
+    if shares is None:
+        return None
+    if eps == 0 and not both and abs(profit) / shares >= EPS_SHARE_FLOOR:
+        facts.pop("eps_basic", None)
+        if not facts.get("eps_diluted"):
+            facts.pop("eps_diluted", None)
+        return "not_given"
+    of = owners if owners else profit
+    if eps and of and (eps > 0) != (of > 0) and abs(abs(eps) * shares / abs(of) - 1) <= EPS_SIGN_BAND:
+        facts["eps_basic"] = -eps
+        d = facts.get("eps_diluted")
+        if d and (d > 0) == (eps > 0):
+            facts["eps_diluted"] = -d
+        return "sign"
+    return None
+
+
 def _insurer_facts(facts: dict, general: bool) -> dict:
     """The lines an insurer's format does not state the way the Ind-AS one does (see LIFE_TAGS)."""
     if "eps_basic" in facts:
@@ -398,6 +459,8 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
     general = insurer and GENERAL_MARK in content
     if insurer:
         tagmap = {**TAGS, **(GENERAL_TAGS if general else LIFE_TAGS)}
+    elif tags is None:
+        tagmap = {**TAGS, **EPS_LINES}            # helper lines, read and dropped below (EPS ON ANOTHER LINE)
     try:
         root = ET.fromstring(content)
     except ET.ParseError as e:
@@ -613,7 +676,7 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
         # context stands, so this can add a missing figure and never replace one.
         collect(fb_dur | fb_inst)
 
-    took = set(source.values())
+    took = {ref for col, ref in source.items() if not col.startswith("_")}     # the helper lines are not figures
     if took & dur:
         facts["quarter_span_days"] = span_days
     elif took & fb_dur:
@@ -623,6 +686,7 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
         duration_source = None
     if insurer:
         _insurer_facts(facts, general)
+    eps_fix = _eps_lines(facts) if tags is None and not insurer else None
     if tags is None and not insurer and duration_source in ("declared", "OneD", "OneD_undated"):
         quarter = {spans[c] for c in dur if c in spans}
         if "OneD" in dur and "OneD" not in declared:
@@ -637,10 +701,10 @@ def parse_xbrl(content: bytes, detail: dict | None = None, tags: dict | None = N
         if rejected:
             for node in root.iter():
                 col = tagmap.get(node.tag.split("}")[-1])
-                if (col and col not in facts and node.get("contextRef") in rejected
+                if (col and not col.startswith("_") and col not in facts and node.get("contextRef") in rejected
                         and (node.text or "").strip()):
                     dropped.add(col)
-        detail.update(duration_source=duration_source,
+        detail.update(duration_source=duration_source, eps_fix=eps_fix,
                       quarter_span_days=facts.get("quarter_span_days"),
                       rejected_span_days=max(rejected_days) if rejected_days else None,
                       dropped_columns=sorted(dropped))
