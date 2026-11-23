@@ -172,9 +172,9 @@ XBRL_SHARES = {"PaidUpValueOfEquityShareCapital": "equity_capital", "FaceValueOf
 def xbrl_address(link: str | None) -> str | None:
     """The full address of the XBRL document an archive row links to, with BSE's misnamed folder for a
     finance company's integrated filing put right; None without a link."""
-    if not link or not str(link).strip():
-        return None
-    link = str(link).strip()
+    if not isinstance(link, str) or not link.strip():
+        return None                     # (an archive row without a link reaches here as NaN from its frame)
+    link = link.strip()
     if link.startswith("http"):
         return link
     m = _NBFC_INTEGRATED.match(link)
@@ -310,7 +310,7 @@ def fetch_company(session, scrip: int, want, pause: float = 1.0, root: Path = DI
             if a.qtr in have or not want(a):
                 continue
             d = _polite(lambda: detail(session, scrip, a.qtr), pause)
-            if not has_figures(d) and a.qtr % 1 == 0 and getattr(a, "xbrl", None):
+            if not has_figures(d) and a.qtr % 1 == 0 and xbrl_address(getattr(a, "xbrl", None)):
                 x = _polite(lambda: fetch_xbrl(session, a.xbrl, a.label), pause)
                 if has_figures(x):
                     d = {**{k: v for k, v in d.items() if k == "audited"}, **x}

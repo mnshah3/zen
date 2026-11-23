@@ -131,7 +131,7 @@ def test_bses_misnamed_folder_for_a_finance_companys_integrated_filing_is_put_ri
         "https://www.bseindia.com/XBRLFILES/IFNBFCUploadDocument/Integrated_Finance_NBFC_532468_5112026175430.xml"
     assert br.xbrl_address("/XBRLFILES/NBFCUploadDocument/NBFC_532468_1422025123557.xml") == \
         "https://www.bseindia.com/XBRLFILES/NBFCUploadDocument/NBFC_532468_1422025123557.xml"    # older ones are where linked
-    assert br.xbrl_address(None) is None and br.xbrl_address(" ") is None
+    assert br.xbrl_address(None) is None and br.xbrl_address(" ") is None and br.xbrl_address(float("nan")) is None
 
 
 def test_the_archive_carries_each_filings_standalone_xbrl_link():
