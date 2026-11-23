@@ -337,8 +337,13 @@ def _polite(call, pause: float, tries: int = 3):
 
 
 def rebuild(con, root: Path = DIR) -> int:
+    # the table is rebuilt whole from the files: a database built before a column was added (20 Nov 2026,
+    # 22 columns to 26) is dropped rather than refused. A column no file holds yet is read as empty.
+    con.execute("DROP TABLE IF EXISTS bse_results")
     con.execute(SCHEMA)
-    con.execute("DELETE FROM bse_results")
     if root.exists() and any(root.glob("*.parquet")):
-        con.execute(f"INSERT INTO bse_results SELECT {', '.join(COLUMNS)} FROM read_parquet('{(root / '*.parquet').as_posix()}', union_by_name=true)")
+        src = f"read_parquet('{(root / '*.parquet').as_posix()}', union_by_name=true)"
+        held = {r[0] for r in con.execute(f"DESCRIBE SELECT * FROM {src}").fetchall()}
+        cols = ", ".join(c if c in held else f"NULL AS {c}" for c in COLUMNS)
+        con.execute(f"INSERT INTO bse_results SELECT {cols} FROM {src}")
     return con.execute("SELECT count(*) FROM bse_results").fetchone()[0]

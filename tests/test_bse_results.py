@@ -222,3 +222,14 @@ def test_gap_targets_reach_every_company_still_trading_and_past_nses_last_quarte
     assert {str(p) for p in t[1]} == {"2025-09", "2025-12", "2026-03", "2026-06", "2026-09"}
     assert t[2] is None                                           # BSE-only and thinly traded: read in full now
     assert {str(p) for p in t[3]} == {f"{y}-{m:02d}" for y, m in [(2025, 6), (2025, 9), (2025, 12), (2026, 3), (2026, 6)]}
+
+
+def test_a_database_built_before_the_new_columns_is_rebuilt(tmp_path):
+    con = duckdb.connect()
+    con.execute("CREATE TABLE bse_results (scrip_cd BIGINT, qtr DOUBLE)")          # an older table
+    old = br.parse_detail(ABBOTT_2011)
+    import pandas as pd
+    pd.DataFrame([{"scrip_cd": 500488, "qtr": 70.0, "label": "Jun-11", "kind": "Quarter", "filed_dt": None, **old}]).to_parquet(
+        tmp_path / "500488.parquet")                                                 # a file written before them
+    assert br.rebuild(con, tmp_path) == 1
+    assert con.execute("SELECT eps_basic, source FROM bse_results").fetchone() == (12.5, None)
