@@ -125,8 +125,13 @@ def parse_detail(rows: list[dict]) -> dict:
                 out[field] = x * MILLION if field in RUPEES else x
     # a 0.00 beside a profit is a line the company left blank (from 2025 BSE often shows the total
     # line as 0.0000 and the figure under continuing operations: Abbott June 2026, 201.66), not an EPS
+    # And an EPS of the opposite sign to the net profit is not that profit's: TGV SRAAC's lines from Mar 2025
+    # to Sep 2026 show "for discontinued & continuing operation" -0.01 beside Rs 21.7 to 55.7 crore of profit
+    # and 5.20 for continuing operations (its XBRL: 5.20). The first line that has the profit's sign is
+    # taken; where none has it, no EPS (43 quarters of 28 companies in zen's download of 23 Nov 2026 had one).
+    profit = out.get("profit")
     for i in range(len(_EPS)):
-        if i in eps and (eps[i] != 0 or not out.get("profit")):
+        if i in eps and (eps[i] != 0 or not profit) and (not profit or not eps[i] or (eps[i] > 0) == (profit > 0)):
             out["eps_basic"] = eps[i]
             break
     if out.get("equity_capital") and out.get("face_value"):

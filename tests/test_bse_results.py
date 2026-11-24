@@ -233,3 +233,12 @@ def test_a_database_built_before_the_new_columns_is_rebuilt(tmp_path):
         tmp_path / "500488.parquet")                                                 # a file written before them
     assert br.rebuild(con, tmp_path) == 1
     assert con.execute("SELECT eps_basic, source FROM bse_results").fetchone() == (12.5, None)
+
+
+def test_an_eps_of_the_opposite_sign_to_the_profit_is_not_taken():
+    # TGV SRAAC, Sep 2026: Rs 557.2 million of profit, -0.01 on the total line, 5.20 for continuing operations
+    d = br.parse_detail(rows([("Net Profit", "557.2000"), ("Basic EPS for continuing operation", "5.2000"),
+                              ("Basic for discontinued & continuing operation", "-0.0100")]))
+    assert d["eps_basic"] == 5.2
+    none = br.parse_detail(rows([("Net Profit", "-417.2600"), ("Basic for discontinued & continuing operation", "15.1600")]))
+    assert "eps_basic" not in none                                      # a loss with only a positive EPS: none
