@@ -3227,6 +3227,12 @@
 "listed": "2026-08-17",
 "series": "BZ"
 },
+"CRYSTALCP": {
+"face_value": 10.0,
+"isin": "INE101P01016",
+"listed": "2026-11-26",
+"series": "EQ"
+},
 "CSBBANK": {
 "face_value": 10.0,
 "isin": "INE679A01013",
@@ -3417,7 +3423,7 @@
 "face_value": 10.0,
 "isin": "INE0A1101019",
 "listed": "2022-10-19",
-"series": "EQ"
+"series": "BE"
 },
 "DCM": {
 "face_value": 10.0,
@@ -9161,6 +9167,12 @@
 "listed": "1996-09-18",
 "series": "EQ"
 },
+"MROTEK": {
+"face_value": 5.0,
+"isin": "INE398B01018",
+"listed": "2000-11-01",
+"series": "EQ"
+},
 "MRPL": {
 "face_value": 10.0,
 "isin": "INE103A01014",
@@ -10834,6 +10846,12 @@
 "isin": "INE546Y01022",
 "listed": "2018-01-31",
 "series": "EQ"
+},
+"PRAXIS-RE3": {
+"face_value": 5.0,
+"isin": "INE546Y20048",
+"listed": "2026-11-27",
+"series": "BE"
 },
 "PRECAM": {
 "face_value": 10.0,
@@ -14613,7 +14631,7 @@
 "face_value": 5.0,
 "isin": "INE382M01027",
 "listed": "2021-04-07",
-"series": "EQ"
+"series": "BE"
 },
 "UFLEX": {
 "face_value": 10.0,
@@ -14667,12 +14685,6 @@
 "face_value": 1.0,
 "isin": "INE240C01028",
 "listed": "2010-07-12",
-"series": "EQ"
-},
-"UMIYA-MRO": {
-"face_value": 5.0,
-"isin": "INE398B01018",
-"listed": "2000-11-01",
 "series": "EQ"
 },
 "UNICHEMLAB": {
