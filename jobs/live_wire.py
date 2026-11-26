@@ -200,12 +200,46 @@ def _fetch_results(prev_path: str | None, out_path: str) -> None:
     print(f"results: {out['n']} kept, {out['read']} read this round, at {out['at']} IST")
 
 
+# ---------------------------------------------------------------- FII and DII the evening they are published
+# 25 Nov 2026, the owner, on the site's Flows panel standing at 20 Nov: "why hasn't this updated". NSE publishes the session's
+# provisional FII and DII cash figures in the evening (19:00 to 19:30 IST), and the archive read them the next morning
+# (jobs.update_market_daily in the morning brief), so the site had them a day late, and after a holiday two. With --flows-out
+# the wire reads the same endpoint with the same parser each round and publishes live/flows.json: the latest session's rows,
+# Rs crore as NSE states them. The archive still files them each morning with the time it saw them.
+FLOW_COLS = ["date", "category", "buy", "sell", "net"]
+
+
+def build_flows(data: list, now: datetime) -> dict:
+    from zen.data import market_daily as md
+    df = md.parse_fii_dii(data, now)
+    rows = sorted([[r.date.isoformat(), r.category, round(float(r.buy_cr), 2), round(float(r.sell_cr), 2), round(float(r.net_cr), 2)]
+                   for r in df.itertuples()])
+    return {"at": now.strftime("%Y-%m-%d %H:%M:%S"), "source": "NSE fiidiiTradeReact: provisional cash market, Rs crore",
+            "n": len(rows), "cols": FLOW_COLS, "rows": rows}
+
+
+def _fetch_flows(out_path: str) -> None:
+    from jobs.update_market_daily import site_session
+    from zen.data import market_daily as md
+    s = site_session()
+    r = s.get(md.FII_DII_URL, timeout=30)
+    r.raise_for_status()
+    out = build_flows(r.json(), datetime.now(IST).replace(tzinfo=None))
+    if not out["rows"]:
+        raise ValueError("no rows")
+    p = Path(out_path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"flows: {out['rows'][0][0]}, {out['n']} rows, at {out['at']} IST")
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--days", type=int, default=1)
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--results-out", default=None)
     ap.add_argument("--prev", default=None)
+    ap.add_argument("--flows-out", default=None)
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     today = datetime.now(IST).date()
@@ -221,6 +255,12 @@ def main(argv=None) -> int:
             _fetch_results(a.prev, a.results_out)
         except Exception as e:                                       # noqa: BLE001
             print(f"results: not read this round ({e})")
+    if a.flows_out:
+        # a third read, on its own: a refused round leaves the file of the last round that answered
+        try:
+            _fetch_flows(a.flows_out)
+        except Exception as e:                                       # noqa: BLE001
+            print(f"flows: not read this round ({e})")
     return 0
 
 

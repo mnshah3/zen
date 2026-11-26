@@ -45,6 +45,9 @@ jobs:
           end=$(( $(date +%s) + 345 * 60 ))
           prev="$RUNNER_TEMP/results-prev.json"
           curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/live/live/results.json" -o "$prev" || rm -f "$prev"
+          # FII and DII the evening NSE publishes them (jobs/live_wire.py --flows-out): a round NSE refuses publishes the last file again
+          prevf="$RUNNER_TEMP/flows-prev.json"
+          curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/live/live/flows.json" -o "$prevf" || rm -f "$prevf"
           git config --global user.name  "zen-bot"
           git config --global user.email "actions@github.com"
           while [ "$(date +%s)" -lt "$end" ]; do
@@ -52,8 +55,10 @@ jobs:
             rm -rf "$out" && mkdir -p "$out/live"
             # a round whose results read fails publishes the last results file again
             [ -f "$prev" ] && cp "$prev" "$out/live/results.json"
-            if python -m jobs.live_wire --days 3 --out "$out/live/filings.json" --results-out "$out/live/results.json" --prev "$prev"; then
+            [ -f "$prevf" ] && cp "$prevf" "$out/live/flows.json"
+            if python -m jobs.live_wire --days 3 --out "$out/live/filings.json" --results-out "$out/live/results.json" --prev "$prev" --flows-out "$out/live/flows.json"; then
               [ -f "$out/live/results.json" ] && cp "$out/live/results.json" "$prev"
+              [ -f "$out/live/flows.json" ] && cp "$out/live/flows.json" "$prevf"
               ( cd "$out" && git init -q -b live && git add live && git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)" &&
                 git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live ) || echo "publish failed, next round"
             else

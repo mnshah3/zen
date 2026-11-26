@@ -25,3 +25,13 @@ def test_call_schedules_recordings_and_transcripts_are_not_material_on_the_wire(
     for s, want in subj.items():
         assert live_wire.material(filing_types.categorise(s), s) is want, s
     assert live_wire.material("results", "Financial Result Updates: results for the quarter") is True
+
+
+def test_the_evenings_flows_are_published_as_nse_states_them():
+    from datetime import datetime
+    data = [{"category": "DII", "date": "26-Nov-2026", "buyValue": "24352.87", "sellValue": "18722.15", "netValue": "5630.72"},
+            {"category": "FII/FPI ", "date": "26-Nov-2026", "buyValue": "17,879.74", "sellValue": "12036.41", "netValue": "5843.33"}]
+    out = live_wire.build_flows(data, datetime(2026, 11, 26, 20, 10, 40))
+    assert out["cols"] == ["date", "category", "buy", "sell", "net"] and out["n"] == 2 and out["at"] == "2026-11-26 20:10:40"
+    assert out["rows"] == [["2026-11-26", "DII", 24352.87, 18722.15, 5630.72], ["2026-11-26", "FII/FPI", 17879.74, 12036.41, 5843.33]]
+    assert live_wire.build_flows([], datetime(2026, 11, 26))["rows"] == []
