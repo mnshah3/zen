@@ -5711,6 +5711,12 @@
 "listed": "1995-05-10",
 "series": "EQ"
 },
+"HEGRAPHITE": {
+"face_value": 2.0,
+"isin": "INE0Y9J01020",
+"listed": "2026-11-27",
+"series": "BE"
+},
 "HEIDELBERG": {
 "face_value": 10.0,
 "isin": "INE578A01017",
@@ -7883,12 +7889,6 @@
 "listed": "2026-08-17",
 "series": "EQ"
 },
-"LAL": {
-"face_value": 1.0,
-"isin": "INE740X01023",
-"listed": "2023-04-10",
-"series": "BE"
-},
 "LALITHAA": {
 "face_value": 5.0,
 "isin": "INE0K9O01026",
@@ -8331,6 +8331,12 @@
 "face_value": 10.0,
 "isin": "INE457A01014",
 "listed": "2004-04-12",
+"series": "EQ"
+},
+"MAHACOAL": {
+"face_value": 2.0,
+"isin": "INE03K401026",
+"listed": "2026-11-27",
 "series": "EQ"
 },
 "MAHAPEXLTD": {
@@ -9094,6 +9100,12 @@
 "isin": "INE950M01013",
 "listed": "2014-12-19",
 "series": "EQ"
+},
+"MONTEIL": {
+"face_value": 1.0,
+"isin": "INE740X01023",
+"listed": "2023-04-10",
+"series": "BE"
 },
 "MORARJEE": {
 "face_value": 7.0,
@@ -15060,8 +15072,8 @@
 "series": "EQ"
 },
 "VGL": {
-"face_value": 5.0,
-"isin": "INE273D01027",
+"face_value": 2.0,
+"isin": "INE273D01035",
 "listed": "2006-11-21",
 "series": "EQ"
 },
